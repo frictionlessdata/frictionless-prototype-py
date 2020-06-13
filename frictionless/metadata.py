@@ -73,10 +73,10 @@ class Metadata(dict):
                     return json.load(file)
             return json.load(descriptor)
         except Exception:
-            details = 'canot retrieve metadata "%s"' % descriptor
+            note = 'canot retrieve metadata "%s"' % descriptor
             if self.metadata_strict:
-                raise exceptions.FrictionlessException(details)
-            error = self.metadata_Error(details=details)
+                raise exceptions.FrictionlessException(note)
+            error = self.metadata_Error(note=note)
             self.metadata_errors.append(error)
 
     # Process
@@ -92,14 +92,13 @@ class Metadata(dict):
             validator_class = jsonschema.validators.validator_for(self.metadata_profile)
             validator = validator_class(self.metadata_profile)
             for error in validator.iter_errors(self):
-                message = str(error.message)
                 metadata_path = '/'.join(map(str, error.path))
                 profile_path = '/'.join(map(str, error.schema_path))
-                details = '"%s" at "%s" in metadata and at "%s" in profile'
-                details = details % (message, metadata_path, profile_path)
+                note = '"%s" at "%s" in metadata and at "%s" in profile'
+                note = note % (error.message, metadata_path, profile_path)
                 if self.metadata_strict:
-                    raise exceptions.FrictionlessException(details)
-                error = self.metadata_Error(details=details)
+                    raise exceptions.FrictionlessException(note)
+                error = self.metadata_Error(note=note)
                 self.metadata_errors.append(error)
 
 
