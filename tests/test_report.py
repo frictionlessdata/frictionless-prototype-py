@@ -8,7 +8,7 @@ def test_validate_report_props():
     report = validate('data/table.csv')
     assert report.time
     assert report.valid is True
-    assert report.version.startswith('3')
+    assert report.version.startswith('0')
     assert report.table_count == 1
     assert report.error_count == 0
     assert report.table.time
