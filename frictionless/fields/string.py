@@ -11,24 +11,24 @@ class StringField(Field):
 
     # Read
 
-    def read_cell(self, cell):
+    def read_cell_cast(self, cell):
         if not isinstance(cell, str):
             return None
-        if format == 'uri':
+        if self.format == 'uri':
             uri = uri_from_string(cell)
             try:
                 uri_validator.validate(uri)
             except rfc3986.exceptions.ValidationError:
                 return None
-        elif format == 'email':
+        elif self.format == 'email':
             if not re.match(EMAIL_PATTERN, cell):
                 return None
-        elif format == 'uuid':
+        elif self.format == 'uuid':
             try:
                 uuid.UUID(cell, version=4)
             except Exception:
                 return None
-        elif format == 'binary':
+        elif self.format == 'binary':
             try:
                 base64.b64decode(cell)
             except Exception:
@@ -37,7 +37,7 @@ class StringField(Field):
 
     # Write
 
-    def write_cell(self, cell):
+    def write_cell_cast(self, cell):
         return cell
 
 

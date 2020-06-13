@@ -7,7 +7,7 @@ class IntegerField(Field):
 
     # Read
 
-    def read_cell(self, cell):
+    def read_cell_cast(self, cell):
         if isinstance(cell, int):
             if cell is True or cell is False:
                 return None
@@ -35,7 +35,7 @@ class IntegerField(Field):
 
     # Write
 
-    def write_cell(self, cell):
+    def write_cell_cast(self, cell):
         return str(cell)
 
 

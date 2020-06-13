@@ -12,19 +12,19 @@ class TimeField(Field):
             if not isinstance(cell, str):
                 return None
             try:
-                if format == 'default':
+                if self.format == 'default':
                     cell = datetime.strptime(cell, DEFAULT_PATTERN).time()
-                elif format == 'any':
+                elif self.format == 'any':
                     cell = parse(cell).time()
                 else:
-                    cell = datetime.strptime(cell, format).time()
+                    cell = datetime.strptime(cell, self.format).time()
             except Exception:
                 return None
         return cell
 
     # Write
 
-    def write_cell(self, cell):
+    def write_cell_cast(self, cell):
         return str(cell)
 
 

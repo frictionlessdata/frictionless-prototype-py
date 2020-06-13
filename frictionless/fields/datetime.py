@@ -17,14 +17,14 @@ class DatetimeField(Field):
                 elif self.format == 'any':
                     cell = parse(cell)
                 else:
-                    cell = datetime.strptime(cell, format)
+                    cell = datetime.strptime(cell, self.format)
             except Exception:
                 return None
         return cell
 
     # Write
 
-    def write_cell(self, cell):
+    def write_cell_cast(self, cell):
         return str(cell)
 
 

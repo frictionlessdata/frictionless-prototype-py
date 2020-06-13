@@ -23,12 +23,12 @@ class DateField(Field):
 
         # Parse string date
         try:
-            if format == 'default':
+            if self.format == 'default':
                 cell = datetime.strptime(cell, DEFAULT_PATTERN).date()
-            elif format == 'any':
+            elif self.format == 'any':
                 cell = parse(cell).date()
             else:
-                cell = datetime.strptime(cell, format).date()
+                cell = datetime.strptime(cell, self.format).date()
         except Exception:
             return None
 
@@ -36,7 +36,7 @@ class DateField(Field):
 
     # Write
 
-    def write_cell(self, cell):
+    def write_cell_cast(self, cell):
         return str(cell)
 
 

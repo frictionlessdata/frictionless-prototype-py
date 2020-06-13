@@ -6,6 +6,7 @@ from .validates import (
     validate_table,
 )
 from .check import Check
+from .field import Field
 from .headers import Headers
 from .inquiry import Inquiry
 from .metadata import Metadata

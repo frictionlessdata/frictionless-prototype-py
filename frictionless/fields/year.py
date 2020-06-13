@@ -21,5 +21,5 @@ class YearField(Field):
 
     # Write
 
-    def write_cell(self, cell):
+    def write_cell_cast(self, cell):
         return str(cell)

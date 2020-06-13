@@ -1,4 +1,5 @@
 import warnings
+import importlib
 from cached_property import cached_property
 from .metadata import Metadata
 from . import config
@@ -12,6 +13,14 @@ class Field(Metadata):
         'properties': {'name': {'type': 'string'}},
     }
     supported_constraints = []  # type: ignore
+
+    def __new__(cls, descriptor):
+        if cls is Field:
+            type = descriptor.get('type', '')
+            name = f'{type.capitalize()}Field'
+            module = importlib.import_module('frictionless.fields')
+            cls = getattr(module, name, getattr(module, 'AnyField'))
+        return super().__new__(cls, descriptor)
 
     @cached_property
     def name(self):

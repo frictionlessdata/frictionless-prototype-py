@@ -21,16 +21,16 @@ class GeojsonField(Field):
                 return None
         if not isinstance(cell, dict):
             return None
-        if format == 'default':
+        if self.format == 'default':
             try:
                 self.__validator.validate(cell)
             except Exception:
                 return None
-        elif format == 'topojson':
+        elif self.format == 'topojson':
             pass  # Accept any dict as possibly topojson for now
         return cell
 
     # Write
 
-    def write_cell(self, cell):
+    def write_cell_cast(self, cell):
         return str(cell)

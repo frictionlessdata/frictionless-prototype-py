@@ -13,13 +13,13 @@ class GeopointField(Field):
         # Parse
         if isinstance(cell, str):
             try:
-                if format == 'default':
+                if self.format == 'default':
                     lon, lat = cell.split(',')
                     lon = lon.strip()
                     lat = lat.strip()
-                elif format == 'array':
+                elif self.format == 'array':
                     lon, lat = json.loads(cell)
-                elif format == 'object':
+                elif self.format == 'object':
                     if isinstance(cell, str):
                         cell = json.loads(cell)
                     if len(cell) != 2:
@@ -44,7 +44,7 @@ class GeopointField(Field):
 
     # Write
 
-    def write_cell(self, cell):
+    def write_cell_cast(self, cell):
         return str(cell)
 
 
