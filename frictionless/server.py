@@ -1,6 +1,6 @@
 class Server:
     def start(self, port):
-        pass
+        raise NotImplementedError()
 
     def stop(self):
-        pass
+        raise NotImplementedError()
