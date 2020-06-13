@@ -1,5 +1,5 @@
 from tableschema import Field
-from goodtables import Row
+from frictionless import Row
 
 
 # General

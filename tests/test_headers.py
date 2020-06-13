@@ -1,5 +1,5 @@
 from tableschema import Field
-from goodtables import Headers
+from frictionless import Headers
 
 
 # General

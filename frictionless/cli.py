@@ -7,7 +7,7 @@ from . import config
 
 
 # General
-@click.command(name='goodtables', short_help='Validate tabular files')
+@click.command(name='frictionless', short_help='Validate tabular files')
 @click.version_option(config.VERSION, message='%(version)s', help="Print version")
 @click.argument('source', type=click.Path(), required=True)
 @click.option('--source-type', type=str, help='Source type')

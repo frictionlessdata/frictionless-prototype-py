@@ -19,7 +19,7 @@ def validate_inquiry(source):
         source_type = task.get('sourceType') or helpers.detect_source_type(task['source'])
         if source_type == 'inquiry':
             message = 'Inquiry cannot contain nested inquiries'
-            raise exceptions.GoodtablesException(message)
+            raise exceptions.FrictionlessException(message)
         if source_type == 'package':
             # For now, we don't flatten inquiry completely and for the case
             # of a list of packages with one resource we don't get proper multiprocessing

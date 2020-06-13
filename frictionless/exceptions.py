@@ -1,0 +1,2 @@
+class FrictionlessException(Exception):
+    pass

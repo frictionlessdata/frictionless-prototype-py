@@ -1,4 +1,4 @@
-from goodtables import validate, ReportTable, errors
+from frictionless import validate, ReportTable, errors
 
 
 # Report

@@ -1,4 +1,4 @@
-from goodtables import validate
+from frictionless import validate
 
 
 # Table

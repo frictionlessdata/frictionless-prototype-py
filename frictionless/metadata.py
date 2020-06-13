@@ -75,7 +75,7 @@ class Metadata(dict):
         except Exception:
             details = 'canot retrieve metadata "%s"' % descriptor
             if self.metadata_strict:
-                raise exceptions.GoodtablesException(details)
+                raise exceptions.FrictionlessException(details)
             error = self.metadata_Error(details=details)
             self.metadata_errors.append(error)
 
@@ -98,7 +98,7 @@ class Metadata(dict):
                 details = '"%s" at "%s" in metadata and at "%s" in profile'
                 details = details % (message, metadata_path, profile_path)
                 if self.metadata_strict:
-                    raise exceptions.GoodtablesException(details)
+                    raise exceptions.FrictionlessException(details)
                 error = self.metadata_Error(details=details)
                 self.metadata_errors.append(error)
 

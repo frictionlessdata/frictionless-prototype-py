@@ -1,5 +1,5 @@
 import tabulator
-from goodtables import errors
+from frictionless import errors
 
 
 # From exception

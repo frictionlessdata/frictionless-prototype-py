@@ -1,7 +1,7 @@
 import json
 import pathlib
 from copy import deepcopy
-from goodtables import validate
+from frictionless import validate
 
 
 # General

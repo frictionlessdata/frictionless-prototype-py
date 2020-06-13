@@ -13,7 +13,7 @@ def read(*paths):
 
 
 # Prepare
-PACKAGE = 'goodtables'
+PACKAGE = 'frictionless'
 NAME = PACKAGE.replace('_', '-')
 CORE_REQUIRES = [
     'click>=6.6',
@@ -46,7 +46,7 @@ DEVOPS_REQUIRES = [
 README = read('README.md')
 VERSION = read(PACKAGE, 'assets', 'VERSION')
 PACKAGES = find_packages(exclude=['tests'])
-ENTRY_POINTS = {'console_scripts': ['goodtables = goodtables.__main__:cli']}
+ENTRY_POINTS = {'console_scripts': ['frictionless = frictionless.__main__:cli']}
 
 
 # Run
@@ -67,10 +67,10 @@ setup(
     zip_safe=False,
     long_description=README,
     long_description_content_type='text/markdown',
-    description='Goodtables is a framework for tabular data validation',
+    description='Frictionless is a data framework',
     author='Open Knowledge Foundation',
     author_email='info@okfn.org',
-    url='https://github.com/frictionlessdata/goodtables',
+    url='https://github.com/frictionlessdata/frictionless-py',
     license='MIT',
     keywords=[
         'data validation',

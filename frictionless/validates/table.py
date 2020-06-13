@@ -296,7 +296,7 @@ def validate_table(
                 memory = helpers.get_current_memory_usage()
                 if memory and memory > limit_memory:
                     message = f'exceeded memory limit "{limit_memory}MB"'
-                    raise exceptions.GoodtablesException(message)
+                    raise exceptions.FrictionlessException(message)
 
     # Validate table
     if not exited:

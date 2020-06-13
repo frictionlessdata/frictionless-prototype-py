@@ -1,4 +1,4 @@
-from goodtables import Metadata
+from frictionless import Metadata
 
 
 # General

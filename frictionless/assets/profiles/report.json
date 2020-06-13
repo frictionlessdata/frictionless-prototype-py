@@ -1,7 +1,7 @@
 {
-  "title": "Goodtables Report",
+  "title": "Frictionless Report",
   "$schema": "http://json-schema.org/draft-06/schema#",
-  "$id": "https://github.com/frictionlessdata/goodtables-py/tree/master/goodtables/assets/profiles/report.json",
+  "$id": "https://github.com/frictionlessdata/frictionless-py/tree/master/frictionless/assets/profiles/report.json",
   "type": "object",
   "required": [
     "time",
@@ -27,7 +27,7 @@
     "version": {
       "type": "string",
       "title": "Version",
-      "description": "Goodtables version"
+      "description": "Frictionless version"
     },
     "tableCount": {
       "type": "integer",

@@ -136,7 +136,7 @@ class CellError(RowError):
                     field_position=field_position,
                 )
         message = f'Field {field_name} is not in the row'
-        raise exceptions.GoodtablesException(message)
+        raise exceptions.FrictionlessException(message)
 
 
 # Metadata

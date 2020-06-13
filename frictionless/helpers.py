@@ -110,7 +110,7 @@ def create_lookup(resource, *, package=None):
 
 
 def translate_headers(headers):
-    # goodtables: [2, 3, 4] (pandas-like)
+    # frictionless: [2, 3, 4] (pandas-like)
     # tabulator: [2, 4] (range-like)
     if headers and isinstance(headers, list):
         if len(headers) == 1:

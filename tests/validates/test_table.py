@@ -1,6 +1,6 @@
 import pathlib
 from tableschema import infer
-from goodtables import validate, Check, errors
+from frictionless import validate, Check, errors
 
 
 # General
@@ -884,7 +884,7 @@ def test_validate_extra_checks_bad_plugin_name():
     assert report.flatten(['code', 'details']) == [
         [
             'task-error',
-            'Plugin "bad" is not installed. Run: "pip install goodtables[bad]"',
+            'Plugin "bad" is not installed. Run: "pip install frictionless[bad]"',
         ],
     ]
 
