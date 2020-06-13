@@ -1,14 +1,17 @@
+import warnings
 from cached_property import cached_property
 from .metadata import Metadata
 from . import config
 
 
+# TODO: reset cached properties on transform
 class Field(Metadata):
     metadata_profile = {  # type: ignore
         'type': 'object',
         'required': ['name'],
         'properties': {'name': {'type': 'string'}},
     }
+    supported_constraints = []  # type: ignore
 
     @cached_property
     def name(self):
@@ -38,7 +41,15 @@ class Field(Metadata):
             str: field format
 
         """
-        return self.get('format', 'default')
+        format = self.get('format', 'default')
+        if format.startswith('fmt:'):
+            warnings.warn(
+                'Format "fmt:<PATTERN>" is deprecated. '
+                'Please use "<PATTERN>" without "fmt:" prefix.',
+                UserWarning,
+            )
+            format = format.replace('fmt:', '')
+        return format
 
     @cached_property
     def missing_values(self):
@@ -73,30 +84,36 @@ class Field(Metadata):
     # Read
 
     def read_cell(self, cell):
-        errors = None
+        note = None
         if cell in self.missing_values:
             cell = None
         if cell is not None:
-            cell, errors = self.read_cell_cast(cell)
-        if not errors:
-            cell, errors = self.read_cell_check(cell)
-        return cell, errors
+            cell = self.read_cell_cast(cell)
+            if cell is None:
+                note = f'expected type is "{self.type}" and format is "{self.format}"'
+        return cell, note
 
     def read_cell_cast(self, cell):
         raise NotImplementedError()
 
-    def read_cell_check(self, cell):
-        raise NotImplementedError()
+    # Test
+
+    def test_cell(self, cell):
+        items = []
+        # TODO: implement
+        return items
 
     # Write
 
     def write_cell(self, cell):
-        errors = None
+        notes = None
         if cell is None:
             cell = ''
         if cell is not None:
-            cell, errors = self.write_cell_cast(cell)
-        return cell, errors
+            cell = self.write_cell_cast(cell)
+        if cell is None:
+            notes = [self.type_error_note]
+        return cell, notes
 
     def write_cell_cast(self, cell):
         raise NotImplementedError()

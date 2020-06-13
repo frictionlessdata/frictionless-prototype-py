@@ -311,6 +311,7 @@ class BlankRowError(RowError):
     description = 'This row is empty. A row should contain at least one value.'
 
 
+# TODO: merge with ConstraintError
 class RequiredError(CellError):
     code = 'required-error'
     name = 'Required Error'

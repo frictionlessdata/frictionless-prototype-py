@@ -14,7 +14,7 @@ class BooleanField(Field):
             elif cell in self.get('falseValues', FALSE_VALUES):
                 cell = False
             else:
-                return 'ERROR'
+                return None
         return cell
 
     # Write
