@@ -5,6 +5,10 @@ from ..field import Field
 
 
 class GeopointField(Field):
+    supported_constraints = [
+        'required',
+        'enum',
+    ]
 
     # Read
 

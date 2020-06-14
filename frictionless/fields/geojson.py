@@ -5,6 +5,11 @@ from ..field import Field
 
 
 class GeojsonField(Field):
+    supported_constraints = [
+        'required',
+        'enum',
+    ]
+
     def __init__(self, descriptor):
         super().__init__(descriptor)
         self.__validator = jsonschema.validators.validator_for(config.GEOJSON_PROFILE)(

@@ -3,6 +3,12 @@ from ..field import Field
 
 
 class YearmonthField(Field):
+    supported_constraints = [
+        'required',
+        'minimum',
+        'maximum',
+        'enum',
+    ]
 
     # Read
 

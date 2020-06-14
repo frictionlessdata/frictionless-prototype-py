@@ -4,6 +4,12 @@ from ..field import Field
 
 
 class TimeField(Field):
+    supported_constraints = [
+        'required',
+        'minimum',
+        'maximum',
+        'enum',
+    ]
 
     # Read
 

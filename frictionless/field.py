@@ -42,7 +42,7 @@ class Field(Metadata):
             str: field type
 
         """
-        return self.get('type')
+        return self.get('type', 'any')
 
     @cached_property
     def format(self):
@@ -73,16 +73,6 @@ class Field(Metadata):
         return self.get('missingValues', config.MISSING_VALUES)
 
     @cached_property
-    def required(self):
-        """Whether field is required
-
-        # Returns
-            bool: true if required
-
-        """
-        return self.constraints.get('required', False)
-
-    @cached_property
     def constraints(self):
         """Field constraints
 
@@ -91,6 +81,16 @@ class Field(Metadata):
 
         """
         return self.get('constraints', {})
+
+    @cached_property
+    def required(self):
+        """Whether field is required
+
+        # Returns
+            bool: true if required
+
+        """
+        return self.constraints.get('required', False)
 
     # Read
 
@@ -113,6 +113,11 @@ class Field(Metadata):
         items = []
         # TODO: implement
         return items
+
+    @cached_property
+    def test_cell_checks(self):
+        checks = []
+        return checks
 
     # Write
 

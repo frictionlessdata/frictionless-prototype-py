@@ -8,6 +8,13 @@ from ..field import Field
 
 
 class StringField(Field):
+    supported_constraints = [
+        'required',
+        'minLength',
+        'maxLength',
+        'pattern',
+        'enum',
+    ]
 
     # Read
 

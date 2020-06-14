@@ -4,6 +4,10 @@ from ..field import Field
 
 
 class DurationField(Field):
+    supported_constraints = [
+        'required',
+        'enum',
+    ]
 
     # Read
 

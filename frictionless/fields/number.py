@@ -4,6 +4,12 @@ from ..field import Field
 
 
 class NumberField(Field):
+    supported_constraints = [
+        'required',
+        'minimum',
+        'maximum',
+        'enum',
+    ]
 
     # Read
 

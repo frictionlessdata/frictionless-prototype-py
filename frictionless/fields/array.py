@@ -3,6 +3,12 @@ from ..field import Field
 
 
 class ArrayField(Field):
+    supported_constraints = [
+        'required',
+        'minLength',
+        'maxLength',
+        'enum',
+    ]
 
     # Read
 

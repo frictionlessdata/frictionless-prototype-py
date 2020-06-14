@@ -4,6 +4,12 @@ from ..field import Field
 
 
 class DateField(Field):
+    supported_constraints = [
+        'required',
+        'minimum',
+        'maximum',
+        'enum',
+    ]
 
     # Read
 

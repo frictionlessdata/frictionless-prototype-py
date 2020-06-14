@@ -2,6 +2,10 @@ from ..field import Field
 
 
 class AnyField(Field):
+    supported_constraints = [
+        'required',
+        'enum',
+    ]
 
     # Read
 
