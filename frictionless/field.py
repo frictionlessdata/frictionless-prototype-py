@@ -14,13 +14,15 @@ class Field(Metadata):
     }
     supported_constraints = []  # type: ignore
 
-    def __new__(cls, descriptor):
-        if cls is Field:
-            type = descriptor.get('type', '')
-            name = f'{type.capitalize()}Field'
+    def __init__(self, descriptor):
+        super().__init__(descriptor)
+        self.__proxy = None
+        if type(self) is Field:
+            pref = descriptor.get('type', '')
+            name = f'{pref.capitalize()}Field'
             module = importlib.import_module('frictionless.fields')
-            cls = getattr(module, name, getattr(module, 'AnyField'))
-        return super().__new__(cls, descriptor)
+            ProxyField = getattr(module, name, getattr(module, 'AnyField'))
+            self.__proxy = ProxyField(descriptor)
 
     @cached_property
     def name(self):
@@ -103,7 +105,7 @@ class Field(Metadata):
         return cell, note
 
     def read_cell_cast(self, cell):
-        raise NotImplementedError()
+        return self.__proxy.read_cell_cast(cell)
 
     # Test
 
@@ -125,4 +127,4 @@ class Field(Metadata):
         return cell, notes
 
     def write_cell_cast(self, cell):
-        raise NotImplementedError()
+        return self.__proxy.write_cell_cast(cell)
