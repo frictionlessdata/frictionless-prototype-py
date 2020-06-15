@@ -135,10 +135,10 @@ class Field(ControlledMetadata):
     def write_cell_cast(self, cell):
         return self.__proxy.write_cell_cast(cell)
 
-    # Process
+    # Metadata
 
-    def process_metadata(self):
-        super().process_metadata()
+    def metadata_process(self):
+        super().metadata_process()
         self.__proxy = None
         if type(self) is Field:
             pref = self.get('type', '')

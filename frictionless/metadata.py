@@ -17,11 +17,11 @@ class Metadata(dict):
         self.__root = root or self
         self.__strict = strict or not self.metadata_Error
         self.__errors = []
-        metadata = self.extract_metadata(descriptor)
+        metadata = self.metadata_extract(descriptor)
         dict.update(self, metadata)
         if self and not root:
-            self.process_metadata()
-            self.validate_metadata()
+            self.metadata_process()
+            self.metadata_validate()
 
     @cached_property
     def metadata_root(self):
@@ -41,16 +41,16 @@ class Metadata(dict):
 
     # Duplicate
 
-    def duplicate_metadata(self):
+    def metadata_duplicate(self):
         result = {}
         for key, value in self.items():
-            if hasattr(value, 'duplicate_metadata'):
+            if hasattr(value, 'metadata_duplicate'):
                 value = value.copy()
             result[key] = value
         return result
 
     def copy(self):
-        return self.duplicate_metadata()
+        return self.metadata_duplicate()
 
     def __copy__(self, *args, **kwargs):
         return self.copy()
@@ -60,7 +60,7 @@ class Metadata(dict):
 
     # Extract
 
-    def extract_metadata(self, descriptor):
+    def metadata_extract(self, descriptor):
         try:
             if descriptor is None:
                 return {}
@@ -81,12 +81,12 @@ class Metadata(dict):
 
     # Process
 
-    def process_metadata(self):
+    def metadata_process(self):
         pass
 
     # Validate
 
-    def validate_metadata(self):
+    def metadata_validate(self):
         self.metadata_errors.clear()
         if self.metadata_profile:
             validator_class = jsonschema.validators.validator_for(self.metadata_profile)
@@ -106,80 +106,80 @@ class ControlledMetadata(Metadata):
 
     # Extract
 
-    def extract_metadata(self, descriptor):
+    def metadata_extract(self, descriptor):
         if isinstance(descriptor, dict):
             return deepcopy(descriptor)
-        super().extract_metadata(descriptor)
+        super().metadata_extract(descriptor)
 
     # Process
 
-    def process_metadata(self):
+    def metadata_process(self):
         for key, value in self.items():
             if isinstance(value, dict):
-                if not hasattr(value, 'on_metadata_transform'):
+                if not hasattr(value, 'metadata_transform'):
                     value = ControlledMetadata(
                         value, root=self.metadata_root, strict=self.metadata_strict
                     )
                     dict.__setitem__(self, key, value)
-                value.process_metadata()
+                value.metadata_process()
             if isinstance(value, list):
-                if not hasattr(value, 'on_metadata_transform'):
+                if not hasattr(value, 'metadata_transform'):
                     value = ControlledMetadataList(
                         value, root=self.metadata_root, strict=self.metadata_strict
                     )
                     dict.__setitem__(self, key, value)
-                value.process_metadata()
+                value.metadata_process()
 
     # Transform
 
-    def on_metadata_transform(self):
+    def metadata_transform(self):
         if self.metadata_root is not self:
-            return self.metadata_root.on_metadata_transform()
-        self.process_metadata()
-        self.validate_metadata()
+            return self.metadata_root.metadata_transform()
+        self.metadata_process()
+        self.metadata_validate()
 
     def __setitem__(self, *args, **kwargs):
         result = super().__setitem__(*args, **kwargs)
-        self.on_metadata_transform()
+        self.metadata_transform()
         return result
 
     def __delitem__(self, *args, **kwargs):
         result = super().__delitem__(*args, **kwargs)
-        self.on_metadata_transform()
+        self.metadata_transform()
         return result
 
     def clear(self, *args, **kwargs):
         result = super().clear(*args, **kwargs)
-        self.on_metadata_transform()
+        self.metadata_transform()
         return result
 
     def pop(self, *args, **kwargs):
         result = super().pop(*args, **kwargs)
-        self.on_metadata_transform()
+        self.metadata_transform()
         return result
 
     def popitem(self, *args, **kwargs):
         result = super().popitem(*args, **kwargs)
-        self.on_metadata_transform()
+        self.metadata_transform()
         return result
 
     def setdefault(self, *args, **kwargs):
         result = super().setdefault(*args, **kwargs)
-        self.on_metadata_transform()
+        self.metadata_transform()
         return result
 
     def update(self, *args, **kwargs):
         result = super().update(*args, **kwargs)
-        self.on_metadata_transform()
+        self.metadata_transform()
         return result
 
     # Validate
 
-    def validate_metadata(self):
-        super().validate_metadata()
+    def metadata_validate(self):
+        super().metadata_validate()
         for key, value in self.items():
-            if hasattr(value, 'validate_metadata'):
-                value.validate_metadata()
+            if hasattr(value, 'metadata_validate'):
+                value.metadata_validate()
                 self.metadata_errors.extend(value.metadata_errors)
 
 
@@ -204,16 +204,16 @@ class ControlledMetadataList(list):
 
     # Duplicate
 
-    def duplicate_metadata(self):
+    def metadata_duplicate(self):
         result = []
         for value in self:
-            if hasattr(value, 'duplicate_metadata'):
+            if hasattr(value, 'metadata_duplicate'):
                 value = value.copy()
             result.append(value)
         return result
 
     def copy(self):
-        return self.duplicate_metadata()
+        return self.metadata_duplicate()
 
     def __copy__(self):
         return self.copy()
@@ -223,72 +223,72 @@ class ControlledMetadataList(list):
 
     # Process
 
-    def process_metadata(self):
+    def metadata_process(self):
         for index, value in list(enumerate(self)):
             if isinstance(value, dict):
-                if not hasattr(value, 'on_metadata_transform'):
+                if not hasattr(value, 'metadata_transform'):
                     value = ControlledMetadata(
                         value, root=self.metadata_root, strict=self.metadata_strict
                     )
                     list.__setitem__(self, index, value)
-                value.process_metadata()
+                value.metadata_process()
             if isinstance(value, list):
-                if not hasattr(value, 'on_metadata_transform'):
+                if not hasattr(value, 'metadata_transform'):
                     value = ControlledMetadataList(
                         value, root=self.metadata_root, strict=self.metadata_strict
                     )
                     list.__setitem__(self, index, value)
-                value.process_metadata()
+                value.metadata_process()
 
     # Transform
 
-    def on_metadata_transform(self):
-        self.metadata_root.on_metadata_transform()
+    def metadata_transform(self):
+        self.metadata_root.metadata_transform()
 
     def __setitem__(self, *args, **kwargs):
         result = super().__setitem__(*args, **kwargs)
-        self.on_metadata_transform()
+        self.metadata_transform()
         return result
 
     def __delitem__(self, *args, **kwargs):
         result = super().__delitem__(*args, **kwargs)
-        self.on_metadata_transform()
+        self.metadata_transform()
         return result
 
     def append(self, *args, **kwargs):
         result = super().append(*args, **kwargs)
-        self.on_metadata_transform()
+        self.metadata_transform()
         return result
 
     def clear(self, *args, **kwargs):
         result = super().clear(*args, **kwargs)
-        self.on_metadata_transform()
+        self.metadata_transform()
         return result
 
     def extend(self, *args, **kwargs):
         result = super().extend(*args, **kwargs)
-        self.on_metadata_transform()
+        self.metadata_transform()
         return result
 
     def insert(self, *args, **kwargs):
         result = super().insert(*args, **kwargs)
-        self.on_metadata_transform()
+        self.metadata_transform()
         return result
 
     def pop(self, *args, **kwargs):
         result = super().pop(*args, **kwargs)
-        self.on_metadata_transform()
+        self.metadata_transform()
         return result
 
     def remove(self, *args, **kwargs):
         result = super().remove(*args, **kwargs)
-        self.on_metadata_transform()
+        self.metadata_transform()
         return result
 
     # Validate
 
-    def validate_metadata(self):
+    def metadata_validate(self):
         for value in self:
-            if hasattr(value, 'validate_metadata'):
-                value.validate_metadata()
+            if hasattr(value, 'metadata_validate'):
+                value.metadata_validate()
                 self.metadata_errors.extend(value.metadata_errors)
