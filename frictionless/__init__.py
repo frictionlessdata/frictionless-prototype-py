@@ -13,7 +13,9 @@ from .metadata import Metadata
 from .plugin import Plugin
 from .report import Report, ReportTable
 from .row import Row
+from .schema import Schema
 from .server import Server
+from .system import System
 from .validate import validate
 from . import controls
 from . import dialects
