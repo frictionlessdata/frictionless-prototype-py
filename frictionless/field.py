@@ -6,6 +6,7 @@ from functools import partial
 from collections import OrderedDict
 from cached_property import cached_property
 from .metadata import ControlledMetadata
+from . import helpers
 from . import config
 
 
@@ -138,6 +139,7 @@ class Field(ControlledMetadata):
     # Metadata
 
     def metadata_process(self):
+        helpers.reset_cached_properties(self)
         super().metadata_process()
         self.__proxy = None
         if type(self) is Field:
