@@ -5,27 +5,18 @@ import importlib
 from functools import partial
 from collections import OrderedDict
 from cached_property import cached_property
-from .metadata import Metadata
+from .metadata import ControlledMetadata
 from . import config
 
 
 # TODO: reset cached properties on transform
-class Field(Metadata):
+class Field(ControlledMetadata):
     metadata_profile = {  # type: ignore
         'type': 'object',
         'required': ['name'],
         'properties': {'name': {'type': 'string'}},
     }
     supported_constraints = []  # type: ignore
-
-    def __init__(self, descriptor):
-        super().__init__(descriptor)
-        self.__proxy = None
-        if type(self) is Field:
-            pref = descriptor.get('type', '')
-            name = f'{pref.capitalize()}Field'
-            module = importlib.import_module('frictionless.fields')
-            self.__proxy = getattr(module, name, getattr(module, 'AnyField'))(descriptor)
 
     @cached_property
     def name(self):
@@ -143,6 +134,17 @@ class Field(Metadata):
 
     def write_cell_cast(self, cell):
         return self.__proxy.write_cell_cast(cell)
+
+    # Process
+
+    def process_metadata(self):
+        super().process_metadata()
+        self.__proxy = None
+        if type(self) is Field:
+            pref = self.get('type', '')
+            name = f'{pref.capitalize()}Field'
+            module = importlib.import_module('frictionless.fields')
+            self.__proxy = getattr(module, name, getattr(module, 'AnyField'))(self)
 
 
 # Internal

@@ -52,10 +52,10 @@ class Metadata(dict):
     def copy(self):
         return self.duplicate_metadata()
 
-    def __copy__(self):
+    def __copy__(self, *args, **kwargs):
         return self.copy()
 
-    def __deepcopy__(self):
+    def __deepcopy__(self, *args, **kwargs):
         return self.copy()
 
     # Extract
