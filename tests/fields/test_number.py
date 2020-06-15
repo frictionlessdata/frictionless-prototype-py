@@ -88,5 +88,5 @@ def test_read_cell_number(format, source, target, options):
     descriptor = {'name': 'name', 'type': 'number', 'format': format}
     descriptor.update(options)
     field = Field(descriptor)
-    cell, note = field.read_cell(source)
+    cell, notes = field.read_cell(source)
     assert cell == target

@@ -98,38 +98,35 @@ class Field(Metadata):
     # Read
 
     def read_cell(self, cell):
-        note = None
+        notes = None
         if cell in self.missing_values:
             cell = None
         if cell is not None:
             cell = self.read_cell_cast(cell)
             if cell is None:
-                note = f'expected type is "{self.type}" and format is "{self.format}"'
-        return cell, note
+                notes = notes or OrderedDict()
+                notes['type'] = f'type is "{self.type}/{self.format}"'
+        if not notes:
+            for name, check in self.read_cell_checks.items():
+                if not check(cell):
+                    notes = notes or OrderedDict()
+                    notes[name] = f'constraint "{name}" is "{self.constraints[name]}"'
+        return cell, notes
 
     def read_cell_cast(self, cell):
         return self.__proxy.read_cell_cast(cell)
 
-    # Test
-
-    def test_cell(self, cell):
-        notes = OrderedDict()
-        for name, check in self.test_cell_checks.notes():
-            if not check(cell):
-                notes[name] = f'"{name}" is "{self.constraints[name]}"'
-        return notes
-
     @cached_property
-    def test_cell_checks(self):
+    def read_cell_checks(self):
         checks = OrderedDict()
-        for name in self.supported_constraints:
+        for name in self.__proxy.supported_constraints:
             constraint = self.constraints.get(name)
             if constraint is not None:
                 if name in ['minimum', 'maximum']:
                     constraint = self.read_cell_cast(constraint)
                 if name == 'enum':
                     constraint = list(map(self.read_cell_cast, constraint))
-                checks[name] = partial(getattr(vars(), f'check_{name}'), constraint)
+                checks[name] = partial(globals().get(f'check_{name}'), constraint)
         return checks
 
     # Write

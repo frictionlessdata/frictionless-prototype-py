@@ -43,7 +43,7 @@ from frictionless import Field
 def test_read_cell_date(format, source, target):
     with pytest.warns(None) as recorded:
         field = Field({'name': 'name', 'type': 'date', 'format': format})
-        cell, note = field.read_cell(source)
+        cell, notes = field.read_cell(source)
         assert cell == target
     if not format.startswith('fmt:'):
         assert recorded.list == []

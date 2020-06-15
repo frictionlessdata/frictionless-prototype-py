@@ -18,5 +18,5 @@ from frictionless import Field
 )
 def test_read_cell_year(format, source, target):
     field = Field({'name': 'name', 'type': 'year', 'format': format})
-    cell, note = field.read_cell(source)
+    cell, notes = field.read_cell(source)
     assert cell == target
