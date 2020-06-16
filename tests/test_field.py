@@ -1,5 +1,4 @@
 import pytest
-from functools import partial
 from frictionless import Field
 
 
@@ -56,6 +55,96 @@ def test_read_cell_number_missingValues():
 
 
 # Constraints
+
+
+@pytest.mark.parametrize(
+    'constraints, type, valid',
+    [
+        # minLength constraint (applies to collections (string, array, object))
+        ({'minLength': 4}, 'any', False),
+        ({'minLength': 4}, 'array', True),
+        ({'minLength': 4}, 'boolean', False),
+        ({'minLength': 4}, 'date', False),
+        ({'minLength': 4}, 'datetime', False),
+        ({'minLength': 4}, 'duration', False),
+        ({'minLength': 4}, 'geojson', False),
+        ({'minLength': 4}, 'geopoint', False),
+        ({'minLength': 4}, 'integer', False),
+        ({'minLength': 4}, 'number', False),
+        ({'minLength': 4}, 'object', True),
+        ({'minLength': 4}, 'string', True),
+        ({'minLength': 4}, 'time', False),
+        ({'minLength': 4}, 'year', False),
+        ({'minLength': 4}, 'yearmonth', False),
+        # maxLength constraint (applies to collections (string, array, object))
+        ({'maxLength': 3}, 'any', False),
+        ({'maxLength': 3}, 'array', True),
+        ({'maxLength': 3}, 'boolean', False),
+        ({'maxLength': 3}, 'date', False),
+        ({'maxLength': 3}, 'datetime', False),
+        ({'maxLength': 3}, 'duration', False),
+        ({'maxLength': 3}, 'geojson', False),
+        ({'maxLength': 3}, 'geopoint', False),
+        ({'maxLength': 3}, 'integer', False),
+        ({'maxLength': 3}, 'number', False),
+        ({'maxLength': 3}, 'object', True),
+        ({'maxLength': 3}, 'string', True),
+        ({'maxLength': 3}, 'time', False),
+        ({'maxLength': 3}, 'year', False),
+        ({'maxLength': 3}, 'yearmonth', False),
+        # minimum constraint (applies to integer, number, date, time, datetime, year, yearmonth)
+        ({'minimum': 4}, 'any', False),
+        ({'minimum': 4}, 'array', False),
+        ({'minimum': 4}, 'boolean', False),
+        ({'minimum': "1789-07-14"}, 'date', True),
+        ({'minimum': "1789-07-14T08:00:00Z"}, 'datetime', True),
+        ({'minimum': 4}, 'duration', False),
+        ({'minimum': 4}, 'geojson', False),
+        ({'minimum': 4}, 'geopoint', False),
+        ({'minimum': 4}, 'integer', True),
+        ({'minimum': 4}, 'number', True),
+        ({'minimum': 4}, 'object', False),
+        ({'minimum': 4}, 'string', False),
+        ({'minimum': "07:07:07"}, 'time', True),
+        ({'minimum': 4}, 'year', True),
+        ({'minimum': "1789-07"}, 'yearmonth', True),
+        # maximum constraint (applies to integer, number, date, time and datetime, year, yearmonth)
+        ({'maximum': 4}, 'any', False),
+        ({'maximum': 4}, 'array', False),
+        ({'maximum': 4}, 'boolean', False),
+        ({'maximum': "2001-01-01"}, 'date', True),
+        ({'maximum': "2001-01-01T12:00:00Z"}, 'datetime', True),
+        ({'maximum': 4}, 'duration', False),
+        ({'maximum': 4}, 'geojson', False),
+        ({'maximum': 4}, 'geopoint', False),
+        ({'maximum': 4}, 'integer', True),
+        ({'maximum': 4}, 'number', True),
+        ({'maximum': 4}, 'object', False),
+        ({'maximum': 4}, 'string', False),
+        ({'maximum': "08:09:10"}, 'time', True),
+        ({'maximum': 4}, 'year', True),
+        ({'maximum': "2001-01"}, 'yearmonth', True),
+        # pattern constraint (apply to string)
+        ({'pattern': '[0-9]+'}, 'any', False),
+        ({'pattern': '[0-9]+'}, 'array', False),
+        ({'pattern': '[0-9]+'}, 'boolean', False),
+        ({'pattern': '[0-9]+'}, 'date', False),
+        ({'pattern': '[0-9]+'}, 'datetime', False),
+        ({'pattern': '[0-9]+'}, 'duration', False),
+        ({'pattern': '[0-9]+'}, 'geojson', False),
+        ({'pattern': '[0-9]+'}, 'geopoint', False),
+        ({'pattern': '[0-9]+'}, 'integer', False),
+        ({'pattern': '[0-9]+'}, 'number', False),
+        ({'pattern': '[0-9]+'}, 'object', False),
+        ({'pattern': '[0-9]+'}, 'string', True),
+        ({'pattern': '[0-9]+'}, 'time', False),
+        ({'pattern': '[0-9]+'}, 'year', False),
+        ({'pattern': '[0-9]+'}, 'yearmonth', False),
+    ],
+)
+def test_field_constraint_field_type(constraints, type, valid):
+    field = Field({'name': 'field', 'constraints': constraints, 'type': type})
+    assert field.metadata_valid == valid
 
 
 def test_read_cell_required():

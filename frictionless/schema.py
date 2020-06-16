@@ -242,3 +242,6 @@ class Schema(ControlledMetadata):
                 field = Field(field, strict=self.metadata_strict, schema=self)
                 list.__setitem__(self.fields, index, field)
         super().metadata_process()
+
+    def metadata_validate(self):
+        super().metadata_validate()

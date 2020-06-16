@@ -225,6 +225,16 @@ class Field(ControlledMetadata):
             module = importlib.import_module('frictionless.fields')
             self.__proxy = getattr(module, name, getattr(module, 'AnyField'))(self)
 
+    def metadata_validate(self):
+        super().metadata_validate()
+        if type(self) is Field:
+            self.metadata_errors.extend(self.__proxy.metadata_errors)
+        if type(self) is not Field:
+            for name in self.constraints.keys():
+                if name not in self.supported_constraints:
+                    note = f'Constraint "{name}" is not supported by type "{self.type}"'
+                    self.metadata_errors.append(errors.SchemaError(note=note))
+
 
 # Internal
 
