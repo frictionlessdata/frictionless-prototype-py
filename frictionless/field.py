@@ -6,12 +6,10 @@ from functools import partial
 from collections import OrderedDict
 from cached_property import cached_property
 from .metadata import ControlledMetadata
-from . import helpers
 from . import errors
 from . import config
 
 
-# TODO: reset cached properties on transform
 class Field(ControlledMetadata):
     """Field representation
 
@@ -216,24 +214,25 @@ class Field(ControlledMetadata):
     # Metadata
 
     def metadata_process(self):
-        helpers.reset_cached_properties(self)
-        super().metadata_process()
         self.__proxy = None
         if type(self) is Field:
-            pref = self.get('type', '')
+            pref = self.get('type', 'any')
             name = f'{pref.capitalize()}Field'
             module = importlib.import_module('frictionless.fields')
             self.__proxy = getattr(module, name, getattr(module, 'AnyField'))(self)
+        super().metadata_process()
 
     def metadata_validate(self):
-        super().metadata_validate()
         if type(self) is Field:
-            self.metadata_errors.extend(self.__proxy.metadata_errors)
-        if type(self) is not Field:
-            for name in self.constraints.keys():
-                if name not in self.supported_constraints:
-                    note = f'Constraint "{name}" is not supported by type "{self.type}"'
-                    self.metadata_errors.append(errors.SchemaError(note=note))
+            self.metadata_errors.clear()
+            return self.metadata_errors.extend(self.__proxy.metadata_errors)
+        super().metadata_validate()
+
+        # Constraints
+        for name in self.constraints.keys():
+            if name not in self.supported_constraints:
+                note = f'constraint "{name}" is not supported by type "{self.type}"'
+                self.metadata_errors.append(errors.SchemaError(note=note))
 
 
 # Internal

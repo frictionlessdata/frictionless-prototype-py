@@ -3,7 +3,6 @@ import json
 import pytest
 import requests
 from decimal import Decimal
-from collections import OrderedDict
 from frictionless import Schema, exceptions
 
 
@@ -32,6 +31,11 @@ def test_init():
     assert Schema(DESCRIPTOR_MAX)
     assert Schema('data/schema-valid-full.json')
     assert Schema('data/schema-valid-simple.json')
+
+
+def test_cannot_extract_metadata():
+    with pytest.raises(exceptions.FrictionlessException):
+        Schema([])
 
 
 def test_init_invalid_in_strict_mode():
@@ -213,6 +217,43 @@ def test_fields_have_public_backreference_to_schema():
     schema = Schema('data/schema-valid-full.json')
     assert schema.get_field('first_name').schema == schema
     assert schema.get_field('last_name').schema == schema
+
+
+def test_schema_metadata_valid():
+    assert Schema('data/schema-valid-simple.json').metadata_valid
+    assert Schema('data/schema-valid-full.json').metadata_valid
+    assert Schema('data/schema-valid-pk-array.json').metadata_valid
+    assert Schema('data/schema-valid-fk-array.json').metadata_valid
+
+
+def test_schema_metadata_not_valid():
+    assert not Schema('data/schema-invalid-empty.json').metadata_valid
+    assert not Schema('data/schema-invalid-pk-string.json').metadata_valid
+    assert not Schema('data/schema-invalid-pk-array.json').metadata_valid
+    assert not Schema('data/schema-invalid-fk-string.json').metadata_valid
+    assert not Schema('data/schema-invalid-fk-no-reference.json').metadata_valid
+    assert not Schema('data/schema-invalid-fk-array.json').metadata_valid
+    assert not Schema('data/schema-invalid-fk-string-array-ref.json').metadata_valid
+    assert not Schema('data/schema-invalid-fk-array-string-ref.json').metadata_valid
+
+
+def test_schema_metadata_not_valid_multiple_errors():
+    schema = Schema('data/schema-invalid-multiple-errors.json')
+    assert len(schema.metadata_errors) == 5
+
+
+def test_schema_metadata_not_valid_multiple_errors_with_pk():
+    schema = Schema('data/schema-invalid-pk-is-wrong-type.json')
+    assert len(schema.metadata_errors) == 3
+
+
+def test_schema_metadata_error_message():
+    schema = Schema({'fields': [{'name': 'name', 'type': 'other'}]})
+    note = schema.metadata_errors[0]['note']
+    assert len(schema.metadata_errors) == 1
+    assert 'is not valid' in note
+    assert 'at "fields/0" in metadata' in note
+    assert 'at "properties/fields/items/anyOf" in profile' in note
 
 
 # Infer

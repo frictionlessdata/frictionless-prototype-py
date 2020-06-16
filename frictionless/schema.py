@@ -1,5 +1,6 @@
 import io
 import json
+from copy import deepcopy
 from .metadata import ControlledMetadata
 from .field import Field
 from . import exceptions
@@ -54,16 +55,18 @@ class Schema(ControlledMetadata):
             dict[]: foreign keys
 
         """
-        foreign_keys = self.get('foreignKeys', [])
-        for key in foreign_keys:
-            key.setdefault('fields', [])
-            key.setdefault('reference', {})
-            key['reference'].setdefault('resource', '')
-            key['reference'].setdefault('fields', [])
-            if not isinstance(key['fields'], list):
-                key['fields'] = [key['fields']]
-            if not isinstance(key['reference']['fields'], list):
-                key['reference']['fields'] = [key['reference']['fields']]
+        foreign_keys = deepcopy(self.get('foreignKeys', []))
+        for index, fk in enumerate(foreign_keys):
+            if not isinstance(fk, dict):
+                continue
+            fk.setdefault('fields', [])
+            fk.setdefault('reference', {})
+            fk['reference'].setdefault('resource', '')
+            fk['reference'].setdefault('fields', [])
+            if not isinstance(fk['fields'], list):
+                fk['fields'] = [fk['fields']]
+            if not isinstance(fk['reference']['fields'], list):
+                fk['reference']['fields'] = [fk['reference']['fields']]
         return foreign_keys
 
     # Fields
@@ -245,3 +248,22 @@ class Schema(ControlledMetadata):
 
     def metadata_validate(self):
         super().metadata_validate()
+
+        # Primary Key
+        for name in self.primary_key:
+            if name not in self.field_names:
+                note = 'primary key "%s" does not match the fields "%s"'
+                note = note % (self.primary_key, self.field_names)
+                self.metadata_errors.append(errors.SchemaError(note=note))
+
+        # Foreign Keys
+        for fk in self.foreign_keys:
+            for name in fk['fields']:
+                if name not in self.field_names:
+                    note = 'foreign key "%s" does not match the fields "%s"'
+                    note = note % (fk, self.field_names)
+                    self.metadata_errors.append(errors.SchemaError(note=note))
+            if len(fk['fields']) != len(fk['reference']['fields']):
+                note = 'foreign key fields "%s" does not match the reference fields "%s"'
+                note = note % (fk['fields'], fk['reference']['fields'])
+                self.metadata_errors.append(errors.SchemaError(note=note))

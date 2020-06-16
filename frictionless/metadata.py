@@ -6,6 +6,7 @@ from copy import deepcopy
 from urllib.parse import urlparse
 from cached_property import cached_property
 from . import exceptions
+from . import helpers
 from . import config
 
 
@@ -19,7 +20,7 @@ class Metadata(dict):
         self.__errors = []
         metadata = self.metadata_extract(descriptor)
         dict.update(self, metadata)
-        if self and not root:
+        if not root:
             self.metadata_process()
             self.metadata_validate()
 
@@ -109,6 +110,7 @@ class ControlledMetadata(Metadata):
     # Process
 
     def metadata_process(self):
+        helpers.reset_cached_properties(self)
         for key, value in self.items():
             if isinstance(value, dict):
                 if not hasattr(value, 'metadata_transform'):
@@ -210,10 +212,10 @@ class ControlledMetadataList(list):
     def copy(self):
         return self.metadata_duplicate()
 
-    def __copy__(self):
+    def __copy__(self, *args, **kwargs):
         return self.copy()
 
-    def __deepcopy__(self):
+    def __deepcopy__(self, *args, **kwargs):
         return self.copy()
 
     # Process
