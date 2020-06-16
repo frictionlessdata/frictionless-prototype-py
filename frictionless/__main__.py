@@ -1,5 +1,5 @@
-from .cli import cli
+from .program import program
 
 
 if __name__ == '__main__':
-    cli(prog_name='frictionless')
+    program(prog_name='frictionless')
