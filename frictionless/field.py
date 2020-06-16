@@ -7,17 +7,44 @@ from collections import OrderedDict
 from cached_property import cached_property
 from .metadata import ControlledMetadata
 from . import helpers
+from . import errors
 from . import config
 
 
 # TODO: reset cached properties on transform
 class Field(ControlledMetadata):
+    """Field representation
+
+    # Arguments
+        descriptor (str|dict): field descriptor
+        strict (bool): if True it will raise a first validation error
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
+    metadata_Error = errors.SchemaError  # type: ignore
     metadata_profile = {  # type: ignore
         'type': 'object',
         'required': ['name'],
         'properties': {'name': {'type': 'string'}},
     }
     supported_constraints = []  # type: ignore
+
+    def __init__(self, descriptor, strict=False, schema=None):
+        super().__init__(descriptor, strict=strict)
+        self.__schema = schema
+
+    @cached_property
+    def schema(self):
+        """Field schema
+
+        # Returns
+            str: field schema
+
+        """
+        return self.__schema
 
     @cached_property
     def name(self):
@@ -27,7 +54,7 @@ class Field(ControlledMetadata):
             str: field name
 
         """
-        return self.get('name')
+        return self.get('name', 'field')
 
     @cached_property
     def type(self):
@@ -65,7 +92,8 @@ class Field(ControlledMetadata):
             str[]: missing values
 
         """
-        return self.get('missingValues', config.MISSING_VALUES)
+        default = self.__schema.missing_values if self.__schema else config.MISSING_VALUES
+        return self.get('missingValues', default)
 
     @cached_property
     def constraints(self):
@@ -87,9 +115,25 @@ class Field(ControlledMetadata):
         """
         return self.constraints.get('required', False)
 
+    # Expand
+
+    def expand(self):
+        self.setdefault('name', 'field')
+        self.setdefault('type', 'any')
+        self.setdefault('format', 'default')
+
     # Read
 
     def read_cell(self, cell):
+        """Read cell (cast)
+
+        # Arguments
+            cell (any): cell
+
+        # Returns
+            (any, OrderedDict): processed cell and dict of notes
+
+        """
         notes = None
         if cell in self.missing_values:
             cell = None
@@ -106,10 +150,25 @@ class Field(ControlledMetadata):
         return cell, notes
 
     def read_cell_cast(self, cell):
+        """Read cell low-level (cast)
+
+        # Arguments
+            cell (any): cell
+
+        # Returns
+            any/None: processed cell or None if an error
+
+        """
         return self.__proxy.read_cell_cast(cell)
 
     @cached_property
     def read_cell_checks(self):
+        """Read cell low-level (cast)
+
+        # Returns
+            OrderedDict: dictionlary of check function by a constraint name
+
+        """
         checks = OrderedDict()
         for name in self.__proxy.supported_constraints:
             constraint = self.constraints.get(name)
@@ -124,6 +183,15 @@ class Field(ControlledMetadata):
     # Write
 
     def write_cell(self, cell):
+        """Write cell (cast)
+
+        # Arguments
+            cell (any): cell
+
+        # Returns
+            (any, OrderedDict): processed cell and dict of notes
+
+        """
         notes = None
         if cell is None:
             cell = ''
@@ -134,6 +202,15 @@ class Field(ControlledMetadata):
         return cell, notes
 
     def write_cell_cast(self, cell):
+        """Write cell low-level (cast)
+
+        # Arguments
+            cell (any): cell
+
+        # Returns
+            any/None: processed cell or None if an error
+
+        """
         return self.__proxy.write_cell_cast(cell)
 
     # Metadata

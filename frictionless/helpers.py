@@ -83,6 +83,12 @@ def reset_cached_properties(obj):
             obj.__dict__.pop(name, None)
 
 
+def ensure_dir(path):
+    dirpath = os.path.dirname(path)
+    if dirpath and not os.path.exists(dirpath):
+        os.makedirs(dirpath)
+
+
 # Integrity
 
 

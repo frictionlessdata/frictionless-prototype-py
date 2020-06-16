@@ -60,24 +60,21 @@ class Metadata(dict):
 
     # Extract
 
-    def metadata_extract(self, descriptor):
+    def metadata_extract(self, descriptor, *, duplicate=False):
         try:
             if descriptor is None:
                 return {}
             if isinstance(descriptor, dict):
-                return descriptor
+                return deepcopy(descriptor) if duplicate else descriptor
             if isinstance(descriptor, str):
                 if urlparse(descriptor).scheme in config.REMOTE_SCHEMES:
                     return requests.get(descriptor).json()
                 with io.open(descriptor, encoding='utf-8') as file:
                     return json.load(file)
             return json.load(descriptor)
-        except Exception:
-            note = 'canot retrieve metadata "%s"' % descriptor
-            if self.metadata_strict:
-                raise exceptions.FrictionlessException(note)
-            error = self.metadata_Error(note=note)
-            self.metadata_errors.append(error)
+        except Exception as exception:
+            message = 'canot extract metadata "%s" because "%s"' % (descriptor, exception)
+            raise exceptions.FrictionlessException(message) from exception
 
     # Process
 
@@ -106,10 +103,8 @@ class ControlledMetadata(Metadata):
 
     # Extract
 
-    def metadata_extract(self, descriptor):
-        if isinstance(descriptor, dict):
-            return deepcopy(descriptor)
-        super().metadata_extract(descriptor)
+    def metadata_extract(self, descriptor, *, duplicate=False):
+        return super().metadata_extract(descriptor, duplicate=True)
 
     # Process
 

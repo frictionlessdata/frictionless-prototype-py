@@ -4,6 +4,7 @@ from cached_property import cached_property
 from . import errors
 
 
+# TODO: support default field_positions/row_position/row_number?
 class Row(OrderedDict):
     def __init__(self, cells, *, fields, field_positions, row_position, row_number):
         assert len(field_positions) in (len(cells), len(fields))
