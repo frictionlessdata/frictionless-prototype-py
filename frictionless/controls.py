@@ -68,12 +68,10 @@ class RemoteControl(Metadata):
     def __init__(
         self, descriptor=None, http_session=None, http_stream=None, http_timeout=None,
     ):
-        super().__init(
-            descriptor,
-            http_session=http_session,
-            http_stream=http_stream,
-            http_timeout=http_timeout,
-        )
+        self.setdefined('httpSession', http_session)
+        self.setdefined('httpStream', http_stream)
+        self.setdefined('httpTimeout', http_timeout)
+        super().__init(descriptor)
 
     # Expand
 

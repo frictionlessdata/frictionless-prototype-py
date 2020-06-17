@@ -2,7 +2,6 @@ import io
 import json
 import requests
 import jsonschema
-import stringcase
 from copy import deepcopy
 from urllib.parse import urlparse
 from cached_property import cached_property
@@ -18,7 +17,6 @@ class Metadata(dict):
         descriptor? (str|dict): schema descriptor
         metadata_root? (Metadata): root metadata object
         metadata_raise? (bool): if True it will fail on the first metadata error
-        **options? (dict): apply additional metadata (camel case / drop none values)
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
@@ -28,21 +26,13 @@ class Metadata(dict):
     metadata_Error = None
     metadata_profile = None
 
-    def __init__(
-        self, descriptor=None, *, metadata_root=None, metadata_raise=False, **options,
-    ):
+    def __init__(self, descriptor=None, *, metadata_root=None, metadata_raise=False):
         self.__errors = []
         self.__root = metadata_root or self
         self.__raise = metadata_raise or not self.metadata_Error
         metadata = self.metadata_extract(descriptor)
-        if metadata:
-            for key, value in metadata.items():
-                dict.setdefault(self, key, value)
-        if options:
-            for key, value in options.items():
-                if value is not None:
-                    key = stringcase.camelcase(key)
-                    dict.__setitem__(self, key, value)
+        for key, value in metadata.items():
+            dict.setdefault(self, key, value)
         if not metadata_root:
             self.metadata_process()
             self.metadata_validate()
@@ -105,6 +95,12 @@ class Metadata(dict):
     def metadata_process(self):
         pass
 
+    # Transform
+
+    def setdefined(self, key, value):
+        if value is not None:
+            self[key] = value
+
     # Validate
 
     def metadata_validate(self):
@@ -124,12 +120,6 @@ class Metadata(dict):
 
 
 class ControlledMetadata(Metadata):
-
-    # Apply
-
-    def metadata_apply(self, key, value, *, filter=False):
-        if not filter or value is not None:
-            super().__setitem__(key, value)
 
     # Extract
 
@@ -163,7 +153,12 @@ class ControlledMetadata(Metadata):
     # Transform
 
     def metadata_transform(self):
-        if self.metadata_root is not self:
+        try:
+            # It can be not initiated
+            root = self.metadata_root
+        except AttributeError:
+            return
+        if root is not self:
             return self.metadata_root.metadata_transform()
         self.metadata_process()
         self.metadata_validate()
@@ -195,6 +190,11 @@ class ControlledMetadata(Metadata):
 
     def setdefault(self, *args, **kwargs):
         result = super().setdefault(*args, **kwargs)
+        self.metadata_transform()
+        return result
+
+    def setdefined(self, *args, **kwargs):
+        result = super().setdefined(*args, **kwargs)
         self.metadata_transform()
         return result
 

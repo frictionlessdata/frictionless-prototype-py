@@ -44,13 +44,13 @@ class Schema(ControlledMetadata):
         metadata_raise=False,
         metadata_resource=None,
     ):
+        self.setdefined('fields', fields)
+        self.setdefined('missingValues', missing_values)
+        self.setdefined('primaryKey', primary_key)
+        self.setdefined('foreignKeys', foreign_keys)
         self.__metadata_resource = metadata_resource
         super().__init__(
-            descriptor,
-            fields=fields,
-            missing_values=missing_values,
-            primary_key=primary_key,
-            foreign_keys=foreign_keys,
+            descriptor=descriptor,
             metadata_root=metadata_root,
             metadata_raise=metadata_raise,
         )

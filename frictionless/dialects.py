@@ -76,19 +76,17 @@ class CsvDialect(Dialect):
         comment_char=None,
         case_sensitive_header=None,
     ):
-        super().__init(
-            descriptor,
-            delimiter=delimiter,
-            line_terminator=line_terminator,
-            quote_char=quote_char,
-            double_quote=double_quote,
-            escape_char=escape_char,
-            null_sequence=null_sequence,
-            skip_initial_space=skip_initial_space,
-            header=header,
-            comment_char=comment_char,
-            case_sensitive_header=case_sensitive_header,
-        )
+        self.setdefined('delimiter', delimiter)
+        self.setdefined('lineTerminator', line_terminator)
+        self.setdefined('quoteChar', quote_char)
+        self.setdefined('doubleQuote', double_quote)
+        self.setdefined('escapeChar', escape_char)
+        self.setdefined('nullSequence', null_sequence)
+        self.setdefined('skipInitialSpace', skip_initial_space)
+        self.setdefined('header', header)
+        self.setdefined('commentChar', comment_char)
+        self.setdefined('caseSensitiveHeader', case_sensitive_header)
+        super().__init(descriptor)
 
     # Expand
 
@@ -136,13 +134,11 @@ class ExcelDialect(Dialect):
         preserve_formatting=None,
         adjust_floating_point_error=None,
     ):
-        super().__init(
-            descriptor,
-            sheet=sheet,
-            fill_merged_cells=fill_merged_cells,
-            preserve_formatting=preserve_formatting,
-            adjust_floating_point_error=adjust_floating_point_error,
-        )
+        self.setdefined('sheet', sheet)
+        self.setdefined('fillMergedCells', fill_merged_cells)
+        self.setdefined('preserveFormatting', preserve_formatting)
+        self.setdefined('adjustFloatingPointError', adjust_floating_point_error)
+        super().__init(descriptor)
 
     # Expand
 
@@ -180,9 +176,10 @@ class JsonDialect(Dialect):
     def __init__(
         self, descriptor=None, keyed=None, lined=None, property=None,
     ):
-        super().__init(
-            descriptor, keyed=keyed, lined=lined, property=property,
-        )
+        self.setdefined('keyed', keyed)
+        self.setdefined('lined', lined)
+        self.setdefined('property', property)
+        super().__init(descriptor)
 
     # Expand
 

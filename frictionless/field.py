@@ -52,14 +52,14 @@ class Field(ControlledMetadata):
         metadata_raise=False,
         metadata_schema=None,
     ):
+        self.setdefined('name', name)
+        self.setdefined('type', type)
+        self.setdefined('format', format)
+        self.setdefined('missingValues', missing_values)
+        self.setdefined('constraints', constraints)
         self.__metadata_schema = metadata_schema
         super().__init__(
-            descriptor,
-            name=None,
-            type=None,
-            format=None,
-            missing_values=None,
-            constraints=None,
+            descriptor=descriptor,
             metadata_root=metadata_root,
             metadata_raise=metadata_raise,
         )
