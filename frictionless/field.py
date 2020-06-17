@@ -14,8 +14,10 @@ class Field(ControlledMetadata):
     """Field representation
 
     # Arguments
-        descriptor (str|dict): field descriptor
-        strict (bool): if True it will raise a first validation error
+        descriptor? (str|dict): field descriptor
+        schema? (Schema): parent schema object
+        metadata_root? (Metadata): root metadata object
+        metadata_raise? (bool): if True it will fail on the first metadata error
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
@@ -30,8 +32,12 @@ class Field(ControlledMetadata):
     }
     supported_constraints = []  # type: ignore
 
-    def __init__(self, descriptor, strict=False, schema=None):
-        super().__init__(descriptor, strict=strict)
+    def __init__(
+        self, descriptor, *, schema=None, metadata_root=None, metadata_raise=False
+    ):
+        super().__init__(
+            descriptor, metadata_root=metadata_root, metadata_raise=metadata_raise
+        )
         self.__schema = schema
 
     @cached_property

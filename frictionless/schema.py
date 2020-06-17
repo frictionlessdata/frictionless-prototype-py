@@ -13,8 +13,9 @@ class Schema(ControlledMetadata):
     """Schema representation
 
     # Arguments
-        descriptor (str|dict): schema descriptor
-        strict (bool): if True it will raise a first validation error
+        descriptor? (str|dict): schema descriptor
+        metadata_root? (Metadata): root metadata object
+        metadata_raise? (bool): if True it will fail on the first metadata error
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
@@ -242,7 +243,12 @@ class Schema(ControlledMetadata):
             if not isinstance(field, Field):
                 if not isinstance(field, dict):
                     field = {'name': f'field{index+1}', 'type': 'any'}
-                field = Field(field, strict=self.metadata_strict, schema=self)
+                field = Field(
+                    field,
+                    schema=self,
+                    metadata_root=self.metadata_root,
+                    metadata_raise=self.metadata_raise,
+                )
                 list.__setitem__(self.fields, index, field)
         super().metadata_process()
 

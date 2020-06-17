@@ -40,7 +40,7 @@ def test_cannot_extract_metadata():
 
 def test_init_invalid_in_strict_mode():
     with pytest.raises(exceptions.FrictionlessException):
-        Schema('data/schema-invalid-multiple-errors.json', strict=True)
+        Schema('data/schema-invalid-multiple-errors.json', metadata_raise=True)
 
 
 def test_descriptor():
