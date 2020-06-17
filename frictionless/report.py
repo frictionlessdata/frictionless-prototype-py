@@ -7,6 +7,19 @@ from .metadata import Metadata
 
 
 class Report(Metadata):
+    """Report representation.
+
+    # Arguments
+        descriptor? (str|dict): schema descriptor
+        time
+        errors
+        tables
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
     metadata_profile = config.REPORT_PROFILE
 
     def __init__(self, descriptor=None, *, time, errors, tables):
@@ -85,6 +98,39 @@ class Report(Metadata):
 
 
 class ReportTable(Metadata):
+    """Report table representation.
+
+    # Arguments
+        descriptor? (str|dict): schema descriptor
+        time
+        scope
+        partial
+        row_count
+        source
+        scheme
+        format
+        encoding
+        compression
+        headers
+        headers_row
+        headers_joiner
+        pick_fields
+        skip_fields
+        limit_fields
+        offset_fields
+        pick_rows
+        skip_rows
+        limit_rows
+        offset_rows
+        schema
+        dialect
+        errors
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
     def __init__(
         self,
         descriptor=None,
