@@ -1,7 +1,7 @@
 import functools
 from . import config
+from . import helpers
 from . import exceptions
-from .helpers import Timer
 from .errors import TaskError
 from .metadata import Metadata
 
@@ -9,15 +9,14 @@ from .metadata import Metadata
 class Report(Metadata):
     metadata_profile = config.REPORT_PROFILE
 
-    def __init__(self, *, time, errors, tables):
-        descriptor = {}
-        descriptor['time'] = time
-        descriptor['valid'] = not errors and all(tab['valid'] for tab in tables)
-        descriptor['version'] = config.VERSION
-        descriptor['tableCount'] = len(tables)
-        descriptor['errorCount'] = len(errors) + sum(tab['errorCount'] for tab in tables)
-        descriptor['errors'] = errors
-        descriptor['tables'] = tables
+    def __init__(self, descriptor=None, *, time, errors, tables):
+        self['time'] = time
+        self['valid'] = not errors and all(tab['valid'] for tab in tables)
+        self['version'] = config.VERSION
+        self['tableCount'] = len(tables)
+        self['errorCount'] = len(errors) + sum(tab['errorCount'] for tab in tables)
+        self['errors'] = errors
+        self['tables'] = tables
         super().__init__(descriptor)
 
     @property
@@ -74,7 +73,7 @@ class Report(Metadata):
     def catch(validate):
         @functools.wraps(validate)
         def wrapper(*args, **kwargs):
-            timer = Timer()
+            timer = helpers.Timer()
             try:
                 return validate(*args, **kwargs)
             except Exception as exception:
@@ -88,6 +87,7 @@ class Report(Metadata):
 class ReportTable(Metadata):
     def __init__(
         self,
+        descriptor=None,
         *,
         time,
         scope,
@@ -113,32 +113,31 @@ class ReportTable(Metadata):
         dialect,
         errors,
     ):
-        descriptor = {}
-        descriptor['time'] = time
-        descriptor['valid'] = not errors
-        descriptor['scope'] = scope
-        descriptor['partial'] = partial
-        descriptor['rowCount'] = row_count
-        descriptor['errorCount'] = len(errors)
-        descriptor['source'] = source
-        descriptor['scheme'] = scheme
-        descriptor['format'] = format
-        descriptor['encoding'] = encoding
-        descriptor['compression'] = compression
-        descriptor['headers'] = headers
-        descriptor['headersRow'] = headers_row
-        descriptor['headersJoiner'] = headers_joiner
-        descriptor['pickFields'] = pick_fields
-        descriptor['skipFields'] = skip_fields
-        descriptor['limitFields'] = limit_fields
-        descriptor['offsetFields'] = offset_fields
-        descriptor['pickRows'] = pick_rows
-        descriptor['skipRows'] = skip_rows
-        descriptor['limitRows'] = limit_rows
-        descriptor['offsetRows'] = offset_rows
-        descriptor['schema'] = schema
-        descriptor['dialect'] = dialect
-        descriptor['errors'] = errors
+        self['time'] = time
+        self['valid'] = not errors
+        self['scope'] = scope
+        self['partial'] = partial
+        self['rowCount'] = row_count
+        self['errorCount'] = len(errors)
+        self['source'] = source
+        self['scheme'] = scheme
+        self['format'] = format
+        self['encoding'] = encoding
+        self['compression'] = compression
+        self['headers'] = headers
+        self['headersRow'] = headers_row
+        self['headersJoiner'] = headers_joiner
+        self['pickFields'] = pick_fields
+        self['skipFields'] = skip_fields
+        self['limitFields'] = limit_fields
+        self['offsetFields'] = offset_fields
+        self['pickRows'] = pick_rows
+        self['skipRows'] = skip_rows
+        self['limitRows'] = limit_rows
+        self['offsetRows'] = offset_rows
+        self['schema'] = schema
+        self['dialect'] = dialect
+        self['errors'] = errors
         super().__init__(descriptor)
 
     @property

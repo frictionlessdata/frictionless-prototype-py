@@ -2,12 +2,20 @@ from .metadata import Metadata
 
 
 class Check(Metadata):
+    """Check representation.
+
+    # Arguments
+        descriptor? (str|dict): schema descriptor
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
     possible_Errors = []  # type: ignore
 
     def __init__(self, descriptor=None):
         super().__init__(descriptor)
-        self.__stream = None
-        self.__schema = None
 
     @property
     def stream(self):

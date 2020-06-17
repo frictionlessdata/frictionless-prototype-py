@@ -23,14 +23,14 @@ def validate_inquiry(source):
         if source_type == 'package':
             # For now, we don't flatten inquiry completely and for the case
             # of a list of packages with one resource we don't get proper multiprocessing
-            report = validate(**helpers.create_options_from_descriptor(task))
+            report = validate(**helpers.create_options(task))
             reports.append(report)
             continue
         tasks.append(task)
 
     # Validate task
     if len(tasks) == 1:
-        report = validate(**helpers.create_options_from_descriptor(tasks[0]))
+        report = validate(**helpers.create_options(tasks[0]))
         reports.append(report)
 
     # Validate tasks

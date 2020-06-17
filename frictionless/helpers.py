@@ -42,15 +42,15 @@ def parse_hashing_digest(hash):
 
 
 def apply_function(function, descriptor):
-    options = create_options_from_descriptor(descriptor)
+    options = create_options(descriptor)
     return function(**options)
 
 
-def create_options_from_descriptor(descriptor):
+def create_options(descriptor):
     return {stringcase.snakecase(key): value for key, value in descriptor.items()}
 
 
-def create_descriptor_from_options(**options):
+def create_descriptor(**options):
     return {stringcase.camelcase(key): value for key, value in options.items()}
 
 
@@ -179,12 +179,12 @@ def translate_dialect(dialect):
     }
     options.pop('header', None)
     options.pop('caseSensitiveHeader', None)
-    options.update(create_options_from_descriptor(dialect))
+    options.update(create_options(dialect))
     return options
 
 
 def translate_control(control):
-    return create_options_from_descriptor(control)
+    return create_options(control)
 
 
 # Measurements

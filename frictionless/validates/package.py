@@ -43,7 +43,7 @@ def validate_package(source, base_path=None, strict=False, **options):
     for resource in package.resources:
         lookup = helpers.create_lookup(resource, package=package)
         descriptor['tasks'].append(
-            helpers.create_descriptor_from_options(
+            helpers.create_descriptor(
                 **options,
                 source=resource.descriptor,
                 base_path=package.base_path,

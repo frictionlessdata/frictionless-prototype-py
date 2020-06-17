@@ -15,9 +15,16 @@ class Field(ControlledMetadata):
 
     # Arguments
         descriptor? (str|dict): field descriptor
-        schema? (Schema): parent schema object
+
+        name? (str): name
+        type? (str): type
+        format? (str): format
+        missing_values? (str[]): missing_values
+        constraints? (dict): constraints
+
         metadata_root? (Metadata): root metadata object
         metadata_raise? (bool): if True it will fail on the first metadata error
+        metadata_schema? (Schema): parent schema object
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
@@ -33,22 +40,29 @@ class Field(ControlledMetadata):
     supported_constraints = []  # type: ignore
 
     def __init__(
-        self, descriptor, *, schema=None, metadata_root=None, metadata_raise=False
+        self,
+        descriptor=None,
+        *,
+        name=None,
+        type=None,
+        format=None,
+        missing_values=None,
+        constraints=None,
+        metadata_root=None,
+        metadata_raise=False,
+        metadata_schema=None,
     ):
+        self.__metadata_schema = metadata_schema
         super().__init__(
-            descriptor, metadata_root=metadata_root, metadata_raise=metadata_raise
+            descriptor,
+            name=None,
+            type=None,
+            format=None,
+            missing_values=None,
+            constraints=None,
+            metadata_root=metadata_root,
+            metadata_raise=metadata_raise,
         )
-        self.__schema = schema
-
-    @cached_property
-    def schema(self):
-        """Field schema
-
-        # Returns
-            str: field schema
-
-        """
-        return self.__schema
 
     @cached_property
     def name(self):
@@ -96,8 +110,12 @@ class Field(ControlledMetadata):
             str[]: missing values
 
         """
-        default = self.__schema.missing_values if self.__schema else config.MISSING_VALUES
-        return self.get('missingValues', default)
+        return self.get(
+            'missingValues',
+            self.__metadata_schema.missing_values
+            if self.__metadata_schema
+            else config.MISSING_VALUES,
+        )
 
     @cached_property
     def constraints(self):

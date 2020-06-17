@@ -2,6 +2,18 @@ from .metadata import Metadata
 
 
 class Control(Metadata):
+    """Control representation
+
+    # Arguments
+        descriptor? (str|dict): descriptor
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
+    def __init__(self, descriptor=None):
+        super().__init__(descriptor)
 
     # Expand
 
@@ -9,7 +21,20 @@ class Control(Metadata):
         pass
 
 
+# TODO: move to plugins
+
+
 class LocalControl(Metadata):
+    """Local control representation
+
+    # Arguments
+        descriptor? (str|dict): descriptor
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
     metadata_profile = {  # type: ignore
         'type': 'object',
         'additionalProperties': False,
@@ -18,6 +43,19 @@ class LocalControl(Metadata):
 
 
 class RemoteControl(Metadata):
+    """Remote control representation
+
+    # Arguments
+        descriptor? (str|dict): descriptor
+        http_session? (any): http_session
+        http_stream? (bool): http_stream
+        http_timeout? (int): http_timeout
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
     metadata_profile = {  # type: ignore
         'type': 'object',
         'properties': {
@@ -27,6 +65,16 @@ class RemoteControl(Metadata):
         },
     }
 
+    def __init__(
+        self, descriptor=None, http_session=None, http_stream=None, http_timeout=None,
+    ):
+        super().__init(
+            descriptor,
+            http_session=http_session,
+            http_stream=http_stream,
+            http_timeout=http_timeout,
+        )
+
     # Expand
 
     def expand(self):
@@ -34,6 +82,16 @@ class RemoteControl(Metadata):
 
 
 class StreamControl(Metadata):
+    """Stream control representation
+
+    # Arguments
+        descriptor? (str|dict): descriptor
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
     metadata_profile = {  # type: ignore
         'type': 'object',
         'additionalProperties': False,
@@ -42,6 +100,16 @@ class StreamControl(Metadata):
 
 
 class TextControl(Metadata):
+    """Text control representation
+
+    # Arguments
+        descriptor? (str|dict): descriptor
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
     metadata_profile = {  # type: ignore
         'type': 'object',
         'additionalProperties': False,

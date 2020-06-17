@@ -213,12 +213,6 @@ def test_primary_foreign_keys_as_string():
     ]
 
 
-def test_fields_have_public_backreference_to_schema():
-    schema = Schema('data/schema-valid-full.json')
-    assert schema.get_field('first_name').schema == schema
-    assert schema.get_field('last_name').schema == schema
-
-
 def test_schema_metadata_valid():
     assert Schema('data/schema-valid-simple.json').metadata_valid
     assert Schema('data/schema-valid-full.json').metadata_valid

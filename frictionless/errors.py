@@ -5,19 +5,32 @@ from . import exceptions
 
 
 class Error(Metadata):
+    """Error representation
+
+    # Arguments
+        descriptor? (str|dict): error descriptor
+
+        note (str): note
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
     code = 'error'
     name = 'Error'
     tags = []  # type: ignore
     template = 'Error'
     description = 'Error.'
 
-    def __init__(self, *, note):
+    def __init__(self, descriptor=None, *, note):
         self['code'] = self.code
         self['name'] = self.name
         self['tags'] = self.tags
         self['note'] = note
         self['message'] = self.template.format(**self)
         self['description'] = self.description
+        super().__init__(descriptor)
 
     @property
     def note(self):
@@ -46,36 +59,78 @@ class Error(Metadata):
         elif isinstance(exception, tableschema.exceptions.TableSchemaException):
             Error = SchemaError
         return Error(note=note)
+        super().metadata_process()
 
 
 class HeaderError(Error):
+    """Header error representation
+
+    # Arguments
+        descriptor? (str|dict): error descriptor
+
+        note (str): note
+        cells (any[]): cells
+        cell (any): cell
+        field_name (str): field_name
+        field_number (int): field_number
+        field_position (int): field_position
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
     code = 'header-error'
     name = 'Header Error'
     tags = ['#head']
     template = 'Cell Error'
     description = 'Cell Error'
 
-    def __init__(self, *, note, cells, cell, field_name, field_number, field_position):
+    def __init__(
+        self,
+        descriptor=None,
+        *,
+        note,
+        cells,
+        cell,
+        field_name,
+        field_number,
+        field_position,
+    ):
         self['cells'] = cells
         self['cell'] = cell
         self['fieldName'] = field_name
         self['fieldNumber'] = field_number
         self['fieldPosition'] = field_position
-        super().__init__(note=note)
+        super().__init__(descriptor, note=note)
 
 
 class RowError(Error):
+    """Row error representation
+
+    # Arguments
+        descriptor? (str|dict): error descriptor
+
+        cells (any[]): cells
+        row_number (int): row_number
+        row_position (int): row_position
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
     code = 'row-error'
     name = 'Row Error'
     tags = ['#body']
     template = 'Row Error'
     description = 'Row Error'
 
-    def __init__(self, *, note, cells, row_number, row_position):
+    def __init__(self, descriptor=None, *, note, cells, row_number, row_position):
         self['cells'] = cells
         self['rowNumber'] = row_number
         self['rowPosition'] = row_position
-        super().__init__(note=note)
+        super().__init__(descriptor, note=note)
 
     # Helpers
 
@@ -90,6 +145,25 @@ class RowError(Error):
 
 
 class CellError(RowError):
+    """Cell error representation
+
+    # Arguments
+        descriptor? (str|dict): error descriptor
+
+        note (str): note
+        cells (any[]): cells
+        row_number (int): row_number
+        row_position (int): row_position
+        cell (any): cell
+        field_name (str): field_name
+        field_number (int): field_number
+        field_position (int): field_position
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
     code = 'cell-error'
     name = 'Cell Error'
     tags = ['#body']
@@ -98,6 +172,7 @@ class CellError(RowError):
 
     def __init__(
         self,
+        descriptor=None,
         *,
         note,
         cells,
@@ -113,7 +188,11 @@ class CellError(RowError):
         self['fieldNumber'] = field_number
         self['fieldPosition'] = field_position
         super().__init__(
-            note=note, cells=cells, row_number=row_number, row_position=row_position
+            descriptor,
+            note=note,
+            cells=cells,
+            row_number=row_number,
+            row_position=row_position,
         )
 
     # Helpers

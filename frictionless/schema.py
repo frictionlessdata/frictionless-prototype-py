@@ -14,8 +14,15 @@ class Schema(ControlledMetadata):
 
     # Arguments
         descriptor? (str|dict): schema descriptor
+
+        fields? (dict[]): list of field descriptors
+        missing_values? (str[]): missing_values
+        primary_key? (str[]): primary_key
+        foreign_keys? (dict[]): foreign_keys
+
         metadata_root? (Metadata): root metadata object
         metadata_raise? (bool): if True it will fail on the first metadata error
+        metadata_resource? (Resource): parent resource
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
@@ -24,6 +31,29 @@ class Schema(ControlledMetadata):
 
     metadata_Error = errors.SchemaError  # type: ignore
     metadata_profile = config.SCHEMA_PROFILE
+
+    def __init__(
+        self,
+        descriptor=None,
+        *,
+        fields=None,
+        missing_values=None,
+        primary_key=None,
+        foreign_keys=None,
+        metadata_root=None,
+        metadata_raise=False,
+        metadata_resource=None,
+    ):
+        self.__metadata_resource = metadata_resource
+        super().__init__(
+            descriptor,
+            fields=fields,
+            missing_values=missing_values,
+            primary_key=primary_key,
+            foreign_keys=foreign_keys,
+            metadata_root=metadata_root,
+            metadata_raise=metadata_raise,
+        )
 
     @property
     def missing_values(self):
@@ -245,9 +275,9 @@ class Schema(ControlledMetadata):
                     field = {'name': f'field{index+1}', 'type': 'any'}
                 field = Field(
                     field,
-                    schema=self,
                     metadata_root=self.metadata_root,
                     metadata_raise=self.metadata_raise,
+                    metadata_schema=self,
                 )
                 list.__setitem__(self.fields, index, field)
         super().metadata_process()
