@@ -2,10 +2,11 @@ import re
 import decimal
 import warnings
 import importlib
+from operator import setitem
 from functools import partial
 from collections import OrderedDict
 from .metadata import ControlledMetadata
-from . import helpers
+from .helpers import memoprop, syncprop
 from . import errors
 from . import config
 
@@ -64,23 +65,15 @@ class Field(ControlledMetadata):
             metadata_raise=metadata_raise,
         )
 
-    @helpers.cached
+    @syncprop('name')
     def name(self):
         return self.get('name', 'field')
 
-    @name.setter  # type: ignore
-    def name(self, value):
-        self['name'] = value
-
-    @helpers.cached
+    @syncprop('type')
     def type(self):
         return self.get('type', 'any')
 
-    @type.setter  # type: ignore
-    def type(self, value):
-        self['type'] = value
-
-    @helpers.cached
+    @syncprop('format')
     def format(self):
         format = self.get('format', 'default')
         if format.startswith('fmt:'):
@@ -92,37 +85,21 @@ class Field(ControlledMetadata):
             format = format.replace('fmt:', '')
         return format
 
-    @format.setter  # type: ignore
-    def format(self, value):
-        self['format'] = value
-
-    @helpers.cached
+    @syncprop('missingValues')
     def missing_values(self):
         schema = self.__metadata_schema
         default = schema.missing_values if schema else config.MISSING_VALUES
         missing_values = self.get('missingValues', default)
         return self.metadata_transorm_bind('missingValues', missing_values)
 
-    @missing_values.setter  # type: ignore
-    def missing_values(self, value):
-        self['missingValues'] = value
-
-    @helpers.cached
+    @syncprop('constraints')
     def constraints(self):
         constraints = self.get('constraints', {})
         return self.metadata_transorm_bind('constraints', constraints)
 
-    @constraints.setter  # type: ignore
-    def constraints(self, value):
-        self['constraints'] = value
-
-    @helpers.cached
+    @syncprop(lambda self, value: setitem(self.constraints, 'required', value))
     def required(self):
         return self.constraints.get('required', False)
-
-    @required.setter  # type: ignore
-    def required(self, value):
-        self.constraints['required'] = value
 
     # Expand
 
@@ -170,7 +147,7 @@ class Field(ControlledMetadata):
         """
         return self.__proxy.read_cell_cast(cell)
 
-    @helpers.cached
+    @memoprop
     def read_cell_checks(self):
         """Read cell low-level (cast)
 

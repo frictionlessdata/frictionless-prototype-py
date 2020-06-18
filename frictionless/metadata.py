@@ -5,8 +5,8 @@ import jsonschema
 from copy import deepcopy
 from operator import setitem
 from urllib.parse import urlparse
+from .helpers import memoprop
 from . import exceptions
-from . import helpers
 from . import config
 
 
@@ -37,19 +37,19 @@ class Metadata(dict):
             self.metadata_process()
             self.metadata_validate()
 
-    @helpers.cached
+    @memoprop
     def metadata_root(self):
         return self.__root
 
-    @helpers.cached
+    @memoprop
     def metadata_raise(self):
         return self.__raise
 
-    @property
+    @memoprop
     def metadata_valid(self):
         return not len(self.__errors)
 
-    @helpers.cached
+    @memoprop
     def metadata_errors(self):
         return self.__errors
 
@@ -140,7 +140,7 @@ class ControlledMetadata(Metadata):
     # Process
 
     def metadata_process(self):
-        helpers.cached.reset(self)
+        memoprop.reset(self)
         for key, value in self.items():
             if isinstance(value, dict):
                 if getattr(value, 'metadata_root', None) != self.metadata_root:
@@ -253,15 +253,15 @@ class ControlledMetadataList(list):
         self.__root = metadata_root or self
         self.__raise = metadata_raise
 
-    @helpers.cached
+    @memoprop
     def metadata_root(self):
         return self.__root
 
-    @helpers.cached
+    @memoprop
     def metadata_raise(self):
         return self.__raise
 
-    @helpers.cached
+    @memoprop
     def metadata_errors(self):
         return self.__errors
 

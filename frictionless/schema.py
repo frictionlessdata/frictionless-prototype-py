@@ -2,6 +2,7 @@ import io
 import json
 from copy import deepcopy
 from .metadata import ControlledMetadata
+from .helpers import syncprop
 from .field import Field
 from . import exceptions
 from . import helpers
@@ -55,27 +56,19 @@ class Schema(ControlledMetadata):
             metadata_raise=metadata_raise,
         )
 
-    @property
+    @syncprop('missingValues')
     def missing_values(self):
         missing_values = self.get('missingValues', config.MISSING_VALUES)
         return self.metadata_transorm_bind('missingValues', missing_values)
 
-    @missing_values.setter
-    def missing_values(self, value):
-        self['missingValues'] = value
-
-    @property
+    @syncprop('primaryKey')
     def primary_key(self):
         primary_key = self.get('primaryKey', [])
         if not isinstance(primary_key, list):
             primary_key = [primary_key]
         return self.metadata_transorm_bind('primaryKey', primary_key)
 
-    @primary_key.setter
-    def primary_key(self, value):
-        self['primaryKey'] = value
-
-    @property
+    @syncprop('foreignKeys')
     def foreign_keys(self):
         foreign_keys = deepcopy(self.get('foreignKeys', []))
         for index, fk in enumerate(foreign_keys):
@@ -90,10 +83,6 @@ class Schema(ControlledMetadata):
             if not isinstance(fk['reference']['fields'], list):
                 fk['reference']['fields'] = [fk['reference']['fields']]
         return self.metadata_transorm_bind('foreignKeys', foreign_keys)
-
-    @foreign_keys.setter
-    def foreign_keys(self, value):
-        self['foreignKeys'] = value
 
     # Fields
 

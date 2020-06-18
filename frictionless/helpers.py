@@ -3,6 +3,7 @@ import os
 import datetime
 import itertools
 import stringcase
+from operator import setitem
 from cached_property import cached_property
 
 
@@ -83,19 +84,35 @@ def ensure_dir(path):
         os.makedirs(dirpath)
 
 
-class cached(cached_property):
-    def setter(self, func):
-        self.setter_func = func
-        return self
+class memoprop(cached_property):
+    def __init__(self, func, *, setter=None):
+        super().__init__(func)
+        self.setter_func = setter
 
     def __set__(self, obj, val):
-        self.setter_func(obj, val)
+        if self.setter_func:
+            self.setter_func(obj, val)
+
+    def setter(self, setter):
+        self.setter_func = setter
+        return self
 
     @staticmethod
     def reset(obj):
         for name, attr in type(obj).__dict__.items():
-            if isinstance(attr, cached_property):
+            if isinstance(attr, memoprop):
                 obj.__dict__.pop(name, None)
+
+
+def syncprop(setter):
+    setter_func = setter
+    if setter and not callable(setter):
+        setter_func = lambda obj, value: setitem(obj, setter, value)
+
+    def wrapper(func):
+        return memoprop(func, setter=setter_func)
+
+    return wrapper
 
 
 # Integrity
