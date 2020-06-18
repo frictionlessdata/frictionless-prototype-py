@@ -7,6 +7,7 @@ from operator import setitem
 from urllib.parse import urlparse
 from .helpers import memoprop
 from . import exceptions
+from . import helpers
 from . import config
 
 
@@ -95,7 +96,20 @@ class Metadata(dict):
     def metadata_process(self):
         pass
 
+    # Save
+
+    def metadata_save(self, target, ensure_ascii=True):
+        try:
+            helpers.ensure_dir(target)
+            with io.open(target, mode='w', encoding='utf-8') as file:
+                json.dump(self, file, indent=2, ensure_ascii=ensure_ascii)
+        except Exception as exception:
+            raise exceptions.FrictionlessException(str(exception)) from exception
+
     # Transform
+
+    def metadata_transform(self):
+        pass
 
     def setdefined(self, key, value):
         if value is not None:
@@ -264,12 +278,6 @@ class ControlledMetadataList(list):
     @memoprop
     def metadata_errors(self):
         return self.__errors
-
-    # Apply
-
-    def metadata_apply(self, index, value, *, filter=False):
-        if not filter or value is not None:
-            super().__setitem__(index, value)
 
     # Duplicate
 

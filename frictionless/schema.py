@@ -1,11 +1,7 @@
-import io
-import json
 from copy import deepcopy
 from .metadata import ControlledMetadata
 from .helpers import syncprop
 from .field import Field
-from . import exceptions
-from . import helpers
 from . import errors
 from . import config
 
@@ -189,26 +185,6 @@ class Schema(ControlledMetadata):
         """Infer schema
         """
         pass
-
-    # Save
-
-    def save(self, target, ensure_ascii=True):
-        """Save schema descriptor to target destination.
-
-        # Arguments
-            target (str): path where to save a descriptor
-            ensure_ascii (bool): the same as `json.dump` provides
-
-        # Raises
-            FrictionlessException: raises any error that occurs during the process
-
-        """
-        try:
-            helpers.ensure_dir(target)
-            with io.open(target, mode='w', encoding='utf-8') as file:
-                json.dump(self, file, indent=4, ensure_ascii=ensure_ascii)
-        except Exception as exception:
-            raise exceptions.FrictionlessException(str(exception)) from exception
 
     # Read
 
