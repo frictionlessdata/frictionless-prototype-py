@@ -5,7 +5,6 @@ import jsonschema
 from copy import deepcopy
 from operator import setitem
 from urllib.parse import urlparse
-from cached_property import cached_property
 from . import exceptions
 from . import helpers
 from . import config
@@ -38,11 +37,11 @@ class Metadata(dict):
             self.metadata_process()
             self.metadata_validate()
 
-    @cached_property
+    @helpers.cached
     def metadata_root(self):
         return self.__root
 
-    @cached_property
+    @helpers.cached
     def metadata_raise(self):
         return self.__raise
 
@@ -50,7 +49,7 @@ class Metadata(dict):
     def metadata_valid(self):
         return not len(self.__errors)
 
-    @cached_property
+    @helpers.cached
     def metadata_errors(self):
         return self.__errors
 
@@ -121,6 +120,17 @@ class Metadata(dict):
 
 
 class ControlledMetadata(Metadata):
+    """Metadata representation (controlled)
+
+    # Arguments
+        descriptor? (str|dict): schema descriptor
+        metadata_root? (Metadata): root metadata object
+        metadata_raise? (bool): if True it will fail on the first metadata error
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
 
     # Extract
 
@@ -130,7 +140,7 @@ class ControlledMetadata(Metadata):
     # Process
 
     def metadata_process(self):
-        helpers.reset_cached_properties(self)
+        helpers.cached.reset(self)
         for key, value in self.items():
             if isinstance(value, dict):
                 if not hasattr(value, 'metadata_transform'):
@@ -225,21 +235,33 @@ class ControlledMetadata(Metadata):
 
 
 class ControlledMetadataList(list):
+    """Metadata representation (controlled list)
+
+    # Arguments
+        values (str|dict): values
+        metadata_root? (Metadata): root metadata object
+        metadata_raise? (bool): if True it will fail on the first metadata error
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
     def __init__(self, values, *, metadata_root, metadata_raise=False):
         list.extend(self, values)
         self.__errors = []
         self.__root = metadata_root
         self.__raise = metadata_raise
 
-    @cached_property
+    @helpers.cached
     def metadata_root(self):
         return self.__root
 
-    @cached_property
+    @helpers.cached
     def metadata_raise(self):
         return self.__raise
 
-    @cached_property
+    @helpers.cached
     def metadata_errors(self):
         return self.__errors
 

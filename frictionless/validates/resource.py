@@ -7,6 +7,10 @@ from .table import validate_table
 
 @Report.catch
 def validate_resource(source, base_path=None, strict=False, lookup=None, **options):
+    """Validate resource
+    """
+
+    # Prepare state
     timer = helpers.Timer()
 
     # Create resource

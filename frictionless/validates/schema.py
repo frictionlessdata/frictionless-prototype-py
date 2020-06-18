@@ -6,6 +6,10 @@ from ..errors import SchemaError
 
 @Report.catch
 def validate_schema(source):
+    """Validate schema
+    """
+
+    # Prepare state
     timer = helpers.Timer()
 
     # Create schema

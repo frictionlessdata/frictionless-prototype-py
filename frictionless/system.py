@@ -3,6 +3,9 @@ from . import exceptions
 
 
 class System:
+    """System representation
+    """
+
     def __init__(self):
         self.__plugins = {}
 

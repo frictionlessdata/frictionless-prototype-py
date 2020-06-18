@@ -4,8 +4,8 @@ import warnings
 import importlib
 from functools import partial
 from collections import OrderedDict
-from cached_property import cached_property
 from .metadata import ControlledMetadata
+from . import helpers
 from . import errors
 from . import config
 
@@ -64,34 +64,24 @@ class Field(ControlledMetadata):
             metadata_raise=metadata_raise,
         )
 
-    @cached_property
+    @helpers.cached
     def name(self):
-        """Field name
-
-        # Returns
-            str: field name
-
-        """
         return self.get('name', 'field')
 
-    @cached_property
+    @name.setter  # type: ignore
+    def name(self, value):
+        self['name'] = value
+
+    @helpers.cached
     def type(self):
-        """Field type
-
-        # Returns
-            str: field type
-
-        """
         return self.get('type', 'any')
 
-    @cached_property
+    @type.setter  # type: ignore
+    def type(self, value):
+        self['type'] = value
+
+    @helpers.cached
     def format(self):
-        """Field format
-
-        # Returns
-            str: field format
-
-        """
         format = self.get('format', 'default')
         if format.startswith('fmt:'):
             warnings.warn(
@@ -102,39 +92,37 @@ class Field(ControlledMetadata):
             format = format.replace('fmt:', '')
         return format
 
-    @cached_property
+    @format.setter  # type: ignore
+    def format(self, value):
+        self['format'] = value
+
+    @helpers.cached
     def missing_values(self):
-        """Field's missing values
-
-        # Returns
-            str[]: missing values
-
-        """
         schema = self.__metadata_schema
         default = schema.missing_values if schema else config.MISSING_VALUES
         missing_values = self.get('missingValues', default)
         return self.metadata_transorm_bind('missingValues', missing_values)
 
-    @cached_property
+    @missing_values.setter  # type: ignore
+    def missing_values(self, value):
+        self['missingValues'] = value
+
+    @helpers.cached
     def constraints(self):
-        """Field constraints
-
-        # Returns
-            dict: dict of field constraints
-
-        """
         constraints = self.get('constraints', {})
         return self.metadata_transorm_bind('constraints', constraints)
 
-    @cached_property
+    @constraints.setter  # type: ignore
+    def constraints(self, value):
+        self['constraints'] = value
+
+    @helpers.cached
     def required(self):
-        """Whether field is required
-
-        # Returns
-            bool: true if required
-
-        """
         return self.constraints.get('required', False)
+
+    @required.setter  # type: ignore
+    def required(self, value):
+        self.constraints['required'] = value
 
     # Expand
 
@@ -182,7 +170,7 @@ class Field(ControlledMetadata):
         """
         return self.__proxy.read_cell_cast(cell)
 
-    @cached_property
+    @helpers.cached
     def read_cell_checks(self):
         """Read cell low-level (cast)
 

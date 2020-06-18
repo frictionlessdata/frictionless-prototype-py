@@ -57,36 +57,26 @@ class Schema(ControlledMetadata):
 
     @property
     def missing_values(self):
-        """Schema's missing values
-
-        # Returns
-            str[]: missing values
-
-        """
         missing_values = self.get('missingValues', config.MISSING_VALUES)
         return self.metadata_transorm_bind('missingValues', missing_values)
 
+    @missing_values.setter
+    def missing_values(self, value):
+        self['missingValues'] = value
+
     @property
     def primary_key(self):
-        """Schema's primary keys
-
-        # Returns
-            str[]: primary keys
-
-        """
         primary_key = self.get('primaryKey', [])
         if not isinstance(primary_key, list):
             primary_key = [primary_key]
         return self.metadata_transorm_bind('primaryKey', primary_key)
 
+    @primary_key.setter
+    def primary_key(self, value):
+        self['primaryKey'] = value
+
     @property
     def foreign_keys(self):
-        """Schema's foreign keys
-
-        # Returns
-            dict[]: foreign keys
-
-        """
         foreign_keys = deepcopy(self.get('foreignKeys', []))
         for index, fk in enumerate(foreign_keys):
             if not isinstance(fk, dict):
@@ -100,6 +90,10 @@ class Schema(ControlledMetadata):
             if not isinstance(fk['reference']['fields'], list):
                 fk['reference']['fields'] = [fk['reference']['fields']]
         return self.metadata_transorm_bind('foreignKeys', foreign_keys)
+
+    @foreign_keys.setter
+    def foreign_keys(self, value):
+        self['foreignKeys'] = value
 
     # Fields
 
@@ -203,6 +197,8 @@ class Schema(ControlledMetadata):
     # Infer
 
     def infer(self, sample):
+        """Infer schema
+        """
         pass
 
     # Save

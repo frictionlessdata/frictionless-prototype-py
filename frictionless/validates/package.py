@@ -8,6 +8,10 @@ from .inquiry import validate_inquiry
 
 @Report.catch
 def validate_package(source, base_path=None, strict=False, **options):
+    """Validate package
+    """
+
+    # Prepare state
     timer = helpers.Timer()
 
     # Create package

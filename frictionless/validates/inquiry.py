@@ -9,6 +9,10 @@ from ..validate import validate
 
 @Report.catch
 def validate_inquiry(source):
+    """Validate inquiry
+    """
+
+    # Prepare state
     timer = helpers.Timer()
     inquiry = Inquiry(source)
 

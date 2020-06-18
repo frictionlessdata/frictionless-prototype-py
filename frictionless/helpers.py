@@ -77,16 +77,25 @@ def detect_source_type(source):
     return source_type
 
 
-def reset_cached_properties(obj):
-    for name, attr in type(obj).__dict__.items():
-        if isinstance(attr, cached_property):
-            obj.__dict__.pop(name, None)
-
-
 def ensure_dir(path):
     dirpath = os.path.dirname(path)
     if dirpath and not os.path.exists(dirpath):
         os.makedirs(dirpath)
+
+
+class cached(cached_property):
+    def setter(self, func):
+        self.setter_func = func
+        return self
+
+    def __set__(self, obj, val):
+        self.setter_func(obj, val)
+
+    @staticmethod
+    def reset(obj):
+        for name, attr in type(obj).__dict__.items():
+            if isinstance(attr, cached_property):
+                obj.__dict__.pop(name, None)
 
 
 # Integrity

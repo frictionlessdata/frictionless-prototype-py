@@ -1,11 +1,21 @@
 from itertools import zip_longest
 from collections import OrderedDict
-from cached_property import cached_property
+from . import helpers
 from . import errors
 
 
-# TODO: support default field_positions/row_position/row_number?
 class Row(OrderedDict):
+    """Row representation
+
+    # Arguments
+        cells
+        fields
+        field_positions
+        row_position
+        row_number
+
+    """
+
     def __init__(self, cells, *, fields, field_positions, row_position, row_number):
         assert len(field_positions) in (len(cells), len(fields))
 
@@ -141,26 +151,26 @@ class Row(OrderedDict):
                 )
             ]
 
-    @cached_property
+    @helpers.cached
     def field_positions(self):
         return self.__field_positions
 
-    @cached_property
+    @helpers.cached
     def row_position(self):
         return self.__row_position
 
-    @cached_property
+    @helpers.cached
     def row_number(self):
         return self.__row_number
 
-    @cached_property
+    @helpers.cached
     def blank_cells(self):
         return self.__blank_cells
 
-    @cached_property
+    @helpers.cached
     def error_cells(self):
         return self.__error_cells
 
-    @cached_property
+    @helpers.cached
     def errors(self):
         return self.__errors

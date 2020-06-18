@@ -67,7 +67,16 @@ class Report(Metadata):
             raise exceptions.FrictionlessException(message)
         return self.tables[0]
 
+    # Flatten
+
     def flatten(self, spec):
+        """Flatten the report
+
+        # Arguments
+            spec
+
+        """
+
         result = []
         for error in self.errors:
             context = {}
@@ -221,7 +230,16 @@ class ReportTable(Metadata):
             raise exceptions.FrictionlessException(message)
         return self.errors[0]
 
+    # Flatten
+
     def flatten(self, spec):
+        """Flatten the report table
+
+        # Arguments
+            spec
+
+        """
+
         result = []
         for error in self.errors:
             context = {}

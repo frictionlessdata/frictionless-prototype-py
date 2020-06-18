@@ -1,9 +1,18 @@
 from itertools import zip_longest
-from cached_property import cached_property
+from . import helpers
 from . import errors
 
 
 class Headers(list):
+    """Headers representation
+
+    # Arguments
+        cells
+        fields
+        field_positions
+
+    """
+
     def __init__(self, cells, *, fields, field_positions):
         assert len(field_positions) in (len(cells), len(fields))
 
@@ -104,10 +113,10 @@ class Headers(list):
         # Save headers
         super().__init__(cells)
 
-    @cached_property
+    @helpers.cached
     def field_positions(self):
         return self.__field_positions
 
-    @cached_property
+    @helpers.cached
     def errors(self):
         return self.__errors
