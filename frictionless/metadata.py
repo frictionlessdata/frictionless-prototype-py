@@ -3,6 +3,7 @@ import json
 import requests
 import jsonschema
 from copy import deepcopy
+from operator import setitem
 from urllib.parse import urlparse
 from cached_property import cached_property
 from . import exceptions
@@ -162,6 +163,16 @@ class ControlledMetadata(Metadata):
             return self.metadata_root.metadata_transform()
         self.metadata_process()
         self.metadata_validate()
+
+    def metadata_transorm_bind(self, name, value):
+        if self.get(name) != value:
+            value = deepcopy(value)
+            if isinstance(value, dict):
+                value = ControlledMetadata(value, metadata_root=self.metadata_root)
+            if isinstance(value, list):
+                value = ControlledMetadataList(value, metadata_root=self.metadata_root)
+            setattr(value, 'metadata_transform', lambda: setitem(self, name, value))
+        return value
 
     def __setitem__(self, *args, **kwargs):
         result = super().__setitem__(*args, **kwargs)
@@ -332,3 +343,11 @@ class ControlledMetadataList(list):
             if hasattr(value, 'metadata_validate'):
                 value.metadata_validate()
                 self.metadata_errors.extend(value.metadata_errors)
+
+
+# Internal
+
+
+def metadata_transform_hook(metadata, name, value):
+    if name not in metadata:
+        metadata[name] = value

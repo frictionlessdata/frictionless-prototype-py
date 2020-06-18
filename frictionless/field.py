@@ -110,12 +110,10 @@ class Field(ControlledMetadata):
             str[]: missing values
 
         """
-        return self.get(
-            'missingValues',
-            self.__metadata_schema.missing_values
-            if self.__metadata_schema
-            else config.MISSING_VALUES,
-        )
+        schema = self.__metadata_schema
+        default = schema.missing_values if schema else config.MISSING_VALUES
+        missing_values = self.get('missingValues', default)
+        return self.metadata_transorm_bind('missingValues', missing_values)
 
     @cached_property
     def constraints(self):
@@ -125,7 +123,8 @@ class Field(ControlledMetadata):
             dict: dict of field constraints
 
         """
-        return self.get('constraints', {})
+        constraints = self.get('constraints', {})
+        return self.metadata_transorm_bind('constraints', constraints)
 
     @cached_property
     def required(self):

@@ -63,7 +63,8 @@ class Schema(ControlledMetadata):
             str[]: missing values
 
         """
-        return self.get('missingValues', config.MISSING_VALUES)
+        missing_values = self.get('missingValues', config.MISSING_VALUES)
+        return self.metadata_transorm_bind('missingValues', missing_values)
 
     @property
     def primary_key(self):
@@ -76,7 +77,7 @@ class Schema(ControlledMetadata):
         primary_key = self.get('primaryKey', [])
         if not isinstance(primary_key, list):
             primary_key = [primary_key]
-        return primary_key
+        return self.metadata_transorm_bind('primaryKey', primary_key)
 
     @property
     def foreign_keys(self):
@@ -98,7 +99,7 @@ class Schema(ControlledMetadata):
                 fk['fields'] = [fk['fields']]
             if not isinstance(fk['reference']['fields'], list):
                 fk['reference']['fields'] = [fk['reference']['fields']]
-        return foreign_keys
+        return self.metadata_transorm_bind('foreignKeys', foreign_keys)
 
     # Fields
 
