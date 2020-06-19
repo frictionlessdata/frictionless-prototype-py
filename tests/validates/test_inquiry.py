@@ -1,3 +1,4 @@
+import pytest
 from frictionless import validate
 
 
@@ -9,6 +10,7 @@ def test_validate():
     assert report.valid
 
 
+@pytest.mark.slow
 def test_validate_multiple():
     report = validate(
         {'tasks': [{'source': 'data/table.csv'}, {'source': 'data/matrix.csv'}]}
@@ -16,6 +18,7 @@ def test_validate_multiple():
     assert report.valid
 
 
+@pytest.mark.slow
 def test_validate_multiple_invalid():
     report = validate(
         {'tasks': [{'source': 'data/table.csv'}, {'source': 'data/invalid.csv'}]}
@@ -32,6 +35,7 @@ def test_validate_multiple_invalid():
     ]
 
 
+@pytest.mark.slow
 def test_validate_multiple_invalid_limit_errors():
     report = validate(
         {
@@ -50,6 +54,7 @@ def test_validate_multiple_invalid_limit_errors():
     ]
 
 
+@pytest.mark.slow
 def test_validate_multiple_invalid_with_schema():
     report = validate(
         {
@@ -75,11 +80,13 @@ def test_validate_multiple_invalid_with_schema():
     ]
 
 
+@pytest.mark.slow
 def test_validate_with_one_package():
     report = validate({'tasks': [{'source': 'data/package/datapackage.json'}]})
     assert report.valid
 
 
+@pytest.mark.slow
 def test_validate_with_multiple_packages():
     report = validate(
         {

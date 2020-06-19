@@ -1,3 +1,4 @@
+import pytest
 import pathlib
 from tableschema import infer
 from frictionless import validate, Check, errors
@@ -822,6 +823,7 @@ def test_validate_structure_errors_with_limit_errors():
     ]
 
 
+@pytest.mark.slow
 def test_validate_limit_memory():
     source = lambda: ([integer] for integer in range(1, 100000000))
     schema = {'fields': [{'name': 'integer', 'type': 'integer'}], 'primaryKey': 'integer'}
@@ -890,42 +892,6 @@ def test_validate_extra_checks_bad_plugin_name():
 
 
 # Issues
-
-
-def test_composite_primary_key_unique_issue_215():
-    source = {
-        'resources': [
-            {
-                'name': 'name',
-                'data': [['id1', 'id2'], ['a', '1'], ['a', '2']],
-                'schema': {
-                    'fields': [{'name': 'id1'}, {'name': 'id2'}],
-                    'primaryKey': ['id1', 'id2'],
-                },
-            }
-        ],
-    }
-    report = validate(source)
-    assert report.valid
-
-
-def test_composite_primary_key_not_unique_issue_215():
-    descriptor = {
-        'resources': [
-            {
-                'name': 'name',
-                'data': [['id1', 'id2'], ['a', '1'], ['a', '1']],
-                'schema': {
-                    'fields': [{'name': 'id1'}, {'name': 'id2'}],
-                    'primaryKey': ['id1', 'id2'],
-                },
-            }
-        ],
-    }
-    report = validate(descriptor, skip_errors=['duplicate-row'])
-    assert report.flatten(['rowPosition', 'fieldPosition', 'code']) == [
-        [3, None, 'primary-key-error'],
-    ]
 
 
 def test_validate_infer_fields_issue_223():

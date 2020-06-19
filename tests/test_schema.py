@@ -56,7 +56,7 @@ def test_descriptor_path():
     assert actual == expect
 
 
-@pytest.mark.remote
+@pytest.mark.slow
 def test_descriptor_url():
     url = BASE_URL % 'data/schema_valid_simple.json'
     actual = Schema(url)

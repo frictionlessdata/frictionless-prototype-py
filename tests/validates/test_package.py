@@ -1,4 +1,5 @@
 import json
+import pytest
 import pathlib
 from copy import deepcopy
 from frictionless import validate
@@ -12,12 +13,14 @@ def test_validate():
     assert report.valid
 
 
+@pytest.mark.slow
 def test_validate_from_dict():
     with open('data/package/datapackage.json') as file:
         report = validate(json.load(file), base_path='data/package')
         assert report.valid
 
 
+@pytest.mark.slow
 def test_validate_from_dict_invalid():
     with open('data/invalid/datapackage.json') as file:
         report = validate(json.load(file), base_path='data/invalid')
@@ -32,11 +35,13 @@ def test_validate_from_dict_invalid():
         ]
 
 
+@pytest.mark.slow
 def test_validate_from_path():
     report = validate('data/package/datapackage.json')
     assert report.valid
 
 
+@pytest.mark.slow
 def test_validate_from_path_invalid():
     report = validate('data/invalid/datapackage.json')
     assert report.flatten(['tablePosition', 'rowPosition', 'fieldPosition', 'code']) == [
@@ -48,11 +53,13 @@ def test_validate_from_path_invalid():
     ]
 
 
+@pytest.mark.slow
 def test_validate_from_zip():
     report = validate('data/package.zip', source_type='package')
     assert report.valid
 
 
+@pytest.mark.slow
 def test_validate_from_zip_invalid():
     report = validate('data/invalid.zip', source_type='package')
     assert report.flatten(['tablePosition', 'rowPosition', 'fieldPosition', 'code']) == [
@@ -64,6 +71,7 @@ def test_validate_from_zip_invalid():
     ]
 
 
+@pytest.mark.slow
 def test_validate_with_non_tabular():
     report = validate(
         {'resources': [{'path': 'data/table.csv'}, {'path': 'data/file.txt'}]}
@@ -109,11 +117,13 @@ def test_validate_invalid_table():
     ]
 
 
+@pytest.mark.slow
 def test_validate_pathlib_source():
     report = validate(pathlib.Path('data/package/datapackage.json'))
     assert report.valid
 
 
+@pytest.mark.slow
 def test_validate_package_infer():
     report = validate('data/infer/datapackage.json')
     assert report.valid
@@ -245,12 +255,14 @@ DESCRIPTOR_FK = {
 }
 
 
+@pytest.mark.slow
 def test_validate_foreign_key_error():
     descriptor = deepcopy(DESCRIPTOR_FK)
     report = validate(descriptor)
     assert report.valid
 
 
+@pytest.mark.slow
 def test_validate_foreign_key_not_defined():
     descriptor = deepcopy(DESCRIPTOR_FK)
     del descriptor['resources'][0]['schema']['foreignKeys']
@@ -258,6 +270,7 @@ def test_validate_foreign_key_not_defined():
     assert report.valid
 
 
+@pytest.mark.slow
 def test_validate_foreign_key_self_referenced_resource_violation():
     descriptor = deepcopy(DESCRIPTOR_FK)
     del descriptor['resources'][0]['data'][4]
@@ -267,6 +280,7 @@ def test_validate_foreign_key_self_referenced_resource_violation():
     ]
 
 
+@pytest.mark.slow
 def test_validate_foreign_key_internal_resource_violation():
     descriptor = deepcopy(DESCRIPTOR_FK)
     del descriptor['resources'][1]['data'][4]
@@ -276,6 +290,7 @@ def test_validate_foreign_key_internal_resource_violation():
     ]
 
 
+@pytest.mark.slow
 def test_validate_foreign_key_internal_resource_violation_non_existent():
     descriptor = deepcopy(DESCRIPTOR_FK)
     del descriptor['resources'][1]
@@ -291,6 +306,7 @@ def test_validate_foreign_key_internal_resource_violation_non_existent():
 # Issues
 
 
+@pytest.mark.slow
 def test_validate_package_mixed_issue_170():
     report = validate('data/infer/datapackage.json')
     assert report.valid
@@ -303,6 +319,42 @@ def test_validate_package_invalid_json_issue_192():
             'package-error',
             'Unable to parse JSON at "data/invalid.json". Expecting property name enclosed in double quotes: line 2 column 5 (char 6)',
         ]
+    ]
+
+
+def test_composite_primary_key_unique_issue_215():
+    source = {
+        'resources': [
+            {
+                'name': 'name',
+                'data': [['id1', 'id2'], ['a', '1'], ['a', '2']],
+                'schema': {
+                    'fields': [{'name': 'id1'}, {'name': 'id2'}],
+                    'primaryKey': ['id1', 'id2'],
+                },
+            }
+        ],
+    }
+    report = validate(source)
+    assert report.valid
+
+
+def test_composite_primary_key_not_unique_issue_215():
+    descriptor = {
+        'resources': [
+            {
+                'name': 'name',
+                'data': [['id1', 'id2'], ['a', '1'], ['a', '1']],
+                'schema': {
+                    'fields': [{'name': 'id1'}, {'name': 'id2'}],
+                    'primaryKey': ['id1', 'id2'],
+                },
+            }
+        ],
+    }
+    report = validate(descriptor, skip_errors=['duplicate-row'])
+    assert report.flatten(['rowPosition', 'fieldPosition', 'code']) == [
+        [3, None, 'primary-key-error'],
     ]
 
 
