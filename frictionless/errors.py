@@ -40,7 +40,7 @@ class Error(Metadata):
     def message(self):
         return self['message']
 
-    # Helpers
+    # Create
 
     @staticmethod
     def from_exception(exception):
@@ -132,7 +132,7 @@ class RowError(Error):
         self['rowPosition'] = row_position
         super().__init__(descriptor, note=note)
 
-    # Helpers
+    # Create
 
     @classmethod
     def from_row(cls, row, *, note):
@@ -195,7 +195,7 @@ class CellError(RowError):
             row_position=row_position,
         )
 
-    # Helpers
+    # Create
 
     @classmethod
     def from_row(cls, row, *, note, field_name):

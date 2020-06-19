@@ -11,7 +11,7 @@ from ..report import Report, ReportTable
 from ..checks import BaselineCheck, IntegrityCheck
 
 
-@Report.catch
+@Report.from_validate
 def validate_table(
     source,
     *,
@@ -21,8 +21,8 @@ def validate_table(
     encoding=None,
     compression=None,
     # Headers
-    headers_row=1,
-    headers_joiner=' ',
+    headers_row=config.HEADERS_ROW,
+    headers_joiner=config.HEADERS_JOINER,
     # Fields
     pick_fields=None,
     skip_fields=None,
@@ -39,8 +39,8 @@ def validate_table(
     patch_schema=False,
     infer_type=None,
     infer_names=None,
-    infer_sample=100,
-    infer_confidence=0.75,
+    infer_sample=config.INFER_SAMPLE,
+    infer_confidence=config.INFER_CONFIDENCE,
     # Dialect
     dialect=None,
     # Control
@@ -53,7 +53,7 @@ def validate_table(
     pick_errors=None,
     skip_errors=None,
     limit_errors=None,
-    limit_memory=1000,
+    limit_memory=config.LIMIT_MEMORY,
     extra_checks=None,
 ):
     """Validate table

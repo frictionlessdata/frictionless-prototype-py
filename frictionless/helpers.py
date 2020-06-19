@@ -84,6 +84,17 @@ def ensure_dir(path):
         os.makedirs(dirpath)
 
 
+def dictprop(setter):
+    setter_func = setter
+    if setter and not callable(setter):
+        setter_func = lambda obj, value: setitem(obj, setter, value)
+
+    def wrapper(func):
+        return memoprop(func, setter=setter_func)
+
+    return wrapper
+
+
 class memoprop(cached_property):
     def __init__(self, func, *, setter=None):
         super().__init__(func)
@@ -102,17 +113,6 @@ class memoprop(cached_property):
         for name, attr in type(obj).__dict__.items():
             if isinstance(attr, memoprop):
                 obj.__dict__.pop(name, None)
-
-
-def syncprop(setter):
-    setter_func = setter
-    if setter and not callable(setter):
-        setter_func = lambda obj, value: setitem(obj, setter, value)
-
-    def wrapper(func):
-        return memoprop(func, setter=setter_func)
-
-    return wrapper
 
 
 # Integrity

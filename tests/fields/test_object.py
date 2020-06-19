@@ -14,6 +14,7 @@ from frictionless import Field
         ('default', '{"key": "value"}', {'key': 'value'}),
         ('default', '["key", "value"]', None),
         ('default', 'string', None),
+        ('default', '1', None),
         ('default', 1, None),
         ('default', '3.14', None),
         ('default', '', None),

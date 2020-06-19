@@ -6,7 +6,7 @@ from operator import setitem
 from functools import partial
 from collections import OrderedDict
 from .metadata import ControlledMetadata
-from .helpers import memoprop, syncprop
+from .helpers import dictprop, memoprop
 from . import errors
 from . import config
 
@@ -65,15 +65,15 @@ class Field(ControlledMetadata):
             metadata_raise=metadata_raise,
         )
 
-    @syncprop('name')
+    @dictprop('name')
     def name(self):
         return self.get('name', 'field')
 
-    @syncprop('type')
+    @dictprop('type')
     def type(self):
         return self.get('type', 'any')
 
-    @syncprop('format')
+    @dictprop('format')
     def format(self):
         format = self.get('format', 'default')
         if format.startswith('fmt:'):
@@ -85,19 +85,19 @@ class Field(ControlledMetadata):
             format = format.replace('fmt:', '')
         return format
 
-    @syncprop('missingValues')
+    @dictprop('missingValues')
     def missing_values(self):
         schema = self.__metadata_schema
         default = schema.missing_values if schema else config.MISSING_VALUES
         missing_values = self.get('missingValues', default)
         return self.metadata_transorm_bind('missingValues', missing_values)
 
-    @syncprop('constraints')
+    @dictprop('constraints')
     def constraints(self):
         constraints = self.get('constraints', {})
         return self.metadata_transorm_bind('constraints', constraints)
 
-    @syncprop(lambda self, value: setitem(self.constraints, 'required', value))
+    @dictprop(lambda self, value: setitem(self.constraints, 'required', value))
     def required(self):
         return self.constraints.get('required', False)
 

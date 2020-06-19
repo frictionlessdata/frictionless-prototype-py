@@ -5,7 +5,7 @@ from ..errors import ResourceError
 from .table import validate_table
 
 
-@Report.catch
+@Report.from_validate
 def validate_resource(source, base_path=None, strict=False, lookup=None, **options):
     """Validate resource
     """

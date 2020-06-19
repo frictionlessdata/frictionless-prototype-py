@@ -4,7 +4,7 @@ from ..report import Report
 from ..errors import SchemaError
 
 
-@Report.catch
+@Report.from_validate
 def validate_schema(source):
     """Validate schema
     """

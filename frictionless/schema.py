@@ -1,6 +1,6 @@
 from copy import deepcopy
 from .metadata import ControlledMetadata
-from .helpers import syncprop
+from .helpers import dictprop, memoprop
 from .field import Field
 from . import errors
 from . import config
@@ -52,19 +52,19 @@ class Schema(ControlledMetadata):
             metadata_raise=metadata_raise,
         )
 
-    @syncprop('missingValues')
+    @dictprop('missingValues')
     def missing_values(self):
         missing_values = self.get('missingValues', config.MISSING_VALUES)
         return self.metadata_transorm_bind('missingValues', missing_values)
 
-    @syncprop('primaryKey')
+    @dictprop('primaryKey')
     def primary_key(self):
         primary_key = self.get('primaryKey', [])
         if not isinstance(primary_key, list):
             primary_key = [primary_key]
         return self.metadata_transorm_bind('primaryKey', primary_key)
 
-    @syncprop('foreignKeys')
+    @dictprop('foreignKeys')
     def foreign_keys(self):
         foreign_keys = deepcopy(self.get('foreignKeys', []))
         for index, fk in enumerate(foreign_keys):
@@ -80,9 +80,25 @@ class Schema(ControlledMetadata):
                 fk['reference']['fields'] = [fk['reference']['fields']]
         return self.metadata_transorm_bind('foreignKeys', foreign_keys)
 
+    # Create
+
+    @staticmethod
+    def from_sample(sample, *, names=None, confidence=config.INFER_CONFIDENCE):
+        """Infer schema from sample
+
+        # Arguments
+            sample
+            names
+            confidence
+
+        """
+        schema = Schema()
+        schema.infer(sample, names=names, confidence=confidence)
+        return schema
+
     # Fields
 
-    @property
+    @dictprop('fields')
     def fields(self):
         """Schema's fields
 
@@ -90,9 +106,10 @@ class Schema(ControlledMetadata):
             Field[]: an array of field instances
 
         """
-        return self.get('fields', [])
+        fields = self.get('fields', [])
+        return self.metadata_transorm_bind('fields', fields)
 
-    @property
+    @memoprop
     def field_names(self):
         """Schema's field names
 
@@ -181,10 +198,56 @@ class Schema(ControlledMetadata):
 
     # Infer
 
-    def infer(self, sample):
+    def infer(self, sample, *, names=None, confidence=config.INFER_CONFIDENCE):
         """Infer schema
+
+        # Arguments
+            sample
+            names
+            confidence
+
         """
-        pass
+
+        # Prepare names
+        if not names:
+            names = [f'field{number}' for number in range(1, len(sample[0]) + 1)]
+
+        # Prepare candidates
+        candidates = []
+        for index, name in enumerate(names):
+            candidates.append([])
+            for type in INFER_TYPES:
+                field = Field(
+                    {'name': name, 'type': type},
+                    metadata_root=self.metadata_root,
+                    metadata_raise=self.metadata_raise,
+                    metadata_schema=self,
+                )
+                candidates[index].append({'field': field, 'score': 0})
+
+        # Prepare fields
+        fields = [None] * len(names)
+        for cells in sample:
+            for index, name in enumerate(names):
+                if fields[index] is not None:
+                    continue
+                source = cells[index] if len(cells) > index else None
+                for candidate in candidates[index]:
+                    if candidate['score'] < len(sample) * (confidence - 1):
+                        continue
+                    target, notes = candidate['field'].read_cell(source)
+                    candidate['score'] += 1 if not notes else -1
+                    if candidate['score'] >= len(sample) * confidence:
+                        print(candidate)
+                        fields[index] = candidate['field']
+                        break
+
+        #  import pprint
+
+        #  pprint.pprint(candidates)
+
+        # Apply fields
+        self.fields = fields
 
     # Read
 
@@ -265,3 +328,24 @@ class Schema(ControlledMetadata):
                 note = 'foreign key fields "%s" does not match the reference fields "%s"'
                 note = note % (fk['fields'], fk['reference']['fields'])
                 self.metadata_errors.append(errors.SchemaError(note=note))
+
+
+# Internal
+
+INFER_TYPES = [
+    'yearmonth',
+    'duration',
+    'geojson',
+    'geopoint',
+    'object',
+    'array',
+    'datetime',
+    'time',
+    'date',
+    'integer',
+    'year',
+    'number',
+    'boolean',
+    'string',
+    'any',
+]

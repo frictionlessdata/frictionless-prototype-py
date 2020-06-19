@@ -253,77 +253,72 @@ def test_schema_metadata_error_message():
 # Infer
 
 
-@pytest.mark.skip
 def test_infer():
-    data = [
-        ['id', 'age', 'name'],
+    sample = [
         ['1', '39', 'Paul'],
         ['2', '23', 'Jimmy'],
         ['3', '36', 'Jane'],
         ['4', 'N/A', 'Judy'],
     ]
+    names = ['id', 'age', 'name']
     schema = Schema()
-    schema.infer(data)
-    assert schema.descriptor == {
+    schema.infer(sample, names=names)
+    assert schema == {
         'fields': [
-            {'format': 'default', 'name': 'id', 'type': 'integer'},
-            {'format': 'default', 'name': 'age', 'type': 'integer'},
-            {'format': 'default', 'name': 'name', 'type': 'string'},
+            {'name': 'id', 'type': 'integer'},
+            {'name': 'age', 'type': 'string'},
+            {'name': 'name', 'type': 'string'},
         ],
-        'missingValues': [''],
     }
-    data = [
-        ['id', 'age', 'name'],
+
+
+def test_infer_confidence_less():
+    sample = [
         ['1', '39', 'Paul'],
         ['2', '23', 'Jimmy'],
         ['3', '36', 'Jane'],
         ['4', 'N/A', 'Judy'],
     ]
+    names = ['id', 'age', 'name']
     schema = Schema()
-    schema.infer(data, confidence=0.8)
-    assert schema.descriptor == {
+    schema.infer(sample, names=names, confidence=0.75)
+    print(schema)
+    assert schema == {
         'fields': [
-            {'format': 'default', 'name': 'id', 'type': 'integer'},
-            {'format': 'default', 'name': 'age', 'type': 'string'},
-            {'format': 'default', 'name': 'name', 'type': 'string'},
+            {'name': 'id', 'type': 'integer'},
+            {'name': 'age', 'type': 'integer'},
+            {'name': 'name', 'type': 'string'},
         ],
-        'missingValues': [''],
     }
 
-    class AllStrings:
-        def cast(self, value):
-            return [('string', 'default', 0)]
 
-    data = [
-        ['id', 'age', 'name'],
+def test_infer_confidence_full():
+    sample = [
         ['1', '39', 'Paul'],
         ['2', '23', 'Jimmy'],
         ['3', '36', 'Jane'],
-        ['4', '100', 'Judy'],
+        ['4', 'N/A', 'Judy'],
     ]
-
+    names = ['id', 'age', 'name']
     schema = Schema()
-    schema.infer(data, confidence=0.8, guesser_cls=AllStrings)
-    assert schema.descriptor['fields'] == [
-        {'format': 'default', 'name': 'id', 'type': 'string'},
-        {'format': 'default', 'name': 'age', 'type': 'string'},
-        {'format': 'default', 'name': 'name', 'type': 'string'},
-    ]
-    assert schema.descriptor == {
+    schema.infer(sample, names=names, confidence=1)
+    print(schema)
+    assert schema == {
         'fields': [
-            {'format': 'default', 'name': 'id', 'type': 'string'},
-            {'format': 'default', 'name': 'age', 'type': 'string'},
-            {'format': 'default', 'name': 'name', 'type': 'string'},
+            {'name': 'id', 'type': 'integer'},
+            {'name': 'age', 'type': 'string'},
+            {'name': 'name', 'type': 'string'},
         ],
-        'missingValues': [''],
     }
 
 
-@pytest.mark.skip
-def test_schema_infer_with_non_headers():
+def test_schema_infer_no_names():
+    sample = [[1], [2], [3]]
     schema = Schema()
-    schema.infer([[1], [2], [3]], headers=[None])
-    assert schema.field_names == ['field1']
+    schema.infer(sample)
+    assert schema == {
+        'fields': [{'name': 'field1', 'type': 'integer'}],
+    }
 
 
 # Issues

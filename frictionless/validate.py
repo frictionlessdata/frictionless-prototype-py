@@ -4,7 +4,7 @@ from . import validates
 from . import helpers
 
 
-@Report.catch
+@Report.from_validate
 def validate(source, source_type=None, **options):
 
     # Normalize source

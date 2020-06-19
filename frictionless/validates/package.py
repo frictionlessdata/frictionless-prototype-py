@@ -6,7 +6,7 @@ from ..errors import PackageError
 from .inquiry import validate_inquiry
 
 
-@Report.catch
+@Report.from_validate
 def validate_package(source, base_path=None, strict=False, **options):
     """Validate package
     """

@@ -67,6 +67,22 @@ class Report(Metadata):
             raise exceptions.FrictionlessException(message)
         return self.tables[0]
 
+    # Create
+
+    @staticmethod
+    def from_validate(validate):
+        @functools.wraps(validate)
+        def wrapper(*args, **kwargs):
+            timer = helpers.Timer()
+            try:
+                return validate(*args, **kwargs)
+            except Exception as exception:
+                time = timer.get_time()
+                error = TaskError(note=str(exception))
+                return Report(time=time, errors=[error], tables=[])
+
+        return wrapper
+
     # Flatten
 
     def flatten(self, spec):
@@ -88,22 +104,6 @@ class Report(Metadata):
                 context.update(error)
                 result.append([context.get(prop) for prop in spec])
         return result
-
-    # Helpers
-
-    @staticmethod
-    def catch(validate):
-        @functools.wraps(validate)
-        def wrapper(*args, **kwargs):
-            timer = helpers.Timer()
-            try:
-                return validate(*args, **kwargs)
-            except Exception as exception:
-                time = timer.get_time()
-                error = TaskError(note=str(exception))
-                return Report(time=time, errors=[error], tables=[])
-
-        return wrapper
 
 
 class ReportTable(Metadata):

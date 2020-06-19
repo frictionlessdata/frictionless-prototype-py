@@ -7,7 +7,7 @@ from ..inquiry import Inquiry
 from ..validate import validate
 
 
-@Report.catch
+@Report.from_validate
 def validate_inquiry(source):
     """Validate inquiry
     """
