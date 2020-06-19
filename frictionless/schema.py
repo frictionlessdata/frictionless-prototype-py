@@ -83,7 +83,9 @@ class Schema(ControlledMetadata):
     # Create
 
     @staticmethod
-    def from_sample(sample, *, names=None, confidence=config.INFER_CONFIDENCE):
+    def from_sample(
+        sample, *, names=None, confidence=config.INFER_CONFIDENCE, missing_values=None
+    ):
         """Infer schema from sample
 
         # Arguments
@@ -92,7 +94,7 @@ class Schema(ControlledMetadata):
             confidence
 
         """
-        schema = Schema()
+        schema = Schema(missing_values=missing_values)
         schema.infer(sample, names=names, confidence=confidence)
         return schema
 
@@ -217,12 +219,7 @@ class Schema(ControlledMetadata):
         for index, name in enumerate(names):
             candidates.append([])
             for type in INFER_TYPES:
-                field = Field(
-                    {'name': name, 'type': type},
-                    metadata_root=self.metadata_root,
-                    metadata_raise=self.metadata_raise,
-                    metadata_schema=self,
-                )
+                field = Field({'name': name, 'type': type}, metadata_schema=self)
                 candidates[index].append({'field': field, 'score': 0})
 
         # Prepare fields
@@ -238,13 +235,8 @@ class Schema(ControlledMetadata):
                     target, notes = candidate['field'].read_cell(source)
                     candidate['score'] += 1 if not notes else -1
                     if candidate['score'] >= len(sample) * confidence:
-                        print(candidate)
                         fields[index] = candidate['field']
                         break
-
-        #  import pprint
-
-        #  pprint.pprint(candidates)
 
         # Apply fields
         self.fields = fields
@@ -343,9 +335,9 @@ INFER_TYPES = [
     'time',
     'date',
     'integer',
-    'year',
     'number',
     'boolean',
+    'year',
     'string',
     'any',
 ]
