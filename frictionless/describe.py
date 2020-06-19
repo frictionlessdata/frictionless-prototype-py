@@ -15,6 +15,16 @@ def describe(
     infer_confidence=config.INFER_CONFIDENCE
 ):
     """Describe data source
+
+    # Arguments
+        source
+        expand
+        missing_values
+        infer_type
+        infer_names
+        infer_sample
+        infer_confidence
+
     """
     with Stream(source, headers=1, sample_size=infer_sample) as stream:
         schema = Schema.from_sample(
