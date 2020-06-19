@@ -73,72 +73,45 @@ class Row(OrderedDict):
         for field_position, field, cell in zip(field_positions, fields, cells):
             field_number += 1
 
-            # Blank cell
-            if cell is not None:
-                if cell in field.missing_values:
-                    self.__blank_cells[field.name] = cell
-                    cell = None
-
-            # Required constraint
-            if cell is None:
-                if field.required:
-                    self.__errors.append(
-                        errors.RequiredError(
-                            note='',
-                            cells=list(map(str, cells)),
-                            row_number=row_number,
-                            row_position=row_position,
-                            cell='',
-                            field_name=field.name,
-                            field_number=field_number,
-                            field_position=field_position,
-                        )
-                    )
+            # Read cell
+            self[field.name], notes = field.read_cell(cell)
+            type_note = notes.pop('type', None) if notes else None
+            if self[field.name] is None and not type_note:
+                self.__blank_cells[field.name] = cell
+            else:
+                is_blank = False
 
             # Type error
-            if cell is not None:
-                is_blank = False
-                cell = field.cast_function(cell)
-                if cell == field.ERROR:
-                    cell = None
-                    note = 'expected type is "%s" and format is "%s"'
-                    note = note % (field.type, field.format)
-                    self.__error_cells[field.name] = cell
+            if type_note:
+                self.__error_cells[field.name] = cell
+                self.__errors.append(
+                    errors.TypeError(
+                        note=type_note,
+                        cells=list(map(str, cells)),
+                        row_number=row_number,
+                        row_position=row_position,
+                        cell=str(cell),
+                        field_name=field.name,
+                        field_number=field_number,
+                        field_position=field_position,
+                    )
+                )
+
+            # Constraint errors
+            if notes:
+                for note in notes.values():
                     self.__errors.append(
-                        errors.TypeError(
+                        errors.ConstraintError(
                             note=note,
                             cells=list(map(str, cells)),
                             row_number=row_number,
                             row_position=row_position,
-                            cell=str(cells[field_number - 1]),
+                            cell=str(cell),
                             field_name=field.name,
                             field_number=field_number,
                             field_position=field_position,
                         )
                     )
-
-            # Constraint errors
-            if cell is not None:
-                for name, check in field.check_functions.items():
-                    if name not in ['required', 'unique']:
-                        if not check(cell):
-                            note = '"%s" is "%s"'
-                            note = note % (field.constraints[name], name)
-                            self.__errors.append(
-                                errors.ConstraintError(
-                                    note=note,
-                                    cells=list(map(str, cells)),
-                                    row_number=row_number,
-                                    row_position=row_position,
-                                    cell=str(cell),
-                                    field_name=field.name,
-                                    field_number=field_number,
-                                    field_position=field_position,
-                                )
-                            )
-
-            # Save cell
-            self[field.name] = cell
 
         # Blank row
         if is_blank:

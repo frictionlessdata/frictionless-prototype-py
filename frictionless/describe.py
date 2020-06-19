@@ -4,9 +4,12 @@ from . import config
 
 
 # TODO: support source_type (table/resource/package)
+# TODO: support infer_type
 def describe(
     source,
     *,
+    source_type=None,
+    headers_row=config.HEADERS_ROW,
     expand=False,
     missing_values=None,
     infer_type=None,
@@ -26,7 +29,7 @@ def describe(
         infer_confidence
 
     """
-    with Stream(source, headers=1, sample_size=infer_sample) as stream:
+    with Stream(source, headers=headers_row, sample_size=infer_sample) as stream:
         schema = Schema.from_sample(
             stream.sample,
             names=infer_names or stream.headers,

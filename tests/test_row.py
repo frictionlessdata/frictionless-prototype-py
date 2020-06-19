@@ -1,5 +1,4 @@
-from tableschema import Field
-from frictionless import Row
+from frictionless import Row, Field
 
 
 # General

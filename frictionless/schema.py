@@ -200,7 +200,7 @@ class Schema(ControlledMetadata):
 
     # Infer
 
-    def infer(self, sample, *, names=None, confidence=config.INFER_CONFIDENCE):
+    def infer(self, sample, *, type=None, names=None, confidence=config.INFER_CONFIDENCE):
         """Infer schema
 
         # Arguments
@@ -213,6 +213,18 @@ class Schema(ControlledMetadata):
         # Prepare names
         if not names:
             names = [f'field{number}' for number in range(1, len(sample[0]) + 1)]
+        if len(names) != len(set(names)):
+            seen_names = []
+            names = names.copy()
+            for index, name in enumerate(names):
+                count = seen_names.count(name) + 1
+                names[index] = '%s%s' % (name, count) if count > 1 else name
+                seen_names.append(name)
+
+        # Handle type
+        if type:
+            self.fields = [{'name': name, 'type': type} for name in names]
+            return
 
         # Prepare candidates
         candidates = []
@@ -287,7 +299,7 @@ class Schema(ControlledMetadata):
 
     def metadata_process(self):
         for index, field in enumerate(self.fields):
-            if not isinstance(field, Field):
+            if not isinstance(field, Field) or field.metadata_root != self:
                 if not isinstance(field, dict):
                     field = {'name': f'field{index+1}', 'type': 'any'}
                 field = Field(

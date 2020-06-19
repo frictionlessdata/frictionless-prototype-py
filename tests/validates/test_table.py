@@ -1,7 +1,6 @@
 import pytest
 import pathlib
-from tableschema import infer
-from frictionless import validate, Check, errors
+from frictionless import validate, describe, Check, errors
 
 
 # General
@@ -388,8 +387,8 @@ def test_validate_schema_multiple_errors():
     assert report.table.partial
     assert report.table.flatten(['rowPosition', 'fieldPosition', 'code']) == [
         [4, 1, 'type-error'],
-        [4, 2, 'required-error'],
-        [4, 3, 'required-error'],
+        [4, 2, 'constraint-error'],
+        [4, 3, 'constraint-error'],
     ]
 
 
@@ -452,15 +451,14 @@ def test_validate_schema_maximum_constraint():
 
 
 def test_validate_sync_schema():
-    schema = infer('data/table.csv')
+    schema = describe('data/table.csv')
     report = validate('data/sync-schema.csv', schema=schema, sync_schema=True)
     assert report.valid
     assert report.table['schema'] == {
         'fields': [
-            {'format': 'default', 'name': 'name', 'type': 'string'},
-            {'format': 'default', 'name': 'id', 'type': 'integer'},
+            {'name': 'name', 'type': 'string'},
+            {'name': 'id', 'type': 'integer'},
         ],
-        'missingValues': [''],
     }
 
 
@@ -487,7 +485,7 @@ def test_validate_schema_headers_errors():
     }
     report = validate(source, schema=schema, sync_schema=True)
     assert report.flatten(['rowPosition', 'fieldPosition', 'code']) == [
-        [4, 4, 'required-error'],
+        [4, 4, 'constraint-error'],
     ]
 
 
@@ -497,8 +495,8 @@ def test_validate_patch_schema():
     assert report.valid
     assert report.table['schema'] == {
         'fields': [
-            {'format': 'default', 'name': 'id', 'type': 'integer'},
-            {'format': 'default', 'name': 'name', 'type': 'string'},
+            {'name': 'id', 'type': 'integer'},
+            {'name': 'name', 'type': 'string'},
         ],
         'missingValues': ['-'],
     }
@@ -509,10 +507,7 @@ def test_validate_patch_schema_fields():
     report = validate('data/table.csv', patch_schema=patch_schema)
     assert report.valid
     assert report.table['schema'] == {
-        'fields': [
-            {'format': 'default', 'name': 'id', 'type': 'string'},
-            {'format': 'default', 'name': 'name', 'type': 'string'},
-        ],
+        'fields': [{'name': 'id', 'type': 'string'}, {'name': 'name', 'type': 'string'}],
         'missingValues': ['-'],
     }
 
@@ -521,11 +516,7 @@ def test_validate_infer_type_string():
     report = validate('data/table.csv', infer_type='string')
     assert report.valid
     assert report.table['schema'] == {
-        'fields': [
-            {'format': 'default', 'name': 'id', 'type': 'string'},
-            {'format': 'default', 'name': 'name', 'type': 'string'},
-        ],
-        'missingValues': [''],
+        'fields': [{'name': 'id', 'type': 'string'}, {'name': 'name', 'type': 'string'}],
     }
 
 
@@ -533,11 +524,7 @@ def test_validate_infer_type_any():
     report = validate('data/table.csv', infer_type='any')
     assert report.valid
     assert report.table['schema'] == {
-        'fields': [
-            {'format': 'default', 'name': 'id', 'type': 'any'},
-            {'format': 'default', 'name': 'name', 'type': 'any'},
-        ],
-        'missingValues': [''],
+        'fields': [{'name': 'id', 'type': 'any'}, {'name': 'name', 'type': 'any'},],
     }
 
 
@@ -823,7 +810,6 @@ def test_validate_structure_errors_with_limit_errors():
     ]
 
 
-@pytest.mark.slow
 def test_validate_limit_memory():
     source = lambda: ([integer] for integer in range(1, 100000000))
     schema = {'fields': [{'name': 'integer', 'type': 'integer'}], 'primaryKey': 'integer'}
@@ -921,9 +907,9 @@ def test_validate_wide_table_with_order_fields_issue_277():
     schema = 'data/issue-277.json'
     report = validate(source, schema=schema, sync_schema=True)
     assert report.flatten(['rowPosition', 'fieldPosition', 'code']) == [
-        [49, 50, 'required-error'],
-        [68, 50, 'required-error'],
-        [69, 50, 'required-error'],
+        [49, 50, 'constraint-error'],
+        [68, 50, 'constraint-error'],
+        [69, 50, 'constraint-error'],
     ]
 
 

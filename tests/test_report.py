@@ -41,10 +41,9 @@ def test_validate_report_props():
     assert report.table['errors'] == []
     assert report.table['schema'] == {
         'fields': [
-            {'format': 'default', 'name': 'id', 'type': 'integer'},
-            {'format': 'default', 'name': 'name', 'type': 'string'},
+            {'name': 'id', 'type': 'integer'},
+            {'name': 'name', 'type': 'string'},
         ],
-        'missingValues': [''],
     }
     assert report.table['dialect'] == {
         'delimiter': ',',

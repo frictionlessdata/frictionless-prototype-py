@@ -1,12 +1,13 @@
 import tabulator
-import tableschema
+from copy import copy
 from .. import config
 from .. import helpers
 from .. import exceptions
 from ..row import Row
-from ..errors import Error
 from ..system import system
+from ..schema import Schema
 from ..headers import Headers
+from ..errors import Error, SchemaError
 from ..report import Report, ReportTable
 from ..checks import BaselineCheck, IntegrityCheck
 
@@ -151,8 +152,8 @@ def validate_table(
 
     # Create schema
     try:
-        schema = tableschema.Schema(schema or {})
-    except tableschema.exceptions.TableSchemaException as exception:
+        schema = Schema(schema)
+    except exceptions.FrictionlessException as exception:
         errors.add(Error.from_exception(exception), force=True)
         schema = None
         exited = True
@@ -161,55 +162,41 @@ def validate_table(
     if not exited:
 
         # Infer schema
-        if schema and not schema.fields:
-            infer_headers = stream.headers
-            if not infer_headers:
-                infer_headers = infer_names
-            if not infer_headers:
-                field_numbers = list(range(1, len(stream.sample[0]) + 1))
-                infer_headers = ['field%s' % number for number in field_numbers]
-            if infer_type:
-                schema.descriptor['fields'] = []
-                schema.descriptor['missingValues'] = config.MISSING_VALUES
-                for header in infer_headers:
-                    field = {'name': header, 'type': infer_type, 'format': 'default'}
-                    schema.descriptor['fields'].append(field)
-                schema.commit()
-            else:
-                schema.infer(
-                    stream.sample, headers=infer_headers, confidence=infer_confidence
-                )
+        if not schema.fields:
+            schema.infer(
+                stream.sample,
+                type=infer_type,
+                names=infer_names or stream.headers,
+                confidence=infer_confidence,
+            )
 
         # Sync schema
-        if schema and sync_schema:
-            new_fields = []
-            old_fields = schema.descriptor.get('fields', [])
-            map_fields = {field.get('name'): field for field in old_fields}
-            for header in stream.headers:
-                new_fields.append(map_fields.get(header, {'name': header, 'type': 'any'}))
-            schema.descriptor['fields'] = new_fields
-            schema.commit()
+        if sync_schema:
+            fields = []
+            mapping = {field.get('name'): field for field in schema.fields}
+            for name in stream.headers:
+                fields.append(mapping.get(name, {'name': name, 'type': 'any'}))
+            schema.fields = fields
 
         # Patch schema
-        if schema and patch_schema:
+        if patch_schema:
             fields = patch_schema.pop('fields', {})
-            schema.descriptor.update(patch_schema)
-            for field in schema.descriptor['fields']:
+            schema.update(patch_schema)
+            for field in schema.fields:
                 field.update((fields.get(field.get('name'), {})))
-            schema.commit()
 
         # Validate schema
-        if schema and schema.errors:
-            for error in schema.errors:
-                errors.add(Error.from_exception(error), force=True)
+        if schema.metadata_errors:
+            for error in schema.metadata_errors:
+                errors.add(error, force=True)
             schema = None
             exited = True
 
         # Confirm schema
         if schema and len(schema.field_names) != len(set(schema.field_names)):
-            message = 'Schemas with duplicate field names are not supported'
-            error = tableschema.exceptions.TableSchemaException(message)
-            errors.add(Error.from_exception(error), force=True)
+            note = 'Schemas with duplicate field names are not supported'
+            error = SchemaError(note=note)
+            errors.add(error, force=True)
             schema = None
             exited = True
 
@@ -306,8 +293,6 @@ def validate_table(
 
     # Return report
     time = timer.get_time()
-    if schema:
-        schema = schema.descriptor
     return Report(
         time=time,
         errors=task_errors,
@@ -333,7 +318,8 @@ def validate_table(
                 skip_rows=skip_rows,
                 limit_rows=limit_rows,
                 offset_rows=offset_rows,
-                schema=schema,
+                # TODO: investigate whey it troubles multiprocessing
+                schema=copy(schema),
                 dialect=stream.dialect,
                 errors=errors,
             )

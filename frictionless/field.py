@@ -218,7 +218,7 @@ class Field(ControlledMetadata):
 
         # Constraints
         for name in self.constraints.keys():
-            if name not in self.supported_constraints:
+            if name not in self.supported_constraints + ['unique']:
                 note = f'constraint "{name}" is not supported by type "{self.type}"'
                 self.metadata_errors.append(errors.SchemaError(note=note))
 

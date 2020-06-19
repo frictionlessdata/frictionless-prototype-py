@@ -1,5 +1,4 @@
 import tabulator
-import tableschema
 from .metadata import Metadata
 from . import exceptions
 
@@ -56,7 +55,8 @@ class Error(Metadata):
             Error = EncodingError
         elif isinstance(exception, tabulator.exceptions.CompressionError):
             Error = CompressionError
-        elif isinstance(exception, tableschema.exceptions.TableSchemaException):
+        # TODO: it's a temporary hack
+        elif isinstance(exception, exceptions.FrictionlessException):
             Error = SchemaError
         return Error(note=note)
         super().metadata_process()

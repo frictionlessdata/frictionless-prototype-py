@@ -1,5 +1,4 @@
-from tableschema import Field
-from frictionless import Headers
+from frictionless import Headers, Field
 
 
 # General

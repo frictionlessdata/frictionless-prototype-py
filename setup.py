@@ -22,7 +22,6 @@ CORE_REQUIRES = [
     'stringcase>=1.2',
     'cached-property>=1.5',
     'tabulator>=1.52',
-    'tableschema>=1.19',
     'datapackage>=1.14',
 ]
 PROB_REQUIRES = [

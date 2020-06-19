@@ -1,7 +1,8 @@
-import tableschema
 from .. import helpers
 from ..report import Report
+from ..schema import Schema
 from ..errors import SchemaError
+from .. import exceptions
 
 
 @Report.from_validate
@@ -14,16 +15,16 @@ def validate_schema(source):
 
     # Create schema
     try:
-        schema = tableschema.Schema(source)
-    except tableschema.exceptions.TableSchemaException as exception:
+        schema = Schema(source)
+    except exceptions.FrictionlessException as exception:
         time = timer.get_time()
         error = SchemaError(note=str(exception))
         return Report(time=time, errors=[error], tables=[])
 
     # Validate schema
     errors = []
-    for error in schema.errors:
-        errors.append(SchemaError(note=str(error)))
+    for error in schema.metadata_errors:
+        errors.append(error)
 
     # Return report
     time = timer.get_time()
