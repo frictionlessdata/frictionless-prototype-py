@@ -1,5 +1,5 @@
 from itertools import zip_longest
-from .helpers import memoprop
+from .helpers import cached_property
 from . import errors
 
 
@@ -113,10 +113,10 @@ class Headers(list):
         # Save headers
         super().__init__(cells)
 
-    @memoprop
+    @cached_property
     def field_positions(self):
         return self.__field_positions
 
-    @memoprop
+    @cached_property
     def errors(self):
         return self.__errors

@@ -5,7 +5,7 @@ import jsonschema
 from copy import deepcopy
 from operator import setitem
 from urllib.parse import urlparse
-from .helpers import memoprop
+from .helpers import cached_property
 from . import exceptions
 from . import helpers
 from . import config
@@ -38,19 +38,19 @@ class Metadata(dict):
             self.metadata_process()
             self.metadata_validate()
 
-    @memoprop
+    @cached_property
     def metadata_root(self):
         return self.__root
 
-    @memoprop
+    @cached_property
     def metadata_raise(self):
         return self.__raise
 
-    @memoprop
+    @cached_property
     def metadata_valid(self):
         return not len(self.__errors)
 
-    @memoprop
+    @cached_property
     def metadata_errors(self):
         return self.__errors
 
@@ -140,11 +140,37 @@ class ControlledMetadata(Metadata):
         descriptor? (str|dict): schema descriptor
         metadata_root? (Metadata): root metadata object
         metadata_raise? (bool): if True it will fail on the first metadata error
+        metadata_attach? (bool): callback for the attach mechanism
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
 
     """
+
+    def __init__(
+        self,
+        descriptor=None,
+        *,
+        metadata_root=None,
+        metadata_raise=False,
+        metadata_attach=None
+    ):
+        self.__attach = metadata_attach
+        super().__init__(
+            descriptor, metadata_root=metadata_root, metadata_raise=metadata_raise
+        )
+
+    # Attach
+
+    def metadata_attach(self, name, value):
+        if self.get(name) != value:
+            value = deepcopy(value)
+            attach = lambda: setitem(self, name, value)
+            if isinstance(value, dict):
+                value = ControlledMetadata(value, metadata_attach=attach)
+            if isinstance(value, list):
+                value = ControlledMetadataList(value, metadata_attach=attach)
+        return value
 
     # Extract
 
@@ -154,7 +180,7 @@ class ControlledMetadata(Metadata):
     # Process
 
     def metadata_process(self):
-        memoprop.reset(self)
+        helpers.reset_cached_properties(self)
         for key, value in self.items():
             if isinstance(value, dict):
                 if getattr(value, 'metadata_root', None) != self.metadata_root:
@@ -183,20 +209,14 @@ class ControlledMetadata(Metadata):
             root = self.metadata_root
         except AttributeError:
             return
+        if self.__attach:
+            attach = self.__attach
+            self.__attach = None
+            attach()
         if root is not self:
             return self.metadata_root.metadata_transform()
         self.metadata_process()
         self.metadata_validate()
-
-    def metadata_transorm_bind(self, name, value):
-        if self.get(name) != value:
-            value = deepcopy(value)
-            if isinstance(value, dict):
-                value = ControlledMetadata(value)
-            if isinstance(value, list):
-                value = ControlledMetadataList(value)
-            setattr(value, 'metadata_transform', lambda: setitem(self, name, value))
-        return value
 
     def __setitem__(self, *args, **kwargs):
         result = super().__setitem__(*args, **kwargs)
@@ -255,27 +275,31 @@ class ControlledMetadataList(list):
         values (str|dict): values
         metadata_root? (Metadata): root metadata object
         metadata_raise? (bool): if True it will fail on the first metadata error
+        metadata_attach? (bool): callback for the attach mechanism
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
 
     """
 
-    def __init__(self, values, *, metadata_root=None, metadata_raise=False):
+    def __init__(
+        self, values, *, metadata_root=None, metadata_raise=False, metadata_attach=None
+    ):
         list.extend(self, values)
         self.__errors = []
         self.__root = metadata_root or self
         self.__raise = metadata_raise
+        self.__attach = metadata_attach
 
-    @memoprop
+    @cached_property
     def metadata_root(self):
         return self.__root
 
-    @memoprop
+    @cached_property
     def metadata_raise(self):
         return self.__raise
 
-    @memoprop
+    @cached_property
     def metadata_errors(self):
         return self.__errors
 
@@ -324,7 +348,16 @@ class ControlledMetadataList(list):
     # Transform
 
     def metadata_transform(self):
-        if self.metadata_root is not self:
+        try:
+            # It can be not initiated
+            root = self.metadata_root
+        except AttributeError:
+            return
+        if self.__attach:
+            attach = self.__attach
+            self.__attach = None
+            attach()
+        if root is not self:
             self.metadata_root.metadata_transform()
 
     def __setitem__(self, *args, **kwargs):

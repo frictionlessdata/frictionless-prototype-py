@@ -1,6 +1,7 @@
+import stringcase
 from copy import deepcopy
 from .metadata import ControlledMetadata
-from .helpers import dictprop, memoprop
+from .helpers import cached_property
 from .field import Field
 from . import errors
 from . import config
@@ -52,19 +53,25 @@ class Schema(ControlledMetadata):
             metadata_raise=metadata_raise,
         )
 
-    @dictprop('missingValues')
+    def __setattr__(self, name, value):
+        if name in ['missing_values', 'primary_key', 'foreign_keys', 'fields']:
+            self[stringcase.camelcase(name)] = value
+        else:
+            super().__setattr__(name, value)
+
+    @cached_property
     def missing_values(self):
         missing_values = self.get('missingValues', config.MISSING_VALUES)
-        return self.metadata_transorm_bind('missingValues', missing_values)
+        return self.metadata_attach('missingValues', missing_values)
 
-    @dictprop('primaryKey')
+    @cached_property
     def primary_key(self):
         primary_key = self.get('primaryKey', [])
         if not isinstance(primary_key, list):
             primary_key = [primary_key]
-        return self.metadata_transorm_bind('primaryKey', primary_key)
+        return self.metadata_attach('primaryKey', primary_key)
 
-    @dictprop('foreignKeys')
+    @cached_property
     def foreign_keys(self):
         foreign_keys = deepcopy(self.get('foreignKeys', []))
         for index, fk in enumerate(foreign_keys):
@@ -78,7 +85,7 @@ class Schema(ControlledMetadata):
                 fk['fields'] = [fk['fields']]
             if not isinstance(fk['reference']['fields'], list):
                 fk['reference']['fields'] = [fk['reference']['fields']]
-        return self.metadata_transorm_bind('foreignKeys', foreign_keys)
+        return self.metadata_attach('foreignKeys', foreign_keys)
 
     # Create
 
@@ -100,7 +107,7 @@ class Schema(ControlledMetadata):
 
     # Fields
 
-    @dictprop('fields')
+    @cached_property
     def fields(self):
         """Schema's fields
 
@@ -109,9 +116,9 @@ class Schema(ControlledMetadata):
 
         """
         fields = self.get('fields', [])
-        return self.metadata_transorm_bind('fields', fields)
+        return self.metadata_attach('fields', fields)
 
-    @memoprop
+    @cached_property
     def field_names(self):
         """Schema's field names
 
@@ -298,7 +305,7 @@ class Schema(ControlledMetadata):
     # Metadata
 
     def metadata_process(self):
-        for index, field in enumerate(self.fields):
+        for index, field in enumerate(self.get('fields', [])):
             if not isinstance(field, Field) or field.metadata_root != self:
                 if not isinstance(field, dict):
                     field = {'name': f'field{index+1}', 'type': 'any'}
@@ -308,7 +315,7 @@ class Schema(ControlledMetadata):
                     metadata_raise=self.metadata_raise,
                     metadata_schema=self,
                 )
-                list.__setitem__(self.fields, index, field)
+                list.__setitem__(self['fields'], index, field)
         super().metadata_process()
 
     def metadata_validate(self):

@@ -2,11 +2,11 @@ import re
 import decimal
 import warnings
 import importlib
-from operator import setitem
+import stringcase
 from functools import partial
 from collections import OrderedDict
 from .metadata import ControlledMetadata
-from .helpers import dictprop, memoprop
+from .helpers import cached_property
 from . import errors
 from . import config
 
@@ -65,15 +65,23 @@ class Field(ControlledMetadata):
             metadata_raise=metadata_raise,
         )
 
-    @dictprop('name')
+    def __setattr__(self, name, value):
+        if name in ['name', 'type', 'format', 'missing_values', 'constraints']:
+            self[stringcase.camelcase(name)] = value
+        elif name == 'required':
+            self.constraints['required'] = value
+        else:
+            super().__setattr__(name, value)
+
+    @cached_property
     def name(self):
         return self.get('name', 'field')
 
-    @dictprop('type')
+    @cached_property
     def type(self):
         return self.get('type', 'any')
 
-    @dictprop('format')
+    @cached_property
     def format(self):
         format = self.get('format', 'default')
         if format.startswith('fmt:'):
@@ -85,19 +93,19 @@ class Field(ControlledMetadata):
             format = format.replace('fmt:', '')
         return format
 
-    @dictprop('missingValues')
+    @cached_property
     def missing_values(self):
         schema = self.__metadata_schema
         default = schema.missing_values if schema else config.MISSING_VALUES
         missing_values = self.get('missingValues', default)
-        return self.metadata_transorm_bind('missingValues', missing_values)
+        return self.metadata_attach('missingValues', missing_values)
 
-    @dictprop('constraints')
+    @cached_property
     def constraints(self):
         constraints = self.get('constraints', {})
-        return self.metadata_transorm_bind('constraints', constraints)
+        return self.metadata_attach('constraints', constraints)
 
-    @dictprop(lambda self, value: setitem(self.constraints, 'required', value))
+    @cached_property
     def required(self):
         return self.constraints.get('required', False)
 
@@ -147,7 +155,7 @@ class Field(ControlledMetadata):
         """
         return self.__proxy.read_cell_cast(cell)
 
-    @memoprop
+    @cached_property
     def read_cell_checks(self):
         """Read cell low-level (cast)
 

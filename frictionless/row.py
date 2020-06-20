@@ -1,6 +1,6 @@
 from itertools import zip_longest
 from collections import OrderedDict
-from .helpers import memoprop
+from .helpers import cached_property
 from . import errors
 
 
@@ -124,26 +124,26 @@ class Row(OrderedDict):
                 )
             ]
 
-    @memoprop
+    @cached_property
     def field_positions(self):
         return self.__field_positions
 
-    @memoprop
+    @cached_property
     def row_position(self):
         return self.__row_position
 
-    @memoprop
+    @cached_property
     def row_number(self):
         return self.__row_number
 
-    @memoprop
+    @cached_property
     def blank_cells(self):
         return self.__blank_cells
 
-    @memoprop
+    @cached_property
     def error_cells(self):
         return self.__error_cells
 
-    @memoprop
+    @cached_property
     def errors(self):
         return self.__errors
