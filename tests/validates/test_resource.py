@@ -23,8 +23,8 @@ def test_validate_invalid_resource():
     ]
 
 
-def test_validate_invalid_resource_strict():
-    report = validate({'path': 'data/table.csv'}, strict=True)
+def test_validate_invalid_resource_exact():
+    report = validate({'path': 'data/table.csv'}, exact=True)
     assert report.flatten(['code', 'note']) == [
         [
             'resource-error',

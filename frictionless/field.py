@@ -3,7 +3,6 @@ import decimal
 import warnings
 import importlib
 import stringcase
-from operator import setitem
 from functools import partial
 from collections import OrderedDict
 from .metadata import ControlledMetadata
@@ -68,10 +67,11 @@ class Field(ControlledMetadata):
 
     def __setattr__(self, name, value):
         if name in ['name', 'type', 'format', 'missing_values', 'constraints']:
-            return setitem(self, stringcase.camelcase(name), value)
+            self[stringcase.camelcase(name)] = value
         elif name == 'required':
-            return setitem(self.constraints, 'required', value)
-        super().__setattr__(name, value)
+            self.constraints['required'] = value
+        else:
+            super().__setattr__(name, value)
 
     @cached_property
     def name(self):

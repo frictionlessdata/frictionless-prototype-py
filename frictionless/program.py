@@ -46,7 +46,7 @@ from . import config
 @click.option('--limit-errors', type=int, help='Limit errors')
 @click.option('--limit-memory', type=int, help='Limit memory')
 # Package/Resource
-@click.option('--strict', type=bool, help='Validate metadata as it is')
+@click.option('--exact', type=bool, help='Do not infer metadata')
 def program(source, *, source_type, json, **options):
     for key, value in list(options.items()):
         if not value:

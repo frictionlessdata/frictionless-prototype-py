@@ -1,6 +1,5 @@
 import stringcase
 from copy import deepcopy
-from operator import setitem
 from .metadata import ControlledMetadata
 from .helpers import cached_property
 from .field import Field
@@ -56,7 +55,7 @@ class Schema(ControlledMetadata):
 
     def __setattr__(self, name, value):
         if name in ['fields', 'missing_values', 'primary_key', 'foreign_keys']:
-            return setitem(self, stringcase.camelcase(name), value)
+            self[stringcase.camelcase(name)] = value
         super().__setattr__(name, value)
 
     @cached_property

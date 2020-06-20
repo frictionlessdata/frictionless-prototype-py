@@ -93,8 +93,8 @@ def test_validate_invalid_package():
     ]
 
 
-def test_validate_invalid_package_strict():
-    report = validate({'resources': [{'path': 'data/table.csv'}]}, strict=True)
+def test_validate_invalid_package_exact():
+    report = validate({'resources': [{'path': 'data/table.csv'}]}, exact=True)
     assert report.flatten(['code', 'note']) == [
         [
             'package-error',
