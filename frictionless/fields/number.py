@@ -1,5 +1,6 @@
 import re
 from decimal import Decimal
+from ..helpers import cached_property
 from ..field import Field
 
 
@@ -14,27 +15,42 @@ class NumberField(Field):
     # Read
 
     def read_cell_cast(self, cell):
-        group_char = self.get('groupChar', DEFAULT_GROUP_CHAR)
-        decimal_char = self.get('decimalChar', DEFAULT_DECIMAL_CHAR)
-        if not isinstance(cell, Decimal):
-            if isinstance(cell, str):
-                cell = re.sub(r'\s', '', cell)
-                cell = cell.replace(decimal_char, '__decimal_char__')
-                cell = cell.replace(group_char, '')
-                cell = cell.replace('__decimal_char__', '.')
-                if not self.get('bareNumber', DEFAULT_BARE_NUMBER):
-                    cell = re.sub(r'((^\D*)|(\D*$))', '', cell)
-            elif not isinstance(cell, (int,) + (float,)):
-                return None
-            elif cell is True or cell is False:
-                return None
+        if isinstance(cell, str):
+            if self.read_cell_cast_processor:
+                cell = self.read_cell_cast_processor(cell)
             try:
-                if isinstance(cell, float):
-                    cell = str(cell)
-                cell = Decimal(cell)
+                return Decimal(cell)
             except Exception:
                 return None
-        return cell
+        elif isinstance(cell, Decimal):
+            return cell
+        elif cell is True or cell is False:
+            return None
+        elif isinstance(cell, int):
+            return cell
+        elif isinstance(cell, float):
+            return Decimal(str(cell))
+        return None
+
+    @cached_property
+    def read_cell_cast_processor(self):
+        if set(['groupChar', 'decimalChar', 'bareNumber']).intersection(self.keys()):
+            group_char = self.get('groupChar', DEFAULT_GROUP_CHAR)
+            decimal_char = self.get('decimalChar', DEFAULT_DECIMAL_CHAR)
+
+            def processor(cell):
+                cell = cell.replace(group_char, '')
+                cell = cell.replace(decimal_char, '.')
+                if self.read_cell_cast_pattern:
+                    cell = self.read_cell_cast_pattern.sub('', cell)
+                return cell
+
+            return processor
+
+    @cached_property
+    def read_cell_cast_pattern(self):
+        if not self.get('bareNumber', DEFAULT_BARE_NUMBER):
+            return re.compile(r'((^\D*)|(\D*$))')
 
     # Write
 

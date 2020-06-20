@@ -21,7 +21,9 @@ class StringField(Field):
     def read_cell_cast(self, cell):
         if not isinstance(cell, str):
             return None
-        if self.format == 'uri':
+        if self.format == 'default':
+            return cell
+        elif self.format == 'uri':
             uri = uri_from_string(cell)
             try:
                 uri_validator.validate(uri)

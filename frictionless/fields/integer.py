@@ -1,5 +1,6 @@
 import re
 from decimal import Decimal
+from ..helpers import cached_property
 from ..field import Field
 
 
@@ -14,30 +15,27 @@ class IntegerField(Field):
     # Read
 
     def read_cell_cast(self, cell):
-        if isinstance(cell, int):
-            if cell is True or cell is False:
-                return None
-            pass
-
-        elif isinstance(cell, str):
-            if not self.get('bareNumber', DEFAULT_BARE_NUMBER):
-                cell = re.sub(r'((^\D*)|(\D*$))', '', cell)
-
+        if isinstance(cell, str):
+            if self.read_cell_cast_pattern:
+                cell = self.read_cell_cast_pattern.sub('', cell)
             try:
-                cell = int(cell)
+                return int(cell)
             except Exception:
                 return None
-
-        elif isinstance(cell, float) and cell.is_integer():
-            cell = int(cell)
-
-        elif isinstance(cell, Decimal) and cell % 1 == 0:
-            cell = int(cell)
-
-        else:
+        elif cell is True or cell is False:
             return None
+        elif isinstance(cell, int):
+            return cell
+        elif isinstance(cell, float) and cell.is_integer():
+            return int(cell)
+        elif isinstance(cell, Decimal) and cell % 1 == 0:
+            return int(cell)
+        return None
 
-        return cell
+    @cached_property
+    def read_cell_cast_pattern(self):
+        if not self.get('bareNumber', DEFAULT_BARE_NUMBER):
+            return re.compile(r'((^\D*)|(\D*$))')
 
     # Write
 

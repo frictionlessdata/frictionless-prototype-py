@@ -1,3 +1,4 @@
+from ..helpers import cached_property
 from ..field import Field
 
 
@@ -10,16 +11,18 @@ class BooleanField(Field):
     # Read
 
     def read_cell_cast(self, cell):
-        if not isinstance(cell, bool):
-            if isinstance(cell, str):
-                cell = cell.strip()
-            if cell in self.get('trueValues', TRUE_VALUES):
-                cell = True
-            elif cell in self.get('falseValues', FALSE_VALUES):
-                cell = False
-            else:
-                return None
-        return cell
+        if cell is True or cell is False:
+            return cell
+        return self.read_cell_cast_mapping.get(cell)
+
+    @cached_property
+    def read_cell_cast_mapping(self):
+        mapping = {}
+        for value in self.get('trueValues', TRUE_VALUES):
+            mapping[value] = True
+        for value in self.get('falseValues', FALSE_VALUES):
+            mapping[value] = False
+        return mapping
 
     # Write
 

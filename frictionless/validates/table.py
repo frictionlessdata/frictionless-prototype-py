@@ -293,6 +293,7 @@ def validate_table(
 
     # Return report
     time = timer.get_time()
+    source = stream.source if isinstance(stream.source, str) else 'inline'
     return Report(
         time=time,
         errors=task_errors,
@@ -302,7 +303,7 @@ def validate_table(
                 scope=errors.scope,
                 partial=partial,
                 row_count=row_number,
-                source=str(stream.source),
+                source=source,
                 scheme=stream.scheme,
                 format=stream.format,
                 encoding=stream.encoding,
