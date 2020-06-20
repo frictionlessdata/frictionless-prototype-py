@@ -132,11 +132,11 @@ class Field(ControlledMetadata):
         if cell in self.missing_values:
             cell = None
         if cell is not None:
-            cell = self.read_cell_cast(cell)
+            cell = self.__proxy.read_cell_cast(cell)
             if cell is None:
                 notes = notes or OrderedDict()
                 notes['type'] = f'type is "{self.type}/{self.format}"'
-        if not notes:
+        if not notes and self.read_cell_checks:
             for name, check in self.read_cell_checks.items():
                 if not check(cell):
                     notes = notes or OrderedDict()
@@ -190,9 +190,10 @@ class Field(ControlledMetadata):
         if cell is None:
             cell = ''
         if cell is not None:
-            cell = self.write_cell_cast(cell)
+            cell = self.__proxy.write_cell_cast(cell)
         if cell is None:
-            notes = [self.type_error_note]
+            notes = notes or OrderedDict()
+            notes['type'] = f'type is "{self.type}/{self.format}"'
         return cell, notes
 
     def write_cell_cast(self, cell):
