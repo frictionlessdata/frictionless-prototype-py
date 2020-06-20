@@ -24,7 +24,7 @@ class Field(ControlledMetadata):
         constraints? (dict): constraints
 
         metadata_root? (Metadata): root metadata object
-        metadata_raise? (bool): if True it will fail on the first metadata error
+        metadata_strict? (bool): if True it will fail on the first metadata error
         metadata_schema? (Schema): parent schema object
 
     # Raises
@@ -50,7 +50,7 @@ class Field(ControlledMetadata):
         missing_values=None,
         constraints=None,
         metadata_root=None,
-        metadata_raise=False,
+        metadata_strict=False,
         metadata_schema=None,
     ):
         self.setdefined('name', name)
@@ -62,7 +62,7 @@ class Field(ControlledMetadata):
         super().__init__(
             descriptor=descriptor,
             metadata_root=metadata_root,
-            metadata_raise=metadata_raise,
+            metadata_strict=metadata_strict,
         )
 
     def __setattr__(self, name, value):

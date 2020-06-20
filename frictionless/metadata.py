@@ -18,7 +18,7 @@ class Metadata(dict):
     # Arguments
         descriptor? (str|dict): schema descriptor
         metadata_root? (Metadata): root metadata object
-        metadata_raise? (bool): if True it will fail on the first metadata error
+        metadata_strict? (bool): if True it will fail on the first metadata error
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
@@ -28,10 +28,10 @@ class Metadata(dict):
     metadata_Error = None
     metadata_profile = None
 
-    def __init__(self, descriptor=None, *, metadata_root=None, metadata_raise=False):
+    def __init__(self, descriptor=None, *, metadata_root=None, metadata_strict=False):
         self.__errors = []
         self.__root = metadata_root or self
-        self.__raise = metadata_raise or not self.metadata_Error
+        self.__raise = metadata_strict or not self.metadata_Error
         metadata = self.metadata_extract(descriptor)
         for key, value in metadata.items():
             dict.setdefault(self, key, value)
@@ -44,7 +44,7 @@ class Metadata(dict):
         return self.__root
 
     @cached_property
-    def metadata_raise(self):
+    def metadata_strict(self):
         return self.__raise
 
     @cached_property
@@ -128,7 +128,7 @@ class Metadata(dict):
                 profile_path = '/'.join(map(str, error.schema_path))
                 note = '"%s" at "%s" in metadata and at "%s" in profile'
                 note = note % (error.message, metadata_path, profile_path)
-                if self.metadata_raise:
+                if self.metadata_strict:
                     raise exceptions.FrictionlessException(note)
                 error = self.metadata_Error(note=note)
                 self.metadata_errors.append(error)
@@ -140,7 +140,7 @@ class ControlledMetadata(Metadata):
     # Arguments
         descriptor? (str|dict): schema descriptor
         metadata_root? (Metadata): root metadata object
-        metadata_raise? (bool): if True it will fail on the first metadata error
+        metadata_strict? (bool): if True it will fail on the first metadata error
         metadata_attach? (bool): callback for the attach mechanism
 
     # Raises
@@ -153,12 +153,12 @@ class ControlledMetadata(Metadata):
         descriptor=None,
         *,
         metadata_root=None,
-        metadata_raise=False,
+        metadata_strict=False,
         metadata_attach=None
     ):
         self.__attach = metadata_attach
         super().__init__(
-            descriptor, metadata_root=metadata_root, metadata_raise=metadata_raise
+            descriptor, metadata_root=metadata_root, metadata_strict=metadata_strict
         )
 
     # Attach
@@ -188,7 +188,7 @@ class ControlledMetadata(Metadata):
                     value = ControlledMetadata(
                         value,
                         metadata_root=self.metadata_root,
-                        metadata_raise=self.metadata_raise,
+                        metadata_strict=self.metadata_strict,
                     )
                     dict.__setitem__(self, key, value)
                 value.metadata_process()
@@ -197,7 +197,7 @@ class ControlledMetadata(Metadata):
                     value = ControlledMetadataList(
                         value,
                         metadata_root=self.metadata_root,
-                        metadata_raise=self.metadata_raise,
+                        metadata_strict=self.metadata_strict,
                     )
                     dict.__setitem__(self, key, value)
                 value.metadata_process()
@@ -275,7 +275,7 @@ class ControlledMetadataList(list):
     # Arguments
         values (str|dict): values
         metadata_root? (Metadata): root metadata object
-        metadata_raise? (bool): if True it will fail on the first metadata error
+        metadata_strict? (bool): if True it will fail on the first metadata error
         metadata_attach? (bool): callback for the attach mechanism
 
     # Raises
@@ -284,12 +284,12 @@ class ControlledMetadataList(list):
     """
 
     def __init__(
-        self, values, *, metadata_root=None, metadata_raise=False, metadata_attach=None
+        self, values, *, metadata_root=None, metadata_strict=False, metadata_attach=None
     ):
         list.extend(self, values)
         self.__errors = []
         self.__root = metadata_root or self
-        self.__raise = metadata_raise
+        self.__raise = metadata_strict
         self.__attach = metadata_attach
 
     @cached_property
@@ -297,7 +297,7 @@ class ControlledMetadataList(list):
         return self.__root
 
     @cached_property
-    def metadata_raise(self):
+    def metadata_strict(self):
         return self.__raise
 
     @cached_property
@@ -332,7 +332,7 @@ class ControlledMetadataList(list):
                     value = ControlledMetadata(
                         value,
                         metadata_root=self.metadata_root,
-                        metadata_raise=self.metadata_raise,
+                        metadata_strict=self.metadata_strict,
                     )
                     list.__setitem__(self, index, value)
                 value.metadata_process()
@@ -341,7 +341,7 @@ class ControlledMetadataList(list):
                     value = ControlledMetadataList(
                         value,
                         metadata_root=self.metadata_root,
-                        metadata_raise=self.metadata_raise,
+                        metadata_strict=self.metadata_strict,
                     )
                     list.__setitem__(self, index, value)
                 value.metadata_process()

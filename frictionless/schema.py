@@ -19,7 +19,7 @@ class Schema(ControlledMetadata):
         foreign_keys? (dict[]): foreign_keys
 
         metadata_root? (Metadata): root metadata object
-        metadata_raise? (bool): if True it will fail on the first metadata error
+        metadata_strict? (bool): if True it will fail on the first metadata error
         metadata_resource? (Resource): parent resource
 
     # Raises
@@ -39,7 +39,7 @@ class Schema(ControlledMetadata):
         primary_key=None,
         foreign_keys=None,
         metadata_root=None,
-        metadata_raise=False,
+        metadata_strict=False,
         metadata_resource=None,
     ):
         self.setdefined('fields', fields)
@@ -50,7 +50,7 @@ class Schema(ControlledMetadata):
         super().__init__(
             descriptor=descriptor,
             metadata_root=metadata_root,
-            metadata_raise=metadata_raise,
+            metadata_strict=metadata_strict,
         )
 
     def __setattr__(self, name, value):
@@ -311,7 +311,7 @@ class Schema(ControlledMetadata):
                 field = Field(
                     field,
                     metadata_root=self.metadata_root,
-                    metadata_raise=self.metadata_raise,
+                    metadata_strict=self.metadata_strict,
                     metadata_schema=self,
                 )
                 list.__setitem__(self['fields'], index, field)
