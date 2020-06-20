@@ -4,6 +4,7 @@ import requests
 import jsonschema
 from copy import deepcopy
 from operator import setitem
+from functools import partial
 from urllib.parse import urlparse
 from .helpers import cached_property
 from . import exceptions
@@ -165,7 +166,7 @@ class ControlledMetadata(Metadata):
     def metadata_attach(self, name, value):
         if self.get(name) != value:
             value = deepcopy(value)
-            attach = lambda: setitem(self, name, value)
+            attach = partial(metadata_attach, self, name, value)
             if isinstance(value, dict):
                 value = ControlledMetadata(value, metadata_attach=attach)
             if isinstance(value, list):
@@ -412,6 +413,5 @@ class ControlledMetadataList(list):
 # Internal
 
 
-def metadata_transform_hook(metadata, name, value):
-    if name not in metadata:
-        metadata[name] = value
+def metadata_attach(self, name, value):
+    setitem(self, name, value)

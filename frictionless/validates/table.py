@@ -318,8 +318,6 @@ def validate_table(
                 skip_rows=skip_rows,
                 limit_rows=limit_rows,
                 offset_rows=offset_rows,
-                # TODO: investigate whey it troubles multiprocessing
-                #  schema=schema,
                 schema=copy(schema),
                 dialect=stream.dialect,
                 errors=errors,
