@@ -68,29 +68,27 @@ class Row(OrderedDict):
                     )
 
         # Iterate items
-        is_blank = True
         field_number = 0
-        for field_position, field, cell in zip(field_positions, fields, cells):
+        for field_position, field, source in zip(field_positions, fields, cells):
             field_number += 1
 
             # Read cell
-            self[field.name], notes = field.read_cell(cell)
+            target, notes = field.read_cell(source)
             type_note = notes.pop('type', None) if notes else None
-            if self[field.name] is None and not type_note:
-                self.__blank_cells[field.name] = cell
-            else:
-                is_blank = False
+            if target is None and not type_note:
+                self.__blank_cells[field.name] = source
+            self[field.name] = target
 
             # Type error
             if type_note:
-                self.__error_cells[field.name] = cell
+                self.__error_cells[field.name] = source
                 self.__errors.append(
                     errors.TypeError(
                         note=type_note,
                         cells=list(map(str, cells)),
                         row_number=row_number,
                         row_position=row_position,
-                        cell=str(cell),
+                        cell=str(source),
                         field_name=field.name,
                         field_number=field_number,
                         field_position=field_position,
@@ -106,7 +104,7 @@ class Row(OrderedDict):
                             cells=list(map(str, cells)),
                             row_number=row_number,
                             row_position=row_position,
-                            cell=str(cell),
+                            cell=str(source),
                             field_name=field.name,
                             field_number=field_number,
                             field_position=field_position,
@@ -114,7 +112,7 @@ class Row(OrderedDict):
                     )
 
         # Blank row
-        if is_blank:
+        if len(self) == len(self.__blank_cells):
             self.__errors = [
                 errors.BlankRowError(
                     note='',
