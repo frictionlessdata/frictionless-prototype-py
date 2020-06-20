@@ -55,7 +55,7 @@ class Schema(ControlledMetadata):
         )
 
     def __setattr__(self, name, value):
-        if name in ['missing_values', 'primary_key', 'foreign_keys', 'fields']:
+        if name in ['fields', 'missing_values', 'primary_key', 'foreign_keys']:
             return setitem(self, stringcase.camelcase(name), value)
         super().__setattr__(name, value)
 
