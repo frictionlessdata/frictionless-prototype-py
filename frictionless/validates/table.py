@@ -329,6 +329,7 @@ def validate_table(
 # Internal
 
 
+# TODO: refactor add/force (make more explicit)
 class Errors(list):
     def __init__(self, *, pick_errors=None, skip_errors=None, limit_errors=None):
         self.__pick_errors = set(pick_errors or [])
