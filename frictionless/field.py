@@ -118,6 +118,7 @@ class Field(ControlledMetadata):
 
     # Read
 
+    # TODO: review: this function gives x2 overhead over inner read_cell_cast
     def read_cell(self, cell):
         """Read cell (cast)
 
