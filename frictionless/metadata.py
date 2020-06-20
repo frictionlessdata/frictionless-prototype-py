@@ -6,6 +6,7 @@ from copy import deepcopy
 from operator import setitem
 from functools import partial
 from urllib.parse import urlparse
+from importlib import import_module
 from .helpers import cached_property
 from . import exceptions
 from . import helpers
@@ -32,6 +33,7 @@ class Metadata(dict):
         self.__errors = []
         self.__root = metadata_root or self
         self.__raise = metadata_strict or not self.metadata_Error
+        self.__Error = self.metadata_Error or import_module('frictionless.errors').Error
         metadata = self.metadata_extract(descriptor)
         for key, value in metadata.items():
             dict.setdefault(self, key, value)
@@ -89,8 +91,8 @@ class Metadata(dict):
                     return json.load(file)
             return json.load(descriptor)
         except Exception as exception:
-            message = 'canot extract metadata "%s" because "%s"' % (descriptor, exception)
-            raise exceptions.FrictionlessException(message) from exception
+            note = f'canot extract metadata "{descriptor}" because "{exception}"'
+            raise exceptions.FrictionlessException(self.__Error(note=note)) from exception
 
     # Process
 
@@ -104,8 +106,8 @@ class Metadata(dict):
             helpers.ensure_dir(target)
             with io.open(target, mode='w', encoding='utf-8') as file:
                 json.dump(self, file, indent=2, ensure_ascii=ensure_ascii)
-        except Exception as exception:
-            raise exceptions.FrictionlessException(str(exception)) from exception
+        except Exception as exc:
+            raise exceptions.FrictionlessException(self.__Error(note=str(exc))) from exc
 
     # Transform
 
@@ -128,9 +130,9 @@ class Metadata(dict):
                 profile_path = '/'.join(map(str, error.schema_path))
                 note = '"%s" at "%s" in metadata and at "%s" in profile'
                 note = note % (error.message, metadata_path, profile_path)
+                error = self.__Error(note=note)
                 if self.metadata_strict:
-                    raise exceptions.FrictionlessException(note)
-                error = self.metadata_Error(note=note)
+                    raise exceptions.FrictionlessException(error)
                 self.metadata_errors.append(error)
 
 
@@ -154,7 +156,7 @@ class ControlledMetadata(Metadata):
         *,
         metadata_root=None,
         metadata_strict=False,
-        metadata_attach=None
+        metadata_attach=None,
     ):
         self.__attach = metadata_attach
         super().__init__(

@@ -1,10 +1,11 @@
 from functools import partial
 from multiprocessing import Pool
+from ..validate import validate
+from ..inquiry import Inquiry
+from ..report import Report
+from ..errors import Error
 from .. import helpers
 from .. import exceptions
-from ..report import Report
-from ..inquiry import Inquiry
-from ..validate import validate
 
 
 @Report.from_validate
@@ -22,8 +23,8 @@ def validate_inquiry(source):
     for task in inquiry.tasks:
         source_type = task.get('sourceType') or helpers.detect_source_type(task['source'])
         if source_type == 'inquiry':
-            message = 'Inquiry cannot contain nested inquiries'
-            raise exceptions.FrictionlessException(message)
+            error = Error(note='Inquiry cannot contain nested inquiries')
+            raise exceptions.FrictionlessException(error)
         if source_type == 'package':
             # For now, we don't flatten inquiry completely and for the case
             # of a list of packages with one resource we don't get proper multiprocessing

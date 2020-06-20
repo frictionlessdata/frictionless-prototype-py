@@ -154,7 +154,7 @@ def validate_table(
     try:
         schema = Schema(schema)
     except exceptions.FrictionlessException as exception:
-        errors.add(Error.from_exception(exception), force=True)
+        errors.add(exception.error, force=True)
         schema = None
         exited = True
 
@@ -282,8 +282,8 @@ def validate_table(
             if limit_memory and not row_number % 100000:
                 memory = helpers.get_current_memory_usage()
                 if memory and memory > limit_memory:
-                    message = f'exceeded memory limit "{limit_memory}MB"'
-                    raise exceptions.FrictionlessException(message)
+                    error = Error(note=f'exceeded memory limit "{limit_memory}MB"')
+                    raise exceptions.FrictionlessException(error)
 
     # Validate table
     if not exited:

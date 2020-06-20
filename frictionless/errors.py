@@ -19,7 +19,7 @@ class Error(Metadata):
     code = 'error'
     name = 'Error'
     tags = []  # type: ignore
-    template = 'Error'
+    template = '{note}'
     description = 'Error.'
 
     def __init__(self, descriptor=None, *, note):
@@ -41,6 +41,7 @@ class Error(Metadata):
 
     # Create
 
+    # TODO: remove after tabulator migration
     @staticmethod
     def from_exception(exception):
         Error = SourceError
@@ -55,9 +56,6 @@ class Error(Metadata):
             Error = EncodingError
         elif isinstance(exception, tabulator.exceptions.CompressionError):
             Error = CompressionError
-        # TODO: it's a temporary hack
-        elif isinstance(exception, exceptions.FrictionlessException):
-            Error = SchemaError
         return Error(note=note)
         super().metadata_process()
 
@@ -214,8 +212,8 @@ class CellError(RowError):
                     field_number=field_number,
                     field_position=field_position,
                 )
-        message = f'Field {field_name} is not in the row'
-        raise exceptions.FrictionlessException(message)
+        error = Error(note=f'Field {field_name} is not in the row')
+        raise exceptions.FrictionlessException(error)
 
 
 # Metadata

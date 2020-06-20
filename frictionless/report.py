@@ -2,8 +2,8 @@ import functools
 from . import config
 from . import helpers
 from . import exceptions
-from .errors import TaskError
 from .metadata import Metadata
+from .errors import Error, TaskError
 
 
 class Report(Metadata):
@@ -63,8 +63,8 @@ class Report(Metadata):
     @property
     def table(self):
         if len(self.tables) != 1:
-            message = 'The "report.table" is only available for a single table reports'
-            raise exceptions.FrictionlessException(message)
+            error = Error(note='The "report.table" is available for single table reports')
+            raise exceptions.FrictionlessException(error)
         return self.tables[0]
 
     # Create
@@ -226,8 +226,8 @@ class ReportTable(Metadata):
     @property
     def error(self):
         if len(self.errors) != 1:
-            message = 'The "table.error" is only available for a single error tables'
-            raise exceptions.FrictionlessException(message)
+            error = Error(note='The "table.error" is available for single error tables')
+            raise exceptions.FrictionlessException(error)
         return self.errors[0]
 
     # Flatten
