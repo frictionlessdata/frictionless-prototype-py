@@ -39,7 +39,7 @@ EXTRAS_REQUIRE = {
     'gsheet': ['google-api-python-client>=1.5'],
     'hint': ['statistics>=1.0'],
     'html': ['pyquery>=1.4'],
-    'json': ['ndjson>=0.3'],
+    'json': ['ijson>=3.0', 'ndjson>=0.3'],
     'ods': ['ezodf>=0.3'],
     'pandas': ['pandas>=1.0'],
     'rule': ['simpleeval>=0.9'],
@@ -51,6 +51,7 @@ EXTRAS_REQUIRE = {
 INSTALL_REQUIRES = (
     [
         'click>=6.6',
+        'chardet>=3.0',
         'requests>=2.10',
         'jsonschema>=2.5',
         'stringcase>=1.2',

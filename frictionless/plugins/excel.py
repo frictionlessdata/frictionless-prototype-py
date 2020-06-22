@@ -545,3 +545,32 @@ class XLSParser(Parser):
                             )
                 row.append(value)
             yield (row_number, None, row)
+
+
+class XLSXWriter:
+    options = [
+        'sheet',
+    ]
+
+    def __init__(self, **options):
+
+        # Make bytes
+        if six.PY2:
+            for key, value in options.items():
+                if isinstance(value, six.string_types):
+                    options[key] = str(value)
+
+        # Set attributes
+        self.__options = options
+
+    def write(self, source, target, headers, encoding=None):
+        helpers.ensure_dir(target)
+        count = 0
+        wb = openpyxl.Workbook(write_only=True)
+        ws = wb.create_sheet(title=self.__options.get('sheet'))
+        ws.append(headers)
+        for row in source:
+            ws.append(row)
+            count += 1
+        wb.save(target)
+        return count

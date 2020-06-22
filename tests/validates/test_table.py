@@ -526,7 +526,7 @@ def test_validate_infer_type_any():
     report = validate('data/table.csv', infer_type='any')
     assert report.valid
     assert report.table['schema'] == {
-        'fields': [{'name': 'id', 'type': 'any'}, {'name': 'name', 'type': 'any'},],
+        'fields': [{'name': 'id', 'type': 'any'}, {'name': 'name', 'type': 'any'}],
     }
 
 

@@ -40,39 +40,39 @@ S3_DEFAULT_ENDPOINT_URL = 'https://s3.amazonaws.com'
 # Loaders
 
 LOADERS = {
-    's3': 'tabulator.loaders.aws.AWSLoader',
-    'file': 'tabulator.loaders.local.LocalLoader',
-    'http': 'tabulator.loaders.remote.RemoteLoader',
-    'https': 'tabulator.loaders.remote.RemoteLoader',
-    'ftp': 'tabulator.loaders.remote.RemoteLoader',
-    'ftps': 'tabulator.loaders.remote.RemoteLoader',
-    'stream': 'tabulator.loaders.stream.StreamLoader',
-    'text': 'tabulator.loaders.text.TextLoader',
+    's3': 'frictionless.plugins.aws.AWSLoader',
+    'file': 'frictionless.loaders.local.LocalLoader',
+    'http': 'frictionless.loaders.remote.RemoteLoader',
+    'https': 'frictionless.loaders.remote.RemoteLoader',
+    'ftp': 'frictionless.loaders.remote.RemoteLoader',
+    'ftps': 'frictionless.loaders.remote.RemoteLoader',
+    'stream': 'frictionless.loaders.stream.StreamLoader',
+    'text': 'frictionless.loaders.text.TextLoader',
 }
 
 # Parsers
 
 PARSERS = {
-    'csv': 'tabulator.parsers.csv.CSVParser',
-    'datapackage': 'tabulator.parsers.datapackage.DataPackageParser',
-    'gsheet': 'tabulator.parsers.gsheet.GsheetParser',
-    'html': 'tabulator.parsers.html.HTMLTableParser',
-    'inline': 'tabulator.parsers.inline.InlineParser',
-    'json': 'tabulator.parsers.json.JSONParser',
-    'jsonl': 'tabulator.parsers.ndjson.NDJSONParser',
-    'ndjson': 'tabulator.parsers.ndjson.NDJSONParser',
-    'ods': 'tabulator.parsers.ods.ODSParser',
-    'sql': 'tabulator.parsers.sql.SQLParser',
-    'tsv': 'tabulator.parsers.tsv.TSVParser',
-    'xls': 'tabulator.parsers.xls.XLSParser',
-    'xlsx': 'tabulator.parsers.xlsx.XLSXParser',
+    'csv': 'frictionless.plugins.csv.CSVParser',
+    'datapackage': 'frictionless.plugins.datapackage.DataPackageParser',
+    'gsheet': 'frictionless.plugins.gsheet.GsheetParser',
+    'html': 'frictionless.plugins.html.HTMLTableParser',
+    'inline': 'frictionless.parsers.inline.InlineParser',
+    'json': 'frictionless.plugins.json.JSONParser',
+    'jsonl': 'frictionless.plugins.json.NDJSONParser',
+    'ndjson': 'frictionless.plugins.json.NDJSONParser',
+    'ods': 'frictionless.plugins.ods.ODSParser',
+    'sql': 'frictionless.plugins.sql.SQLParser',
+    'tsv': 'frictionless.plugins.tsv.TSVParser',
+    'xls': 'frictionless.plugins.excel.XLSParser',
+    'xlsx': 'frictionless.plugins.excel.XLSXParser',
 }
 
 # Writers
 
 WRITERS = {
-    'csv': 'tabulator.writers.csv.CSVWriter',
-    'json': 'tabulator.writers.json.JSONWriter',
-    'xlsx': 'tabulator.writers.xlsx.XLSXWriter',
-    'sql': 'tabulator.writers.sql.SQLWriter',
+    'csv': 'frictionless.plugins.csv.CSVWriter',
+    'json': 'frictionless.plugins.json.JSONWriter',
+    'xlsx': 'frictionless.plugins.excel.XLSXWriter',
+    'sql': 'frictionless.plugins.sql.SQLWriter',
 }

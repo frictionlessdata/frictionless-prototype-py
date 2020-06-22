@@ -20,7 +20,7 @@ format:
 
 lint:
 	black $(PACKAGE) tests --skip-string-normalization --line-length 90 --check
-	pylama $(PACKAGE)
+	pylama $(PACKAGE) tests
 	mypy $(PACKAGE) --ignore-missing-imports
 
 readme:
