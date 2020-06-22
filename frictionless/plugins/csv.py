@@ -1,9 +1,7 @@
 import io
 import csv
-import six
 import unicodecsv
 from itertools import chain
-from codecs import iterencode
 from ..plugin import Plugin
 from ..parser import Parser
 from .. import helpers
@@ -33,14 +31,6 @@ class CsvParser(Parser):
     ]
 
     def __init__(self, loader, force_parse=False, **options):
-
-        # Make bytes
-        if six.PY2:
-            for key, value in options.items():
-                if isinstance(value, six.string_types):
-                    options[key] = str(value)
-
-        # Set attributes
         self.__loader = loader
         self.__options = options
         self.__force_parse = force_parse
@@ -94,26 +84,10 @@ class CsvParser(Parser):
     # Private
 
     def __iter_extended_rows(self):
-
-        # For PY2 encode/decode
-        if six.PY2:
-            # Reader requires utf-8 encoded stream
-            bytes = iterencode(self.__chars, 'utf-8')
-            sample, dialect = self.__prepare_dialect(bytes)
-            items = csv.reader(chain(sample, bytes), dialect=dialect)
-            for row_number, item in enumerate(items, start=1):
-                values = []
-                for value in item:
-                    value = value.decode('utf-8')
-                    values.append(value)
-                yield (row_number, None, list(values))
-
-        # For PY3 use chars
-        else:
-            sample, dialect = self.__prepare_dialect(self.__chars)
-            items = csv.reader(chain(sample, self.__chars), dialect=dialect)
-            for row_number, item in enumerate(items, start=1):
-                yield (row_number, None, list(item))
+        sample, dialect = self.__prepare_dialect(self.__chars)
+        items = csv.reader(chain(sample, self.__chars), dialect=dialect)
+        for row_number, item in enumerate(items, start=1):
+            yield (row_number, None, list(item))
 
     def __prepare_dialect(self, stream):
 
@@ -129,7 +103,7 @@ class CsvParser(Parser):
 
         # Get dialect
         try:
-            separator = b'' if six.PY2 else ''
+            separator = ''
             delimiter = self.__options.get('delimiter', ',\t;|')
             dialect = csv.Sniffer().sniff(separator.join(sample), delimiter)
             if not dialect.escapechar:
@@ -155,14 +129,6 @@ class CsvWriter:
     ]
 
     def __init__(self, **options):
-
-        # Make bytes
-        if six.PY2:
-            for key, value in options.items():
-                if isinstance(value, six.string_types):
-                    options[key] = str(value)
-
-        # Set attributes
         self.__options = options
 
     def write(self, source, target, headers, encoding=None):

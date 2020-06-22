@@ -1,5 +1,4 @@
 import io
-import six
 import requests
 from ..loader import Loader
 from .. import exceptions
@@ -27,10 +26,6 @@ class RemoteLoader(Loader):
         if not http_session:
             http_session = requests.Session()
             http_session.headers.update(config.HTTP_HEADERS)
-
-        # No stream support
-        if six.PY2:
-            http_stream = False
 
         # Set attributes
         self.__bytes_sample_size = bytes_sample_size

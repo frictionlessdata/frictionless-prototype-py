@@ -1,4 +1,3 @@
-import six
 from collections import OrderedDict
 from ..parser import Parser
 from .. import exceptions
@@ -19,7 +18,7 @@ class InlineParser(Parser):
         return False
 
     def open(self, source, encoding=None):
-        if hasattr(source, '__next__' if six.PY3 else 'next'):
+        if hasattr(source, '__next__'):
             message = 'Only callable returning an iterator is supported'
             raise exceptions.SourceError(message)
         self.close()

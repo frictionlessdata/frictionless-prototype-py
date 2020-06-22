@@ -1,6 +1,5 @@
 import os
 import io
-import six
 import sys
 import xlrd
 import shutil
@@ -100,7 +99,7 @@ class XlsxParser(Parser):
 
         # Get sheet
         try:
-            if isinstance(self.__sheet_pointer, six.string_types):
+            if isinstance(self.__sheet_pointer, str):
                 self.__sheet = self.__book[self.__sheet_pointer]
             else:
                 self.__sheet = self.__book.worksheets[self.__sheet_pointer - 1]
@@ -478,7 +477,7 @@ class XlsParser(Parser):
 
         # Get sheet
         try:
-            if isinstance(self.__sheet_pointer, six.string_types):
+            if isinstance(self.__sheet_pointer, str):
                 self.__sheet = self.__book.sheet_by_name(self.__sheet_pointer)
             else:
                 self.__sheet = self.__book.sheet_by_index(self.__sheet_pointer - 1)
@@ -553,14 +552,6 @@ class XlsxWriter:
     ]
 
     def __init__(self, **options):
-
-        # Make bytes
-        if six.PY2:
-            for key, value in options.items():
-                if isinstance(value, six.string_types):
-                    options[key] = str(value)
-
-        # Set attributes
         self.__options = options
 
     def write(self, source, target, headers, encoding=None):

@@ -1,5 +1,4 @@
 import re
-import six
 import gzip
 import zipfile
 import tempfile
@@ -353,7 +352,7 @@ class Table:
                 )
 
         # Zip compression
-        if compression == 'zip' and six.PY3:
+        if compression == 'zip':
             source = self.__loader.load(source, mode='b')
             with zipfile.ZipFile(source) as archive:
                 name = archive.namelist()[0]
@@ -371,7 +370,7 @@ class Table:
             scheme = 'stream'
 
         # Gzip compression
-        elif compression == 'gz' and six.PY3:
+        elif compression == 'gz':
             name = ''
             if isinstance(source, str):
                 name = source.replace('.gz', '')
@@ -776,7 +775,7 @@ class Table:
             headers = headers if keyed_source else row
             for index, header in enumerate(headers):
                 if header is not None:
-                    headers[index] = six.text_type(header).strip()
+                    headers[index] = str(header).strip()
             if row_number == self.__headers_row:
                 self.__headers = headers
                 last_merged = {index: header for index, header in enumerate(headers)}
@@ -875,7 +874,7 @@ class Table:
         if isinstance(self.__headers, list):
             str_headers = []
             for header in self.__headers:
-                str_headers.append(six.text_type(header) if header is not None else '')
+                str_headers.append(str(header) if header is not None else '')
             self.__headers = str_headers
 
     def __detect_html(self):
@@ -884,7 +883,7 @@ class Table:
         text = ''
         for row_number, headers, row in self.__sample_extended_rows:
             for value in row:
-                if isinstance(value, six.string_types):
+                if isinstance(value, str):
                     text += value
 
         # Detect html content
@@ -992,7 +991,7 @@ class Table:
 
             # Pick by comment
             for comment in filter(None, self.__pick_rows_by_comments):
-                if six.text_type(cell).startswith(comment):
+                if str(cell).startswith(comment):
                     return False
 
             # Default
@@ -1024,7 +1023,7 @@ class Table:
 
             # Skip by comment
             for comment in filter(None, self.__skip_rows_by_comments):
-                if six.text_type(cell).startswith(comment):
+                if str(cell).startswith(comment):
                     return True
 
             # Default

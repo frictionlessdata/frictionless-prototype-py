@@ -1,6 +1,5 @@
-import six
+import io
 import ezodf
-from six import BytesIO
 from datetime import datetime
 from ..plugin import Plugin
 from ..parser import Parser
@@ -44,11 +43,11 @@ class OdsParser(Parser):
         self.__bytes = self.__loader.load(source, mode='b', encoding=encoding)
 
         # Get book
-        self.__book = ezodf.opendoc(BytesIO(self.__bytes.read()))
+        self.__book = ezodf.opendoc(io.BytesIO(self.__bytes.read()))
 
         # Get sheet
         try:
-            if isinstance(self.__sheet_pointer, six.string_types):
+            if isinstance(self.__sheet_pointer, str):
                 self.__sheet = self.__book.sheets[self.__sheet_pointer]
             else:
                 self.__sheet = self.__book.sheets[self.__sheet_pointer - 1]

@@ -1,7 +1,6 @@
 import io
 import re
 import os
-import six
 import codecs
 import hashlib
 import chardet
@@ -10,7 +9,7 @@ import itertools
 import stringcase
 from copy import copy
 from importlib import import_module
-from urllib.parse import urlparse, urlunparse, parse_qs
+from urllib.parse import urlparse, parse_qs
 from _thread import RLock  # type: ignore
 from . import exceptions
 
@@ -242,7 +241,7 @@ def detect_scheme_and_format(source):
         return ('stream', None)
 
     # Format: inline
-    if not isinstance(source, six.string_types):
+    if not isinstance(source, str):
         return (None, 'inline')
 
     # Format: gsheet
@@ -347,20 +346,6 @@ def requote_uri(uri):
     # To reduce tabulator import time
     import requests.utils
 
-    if six.PY2:
-
-        def url_encode_non_ascii(bytes):
-            pattern = '[\x80-\xFF]'
-            replace = lambda c: ('%%%02x' % ord(c.group(0))).upper()
-            return re.sub(pattern, replace, bytes)
-
-        parts = urlparse(uri)
-        uri = urlunparse(
-            part.encode('idna')
-            if index == 1
-            else url_encode_non_ascii(part.encode('utf-8'))
-            for index, part in enumerate(parts)
-        )
     return requests.utils.requote_uri(uri)
 
 
