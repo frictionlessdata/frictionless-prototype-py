@@ -33,8 +33,7 @@ EXTRAS_REQUIRE = {
     'aws': ['boto3>=1.9'],
     'bigquery': ['google-api-python-client>=1.5'],
     'ckan': ['ckanapi>=4.3'],
-    'csv': [],
-    'dev': TESTS_REQUIRE,
+    'csv': ['unicodecsv'],
     'elastic': ['elasticsearch>=7.0,<8.0'],
     'excel': ['openpyxl>=3.0', 'xlrd>=1.2'],
     'gsheet': ['google-api-python-client>=1.5'],
@@ -48,6 +47,7 @@ EXTRAS_REQUIRE = {
     'spss': ['savReaderWriter>=3.0'],
     'sql': ['sqlalchemy>=1.3'],
     'tsv': ['linear-tsv>=1.0'],
+    'dev': TESTS_REQUIRE,
 }
 INSTALL_REQUIRES = (
     [
