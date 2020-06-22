@@ -4,6 +4,8 @@ from setuptools import setup, find_packages
 
 
 # Helpers
+
+
 def read(*paths):
     """Read a text file."""
     basedir = os.path.dirname(__file__)
@@ -13,26 +15,11 @@ def read(*paths):
 
 
 # Prepare
+
+
 PACKAGE = 'frictionless'
 NAME = PACKAGE.replace('_', '-')
-CORE_REQUIRES = [
-    'click>=6.6',
-    'requests>=2.10',
-    'jsonschema>=2.5',
-    'stringcase>=1.2',
-    'tabulator>=1.52',
-    'datapackage>=1.14',
-]
-PROB_REQUIRES = [
-    'statistics>=1.0',
-]
-RULE_REQUIRES = [
-    'simpleeval>=0.9',
-]
-SERVER_REQUIRES = [
-    'gunicorn>=20',
-]
-DEVOPS_REQUIRES = [
+TESTS_REQUIRE = [
     'mypy',
     'black',
     'pylama',
@@ -41,6 +28,39 @@ DEVOPS_REQUIRES = [
     'coveralls',
     'ipython',
 ]
+EXTRAS_REQUIRE = {
+    'aws': ['boto3>=1.9'],
+    'bigquery': ['google-api-python-client>=1.5'],
+    'ckan': ['ckanapi>=4.3'],
+    'csv': [],
+    'dev': TESTS_REQUIRE,
+    'elastic': ['elasticsearch>=7.0,<8.0'],
+    'excel': ['openpyxl>=3.0', 'xlrd>=1.2'],
+    'gsheet': ['google-api-python-client>=1.5'],
+    'hint': ['statistics>=1.0'],
+    'html': ['pyquery>=1.4'],
+    'json': ['ndjson>=0.3'],
+    'ods': ['ezodf>=0.3'],
+    'pandas': ['pandas>=1.0'],
+    'rule': ['simpleeval>=0.9'],
+    'server': ['gunicorn>=20'],
+    'spss': ['savReaderWriter>=3.0'],
+    'sql': ['sqlalchemy>=1.3'],
+    'tsv': ['linear-tsv>=1.0'],
+}
+INSTALL_REQUIRES = (
+    [
+        'click>=6.6',
+        'requests>=2.10',
+        'jsonschema>=2.5',
+        'stringcase>=1.2',
+        'tabulator>=1.52',
+        'datapackage>=1.14',
+    ]
+    + EXTRAS_REQUIRE['csv']
+    + EXTRAS_REQUIRE['excel']
+    + EXTRAS_REQUIRE['json']
+)
 README = read('README.md')
 VERSION = read(PACKAGE, 'assets', 'VERSION')
 PACKAGES = find_packages(exclude=['tests'])
@@ -48,19 +68,16 @@ ENTRY_POINTS = {'console_scripts': ['frictionless = frictionless.__main__:progra
 
 
 # Run
+
+
 setup(
     name=NAME,
     version=VERSION,
     packages=PACKAGES,
     include_package_data=True,
-    install_requires=CORE_REQUIRES,
-    tests_require=DEVOPS_REQUIRES,
-    extras_require={
-        'prob': PROB_REQUIRES,
-        'rule': RULE_REQUIRES,
-        'server': SERVER_REQUIRES,
-        'devops': DEVOPS_REQUIRES,
-    },
+    install_requires=INSTALL_REQUIRES,
+    tests_require=TESTS_REQUIRE,
+    extras_require=EXTRAS_REQUIRE,
     entry_points=ENTRY_POINTS,
     zip_safe=False,
     long_description=README,
