@@ -27,6 +27,7 @@ TESTS_REQUIRE = [
     'pytest-cov',
     'coveralls',
     'ipython',
+    'moto',
 ]
 EXTRAS_REQUIRE = {
     'aws': ['boto3>=1.9'],
