@@ -1,5 +1,5 @@
-from tabulator import Stream
 from .schema import Schema
+from .table import Table
 from . import config
 
 
@@ -29,10 +29,10 @@ def describe(
         infer_confidence
 
     """
-    with Stream(source, headers=headers_row, sample_size=infer_sample) as stream:
+    with Table(source, headers=headers_row, sample_size=infer_sample) as table:
         schema = Schema.from_sample(
-            stream.sample,
-            names=infer_names or stream.headers,
+            table.sample,
+            names=infer_names or table.headers,
             confidence=infer_confidence,
             missing_values=missing_values,
         )

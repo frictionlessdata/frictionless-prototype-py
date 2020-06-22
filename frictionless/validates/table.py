@@ -1,9 +1,9 @@
-import tabulator
 from copy import copy
 from .. import config
 from .. import helpers
 from .. import exceptions
 from ..row import Row
+from ..table import Table
 from ..system import system
 from ..schema import Schema
 from ..headers import Headers
@@ -118,7 +118,7 @@ def validate_table(
     )
 
     # Create stream
-    stream = tabulator.Stream(
+    table = Table(
         source,
         scheme=scheme,
         format=format,
@@ -140,12 +140,12 @@ def validate_table(
         **helpers.translate_control(control or {}),
     )
 
-    # Open stream
+    # Open table
     try:
-        stream.open()
-        if not stream.sample:
+        table.open()
+        if not table.sample:
             message = 'There are no rows available'
-            raise tabulator.exceptions.SourceError(message)
+            raise exceptions.SourceError(message)
     except Exception as exception:
         errors.add(Error.from_exception(exception), force=True)
         exited = True
@@ -164,9 +164,9 @@ def validate_table(
         # Infer schema
         if not schema.fields:
             schema.infer(
-                stream.sample,
+                table.sample,
                 type=infer_type,
-                names=infer_names or stream.headers,
+                names=infer_names or table.headers,
                 confidence=infer_confidence,
             )
 
@@ -174,7 +174,7 @@ def validate_table(
         if sync_schema:
             fields = []
             mapping = {field.get('name'): field for field in schema.fields}
-            for name in stream.headers:
+            for name in table.headers:
                 fields.append(mapping.get(name, {'name': name, 'type': 'any'}))
             schema.fields = fields
 
@@ -210,7 +210,7 @@ def validate_table(
         for item in items:
             p1, p2 = item if isinstance(item, (tuple, list)) else (item, None)
             check = p1(p2) if isinstance(p1, type) else create(p1, descriptor=p2)
-            check.connect(stream=stream, schema=schema)
+            check.connect(stream=table, schema=schema)
             check.prepare()
             checks.append(check)
             errors.register(check)
@@ -225,13 +225,13 @@ def validate_table(
 
     # Validate headers
     if not exited:
-        if stream.headers:
+        if table.headers:
 
             # Get headers
             headers = Headers(
-                stream.headers,
+                table.headers,
                 fields=schema.fields,
-                field_positions=stream.field_positions,
+                field_positions=table.field_positions,
             )
 
             # Validate headers
@@ -242,8 +242,8 @@ def validate_table(
     # Validate rows
     if not exited:
         fields = schema.fields
-        iterator = stream.iter(extended=True)
-        field_positions = stream.field_positions
+        iterator = table.iter(extended=True)
+        field_positions = table.field_positions
         if not field_positions:
             field_positions = list(range(1, len(schema.fields) + 1))
         while True:
@@ -293,7 +293,7 @@ def validate_table(
 
     # Return report
     time = timer.get_time()
-    source = stream.source if isinstance(stream.source, str) else 'inline'
+    source = table.source if isinstance(table.source, str) else 'inline'
     return Report(
         time=time,
         errors=task_errors,
@@ -304,11 +304,11 @@ def validate_table(
                 partial=partial,
                 row_count=row_number,
                 source=source,
-                scheme=stream.scheme,
-                format=stream.format,
-                encoding=stream.encoding,
-                compression=stream.compression,
-                headers=stream.headers,
+                scheme=table.scheme,
+                format=table.format,
+                encoding=table.encoding,
+                compression=table.compression,
+                headers=table.headers,
                 headers_row=headers_row,
                 headers_joiner=headers_joiner,
                 pick_fields=pick_fields,
@@ -320,7 +320,7 @@ def validate_table(
                 limit_rows=limit_rows,
                 offset_rows=offset_rows,
                 schema=copy(schema),
-                dialect=stream.dialect,
+                dialect=table.dialect,
                 errors=errors,
             )
         ],

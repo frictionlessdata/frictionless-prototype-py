@@ -1,4 +1,3 @@
-import tabulator
 from .metadata import Metadata
 from . import exceptions
 
@@ -46,15 +45,15 @@ class Error(Metadata):
     def from_exception(exception):
         Error = SourceError
         note = str(exception)
-        if isinstance(exception, tabulator.exceptions.SourceError):
+        if isinstance(exception, exceptions.SourceError):
             Error = SourceError
-        elif isinstance(exception, tabulator.exceptions.SchemeError):
+        elif isinstance(exception, exceptions.SchemeError):
             Error = SchemeError
-        elif isinstance(exception, tabulator.exceptions.FormatError):
+        elif isinstance(exception, exceptions.FormatError):
             Error = FormatError
-        elif isinstance(exception, tabulator.exceptions.EncodingError):
+        elif isinstance(exception, exceptions.EncodingError):
             Error = EncodingError
-        elif isinstance(exception, tabulator.exceptions.CompressionError):
+        elif isinstance(exception, exceptions.CompressionError):
             Error = CompressionError
         return Error(note=note)
         super().metadata_process()

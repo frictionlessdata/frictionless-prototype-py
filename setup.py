@@ -55,7 +55,6 @@ INSTALL_REQUIRES = (
         'requests>=2.10',
         'jsonschema>=2.5',
         'stringcase>=1.2',
-        'tabulator>=1.52',
         'datapackage>=1.14',
     ]
     + EXTRAS_REQUIRE['csv']
