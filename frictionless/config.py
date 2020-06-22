@@ -40,7 +40,7 @@ S3_DEFAULT_ENDPOINT_URL = 'https://s3.amazonaws.com'
 # Loaders
 
 LOADERS = {
-    's3': 'frictionless.plugins.aws.AWSLoader',
+    's3': 'frictionless.plugins.aws.AwsLoader',
     'file': 'frictionless.loaders.local.LocalLoader',
     'http': 'frictionless.loaders.remote.RemoteLoader',
     'https': 'frictionless.loaders.remote.RemoteLoader',
@@ -53,26 +53,25 @@ LOADERS = {
 # Parsers
 
 PARSERS = {
-    'csv': 'frictionless.plugins.csv.CSVParser',
-    'datapackage': 'frictionless.plugins.datapackage.DataPackageParser',
+    'csv': 'frictionless.plugins.csv.CsvParser',
     'gsheet': 'frictionless.plugins.gsheet.GsheetParser',
-    'html': 'frictionless.plugins.html.HTMLTableParser',
+    'html': 'frictionless.plugins.html.HtmlTableParser',
     'inline': 'frictionless.parsers.inline.InlineParser',
-    'json': 'frictionless.plugins.json.JSONParser',
-    'jsonl': 'frictionless.plugins.json.NDJSONParser',
-    'ndjson': 'frictionless.plugins.json.NDJSONParser',
-    'ods': 'frictionless.plugins.ods.ODSParser',
-    'sql': 'frictionless.plugins.sql.SQLParser',
-    'tsv': 'frictionless.plugins.tsv.TSVParser',
-    'xls': 'frictionless.plugins.excel.XLSParser',
-    'xlsx': 'frictionless.plugins.excel.XLSXParser',
+    'json': 'frictionless.plugins.json.JsonParser',
+    'jsonl': 'frictionless.plugins.json.NdjsonParser',
+    'ndjson': 'frictionless.plugins.json.NdjsonParser',
+    'ods': 'frictionless.plugins.ods.OdsParser',
+    'sql': 'frictionless.plugins.sql.SqlParser',
+    'tsv': 'frictionless.plugins.tsv.TsvParser',
+    'xls': 'frictionless.plugins.excel.XlsParser',
+    'xlsx': 'frictionless.plugins.excel.XlsxParser',
 }
 
 # Writers
 
 WRITERS = {
-    'csv': 'frictionless.plugins.csv.CSVWriter',
-    'json': 'frictionless.plugins.json.JSONWriter',
-    'xlsx': 'frictionless.plugins.excel.XLSXWriter',
-    'sql': 'frictionless.plugins.sql.SQLWriter',
+    'csv': 'frictionless.plugins.csv.CsvWriter',
+    'json': 'frictionless.plugins.json.JsonWriter',
+    'xlsx': 'frictionless.plugins.excel.XlsxWriter',
+    'sql': 'frictionless.plugins.sql.SqlWriter',
 }

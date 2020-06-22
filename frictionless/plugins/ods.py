@@ -19,7 +19,7 @@ class OdsPlugin(Plugin):
 # Parsers
 
 
-class ODSParser(Parser):
+class OdsParser(Parser):
     options = [
         'sheet',
     ]

@@ -20,7 +20,7 @@ class AwsPlugin(Plugin):
 # Loaders
 
 
-class AWSLoader(Loader):
+class AwsLoader(Loader):
     remote = True
     options = [
         's3_endpoint_url',

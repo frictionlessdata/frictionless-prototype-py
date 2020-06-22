@@ -21,7 +21,7 @@ class CsvPlugin(Plugin):
 # Parsers
 
 
-class CSVParser(Parser):
+class CsvParser(Parser):
     options = [
         'delimiter',
         'doublequote',
@@ -149,7 +149,7 @@ class CSVParser(Parser):
         return sample, dialect
 
 
-class CSVWriter:
+class CsvWriter:
     options = [
         'delimiter',
     ]

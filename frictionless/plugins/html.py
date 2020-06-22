@@ -15,7 +15,7 @@ class HtmlPlugin(Plugin):
 # Parsers
 
 
-class HTMLTableParser(Parser):
+class HtmlTableParser(Parser):
     options = [
         'selector',
     ]

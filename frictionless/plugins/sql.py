@@ -15,7 +15,7 @@ class SqlPlugin(Plugin):
 # Parsers
 
 
-class SQLParser(Parser):
+class SqlParser(Parser):
     options = [
         'table',
         'order_by',
@@ -74,7 +74,7 @@ class SQLParser(Parser):
             yield (row_number, row.keys(), list(row))
 
 
-class SQLWriter:
+class SqlWriter:
     options = [
         'table',
     ]

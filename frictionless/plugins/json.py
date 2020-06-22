@@ -18,7 +18,7 @@ class JsonPlugin(Plugin):
 # Parsers
 
 
-class JSONParser(Parser):
+class JsonParser(Parser):
     options = [
         'property',
     ]
@@ -83,7 +83,7 @@ class JSONParser(Parser):
                 yield (row_number, None, [])
 
 
-class NDJSONParser(Parser):
+class NdjsonParser(Parser):
     options = []  # type: ignore
 
     def __init__(self, loader, force_parse=False):
@@ -137,7 +137,7 @@ class NDJSONParser(Parser):
                 yield (row_number, None, [])
 
 
-class JSONWriter:
+class JsonWriter:
     options = [
         'keyed',
     ]

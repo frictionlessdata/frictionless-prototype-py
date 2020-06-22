@@ -15,7 +15,7 @@ class TsvPlugin(Plugin):
 # Parsers
 
 
-class TSVParser(Parser):
+class TsvParser(Parser):
     options = []  # type: ignore
 
     def __init__(self, loader, force_parse=False):

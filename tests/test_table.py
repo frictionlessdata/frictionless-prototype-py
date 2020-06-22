@@ -6,7 +6,7 @@ import pytest
 import datetime
 from frictionless import Table, exceptions
 from frictionless.loaders.local import LocalLoader
-from frictionless.plugins.csv import CSVParser, CSVWriter
+from frictionless.plugins.csv import CsvParser, CsvWriter
 
 
 # General
@@ -779,7 +779,7 @@ def test_table_custom_loaders():
 def test_table_custom_parsers():
     source = 'data/table.custom'
 
-    class CustomParser(CSVParser):
+    class CustomParser(CsvParser):
         def open(self, source, *args, **kwargs):
             return super(CustomParser, self).open(
                 source.replace('custom', 'csv'), *args, **kwargs
@@ -796,7 +796,7 @@ def test_table_save_custom_writers(tmpdir):
     source = 'data/table.csv'
     target = str(tmpdir.join('table.csv'))
 
-    class CustomWriter(CSVWriter):
+    class CustomWriter(CsvWriter):
         pass
 
     with Table(source, headers=1, custom_writers={'csv': CustomWriter}) as table:

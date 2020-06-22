@@ -26,7 +26,7 @@ class ExcelPlugin(Plugin):
 # Parsers
 
 
-class XLSXParser(Parser):
+class XlsxParser(Parser):
     options = [
         "sheet",
         "workbook_cache",
@@ -429,7 +429,7 @@ def extract_row_values(row, preserve_formatting=False, adjust_floating_point_err
     return list(cell.value for cell in row)
 
 
-class XLSParser(Parser):
+class XlsParser(Parser):
     """Parser to parse Excel data format.
     """
 
@@ -547,7 +547,7 @@ class XLSParser(Parser):
             yield (row_number, None, row)
 
 
-class XLSXWriter:
+class XlsxWriter:
     options = [
         'sheet',
     ]
