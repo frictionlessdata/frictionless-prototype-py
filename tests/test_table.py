@@ -1,6 +1,5 @@
 import io
 import ast
-import six
 import sys
 import pytest
 import datetime
@@ -729,7 +728,7 @@ def test_table_post_parse_chain():
             crow = []
             for value in row:
                 try:
-                    if isinstance(value, six.string_types):
+                    if isinstance(value, str):
                         value = ast.literal_eval(value)
                 except Exception:
                     pass
@@ -878,7 +877,6 @@ def test_table_size():
         assert table.size == 7346
 
 
-@pytest.mark.skipif(six.PY2, reason='Support only for Python3')
 def test_table_size_compressed():
     with Table('data/special/doublequote.csv.zip') as table:
         table.read()
@@ -942,7 +940,6 @@ def test_table_hash_not_supported():
             table.read()
 
 
-@pytest.mark.skipif(six.PY2, reason='Support only for Python3')
 def test_table_hash_compressed():
     with Table('data/special/doublequote.csv.zip') as table:
         table.read()
@@ -1067,7 +1064,6 @@ def test_table_read_closed():
 # Support for compressed files
 
 
-@pytest.mark.skipif(six.PY2, reason='Support only for Python3')
 def test_table_local_csv_zip():
     with Table('data/table.csv.zip') as table:
         assert table.headers is None
@@ -1075,7 +1071,6 @@ def test_table_local_csv_zip():
         assert table.read() == [['id', 'name'], ['1', 'english'], ['2', '中国人']]
 
 
-@pytest.mark.skipif(six.PY2, reason='Support only for Python3')
 def test_table_local_csv_zip_multiple_files():
     with Table('data/2-files.zip', filename='table.csv') as table:
         assert table.headers is None
@@ -1085,7 +1080,6 @@ def test_table_local_csv_zip_multiple_files():
         assert table.read() == [['id', 'name'], ['1', '中国人'], ['2', 'english']]
 
 
-@pytest.mark.skipif(six.PY2, reason='Support only for Python3')
 def test_table_local_csv_zip_multiple_open():
     # That's how `tableschema.iter()` acts
     table = Table('data/table.csv.zip')
@@ -1099,14 +1093,12 @@ def test_table_local_csv_zip_multiple_open():
     table.close()
 
 
-@pytest.mark.skipif(six.PY2, reason='Support only for Python3')
 def test_table_local_csv_gz():
     with Table('data/table.csv.gz') as table:
         assert table.headers is None
         assert table.read() == [['id', 'name'], ['1', 'english'], ['2', '中国人']]
 
 
-@pytest.mark.skipif(six.PY2, reason='Support only for Python3')
 def test_table_filelike_csv_zip():
     with open('data/table.csv.zip', 'rb') as file:
         with Table(file, format='csv', compression='zip') as table:
@@ -1114,7 +1106,6 @@ def test_table_filelike_csv_zip():
             assert table.read() == [['id', 'name'], ['1', 'english'], ['2', '中国人']]
 
 
-@pytest.mark.skipif(six.PY2, reason='Support only for Python3')
 def test_table_filelike_csv_gz():
     with open('data/table.csv.gz', 'rb') as file:
         with Table(file, format='csv', compression='gz') as table:
@@ -1123,7 +1114,6 @@ def test_table_filelike_csv_gz():
 
 
 @pytest.mark.slow
-@pytest.mark.skipif(six.PY2, reason='Support only for Python3')
 def test_table_remote_csv_zip():
     source = 'https://raw.githubusercontent.com/frictionlessdata/tabulator-py/master/data/table.csv.zip'
     with Table(source) as table:
@@ -1132,7 +1122,6 @@ def test_table_remote_csv_zip():
 
 
 @pytest.mark.slow
-@pytest.mark.skipif(six.PY2, reason='Support only for Python3')
 def test_table_remote_csv_gz():
     source = 'https://raw.githubusercontent.com/frictionlessdata/tabulator-py/master/data/table.csv.gz'
     with Table(source) as table:
