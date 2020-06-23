@@ -57,12 +57,8 @@ class Loader:
         return self.__fragment
 
     @property
-    def size(self):
-        return self.__stats.get('size')
-
-    @property
-    def hash(self):
-        return self.__stats.get('hash')
+    def stats(self):
+        return self.__stats
 
     # Detect
 
