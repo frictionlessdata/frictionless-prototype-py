@@ -1,4 +1,4 @@
-class Parser(object):
+class Parser:
     """Abstract class implemented by the data parsers.
 
     The parsers inherit and implement this class' methods to add support for a

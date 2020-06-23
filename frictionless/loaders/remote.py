@@ -15,11 +15,7 @@ class RemoteLoader(Loader):
     ]
 
     def __init__(
-        self,
-        bytes_sample_size=config.DEFAULT_BYTES_SAMPLE_SIZE,
-        http_session=None,
-        http_stream=True,
-        http_timeout=None,
+        self, http_session=None, http_stream=True, http_timeout=None,
     ):
 
         # Create default session
@@ -28,7 +24,6 @@ class RemoteLoader(Loader):
             http_session.headers.update(config.HTTP_HEADERS)
 
         # Set attributes
-        self.__bytes_sample_size = bytes_sample_size
         self.__http_session = http_session
         self.__http_stream = http_stream
         self.__http_timeout = http_timeout
@@ -60,8 +55,9 @@ class RemoteLoader(Loader):
             return bytes
 
         # Detect encoding
-        if self.__bytes_sample_size:
-            sample = bytes.read(self.__bytes_sample_size)[: self.__bytes_sample_size]
+        # TODO: rebase on infer_volume/sampling
+        if True:
+            sample = bytes.read(10000)[:10000]
             bytes.seek(0)
             encoding = helpers.detect_encoding(sample, encoding)
 

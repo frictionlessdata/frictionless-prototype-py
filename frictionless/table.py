@@ -71,11 +71,6 @@ class Table:
             ``0`` to disable sampling, in which case nothing will be inferred
             from the data. Defaults to ``config.DEFAULT_SAMPLE_SIZE``.
 
-        bytes_sample_size (int, optional):
-            Same as `sample_size`, but instead
-            of number of rows, controls number of bytes. Defaults to
-            ``config.DEFAULT_BYTES_SAMPLE_SIZE``.
-
         allow_html (bool, optional):
             Allow the file source to be an HTML page.
             If False, raises ``exceptions.FormatError`` if the loaded file is
@@ -136,7 +131,6 @@ class Table:
         compression=None,
         allow_html=False,
         sample_size=config.DEFAULT_SAMPLE_SIZE,
-        bytes_sample_size=config.DEFAULT_BYTES_SAMPLE_SIZE,
         ignore_blank_headers=False,
         ignore_listed_headers=None,
         ignore_not_listed_headers=None,
@@ -241,7 +235,6 @@ class Table:
         self.__compression = compression
         self.__allow_html = allow_html
         self.__sample_size = sample_size
-        self.__bytes_sample_size = bytes_sample_size
         self.__ignore_blank_headers = ignore_blank_headers
         self.__ignore_listed_headers = ignore_listed_headers
         self.__ignore_not_listed_headers = ignore_not_listed_headers
@@ -340,9 +333,7 @@ class Table:
                 loader_options = helpers.extract_options(options, loader_class.options)
                 if compression and 'http_stream' in loader_class.options:
                     loader_options['http_stream'] = False
-                self.__loader = loader_class(
-                    bytes_sample_size=self.__bytes_sample_size, **loader_options
-                )
+                self.__loader = loader_class(**loader_options)
 
         # Zip compression
         if compression == 'zip':
@@ -358,7 +349,7 @@ class Table:
                         source.write(line)
                     source.seek(0)
             # We redefine loader/format/schema after decompression
-            self.__loader = StreamLoader(bytes_sample_size=self.__bytes_sample_size)
+            self.__loader = StreamLoader()
             format = self.__format or helpers.detect_scheme_and_format(source.name)[1]
             scheme = 'stream'
 
@@ -369,7 +360,7 @@ class Table:
                 name = source.replace('.gz', '')
             source = gzip.open(self.__loader.load(source, mode='b'))
             # We redefine loader/format/schema after decompression
-            self.__loader = StreamLoader(bytes_sample_size=self.__bytes_sample_size)
+            self.__loader = StreamLoader()
             format = self.__format or helpers.detect_scheme_and_format(name)[1]
             scheme = 'stream'
 

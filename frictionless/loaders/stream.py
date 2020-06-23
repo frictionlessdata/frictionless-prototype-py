@@ -2,14 +2,12 @@ import io
 from ..loader import Loader
 from .. import exceptions
 from .. import helpers
-from .. import config
 
 
 class StreamLoader(Loader):
     options = []  # type: ignore
 
-    def __init__(self, bytes_sample_size=config.DEFAULT_BYTES_SAMPLE_SIZE):
-        self.__bytes_sample_size = bytes_sample_size
+    def __init__(self):
         self.__stats = None
 
     def attach_stats(self, stats):
@@ -32,8 +30,9 @@ class StreamLoader(Loader):
             return bytes
 
         # Detect encoding
-        if self.__bytes_sample_size:
-            sample = bytes.read(self.__bytes_sample_size)
+        # TODO: rebase on infer_volume/sampling
+        if True:
+            sample = bytes.read(10000)
             bytes.seek(0)
             encoding = helpers.detect_encoding(sample, encoding)
 

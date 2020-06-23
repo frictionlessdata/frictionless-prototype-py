@@ -308,6 +308,7 @@ def test_table_sample():
 # Bytes sample size
 
 
+@pytest.mark.skip
 def test_table_bytes_sample_size():
     source = 'data/special/latin1.csv'
     with Table(source) as table:

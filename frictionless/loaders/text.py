@@ -7,8 +7,7 @@ from .. import config
 class TextLoader(Loader):
     options = []  # type: ignore
 
-    def __init__(self, bytes_sample_size=config.DEFAULT_BYTES_SAMPLE_SIZE):
-        self.__bytes_sample_size = bytes_sample_size
+    def __init__(self):
         self.__stats = None
 
     def attach_stats(self, stats):
