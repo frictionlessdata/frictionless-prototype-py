@@ -18,9 +18,8 @@ class TsvPlugin(Plugin):
 class TsvParser(Parser):
     options = []  # type: ignore
 
-    def __init__(self, loader, force_parse=False):
+    def __init__(self, loader):
         self.__loader = loader
-        self.__force_parse = force_parse
         self.__extended_rows = None
         self.__encoding = None
         self.__chars = None

@@ -20,10 +20,9 @@ class HtmlTableParser(Parser):
         'selector',
     ]
 
-    def __init__(self, loader, force_parse=False, selector='table'):
+    def __init__(self, loader, selector='table'):
         self.__loader = loader
         self.__selector = selector
-        self.__force_parse = force_parse
         self.__extended_rows = None
         self.__encoding = None
         self.__chars = None

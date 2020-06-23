@@ -23,10 +23,9 @@ class JsonParser(Parser):
         'property',
     ]
 
-    def __init__(self, loader, force_parse=False, property=None):
+    def __init__(self, loader, property=None):
         self.__loader = loader
         self.__property = property
-        self.__force_parse = force_parse
         self.__extended_rows = None
         self.__encoding = None
         self.__bytes = None
@@ -61,7 +60,7 @@ class JsonParser(Parser):
 
     # Private
 
-    def __iter_extended_rows(self):
+    def __iter_extended_rows(self, dialect=None):
         path = 'item'
         if self.__property is not None:
             path = '%s.item' % self.__property
@@ -77,7 +76,8 @@ class JsonParser(Parser):
                     values.append(item[key])
                 yield (row_number, list(keys), list(values))
             else:
-                if not self.__force_parse:
+                # TODO: remove not dialect
+                if not dialect or not dialect.get('forced'):
                     message = 'JSON item has to be list or dict'
                     raise exceptions.SourceError(message)
                 yield (row_number, None, [])
@@ -86,9 +86,8 @@ class JsonParser(Parser):
 class NdjsonParser(Parser):
     options = []  # type: ignore
 
-    def __init__(self, loader, force_parse=False):
+    def __init__(self, loader):
         self.__loader = loader
-        self.__force_parse = force_parse
         self.__extended_rows = None
         self.__encoding = None
         self.__chars = None
@@ -123,7 +122,7 @@ class NdjsonParser(Parser):
 
     # Private
 
-    def __iter_extended_rows(self):
+    def __iter_extended_rows(self, dialect=None):
         rows = jsonlines.Reader(self.__chars)
         for row_number, row in enumerate(rows, start=1):
             if isinstance(row, (tuple, list)):
@@ -132,7 +131,8 @@ class NdjsonParser(Parser):
                 keys, values = zip(*sorted(row.items()))
                 yield (row_number, list(keys), list(values))
             else:
-                if not self.__force_parse:
+                # TODO: remove not dialect
+                if not dialect and not dialect.get('forced'):
                     raise exceptions.SourceError('JSON item has to be list or dict')
                 yield (row_number, None, [])
 

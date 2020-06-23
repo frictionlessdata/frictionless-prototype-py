@@ -30,10 +30,9 @@ class CsvParser(Parser):
         'lineterminator',
     ]
 
-    def __init__(self, loader, force_parse=False, **options):
+    def __init__(self, loader, **options):
         self.__loader = loader
         self.__options = options
-        self.__force_parse = force_parse
         self.__extended_rows = None
         self.__encoding = None
         self.__dialect = None

@@ -6,9 +6,8 @@ from .. import exceptions
 class InlineParser(Parser):
     options = []  # type: ignore
 
-    def __init__(self, loader, force_parse=False):
+    def __init__(self, loader):
         self.__loader = loader
-        self.__force_parse = force_parse
         self.__extended_rows = None
         self.__encoding = None
         self.__source = None
@@ -42,7 +41,7 @@ class InlineParser(Parser):
 
     # Private
 
-    def __iter_extended_rows(self):
+    def __iter_extended_rows(self, dialect=None):
         items = self.__source
         if not hasattr(items, '__iter__'):
             items = items()
@@ -60,7 +59,8 @@ class InlineParser(Parser):
                     values.append(item[key])
                 yield (row_number, list(keys), list(values))
             else:
-                if not self.__force_parse:
+                # TODO: remove not dialect
+                if not dialect and not dialect.get('forced'):
                     message = 'Inline data item has to be tuple, list or dict'
                     raise exceptions.SourceError(message)
                 yield (row_number, None, [])

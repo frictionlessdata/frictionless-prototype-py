@@ -37,7 +37,6 @@ class XlsxParser(Parser):
     def __init__(
         self,
         loader,
-        force_parse=False,
         sheet=1,
         workbook_cache=None,
         fill_merged_cells=False,
@@ -53,7 +52,6 @@ class XlsxParser(Parser):
         self.__extended_rows = None
         self.__encoding = None
         self.__fragment = None
-        self.__force_parse = force_parse
         self.__bytes = None
 
     @property
@@ -439,11 +437,10 @@ class XlsParser(Parser):
         'fill_merged_cells',
     ]
 
-    def __init__(self, loader, force_parse=False, sheet=1, fill_merged_cells=False):
+    def __init__(self, loader, sheet=1, fill_merged_cells=False):
         self.__loader = loader
         self.__sheet_pointer = sheet
         self.__fill_merged_cells = fill_merged_cells
-        self.__force_parse = force_parse
         self.__extended_rows = None
         self.__encoding = None
         self.__fragment = None

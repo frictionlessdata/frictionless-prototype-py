@@ -100,11 +100,6 @@ class Table:
             When True, casts all data to strings.
             Defaults to False.
 
-        force_parse (bool, optional):
-            When True, don't raise exceptions when
-            parsing malformed rows, simply returning an empty value. Defaults
-            to False.
-
         post_parse (List[function], optional):
             List of generator functions that
             receives a list of rows and headers, processes them, and yields
@@ -149,7 +144,6 @@ class Table:
         multiline_headers_duplicates=False,
         hashing_algorithm='sha256',
         force_strings=False,
-        force_parse=False,
         pick_columns=None,
         skip_columns=None,
         pick_fields=None,
@@ -256,7 +250,6 @@ class Table:
         self.__ignored_headers_indexes = []
         self.__hashing_algorithm = hashing_algorithm
         self.__force_strings = force_strings
-        self.__force_parse = force_parse
         self.__limit_fields = limit_fields
         self.__offset_fields = offset_fields
         self.__limit_rows = limit_rows
@@ -407,9 +400,7 @@ class Table:
                 raise exceptions.FormatError(message)
             parser_class = helpers.import_attribute(config.PARSERS[format])
         parser_options = helpers.extract_options(options, parser_class.options)
-        self.__parser = parser_class(
-            self.__loader, force_parse=self.__force_parse, **parser_options
-        )
+        self.__parser = parser_class(self.__loader, **parser_options)
 
         # Bad options
         if options:

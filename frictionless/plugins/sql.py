@@ -21,7 +21,7 @@ class SqlParser(Parser):
         'order_by',
     ]
 
-    def __init__(self, loader, force_parse=False, table=None, order_by=None):
+    def __init__(self, loader, table=None, order_by=None):
 
         # Ensure table
         if table is None:
@@ -31,7 +31,6 @@ class SqlParser(Parser):
         self.__loader = loader
         self.__table = table
         self.__order_by = order_by
-        self.__force_parse = force_parse
         self.__engine = None
         self.__extended_rows = None
         self.__encoding = None

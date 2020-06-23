@@ -6,11 +6,6 @@ class Parser(object):
 
     # Arguments
         loader (tabulator.Loader): Loader instance to read the file.
-        force_parse (bool):
-            When `True`, the parser yields an empty extended
-            row tuple `(row_number, None, [])` when there is an error parsing a
-            row. Otherwise, it stops the iteration by raising the exception
-            `tabulator.exceptions.SourceError`.
         **options (dict): Loader options
 
     """
@@ -19,7 +14,7 @@ class Parser(object):
 
     options = []  # type: ignore
 
-    def __init__(self, loader, force_parse, **options):
+    def __init__(self, loader, **options):
         pass
 
     @property
@@ -78,10 +73,7 @@ class Parser(object):
 
         # Raises
             SourceError:
-                If `force_parse` is `False` and
-                a row can't be parsed, this exception will be raised.
-                Otherwise, an empty extended row is returned (i.e.
-                `(row_number, None, [])`).
+                If a row can't be parsed, this exception will be raised.
 
         Returns:
             Iterator[Tuple[int, List[str], List[Any]]]:

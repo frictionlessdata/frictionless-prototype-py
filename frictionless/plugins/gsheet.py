@@ -18,9 +18,8 @@ class GsheetPlugin(Plugin):
 class GsheetParser(Parser):
     options = []  # type: ignore
 
-    def __init__(self, loader, force_parse=False):
+    def __init__(self, loader):
         self.__loader = loader
-        self.__force_parse = force_parse
         self.__stream = None
         self.__encoding = None
 
@@ -39,9 +38,7 @@ class GsheetParser(Parser):
         url = url % (key, key)
         if gid:
             url = '%s&gid=%s' % (url, gid)
-        self.__stream = Table(
-            url, format='csv', encoding=encoding, force_parse=self.__force_parse
-        ).open()
+        self.__stream = Table(url, format='csv', encoding=encoding).open()
         self.__extended_rows = self.__stream.iter(extended=True)
         self.__encoding = encoding
 

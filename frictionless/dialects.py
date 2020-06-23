@@ -27,7 +27,7 @@ class InlineDialect(Dialect):
     # Arguments
         descriptor? (str|dict): descriptor
         keyed? (bool): keyes
-        forced? (bool): lined
+        forced? (bool): forced
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
@@ -186,7 +186,6 @@ class JsonDialect(Dialect):
     # Arguments
         descriptor? (str|dict): descriptor
         keyed? (bool): keyes
-        lined? (bool): lined
         property? (str): property
 
     # Raises
@@ -197,18 +196,13 @@ class JsonDialect(Dialect):
     metadata_profile = {  # type: ignore
         'type': 'object',
         'additionalProperties': False,
-        'properties': {
-            'keyed': {'type': 'boolean'},
-            'lined': {'type': 'boolean'},
-            'property': {'type': 'string'},
-        },
+        'properties': {'keyed': {'type': 'boolean'}, 'property': {'type': 'string'}},
     }
 
     def __init__(
-        self, descriptor=None, keyed=None, lined=None, property=None,
+        self, descriptor=None, keyed=None, property=None,
     ):
         self.setdefined('keyed', keyed)
-        self.setdefined('lined', lined)
         self.setdefined('property', property)
         super().__init(descriptor)
 
@@ -216,4 +210,3 @@ class JsonDialect(Dialect):
 
     def expand(self):
         self.setdetault('keyed', False)
-        self.setdetault('lined', False)
