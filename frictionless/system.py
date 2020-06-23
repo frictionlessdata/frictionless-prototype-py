@@ -5,6 +5,7 @@ from importlib import import_module
 from .errors import Error
 from . import exceptions
 from . import plugins
+from . import checks
 
 
 class System:
@@ -26,6 +27,23 @@ class System:
             check = func(name, descriptor=descriptor)
             if check is not None:
                 break
+        if check is None:
+            if name == 'baseline':
+                return checks.BaselineCheck(descriptor)
+            elif name == 'integrity':
+                return checks.IntegrityCheck(descriptor)
+            elif name == 'duplicate-row':
+                return checks.DuplicateRowCheck(descriptor)
+            elif name == 'deviated-value':
+                return checks.DeviatedValueCheck(descriptor)
+            elif name == 'truncated-value':
+                return checks.TruncatedValueCheck(descriptor)
+            elif name == 'blacklisted-value':
+                return checks.BlacklistedValueCheck(descriptor)
+            elif name == 'sequential-value':
+                return checks.SequentialValueCheck(descriptor)
+            elif name == 'row-constraint':
+                return checks.RowConstraintCheck(descriptor)
         if check is None:
             note = f'Cannot create check "{name}". Try installing "frictionless-{name}"'
             raise exceptions.FrictionlessException(Error(note=note))

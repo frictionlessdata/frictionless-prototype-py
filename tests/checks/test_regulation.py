@@ -7,17 +7,17 @@ from frictionless import validate
 def test_validate_blacklisted_value():
     report = validate(
         'data/table.csv',
-        extra_checks=[('rule/blacklisted-value', {'fieldName': 'id', 'blacklist': [2]})],
+        extra_checks=[('blacklisted-value', {'fieldName': 'id', 'blacklist': [2]})],
     )
     assert report.flatten(['rowPosition', 'fieldPosition', 'code']) == [
-        [3, 1, 'rule/blacklisted-value'],
+        [3, 1, 'blacklisted-value'],
     ]
 
 
 def test_validate_blacklisted_value_task_error():
     report = validate(
         'data/table.csv',
-        extra_checks=[('rule/blacklisted-value', {'fieldName': 'bad', 'blacklist': [2]})],
+        extra_checks=[('blacklisted-value', {'fieldName': 'bad', 'blacklist': [2]})],
     )
     assert report.flatten(['rowPosition', 'fieldPosition', 'code']) == [
         [None, None, 'task-error'],
@@ -36,15 +36,15 @@ def test_validate_blacklisted_value_many_rules():
     report = validate(
         source,
         extra_checks=[
-            ('rule/blacklisted-value', {'fieldName': 'row', 'blacklist': [10]}),
-            ('rule/blacklisted-value', {'fieldName': 'name', 'blacklist': ['mistake']}),
-            ('rule/blacklisted-value', {'fieldName': 'row', 'blacklist': [10]}),
-            ('rule/blacklisted-value', {'fieldName': 'name', 'blacklist': ['error']}),
+            ('blacklisted-value', {'fieldName': 'row', 'blacklist': [10]}),
+            ('blacklisted-value', {'fieldName': 'name', 'blacklist': ['mistake']}),
+            ('blacklisted-value', {'fieldName': 'row', 'blacklist': [10]}),
+            ('blacklisted-value', {'fieldName': 'name', 'blacklist': ['error']}),
         ],
     )
     assert report.flatten(['rowPosition', 'fieldPosition', 'code']) == [
-        [4, 2, 'rule/blacklisted-value'],
-        [5, 2, 'rule/blacklisted-value'],
+        [4, 2, 'blacklisted-value'],
+        [5, 2, 'blacklisted-value'],
         [6, 2, 'missing-cell'],
     ]
 
@@ -57,8 +57,8 @@ def test_validate_blacklisted_value_many_rules_with_non_existent_field():
     report = validate(
         source,
         extra_checks=[
-            ('rule/blacklisted-value', {'fieldName': 'row', 'blacklist': [10]}),
-            ('rule/blacklisted-value', {'fieldName': 'bad', 'blacklist': ['mistake']},),
+            ('blacklisted-value', {'fieldName': 'row', 'blacklist': [10]}),
+            ('blacklisted-value', {'fieldName': 'bad', 'blacklist': ['mistake']},),
         ],
     )
     assert report.flatten(['rowPosition', 'fieldPosition', 'code']) == [
@@ -81,13 +81,13 @@ def test_validate_sequential_value():
     report = validate(
         source,
         extra_checks=[
-            ('rule/sequential-value', {'fieldName': 'index2'}),
-            ('rule/sequential-value', {'fieldName': 'index3'}),
+            ('sequential-value', {'fieldName': 'index2'}),
+            ('sequential-value', {'fieldName': 'index3'}),
         ],
     )
     assert report.flatten(['rowPosition', 'fieldPosition', 'code']) == [
-        [3, 3, 'rule/sequential-value'],
-        [5, 2, 'rule/sequential-value'],
+        [3, 3, 'sequential-value'],
+        [5, 2, 'sequential-value'],
         [6, 2, 'missing-cell'],
         [6, 3, 'missing-cell'],
     ]
@@ -102,8 +102,8 @@ def test_validate_sequential_value_non_existent_field():
     report = validate(
         source,
         extra_checks=[
-            ('rule/sequential-value', {'fieldName': 'row'}),
-            ('rule/sequential-value', {'fieldName': 'bad'}),
+            ('sequential-value', {'fieldName': 'row'}),
+            ('sequential-value', {'fieldName': 'bad'}),
         ],
     )
     assert report.flatten(['rowPosition', 'fieldPosition', 'code']) == [
@@ -124,14 +124,13 @@ def test_validate_row_constraint():
         [6],
     ]
     report = validate(
-        source,
-        extra_checks=[('rule/row-constraint', {'constraint': 'salary == bonus * 5'})],
+        source, extra_checks=[('row-constraint', {'constraint': 'salary == bonus * 5'})],
     )
     assert report.flatten(['rowPosition', 'fieldPosition', 'code']) == [
-        [4, None, 'rule/row-constraint'],
+        [4, None, 'row-constraint'],
         [6, 2, 'missing-cell'],
         [6, 3, 'missing-cell'],
-        [6, None, 'rule/row-constraint'],
+        [6, None, 'row-constraint'],
     ]
 
 
@@ -143,13 +142,13 @@ def test_validate_row_constraint_incorrect_constraint():
     report = validate(
         source,
         extra_checks=[
-            ('rule/row-constraint', {'constraint': 'vars()'}),
-            ('rule/row-constraint', {'constraint': 'import(os)'}),
-            ('rule/row-constraint', {'constraint': 'non_existent > 0'}),
+            ('row-constraint', {'constraint': 'vars()'}),
+            ('row-constraint', {'constraint': 'import(os)'}),
+            ('row-constraint', {'constraint': 'non_existent > 0'}),
         ],
     )
     assert report.flatten(['rowPosition', 'fieldPosition', 'code']) == [
-        [2, None, 'rule/row-constraint'],
-        [2, None, 'rule/row-constraint'],
-        [2, None, 'rule/row-constraint'],
+        [2, None, 'row-constraint'],
+        [2, None, 'row-constraint'],
+        [2, None, 'row-constraint'],
     ]

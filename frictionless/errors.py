@@ -434,3 +434,54 @@ class ForeignKeyError(RowError):
     tags = ['#body', '#schema', '#integrity']
     template = 'The row at position "{rowPosition}" does not conform to the foreign key constraint: {note}'
     description = 'Values in the foreign key fields should exist in the reference table'
+
+
+# Misc
+
+
+class DuplicateRowError(RowError):
+    code = 'duplicate-row'
+    name = 'Duplicate Row'
+    tags = ['#body', '#heuristic']
+    template = 'Row at position {rowPosition} is duplicated: {note}'
+    description = 'The row is duplicated.'
+
+
+class DeviatedValueError(Error):
+    code = 'deviated-value'
+    name = 'Deviated Value'
+    tags = ['#body', '#heuristic']
+    template = 'There is a possible error because the value is deviated: {note}'
+    description = 'The value is deviated.'
+
+
+class TruncatedValueError(CellError):
+    code = 'truncated-value'
+    name = 'Truncated Value'
+    tags = ['#body', '#heuristic']
+    template = 'The cell {cell} in row at position {rowPosition} and field {fieldName} at position {fieldPosition} has an error: {note}'
+    description = 'The value is possible truncated.'
+
+
+class BlacklistedValueError(CellError):
+    code = 'blacklisted-value'
+    name = 'Blacklisted Value'
+    tags = ['#body', '#regulation']
+    template = 'The cell {cell} in row at position {rowPosition} and field {fieldName} at position {fieldPosition} has an error: {note}'
+    description = 'The value is blacklisted.'
+
+
+class SequentialValueError(CellError):
+    code = 'sequential-value'
+    name = 'Sequential Value'
+    tags = ['#body', '#regulation']
+    template = 'The cell {cell} in row at position {rowPosition} and field {fieldName} at position {fieldPosition} has an error: {note}'
+    description = 'The value is not sequential.'
+
+
+class RowConstraintError(RowError):
+    code = 'row-constraint'
+    name = 'Row Constraint'
+    tags = ['#body', '#regulation']
+    template = 'The row at position {rowPosition} has an error: {note}'
+    description = 'The value does not conform to the row constraint.'

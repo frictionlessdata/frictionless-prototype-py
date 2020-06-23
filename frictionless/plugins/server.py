@@ -8,13 +8,13 @@ from ..server import Server
 
 class ServerPlugin(Plugin):
     def create_server(self, name):
-        if name == 'server/validation':
-            return ValidationServer()
+        if name == 'api':
+            return ApiServer()
 
 
 # Servers
 
 
-class ValidationServer(Server):
+class ApiServer(Server):
     def listen(self, port):
         gunicorn

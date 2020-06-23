@@ -12,7 +12,7 @@ list:
 	@grep '^\.PHONY' Makefile | cut -d' ' -f2- | tr ' ' '\n'
 
 install:
-	pip install --upgrade -e .[aws,bigquery,ckan,elastic,gsheet,hint,html,ods,pandas,rule,server,spss,sql,tsv,dev]
+	pip install --upgrade -e .[aws,bigquery,ckan,elastic,gsheet,html,ods,pandas,server,spss,sql,tsv,dev]
 	test -f '.git/hooks/pre-commit' || cp .gitverify .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
 
 format:

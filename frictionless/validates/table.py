@@ -9,7 +9,6 @@ from ..schema import Schema
 from ..headers import Headers
 from ..errors import Error, SchemaError
 from ..report import Report, ReportTable
-from ..checks import BaselineCheck, IntegrityCheck
 
 
 @Report.from_validate
@@ -203,8 +202,8 @@ def validate_table(
     # Create checks
     if not exited:
         items = []
-        items.append(BaselineCheck)
-        items.append((IntegrityCheck, {'size': size, 'hash': hash, 'lookup': lookup}))
+        items.append('baseline')
+        items.append(('integrity', {'size': size, 'hash': hash, 'lookup': lookup}))
         items.extend(extra_checks or [])
         create = system.create_check
         for item in items:

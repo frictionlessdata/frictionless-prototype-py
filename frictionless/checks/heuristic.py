@@ -2,50 +2,6 @@ import hashlib
 import statistics
 from .. import errors
 from ..check import Check
-from ..plugin import Plugin
-
-
-# Plugin
-
-
-class HintPlugin(Plugin):
-    def create_check(self, name, *, descriptor=None):
-        if name == 'hint/duplicate-row':
-            return DuplicateRowCheck(descriptor)
-        if name == 'hint/deviated-value':
-            return DeviatedValueCheck(descriptor)
-        if name == 'hint/truncated-value':
-            return TruncatedValueCheck(descriptor)
-
-
-# Errors
-
-
-class DuplicateRowError(errors.RowError):
-    code = 'hint/duplicate-row'
-    name = 'Duplicate Row'
-    tags = ['#body', '#hint']
-    template = 'Row at position {rowPosition} is duplicated: {note}'
-    description = 'The row is duplicated.'
-
-
-class DeviatedValueError(errors.Error):
-    code = 'hint/deviated-value'
-    name = 'Deviated Value'
-    tags = ['#body', '#hint']
-    template = 'There is a possible error because the value is deviated: {note}'
-    description = 'The value is deviated.'
-
-
-class TruncatedValueError(errors.CellError):
-    code = 'hint/truncated-value'
-    name = 'Truncated Value'
-    tags = ['#body', '#hint']
-    template = 'The cell {cell} in row at position {rowPosition} and field {fieldName} at position {fieldPosition} has an error: {note}'
-    description = 'The value is possible truncated.'
-
-
-# Checks
 
 
 class DuplicateRowCheck(Check):
@@ -54,7 +10,7 @@ class DuplicateRowCheck(Check):
         'properties': {},
     }
     possible_Errors = [  # type: ignore
-        DuplicateRowError
+        errors.DuplicateRowError
     ]
 
     def prepare(self):
@@ -66,7 +22,7 @@ class DuplicateRowCheck(Check):
         match = self.memory.get(hash)
         if match:
             note = 'the same as row at position "%s"' % match
-            yield DuplicateRowError.from_row(row, note=note)
+            yield errors.DuplicateRowError.from_row(row, note=note)
         self.memory[hash] = row.row_position
 
 
@@ -81,7 +37,7 @@ class DeviatedValueCheck(Check):
         },
     }
     possible_Errors = [  # type: ignore
-        DeviatedValueError
+        errors.DeviatedValueError
     ]
 
     def prepare(self):
@@ -126,14 +82,14 @@ class DeviatedValueCheck(Check):
             maximum = average + stdev * self.interval
         except Exception as exception:
             note = 'calculation issue "%s"' % exception
-            yield DeviatedValueError(note=note)
+            yield errors.DeviatedValueError(note=note)
 
         # Check values
         for row_position, cell in zip(self.row_positions, self.cells):
             if not (minimum <= cell <= maximum):
                 dtl = 'value "%s" in row at position "%s" and field "%s" is deviated "[%.2f, %.2f]"'
                 dtl = dtl % (cell, row_position, self.field_name, minimum, maximum)
-                yield DeviatedValueError(note=dtl)
+                yield errors.DeviatedValueError(note=dtl)
 
 
 class TruncatedValueCheck(Check):
@@ -142,7 +98,7 @@ class TruncatedValueCheck(Check):
         'properties': {},
     }
     possible_Errors = [  # type: ignore
-        TruncatedValueError
+        errors.TruncatedValueError
     ]
 
     def validate_row(self, row):
@@ -164,7 +120,9 @@ class TruncatedValueCheck(Check):
             # Add error
             if truncated:
                 note = 'value  is probably truncated'
-                yield TruncatedValueError.from_row(row, note=note, field_name=field_name)
+                yield errors.TruncatedValueError.from_row(
+                    row, note=note, field_name=field_name
+                )
 
 
 # Internal
