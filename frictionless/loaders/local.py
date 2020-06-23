@@ -1,45 +1,16 @@
 import io
 from ..loader import Loader
-from .. import exceptions
-from .. import helpers
+from .. import controls
 
 
 class LocalLoader(Loader):
-    options = []  # type: ignore
+    Control = controls.LocalControl
 
-    def __init__(self):
-        self.__stats = None
+    # Read
 
-    def attach_stats(self, stats):
-        self.__stats = stats
-
-    def load(self, source, mode='t', encoding=None):
-
-        # Prepare source
+    def read_byte_stream_create(self, source):
         scheme = 'file://'
         if source.startswith(scheme):
             source = source.replace(scheme, '', 1)
-
-        # Prepare bytes
-        try:
-            bytes = io.open(source, 'rb')
-            if self.__stats:
-                bytes = helpers.BytesStatsWrapper(bytes, self.__stats)
-        except IOError as exception:
-            raise exceptions.LoadingError(str(exception))
-
-        # Return bytes
-        if mode == 'b':
-            return bytes
-
-        # Detect encoding
-        # TODO: rebase on infer_volume/sampling
-        if True:
-            sample = bytes.read(10000)
-            bytes.seek(0)
-            encoding = helpers.detect_encoding(sample, encoding)
-
-        # Prepare chars
-        chars = io.TextIOWrapper(bytes, encoding)
-
-        return chars
+        byte_stream = io.open(source, 'rb')
+        return byte_stream

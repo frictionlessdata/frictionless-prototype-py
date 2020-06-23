@@ -2,9 +2,9 @@ import os
 import io
 import boto3
 from urllib.parse import urlparse
+from ..controls import Control
 from ..plugin import Plugin
 from ..loader import Loader
-from .. import exceptions
 from .. import helpers
 from .. import config
 
@@ -17,59 +17,60 @@ class AwsPlugin(Plugin):
         pass
 
 
-# Loaders
+# Controls
 
 
-class AwsLoader(Loader):
-    remote = True
-    options = [
-        's3_endpoint_url',
-    ]
+class S3Control(Control):
+    """S3 control representation
 
-    def __init__(self, s3_endpoint_url=None):
-        self.__s3_endpoint_url = (
-            s3_endpoint_url
+    # Arguments
+        descriptor? (str|dict): descriptor
+        endpoint_url? (string): endpoint_url
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
+    metadata_profile = {  # type: ignore
+        'type': 'object',
+        'properties': {'endpointUrl': {'type': 'string'}},
+    }
+
+    def __init__(self, descriptor=None, endpoint_url=None):
+        self.setdefined('endpointUrl', endpoint_url)
+        super().__init(descriptor)
+
+    @property
+    def endpoint_url(self):
+        return (
+            self.get('endpointUrl')
             or os.environ.get('S3_ENDPOINT_URL')
             or config.S3_DEFAULT_ENDPOINT_URL
         )
-        self.__s3_client = boto3.client('s3', endpoint_url=self.__s3_endpoint_url)
-        self.__stats = None
 
-    def attach_stats(self, stats):
-        self.__stats = stats
+    # Expand
 
-    def load(self, source, mode='t', encoding=None):
+    def expand(self):
+        self.setdetault('endpointUrl', self.endpoint_url)
 
-        # Prepare source
+
+# Loaders
+
+
+class S3Loader(Loader):
+    Contol = S3Control
+    network = True
+
+    # Read
+
+    def read_byte_stream_create(self, source):
+        client = boto3.client('s3', endpoint_url=self.control.endpoint_url)
         source = helpers.requote_uri(source)
-
-        # Prepare bytes
-        try:
-            parts = urlparse(source, allow_fragments=False)
-            response = self.__s3_client.get_object(
-                Bucket=parts.netloc, Key=parts.path[1:]
-            )
-            # https://github.com/frictionlessdata/tabulator-py/issues/271
-            bytes = io.BufferedRandom(io.BytesIO())
-            bytes.write(response['Body'].read())
-            bytes.seek(0)
-            if self.__stats:
-                bytes = helpers.BytesStatsWrapper(bytes, self.__stats)
-        except Exception as exception:
-            raise exceptions.LoadingError(str(exception))
-
-        # Return bytes
-        if mode == 'b':
-            return bytes
-
-        # Detect encoding
-        # TODO: rebase on infer_volume/sampling
-        if True:
-            sample = bytes.read(10000)
-            bytes.seek(0)
-            encoding = helpers.detect_encoding(sample, encoding)
-
-        # Prepare chars
-        chars = io.TextIOWrapper(bytes, encoding)
-
-        return chars
+        parts = urlparse(source, allow_fragments=False)
+        response = client.get_object(Bucket=parts.netloc, Key=parts.path[1:])
+        # https://github.com/frictionlessdata/tabulator-py/issues/271
+        byte_stream = io.BufferedRandom(io.BytesIO())
+        byte_stream.write(response['Body'].read())
+        byte_stream.seek(0)
+        return byte_stream

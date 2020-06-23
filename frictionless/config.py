@@ -12,12 +12,13 @@ SCHEMA_PROFILE = json.loads(read_asset('profiles', 'schema.json'))
 REMOTE_SCHEMES = ['http', 'https', 'ftp', 'ftps']
 MISSING_VALUES = ['']
 INFER_VOLUME = 100
-INFER_VOLUME_FACTOR = 100
 INFER_CONFIDENCE = 0.9
-INFER_CONFIDENCE_FACTOR = 0.6
+DETECT_ENCODING_VOLUME = 10000
+DETECT_ENCODING_CONFIDENCE = 0.5
 LIMIT_MEMORY = 1000
 HEADERS_ROW = 1
 HEADERS_JOINER = ' '
+HASHING_ALGORITHM = 'md5'
 
 # Tabulator
 # TODO: rework
@@ -33,6 +34,7 @@ HTTP_HEADERS = {
     + 'AppleWebKit/537.36 (KHTML, like Gecko) '
     + 'Chrome/54.0.2840.87 Safari/537.36'
 }
+HTTP_TIMEOUT = 10
 CSV_SAMPLE_LINES = 100
 # http://docs.sqlalchemy.org/en/latest/dialects/index.html
 SQL_SCHEMES = ['firebird', 'mssql', 'mysql', 'oracle', 'postgresql', 'sqlite', 'sybase']

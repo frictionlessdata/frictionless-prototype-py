@@ -18,8 +18,10 @@ def validate_table(
     # Source
     scheme=None,
     format=None,
+    hashing=None,
     encoding=None,
     compression=None,
+    fragment=None,
     # Headers
     headers_row=config.HEADERS_ROW,
     headers_joiner=config.HEADERS_JOINER,

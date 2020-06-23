@@ -293,6 +293,14 @@ class EncodingError(Error):
     description = 'Data reading error because of an encoding problem.'
 
 
+class HashingError(Error):
+    code = 'hashing-error'
+    name = 'Hashing Error'
+    tags = ['#table']
+    template = 'The data source could not be successfully hashed: {note}'
+    description = 'Data reading error because of a hashing problem.'
+
+
 class CompressionError(Error):
     code = 'compression-error'
     name = 'Compression Error'
