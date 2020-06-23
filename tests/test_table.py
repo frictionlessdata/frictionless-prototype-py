@@ -418,6 +418,7 @@ def test_table_force_strings():
 # Force parse
 
 
+@pytest.mark.skip
 def test_table_force_parse_inline():
     source = [['John', 21], 'bad-row', ['Alex', 33]]
     with Table(source, force_parse=True) as table:
@@ -428,6 +429,7 @@ def test_table_force_parse_inline():
         ]
 
 
+@pytest.mark.skip
 def test_table_force_parse_json():
     source = '[["John", 21], "bad-row", ["Alex", 33]]'
     with Table(source, scheme='text', format='json', force_parse=True) as table:
