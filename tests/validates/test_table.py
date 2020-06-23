@@ -866,17 +866,7 @@ def test_validate_extra_checks_with_arguments():
 def test_validate_extra_checks_bad_name():
     report = validate('data/table.csv', extra_checks=['bad'])
     assert report.flatten(['code', 'note']) == [
-        ['task-error', 'Check name "bad" should be in "plugin/element" form'],
-    ]
-
-
-def test_validate_extra_checks_bad_plugin_name():
-    report = validate('data/table.csv', extra_checks=['bad/some-check'])
-    assert report.flatten(['code', 'note']) == [
-        [
-            'task-error',
-            'Plugin "bad" is not installed. Run: "pip install frictionless[bad]"',
-        ],
+        ['task-error', 'Cannot create check "bad". Try installing "frictionless-bad"'],
     ]
 
 
