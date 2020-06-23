@@ -14,7 +14,7 @@ def describe(
     missing_values=None,
     infer_type=None,
     infer_names=None,
-    infer_sample=config.INFER_SAMPLE,
+    infer_volume=config.INFER_VOLUME,
     infer_confidence=config.INFER_CONFIDENCE
 ):
     """Describe data source
@@ -25,11 +25,11 @@ def describe(
         missing_values
         infer_type
         infer_names
-        infer_sample
+        infer_volume
         infer_confidence
 
     """
-    with Table(source, headers=headers_row, sample_size=infer_sample) as table:
+    with Table(source, headers=headers_row, sample_size=infer_volume) as table:
         schema = Schema.from_sample(
             table.sample,
             names=infer_names or table.headers,

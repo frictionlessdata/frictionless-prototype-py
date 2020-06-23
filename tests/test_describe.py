@@ -38,8 +38,8 @@ def test_describe_expand():
     }
 
 
-def test_describe_infer_sample():
-    schema = describe('data/table-infer-row-limit.csv', infer_sample=4)
+def test_describe_infer_volume():
+    schema = describe('data/table-infer-row-limit.csv', infer_volume=4)
     assert schema == {
         'fields': [
             {'name': 'id', 'type': 'integer'},
@@ -92,7 +92,7 @@ def test_describe_xlsx_file_with_boolean_column_issue_203():
 
 
 def test_describe_increase_limit_issue_212():
-    schema = describe('data/table-infer-increase-limit.csv', infer_sample=200)
+    schema = describe('data/table-infer-increase-limit.csv', infer_volume=200)
     assert schema == {
         'fields': [{'name': 'a', 'type': 'integer'}, {'name': 'b', 'type': 'number'}],
     }

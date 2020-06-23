@@ -39,7 +39,7 @@ def validate_table(
     patch_schema=False,
     infer_type=None,
     infer_names=None,
-    infer_sample=config.INFER_SAMPLE,
+    infer_volume=config.INFER_VOLUME,
     infer_confidence=config.INFER_CONFIDENCE,
     # Dialect
     dialect=None,
@@ -84,7 +84,7 @@ def validate_table(
         patch_schema? (dict)
         infer_type? (str)
         infer_names? (str[])
-        infer_sample? (int)
+        infer_volume? (int)
         infer_confidence? (float)
 
         dialect? (dict)
@@ -133,7 +133,7 @@ def validate_table(
         skip_rows=helpers.translate_skip_rows(skip_rows),
         limit_rows=limit_rows,
         offset_rows=offset_rows,
-        sample_size=infer_sample,
+        sample_size=infer_volume,
         hashing_algorithm=helpers.parse_hashing_algorithm(hash),
         **helpers.translate_dialect(dialect or {}),
         **helpers.translate_control(control or {}),

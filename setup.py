@@ -50,6 +50,7 @@ EXTRAS_REQUIRE = {
 INSTALL_REQUIRES = (
     [
         'click>=6.6',
+        'pyyaml>=5.3',
         'chardet>=3.0',
         'requests>=2.10',
         'jsonschema>=2.5',
