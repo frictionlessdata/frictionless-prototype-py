@@ -68,7 +68,7 @@ class System:
         modules = OrderedDict()
         # External
         for item in pkgutil.iter_modules():
-            if item.name.startswith('frictionless-'):
+            if item.name.startswith('frictionless_'):
                 module = import_module(item.name)
                 modules[item.name] = module
         # Internal
