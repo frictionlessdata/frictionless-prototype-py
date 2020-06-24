@@ -7,6 +7,8 @@ from copy import copy
 from itertools import chain
 from collections import deque
 from .loaders.stream import StreamLoader
+from .location import Location
+from .system import system
 from . import exceptions
 from . import helpers
 from . import config
@@ -258,7 +260,6 @@ class Table:
         self.__options = options
         self.__sample_extended_rows = []
         self.__field_positions = None
-        self.__loader = None
         self.__parser = None
         self.__row_number = 0
         self.__stats = None
@@ -295,15 +296,6 @@ class Table:
         source = self.__source
         options = copy(self.__options)
 
-        # Programming error assertions
-        assert self.__hashing_algorithm in config.SUPPORTED_HASHING_ALGORITHMS
-
-        # Validate compression
-        if self.__compression:
-            if self.__compression not in config.SUPPORTED_COMPRESSION:
-                message = 'Not supported compression "%s"' % self.__compression
-                raise exceptions.CompressionError(message)
-
         # Get scheme and format if not already given
         compression = None
         if self.__scheme is None or self.__format is None:
@@ -319,79 +311,24 @@ class Table:
             format = self.__format
 
         # Initiate loader
-        self.__loader = None
-        if scheme is not None:
-            loader_class = self.__custom_loaders.get(scheme)
-            if loader_class is None:
-                if scheme not in config.LOADERS:
-                    message = 'Scheme "%s" is not supported' % scheme
-                    raise exceptions.SchemeError(message)
-                loader_path = config.LOADERS[scheme]
-                if loader_path:
-                    loader_class = helpers.import_attribute(loader_path)
-            if loader_class is not None:
-                loader_options = helpers.extract_options(options, loader_class.options)
-                if compression and 'http_stream' in loader_class.options:
-                    loader_options['http_stream'] = False
-                self.__loader = loader_class(**loader_options)
-
-        # Zip compression
-        if compression == 'zip':
-            source = self.__loader.load(source, mode='b')
-            with zipfile.ZipFile(source) as archive:
-                name = archive.namelist()[0]
-                if 'filename' in options.keys():
-                    name = options['filename']
-                    del options['filename']
-                with archive.open(name) as file:
-                    source = tempfile.NamedTemporaryFile(suffix='.' + name)
-                    for line in file:
-                        source.write(line)
-                    source.seek(0)
-            # We redefine loader/format/schema after decompression
-            self.__loader = StreamLoader()
-            format = self.__format or helpers.detect_scheme_and_format(source.name)[1]
-            scheme = 'stream'
-
-        # Gzip compression
-        elif compression == 'gz':
-            name = ''
-            if isinstance(source, str):
-                name = source.replace('.gz', '')
-            source = gzip.open(self.__loader.load(source, mode='b'))
-            # We redefine loader/format/schema after decompression
-            self.__loader = StreamLoader()
-            format = self.__format or helpers.detect_scheme_and_format(name)[1]
-            scheme = 'stream'
-
-        # Not supported compression
-        elif compression:
-            message = 'Compression "%s" is not supported for your Python version'
-            raise exceptions.TabulatorException(message % compression)
-
-        # Attach stats to the loader
-        if getattr(self.__loader, 'attach_stats', None):
-            self.__stats = {
-                'size': 0,
-                'hash': '',
-                'hashing_algorithm': self.__hashing_algorithm,
-            }
-            getattr(self.__loader, 'attach_stats')(self.__stats)
+        loader = None
+        if scheme:
+            location = Location(
+                source,
+                scheme=scheme,
+                format=format,
+                hashing=self.__hashing_algorithm,
+                encoding=self.__encoding,
+                compression=self.__compression,
+            )
+            loader = system.create_loader(location)
 
         # Initiate parser
         parser_class = self.__custom_parsers.get(format)
         if parser_class is None:
-            if format not in config.PARSERS:
-                # If not existent it's a not-found error
-                # Next line will raise IOError/HTTPError
-                chars = self.__loader.load(source)
-                chars.close()
-                # Otherwise it's a format error
-                message = 'Format "%s" is not supported' % format
-                raise exceptions.FormatError(message)
             parser_class = helpers.import_attribute(config.PARSERS[format])
         parser_options = helpers.extract_options(options, parser_class.options)
-        self.__parser = parser_class(self.__loader, **parser_options)
+        self.__parser = parser_class(loader, **parser_options)
 
         # Bad options
         if options:

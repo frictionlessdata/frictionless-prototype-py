@@ -4,6 +4,7 @@ import unicodecsv
 from itertools import chain
 from ..plugin import Plugin
 from ..parser import Parser
+from ..system import system
 from .. import helpers
 from .. import config
 
@@ -36,26 +37,26 @@ class CsvParser(Parser):
         self.__extended_rows = None
         self.__encoding = None
         self.__dialect = None
-        self.__chars = None
+        self.__text_stream = None
 
     @property
     def closed(self):
-        return self.__chars is None or self.__chars.closed
+        return self.__text_stream is None or self.__text_stream.closed
 
     def open(self, source, encoding=None):
         self.close()
-        self.__chars = self.__loader.load(source, encoding=encoding)
-        self.__encoding = getattr(self.__chars, 'encoding', encoding)
+        self.__text_stream = self.__loader.read_text_stream()
+        self.__encoding = getattr(self.__text_stream, 'encoding', encoding)
         if self.__encoding:
             self.__encoding.lower()
         self.reset()
 
     def close(self):
         if not self.closed:
-            self.__chars.close()
+            self.__text_stream.close()
 
     def reset(self):
-        helpers.reset_stream(self.__chars)
+        helpers.reset_stream(self.__text_stream)
         self.__extended_rows = self.__iter_extended_rows()
 
     @property
@@ -83,8 +84,8 @@ class CsvParser(Parser):
     # Private
 
     def __iter_extended_rows(self):
-        sample, dialect = self.__prepare_dialect(self.__chars)
-        items = csv.reader(chain(sample, self.__chars), dialect=dialect)
+        sample, dialect = self.__prepare_dialect(self.__text_stream)
+        items = csv.reader(chain(sample, self.__text_stream), dialect=dialect)
         for row_number, item in enumerate(items, start=1):
             yield (row_number, None, list(item))
 
