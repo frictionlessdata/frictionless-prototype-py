@@ -6,7 +6,6 @@ from urllib.parse import urlparse
 from ..controls import Control
 from ..plugin import Plugin
 from ..loader import Loader
-from .. import helpers
 from .. import config
 
 
@@ -14,8 +13,9 @@ from .. import config
 
 
 class AwsPlugin(Plugin):
-    def create_loader(self, source, *, control=None):
-        pass
+    def create_loader(self, location, *, control=None):
+        if location.scheme == 's3':
+            return S3Loader(location, control=control)
 
 
 # Controls
@@ -65,9 +65,9 @@ class S3Loader(Loader):
 
     # Read
 
-    def read_byte_stream_create(self, source):
+    def read_byte_stream_create(self):
         client = boto3.client('s3', endpoint_url=self.control.endpoint_url)
-        source = requests.utils.requote_uri(source)
+        source = requests.utils.requote_uri(self.location.source)
         parts = urlparse(source, allow_fragments=False)
         response = client.get_object(Bucket=parts.netloc, Key=parts.path[1:])
         # https://github.com/frictionlessdata/tabulator-py/issues/271

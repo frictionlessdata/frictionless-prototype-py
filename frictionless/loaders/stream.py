@@ -9,7 +9,8 @@ class StreamLoader(Loader):
 
     # Read
 
-    def read_byte_stream_create(self, source):
+    def read_byte_stream_create(self):
+        source = self.location.source
         if hasattr(source, 'encoding'):
             error = errors.SourceError(note='only byte streams are supported')
             raise exceptions.FrictionlessExceptionError(error)

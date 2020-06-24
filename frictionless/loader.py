@@ -26,21 +26,18 @@ class Loader:
     Control = None
     network = False
 
-    def __init__(
-        self,
-        control,
-        *,
-        hashing=None,
-        encoding=None,
-        compression=None,
-        compression_file=None,
-    ):
+    def __init__(self, location, *, control=None):
+        self.__location = location
         self.__control = self.Control(control)
-        self.__hashing = hashing
-        self.__encoding = encoding
-        self.__compression = compression
-        self.__compression_file = compression_file
+        self.__hashing = location.hashing
+        self.__encoding = location.encoding
+        self.__compression = location.compression
+        self.__compression_file = location.compression_file
         self.__stats = {}
+
+    @property
+    def location(self):
+        return self.__location
 
     @property
     def control(self):
@@ -66,37 +63,32 @@ class Loader:
     def stats(self):
         return self.__stats
 
-    # Detect
-
     # Read
 
-    def read_text_stream(self, source):
+    def read_text_stream(self):
         """Create texts stream
 
         # Arguments
-            source (any): Source pointer
+            location (any): Location location
 
         # Returns
             TextIO: I/O stream
 
         """
-        byte_stream = self.read_byte_stream(source)
+        byte_stream = self.read_byte_stream()
         byte_stream = self.read_byte_stream_detect_encoding(byte_stream)
         text_stream = io.TextIOWrapper(byte_stream, self.encoding)
         return text_stream
 
-    def read_byte_stream(self, source):
+    def read_byte_stream(self):
         """Create bytes stream
-
-        # Arguments
-            source (any): Source pointer
 
         # Returns
             BinaryIO: I/O stream
 
         """
         try:
-            byte_stream = self.read_byte_stream_create(source)
+            byte_stream = self.read_byte_stream_create()
         except IOError as exception:
             error = errors.SchemeError(note=str(exception))
             raise exceptions.FrictionlessException(error)
@@ -104,11 +96,12 @@ class Loader:
         byte_stream = self.read_byte_stream_detect_stats(byte_stream)
         return byte_stream
 
-    def read_byte_stream_create(self, source):
+    def read_byte_stream_create(self):
         raise NotImplementedError
 
     def read_byte_stream_decompress(self, byte_stream):
         if self.compression == 'zip':
+            self.network = False
             with zipfile.ZipFile(byte_stream) as archive:
                 name = self.compression_file or archive.namelist()[0]
                 with archive.open(name) as file:
@@ -119,12 +112,17 @@ class Loader:
                     byte_stream.seek(0)
             return byte_stream
         if self.compression == 'gz':
-            return gzip.open(byte_stream)
+            byte_stream = gzip.open(byte_stream)
+            return byte_stream
+        if self.compression == 'no':
+            return byte_stream
         note = f'Compression "{self.compression}" is not supported'
         raise exceptions.FrictionlessException(errors.CompressionError(note=note))
 
     def read_byte_stream_detect_stats(self, byte_stream):
-        return ByteStreamWithStats(byte_stream, stats=self.__stats, hashing=self.hashing)
+        byte_stream = ByteStreamWithStats(byte_stream, hashing=self.hashing)
+        self.__stats = byte_stream.stats
+        return byte_stream
 
     def read_byte_stream_detect_encoding(self, byte_stream):
         encoding = self.encoding
@@ -168,23 +166,26 @@ class ByteStreamWithStats(object):
     It will be updating the stats during reading.
 
     # Arguments
-        bytes
-        stats
+        byte_stream
         hashing
 
     """
 
-    def __init__(self, byte_stream, *, stats, hashing=None):
+    def __init__(self, byte_stream, *, hashing=None):
         try:
             self.__hasher = getattr(hashlib, hashing)() if hashing else None
         except Exception as exception:
             error = errors.HashingError(note=str(exception))
             raise exceptions.FrictionlessException(error)
         self.__byte_stream = byte_stream
-        self.__stats = stats
+        self.__stats = {'size': 0, 'hash': ''}
 
     def __getattr__(self, name):
         return getattr(self.__byte_stream, name)
+
+    @property
+    def stats(self):
+        return self.__stats
 
     @property
     def closed(self):

@@ -23,6 +23,7 @@ class Location:
         self.__compression = compression
         self.__compression_file = compression_file
         detect = helpers.detect_source_scheme_and_format(source)
+        self.__detected_compression = None
         if detect[1] in config.SUPPORTED_COMPRESSION:
             self.__detected_compression = detect[1]
             detect = helpers.detect_source_scheme_and_format(source[: -len(detect[1])])
@@ -43,7 +44,7 @@ class Location:
 
     @cached_property
     def format(self):
-        return self.__format or format
+        return self.__format or self.__detected_format
 
     @cached_property
     def hashing(self):
@@ -55,7 +56,11 @@ class Location:
 
     @cached_property
     def compression(self):
-        return self.__compression or self.__detected_compression
+        return (
+            self.__compression
+            or self.__detected_compression
+            or config.DEFAULT_COMPRESSION
+        )
 
     @cached_property
     def compression_file(self):

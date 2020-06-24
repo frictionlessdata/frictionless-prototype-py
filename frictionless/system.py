@@ -5,7 +5,10 @@ from importlib import import_module
 from .errors import Error
 from . import exceptions
 from . import plugins
+from . import loaders
+from . import parsers
 from . import checks
+from . import config
 
 
 class System:
@@ -16,10 +19,12 @@ class System:
         self.__plugins = OrderedDict()
         self.__actions = {
             'create_check': OrderedDict(),
+            'create_loader': OrderedDict(),
+            'create_parser': OrderedDict(),
             'create_server': OrderedDict(),
         }
 
-    # Checks
+    # Create
 
     def create_check(self, name, *, descriptor=None):
         check = None
@@ -49,7 +54,41 @@ class System:
             raise exceptions.FrictionlessException(Error(note=note))
         return check
 
-    # Servers
+    def create_loader(self, location, *, control=None):
+        loader = None
+        name = location.scheme
+        for func in self.__actions['create_loader'].values():
+            loader = func(location, control=control)
+            if loader is not None:
+                break
+        if loader is None:
+            if name == 'file':
+                return loaders.LocalLoader(location, control=control)
+            elif name in config.REMOTE_SCHEMES:
+                return loaders.RemoteLoader(location, control=control)
+            elif name == 'stream':
+                return loaders.StreamLoader(location, control=control)
+            elif name == 'text':
+                return loaders.TextLoader(location, control=control)
+        if loader is None:
+            note = f'Cannot create loader "{name}". Try installing "frictionless-{name}"'
+            raise exceptions.FrictionlessException(Error(note=note))
+        return loader
+
+    def create_parser(self, location, *, dialect=None):
+        parser = None
+        name = location.format
+        for func in self.__actions['create_parser'].values():
+            parser = func(location, dialect=dialect)
+            if parser is not None:
+                break
+        if parser is None:
+            if name == 'inline':
+                return parsers.InlineParser(location, dialect=dialect)
+        if parser is None:
+            note = f'Cannot create parser "{name}". Try installing "frictionless-{name}"'
+            raise exceptions.FrictionlessException(Error(note=note))
+        return parser
 
     def create_server(self, name):
         server = None

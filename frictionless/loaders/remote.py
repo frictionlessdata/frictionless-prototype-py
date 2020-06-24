@@ -10,8 +10,8 @@ class RemoteLoader(Loader):
 
     # Read
 
-    def read_byte_stream_create(self, source):
-        source = requests.utils.requote_uri(source)
+    def read_byte_stream_create(self):
+        source = requests.utils.requote_uri(self.location.source)
         session = self.control.http_session
         timeout = self.control.http_timeout
         byte_stream = RemoteStream(source, session=session, timeout=timeout).open()

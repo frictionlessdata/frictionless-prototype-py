@@ -3,13 +3,14 @@ from .describe import describe
 from .field import Field
 from .headers import Headers
 from .inquiry import Inquiry
+from .location import Location
 from .metadata import Metadata
 from .plugin import Plugin
 from .report import Report, ReportTable
 from .row import Row
 from .schema import Schema
 from .server import Server
-from .system import System
+from .system import System, system
 from .table import Table
 from .validates import validate_inquiry
 from .validates import validate_package, validate_resource
