@@ -26,52 +26,23 @@ class Loader:
     Control = None
     network = False
 
-    def __init__(self, location, *, control=None):
-        self.__location = location
+    def __init__(self, file, *, control=None):
+        self.__file = file
         self.__control = self.Control(control)
-        self.__encoding = location.encoding
         self.__byte_stream = None
         self.__stats = {}
 
     @property
-    def location(self):
-        return self.__location
+    def file(self):
+        return self.__file
 
     @property
     def control(self):
         return self.__control
 
     @property
-    def scheme(self):
-        return self.location.scheme
-
-    @property
-    def format(self):
-        return self.location.format
-
-    @property
-    def hashing(self):
-        return self.location.hashing
-
-    @property
-    def encoding(self):
-        return self.__encoding
-
-    @property
-    def compression(self):
-        return self.location.compression
-
-    @property
-    def compression_file(self):
-        return self.location.compression_file
-
-    @property
     def byte_stream(self):
         return self.__byte_stream
-
-    @property
-    def stats(self):
-        return self.__stats
 
     # Close
 
@@ -83,9 +54,6 @@ class Loader:
 
     def read_text_stream(self):
         """Create texts stream
-
-        # Arguments
-            location (any): Location location
 
         # Returns
             TextIO: I/O stream
@@ -138,11 +106,11 @@ class Loader:
 
     def read_byte_stream_detect_stats(self, byte_stream):
         byte_stream = ByteStreamWithStats(byte_stream, hashing=self.hashing)
-        self.__stats = byte_stream.stats
+        self.file.statistics = byte_stream.statistics
         return byte_stream
 
     def read_byte_stream_detect_encoding(self, byte_stream):
-        encoding = self.encoding
+        encoding = self.file.encoding
         if encoding is None:
             sample = byte_stream.read(config.DETECT_ENCODING_VOLUME)
             sample = sample[: config.DETECT_ENCODING_VOLUME]
@@ -167,7 +135,7 @@ class Loader:
         elif encoding == 'utf-16-le':
             if sample.startswith(codecs.BOM_UTF16_LE):
                 encoding = 'utf-16'
-        self.__encoding = encoding
+        self.file.encoding = encoding
         return byte_stream
 
 
@@ -195,14 +163,14 @@ class ByteStreamWithStats(object):
             error = errors.HashingError(note=str(exception))
             raise exceptions.FrictionlessException(error)
         self.__byte_stream = byte_stream
-        self.__stats = {'size': 0, 'hash': ''}
+        self.__statistics = {'size': 0, 'hash': ''}
 
     def __getattr__(self, name):
         return getattr(self.__byte_stream, name)
 
     @property
-    def stats(self):
-        return self.__stats
+    def statistics(self):
+        return self.__statistics
 
     @property
     def closed(self):
@@ -210,8 +178,8 @@ class ByteStreamWithStats(object):
 
     def read1(self, size=None):
         chunk = self.__byte_stream.read1(size)
-        self.__stats['size'] += len(chunk)
+        self.__statistics['size'] += len(chunk)
         if self.__hasher:
             self.__hasher.update(chunk)
-            self.__stats['hash'] = self.__hasher.hexdigest()
+            self.__statistics['hash'] = self.__hasher.hexdigest()
         return chunk

@@ -8,7 +8,7 @@ from .. import exceptions
 
 
 class SqlPlugin(Plugin):
-    def create_parser(self, source, *, dialect=None):
+    def create_parser(self, source, *, control=None, dialect=None):
         pass
 
 

@@ -10,7 +10,7 @@ class LocalLoader(Loader):
 
     def read_byte_stream_create(self):
         scheme = 'file://'
-        source = self.location.source
+        source = self.file.source
         if source.startswith(scheme):
             source = source.replace(scheme, '', 1)
         byte_stream = io.open(source, 'rb')

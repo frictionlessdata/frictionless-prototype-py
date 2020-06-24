@@ -5,9 +5,6 @@ from importlib import import_module
 from .helpers import cached_property
 from .errors import Error
 from . import exceptions
-from . import loaders
-from . import parsers
-from . import checks
 from . import config
 
 
@@ -21,6 +18,7 @@ class System:
 
     def create_check(self, name, *, descriptor=None):
         check = None
+        checks = import_module('frictionless.checks')
         for func in self.methods['create_check'].values():
             check = func(name, descriptor=descriptor)
             if check is not None:
@@ -47,37 +45,39 @@ class System:
             raise exceptions.FrictionlessException(Error(note=note))
         return check
 
-    def create_loader(self, location, *, control=None):
+    def create_loader(self, file, *, control=None):
         loader = None
-        name = location.scheme
+        name = file.scheme
+        loaders = import_module('frictionless.loaders')
         for func in self.methods['create_loader'].values():
-            loader = func(location, control=control)
+            loader = func(file, control=control)
             if loader is not None:
                 break
         if loader is None:
             if name == 'file':
-                return loaders.LocalLoader(location, control=control)
+                return loaders.LocalLoader(file, control=control)
             elif name in config.REMOTE_SCHEMES:
-                return loaders.RemoteLoader(location, control=control)
+                return loaders.RemoteLoader(file, control=control)
             elif name == 'stream':
-                return loaders.StreamLoader(location, control=control)
+                return loaders.StreamLoader(file, control=control)
             elif name == 'text':
-                return loaders.TextLoader(location, control=control)
+                return loaders.TextLoader(file, control=control)
         if loader is None:
             note = f'Cannot create loader "{name}". Try installing "frictionless-{name}"'
             raise exceptions.FrictionlessException(Error(note=note))
         return loader
 
-    def create_parser(self, location, *, control=None, dialect=None):
+    def create_parser(self, file, *, control=None, dialect=None):
         parser = None
-        name = location.format
+        name = file.format
+        parsers = import_module('frictionless.parsers')
         for func in self.methods['create_parser'].values():
-            parser = func(location, control=None, dialect=dialect)
+            parser = func(file, control=None, dialect=dialect)
             if parser is not None:
                 break
         if parser is None:
             if name == 'inline':
-                return parsers.InlineParser(location, control=None, dialect=dialect)
+                return parsers.InlineParser(file, control=None, dialect=dialect)
         if parser is None:
             note = f'Cannot create parser "{name}". Try installing "frictionless-{name}"'
             raise exceptions.FrictionlessException(Error(note=note))

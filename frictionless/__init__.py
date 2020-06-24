@@ -1,9 +1,9 @@
 from .check import Check
 from .describe import describe
 from .field import Field
+from .file import File
 from .headers import Headers
 from .inquiry import Inquiry
-from .location import Location
 from .metadata import Metadata
 from .plugin import Plugin
 from .report import Report, ReportTable

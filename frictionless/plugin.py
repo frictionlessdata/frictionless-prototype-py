@@ -5,10 +5,10 @@ class Plugin:
     def create_check(self, name, *, descriptor=None):
         pass
 
-    def create_loader(self, location, *, control=None):
+    def create_loader(self, file, *, control=None):
         pass
 
-    def create_parser(self, location, *, control=None, dialect=None):
+    def create_parser(self, file, *, control=None, dialect=None):
         pass
 
     def create_server(self, name):

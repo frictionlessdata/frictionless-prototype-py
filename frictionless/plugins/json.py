@@ -11,7 +11,7 @@ from .. import helpers
 
 
 class JsonPlugin(Plugin):
-    def create_parser(self, source, *, dialect=None):
+    def create_parser(self, source, *, control=None, dialect=None):
         pass
 
 

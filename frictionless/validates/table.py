@@ -43,7 +43,7 @@ def validate_table(
     infer_names=None,
     infer_volume=config.INFER_VOLUME,
     infer_confidence=config.INFER_CONFIDENCE,
-    # Control/dialect
+    # Control/Dialect
     control=None,
     dialect=None,
     # Integrity

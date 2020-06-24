@@ -1,14 +1,9 @@
 import re
-import gzip
-import zipfile
-import tempfile
-import warnings
 from copy import copy
 from itertools import chain
 from collections import deque
-from .loaders.stream import StreamLoader
-from .location import Location
 from .system import system
+from .file import File
 from . import exceptions
 from . import helpers
 from . import config
@@ -253,16 +248,27 @@ class Table:
         self.__custom_loaders = copy(custom_loaders)
         self.__custom_parsers = copy(custom_parsers)
         self.__custom_writers = copy(custom_writers)
-        self.__actual_scheme = scheme
-        self.__actual_format = format
-        self.__actual_encoding = encoding
-        self.__actual_compression = compression
         self.__options = options
         self.__sample_extended_rows = []
         self.__field_positions = None
         self.__parser = None
         self.__row_number = 0
         self.__stats = None
+
+        # Create file
+        self.__file = File(
+            source=self.__source,
+            scheme=self.__scheme,
+            format=self.__format,
+            hashing=self.__hashing_algorithm,
+            encoding=self.__encoding,
+            compression=self.__compression,
+            compression_path=self.__options.get('filename'),
+            statistics={'size': 0, 'hash': ''},
+        )
+
+        # Create parser
+        self.__parser = system.create_parser(self.__file)
 
     def __enter__(self):
         if self.closed:
@@ -293,29 +299,11 @@ class Table:
             TabulatorException: if an error
 
         """
-
-        # Open and setup
-        self.__location = Location(
-            self.__source,
-            scheme=self.__scheme,
-            format=self.__format,
-            hashing=self.__hashing_algorithm,
-            encoding=self.__encoding,
-            compression=self.__compression,
-        )
-        self.__parser = system.create_parser(self.__location)
         self.__line_stream = self.__parser.create_line_stream()
         self.__extract_sample()
         self.__extract_headers()
         if not self.__allow_html:
             self.__detect_html()
-
-        # Set scheme/format/encoding
-        self.__actual_scheme = self.__parser.scheme
-        self.__actual_format = self.__parser.format
-        self.__actual_encoding = self.__parser.encoding
-        self.__actual_compression = self.__parser.compression
-
         return self
 
     def close(self):
@@ -335,6 +323,27 @@ class Table:
         self.__row_number = 0
 
     @property
+    def field_positions(self):
+        if self.__field_positions is None:
+            self.__field_positions = []
+            if self.__headers:
+                size = len(self.__headers) + len(self.__ignored_headers_indexes)
+                for index in range(size):
+                    if index not in self.__ignored_headers_indexes:
+                        self.__field_positions.append(index + 1)
+        return self.__field_positions
+
+    @property
+    def path(self):
+        """Path
+
+        # Returns
+            any: stream path
+
+        """
+        return self.__file.path
+
+    @property
     def source(self):
         """Source
 
@@ -342,7 +351,77 @@ class Table:
             any: stream source
 
         """
-        return self.__source
+        return self.__file.source
+
+    @property
+    def scheme(self):
+        """Path's scheme
+
+        # Returns
+            str: scheme
+
+        """
+        return self.__file.scheme
+
+    @property
+    def format(self):
+        """Path's format
+
+        # Returns
+            str: format
+
+        """
+        return self.__file.format
+
+    @property
+    def hashing(self):
+        """Stream's encoding
+
+        # Returns
+            str: encoding
+
+        """
+        return self.__file.hashing
+
+    @property
+    def encoding(self):
+        """Stream's encoding
+
+        # Returns
+            str: encoding
+
+        """
+        return self.__file.encoding
+
+    @property
+    def compression(self):
+        """Stream's compression ("no" if no compression)
+
+        # Returns
+            str: compression
+
+        """
+        return self.__file.compression
+
+    @property
+    def compression_path(self):
+        """Stream's compression path
+
+        # Returns
+            str: compression
+
+        """
+        return self.__file.compression_path
+
+    @property
+    def statistics(self):
+        """Returns statistics
+
+        # Returns
+            int/None: BYTE count
+
+        """
+        return self.__file.statistics
 
     @property
     def headers(self):
@@ -353,103 +432,6 @@ class Table:
 
         """
         return self.__headers
-
-    @headers.setter
-    def headers(self, headers):
-        """Set headers
-
-        # Arguments
-            str[]: headers
-
-        """
-        self.__headers = headers
-
-    @property
-    def scheme(self):
-        """Path's scheme
-
-        # Returns
-            str: scheme
-
-        """
-        return self.__actual_scheme or 'inline'
-
-    @property
-    def format(self):
-        """Path's format
-
-        # Returns
-            str: format
-
-        """
-        return self.__actual_format or 'inline'
-
-    @property
-    def encoding(self):
-        """Stream's encoding
-
-        # Returns
-            str: encoding
-
-        """
-        return self.__actual_encoding or 'no'
-
-    @property
-    def compression(self):
-        """Stream's compression ("no" if no compression)
-
-        # Returns
-            str: compression
-
-        """
-        return self.__actual_compression or 'no'
-
-    @property
-    def fragment(self):
-        """Path's fragment
-
-        # Returns
-            str: fragment
-
-        """
-        if self.__parser:
-            return getattr(self.__parser, 'fragment', None)
-        return None
-
-    @property
-    def dialect(self):
-        """Dialect (if available)
-
-        # Returns
-            dict/None: dialect
-
-        """
-        if self.__parser:
-            return getattr(self.__parser, 'dialect', {})
-        return None
-
-    @property
-    def size(self):
-        """Returns the BYTE count of the read chunks if available
-
-        # Returns
-            int/None: BYTE count
-
-        """
-        if self.__stats:
-            return self.__stats['size']
-
-    @property
-    def hash(self):
-        """Returns the SHA256 (or according to the "hashing_algorithm" parameter)
-        hash of the read chunks if available
-
-        # Returns
-            str/None: bytes hash
-
-        """
-        if self.__stats:
-            return self.__stats['hash']
 
     @property
     def sample(self):
@@ -470,19 +452,34 @@ class Table:
         return sample
 
     @property
-    def field_positions(self):
-        if self.__field_positions is None:
-            self.__field_positions = []
-            if self.__headers:
-                size = len(self.__headers) + len(self.__ignored_headers_indexes)
-                for index in range(size):
-                    if index not in self.__ignored_headers_indexes:
-                        self.__field_positions.append(index + 1)
-        return self.__field_positions
+    def schema(self):
+        """Schema
+
+        # Returns
+            str[]/None: schema
+
+        """
+        return self.__schema
 
     @property
-    def hashing_algorithm(self):
-        return self.__hashing_algorithm
+    def control(self):
+        """Control (if available)
+
+        # Returns
+            dict/None: dialect
+
+        """
+        return self.__parser.control
+
+    @property
+    def dialect(self):
+        """Dialect (if available)
+
+        # Returns
+            dict/None: dialect
+
+        """
+        return self.__parser.dialect
 
     def iter(self, keyed=False, extended=False):
         """Iterate over the rows.
@@ -519,7 +516,7 @@ class Table:
             raise exceptions.TabulatorException(message)
 
         # Create iterator
-        iterator = chain(self.__sample_extended_rows, self.__parser.extended_rows)
+        iterator = chain(self.__sample_extended_rows, self.__line_stream)
         iterator = self.__apply_processors(iterator)
 
         # Yield rows from iterator
@@ -625,7 +622,7 @@ class Table:
         self.__sample_extended_rows = []
         for _ in range(self.__sample_size):
             try:
-                row_number, headers, row = next(self.__parser.extended_rows)
+                row_number, headers, row = next(self.__line_stream)
                 if self.__headers_row and self.__headers_row >= row_number:
                     if self.__check_if_row_for_skipping(row_number, headers, row):
                         self.__headers_row += 1

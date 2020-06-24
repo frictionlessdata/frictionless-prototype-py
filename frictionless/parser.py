@@ -1,5 +1,4 @@
 from .system import system
-from .helpers import cached_property
 
 
 class Parser:
@@ -14,19 +13,19 @@ class Parser:
 
     """
 
-    def __init__(self, location, *, control=None, dialect=None):
-        self.__location = location
+    def __init__(self, file, *, control=None, dialect=None):
+        self.__file = file
         self.__control = control
         self.__dialect = dialect
         self.__loader = None
 
     @property
-    def location(self):
-        return self.__location
+    def file(self):
+        return self.__file
 
     @property
     def control(self):
-        return self.__control
+        return getattr(self.loader, 'control', self.__control)
 
     @property
     def dialect(self):
@@ -35,34 +34,6 @@ class Parser:
     @property
     def loader(self):
         return self.__loader
-
-    @property
-    def scheme(self):
-        return getattr(self.loader, 'scheme', self.location.scheme)
-
-    @property
-    def format(self):
-        return getattr(self.loader, 'format', self.location.format)
-
-    @property
-    def hashing(self):
-        return getattr(self.loader, 'hashing', self.location.hashing)
-
-    @property
-    def encoding(self):
-        return getattr(self.loader, 'encoding', self.location.encoding)
-
-    @property
-    def compression(self):
-        return getattr(self.loader, 'compression', self.location.compression)
-
-    @property
-    def compression_file(self):
-        return getattr(self.loader, 'compression_file', self.location.compression_file)
-
-    @property
-    def stats(self):
-        return getattr(self.loader, 'stats', {})
 
     # Close
 
@@ -80,4 +51,4 @@ class Parser:
         raise NotImplementedError
 
     def read_line_stream_create_loader(self):
-        return system.create_loader(self.location, control=self.control)
+        return system.create_loader(self.file, control=self.control)
