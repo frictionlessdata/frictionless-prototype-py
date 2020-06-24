@@ -27,13 +27,19 @@ class Loader:
     network = False
 
     def __init__(
-        self, control, *, hashing=None, encoding=None, compression=None, fragment=None
+        self,
+        control,
+        *,
+        hashing=None,
+        encoding=None,
+        compression=None,
+        compression_file=None,
     ):
         self.__control = self.Control(control)
         self.__hashing = hashing
         self.__encoding = encoding
         self.__compression = compression
-        self.__fragment = fragment
+        self.__compression_file = compression_file
         self.__stats = {}
 
     @property
@@ -53,8 +59,8 @@ class Loader:
         return self.__compression
 
     @property
-    def fragment(self):
-        return self.__fragment
+    def compression_file(self):
+        return self.__compression_file
 
     @property
     def stats(self):
@@ -104,7 +110,7 @@ class Loader:
     def read_byte_stream_decompress(self, byte_stream):
         if self.compression == 'zip':
             with zipfile.ZipFile(byte_stream) as archive:
-                name = self.fragment or archive.namelist()[0]
+                name = self.compression_file or archive.namelist()[0]
                 with archive.open(name) as file:
                     byte_stream = tempfile.NamedTemporaryFile(suffix='.' + name)
                     atexit.register(os.remove, byte_stream.name)

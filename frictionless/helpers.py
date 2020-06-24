@@ -1,38 +1,38 @@
-import io
 import re
 import os
 import codecs
 import hashlib
 import chardet
 import datetime
-import itertools
 import stringcase
 from copy import copy
 from importlib import import_module
 from urllib.parse import urlparse, parse_qs
 from _thread import RLock  # type: ignore
 from . import exceptions
+from . import config
 
 
 # General
 
 
-def read_asset(*paths):
-    dirname = os.path.dirname(__file__)
-    return io.open(os.path.join(dirname, 'assets', *paths)).read().strip()
+def apply_function(function, descriptor):
+    options = create_options(descriptor)
+    return function(**options)
 
 
-def combine(*iterators):
-    combine.missing = '__combine_missing__'
-    return itertools.zip_longest(*iterators, fillvalue=combine.missing)
+def create_options(descriptor):
+    return {stringcase.snakecase(key): value for key, value in descriptor.items()}
 
 
-def find_positions(haystack, needle):
-    positions = []
-    for position, value in enumerate(haystack, start=1):
-        if value == needle:
-            positions.append(position)
-    return positions
+def create_descriptor(**options):
+    return {stringcase.camelcase(key): value for key, value in options.items()}
+
+
+def ensure_dir(path):
+    dirpath = os.path.dirname(path)
+    if dirpath and not os.path.exists(dirpath):
+        os.makedirs(dirpath)
 
 
 def parse_hashing_algorithm(hash):
@@ -49,17 +49,11 @@ def parse_hashing_digest(hash):
     return parts[1] if len(parts) > 1 else hash
 
 
-def apply_function(function, descriptor):
-    options = create_options(descriptor)
-    return function(**options)
-
-
-def create_options(descriptor):
-    return {stringcase.snakecase(key): value for key, value in descriptor.items()}
-
-
-def create_descriptor(**options):
-    return {stringcase.camelcase(key): value for key, value in options.items()}
+def reset_cached_properties(obj):
+    for name, attr in type(obj).__dict__.items():
+        if name in obj.__dict__:
+            if isinstance(attr, cached_property):
+                obj.__dict__.pop(name)
 
 
 def detect_source_type(source):
@@ -85,20 +79,33 @@ def detect_source_type(source):
     return source_type
 
 
-def ensure_dir(path):
-    dirpath = os.path.dirname(path)
-    if dirpath and not os.path.exists(dirpath):
-        os.makedirs(dirpath)
-
-
-def reset_cached_properties(obj):
-    for name, attr in type(obj).__dict__.items():
-        if name in obj.__dict__:
-            if isinstance(attr, cached_property):
-                obj.__dict__.pop(name)
-
-
-# Integrity
+def detect_source_scheme_and_format(source):
+    if hasattr(source, 'read'):
+        return ('stream', None)
+    if not isinstance(source, str):
+        return (None, 'inline')
+    if 'docs.google.com/spreadsheets' in source:
+        if 'export' not in source and 'pub' not in source:
+            return (None, 'gsheet')
+        elif 'csv' in source:
+            return ('https', 'csv')
+    for sql_scheme in config.SQL_SCHEMES:
+        if source.startswith('%s://' % sql_scheme):
+            return (None, 'sql')
+    parsed = urlparse(source)
+    scheme = parsed.scheme.lower()
+    if len(scheme) < 2:
+        scheme = config.DEFAULT_SCHEME
+    format = os.path.splitext(parsed.path or parsed.netloc)[1][1:].lower() or None
+    if format is None:
+        # Test if query string contains a "format=" parameter.
+        query_string = parse_qs(parsed.query)
+        query_string_format = query_string.get("format")
+        if query_string_format is not None and len(query_string_format) == 1:
+            format = query_string_format[0]
+    if parsed.path.endswith('datapackage.json'):
+        return (None, 'package')
+    return (scheme, format)
 
 
 def create_lookup(resource, *, package=None):
@@ -126,6 +133,30 @@ def create_lookup(resource, *, package=None):
         except Exception:
             pass
     return lookup
+
+
+def get_current_memory_usage():
+    # Current memory usage of the current process in MB
+    # This will only work on systems with a /proc file system (like Linux)
+    # https://stackoverflow.com/questions/897941/python-equivalent-of-phps-memory-get-usage
+    try:
+        with open('/proc/self/status') as status:
+            for line in status:
+                parts = line.split()
+                key = parts[0][2:-1].lower()
+                if key == 'rss':
+                    return int(parts[1]) / 1000
+    except Exception:
+        pass
+
+
+class Timer:
+    def __init__(self):
+        self.__initial = datetime.datetime.now()
+
+    def get_time(self):
+        current = datetime.datetime.now()
+        return round((current - self.__initial).total_seconds(), 3)
 
 
 # Compatability
@@ -194,33 +225,6 @@ def translate_dialect(dialect):
 
 def translate_control(control):
     return create_options(control)
-
-
-# Measurements
-
-
-class Timer:
-    def __init__(self):
-        self.__initial = datetime.datetime.now()
-
-    def get_time(self):
-        current = datetime.datetime.now()
-        return round((current - self.__initial).total_seconds(), 3)
-
-
-def get_current_memory_usage():
-    # Current memory usage of the current process in MB
-    # This will only work on systems with a /proc file system (like Linux)
-    # https://stackoverflow.com/questions/897941/python-equivalent-of-phps-memory-get-usage
-    try:
-        with open('/proc/self/status') as status:
-            for line in status:
-                parts = line.split()
-                key = parts[0][2:-1].lower()
-                if key == 'rss':
-                    return int(parts[1]) / 1000
-    except Exception:
-        pass
 
 
 # Tabulator

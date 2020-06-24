@@ -1,7 +1,7 @@
 import io
+import requests.utils
 from ..loader import Loader
 from .. import controls
-from .. import helpers
 
 
 class RemoteLoader(Loader):
@@ -11,7 +11,7 @@ class RemoteLoader(Loader):
     # Read
 
     def read_byte_stream_create(self, source):
-        source = helpers.requote_uri(source)
+        source = requests.utils.requote_uri(source)
         session = self.control.http_session
         timeout = self.control.http_timeout
         byte_stream = RemoteStream(source, session=session, timeout=timeout).open()

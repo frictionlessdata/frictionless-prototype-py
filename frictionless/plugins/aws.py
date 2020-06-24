@@ -1,6 +1,7 @@
 import os
 import io
 import boto3
+import requests.utils
 from urllib.parse import urlparse
 from ..controls import Control
 from ..plugin import Plugin
@@ -66,7 +67,7 @@ class S3Loader(Loader):
 
     def read_byte_stream_create(self, source):
         client = boto3.client('s3', endpoint_url=self.control.endpoint_url)
-        source = helpers.requote_uri(source)
+        source = requests.utils.requote_uri(source)
         parts = urlparse(source, allow_fragments=False)
         response = client.get_object(Bucket=parts.netloc, Key=parts.path[1:])
         # https://github.com/frictionlessdata/tabulator-py/issues/271

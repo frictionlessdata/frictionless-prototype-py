@@ -1,5 +1,14 @@
+import io
+import os
 import json
-from .helpers import read_asset
+
+
+# Helpers
+
+
+def read_asset(*paths):
+    dirname = os.path.dirname(__file__)
+    return io.open(os.path.join(dirname, 'assets', *paths)).read().strip()
 
 
 # General
@@ -15,10 +24,10 @@ INFER_VOLUME = 100
 INFER_CONFIDENCE = 0.9
 DETECT_ENCODING_VOLUME = 10000
 DETECT_ENCODING_CONFIDENCE = 0.5
+DEFAULT_HASHING = 'md5'
 LIMIT_MEMORY = 1000
 HEADERS_ROW = 1
 HEADERS_JOINER = ' '
-HASHING_ALGORITHM = 'md5'
 
 # Tabulator
 # TODO: rework

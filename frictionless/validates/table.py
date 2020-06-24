@@ -21,7 +21,7 @@ def validate_table(
     hashing=None,
     encoding=None,
     compression=None,
-    fragment=None,
+    compression_file=None,
     # Headers
     headers_row=config.HEADERS_ROW,
     headers_joiner=config.HEADERS_JOINER,
