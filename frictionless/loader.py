@@ -29,10 +29,8 @@ class Loader:
     def __init__(self, location, *, control=None):
         self.__location = location
         self.__control = self.Control(control)
-        self.__hashing = location.hashing
         self.__encoding = location.encoding
-        self.__compression = location.compression
-        self.__compression_file = location.compression_file
+        self.__byte_stream = None
         self.__stats = {}
 
     @property
@@ -44,8 +42,16 @@ class Loader:
         return self.__control
 
     @property
+    def scheme(self):
+        return self.location.scheme
+
+    @property
+    def format(self):
+        return self.location.format
+
+    @property
     def hashing(self):
-        return self.__hashing
+        return self.location.hashing
 
     @property
     def encoding(self):
@@ -53,15 +59,25 @@ class Loader:
 
     @property
     def compression(self):
-        return self.__compression
+        return self.location.compression
 
     @property
     def compression_file(self):
-        return self.__compression_file
+        return self.location.compression_file
+
+    @property
+    def byte_stream(self):
+        return self.__byte_stream
 
     @property
     def stats(self):
         return self.__stats
+
+    # Close
+
+    def close(self):
+        if self.byte_stream:
+            self.byte_stream.close()
 
     # Read
 
@@ -94,6 +110,7 @@ class Loader:
             raise exceptions.FrictionlessException(error)
         byte_stream = self.read_byte_stream_decompress(byte_stream)
         byte_stream = self.read_byte_stream_detect_stats(byte_stream)
+        self.__byte_stream
         return byte_stream
 
     def read_byte_stream_create(self):

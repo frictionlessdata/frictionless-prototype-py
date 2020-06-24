@@ -15,42 +15,13 @@ class System:
     """System representation
     """
 
-    @cached_property
-    def actions(self):
-        actions = {}
-        codes = ['create_check', 'create_loader', 'create_parser', 'create_server']
-        for code in codes:
-            actions[code] = OrderedDict()
-            for name, plugin in self.plugins.items():
-                if code in vars(type(plugin)):
-                    func = getattr(plugin, code, None)
-                    actions[code][name] = func
-        return actions
+    # Actions
 
-    @cached_property
-    def plugins(self):
-        modules = OrderedDict()
-        for item in pkgutil.iter_modules():
-            if item.name.startswith('frictionless_'):
-                module = import_module(item.name)
-                modules[item.name] = module
-        module = import_module(f'frictionless.plugins')
-        for _, name, _ in pkgutil.iter_modules([os.path.dirname(module.__file__)]):
-            module = import_module(f'frictionless.plugins.{name}')
-            modules[name] = module
-        plugins = OrderedDict()
-        for name, module in modules.items():
-            Plugin = getattr(module, f'{name.capitalize()}Plugin', None)
-            if Plugin:
-                plugin = Plugin()
-                plugins[name] = plugin
-        return plugins
-
-    # Create
+    actions = ['create_check', 'create_loader', 'create_parser', 'create_server']
 
     def create_check(self, name, *, descriptor=None):
         check = None
-        for func in self.actions['create_check'].values():
+        for func in self.methods['create_check'].values():
             check = func(name, descriptor=descriptor)
             if check is not None:
                 break
@@ -79,7 +50,7 @@ class System:
     def create_loader(self, location, *, control=None):
         loader = None
         name = location.scheme
-        for func in self.actions['create_loader'].values():
+        for func in self.methods['create_loader'].values():
             loader = func(location, control=control)
             if loader is not None:
                 break
@@ -97,16 +68,16 @@ class System:
             raise exceptions.FrictionlessException(Error(note=note))
         return loader
 
-    def create_parser(self, location, *, dialect=None):
+    def create_parser(self, location, *, control=None, dialect=None):
         parser = None
         name = location.format
-        for func in self.actions['create_parser'].values():
-            parser = func(location, dialect=dialect)
+        for func in self.methods['create_parser'].values():
+            parser = func(location, control=None, dialect=dialect)
             if parser is not None:
                 break
         if parser is None:
             if name == 'inline':
-                return parsers.InlineParser(location, dialect=dialect)
+                return parsers.InlineParser(location, control=None, dialect=dialect)
         if parser is None:
             note = f'Cannot create parser "{name}". Try installing "frictionless-{name}"'
             raise exceptions.FrictionlessException(Error(note=note))
@@ -114,7 +85,7 @@ class System:
 
     def create_server(self, name):
         server = None
-        for func in self.actions['create_server'].values():
+        for func in self.methods['create_server'].values():
             server = func(name)
             if server is not None:
                 break
@@ -122,6 +93,40 @@ class System:
             note = f'Cannot create server "{name}". Try installing "frictionless-{name}"'
             raise exceptions.FrictionlessException(Error(note=note))
         return server
+
+    # Methods
+
+    @cached_property
+    def methods(self):
+        methods = {}
+        for action in self.actions:
+            methods[action] = OrderedDict()
+            for name, plugin in self.plugins.items():
+                if action in vars(type(plugin)):
+                    func = getattr(plugin, action, None)
+                    methods[action][name] = func
+        return methods
+
+    # Plugins
+
+    @cached_property
+    def plugins(self):
+        modules = OrderedDict()
+        for item in pkgutil.iter_modules():
+            if item.name.startswith('frictionless_'):
+                module = import_module(item.name)
+                modules[item.name] = module
+        module = import_module(f'frictionless.plugins')
+        for _, name, _ in pkgutil.iter_modules([os.path.dirname(module.__file__)]):
+            module = import_module(f'frictionless.plugins.{name}')
+            modules[name] = module
+        plugins = OrderedDict()
+        for name, module in modules.items():
+            Plugin = getattr(module, f'{name.capitalize()}Plugin', None)
+            if Plugin:
+                plugin = Plugin()
+                plugins[name] = plugin
+        return plugins
 
 
 system = System()

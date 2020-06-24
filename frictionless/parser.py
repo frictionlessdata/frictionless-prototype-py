@@ -1,3 +1,7 @@
+from .system import system
+from .helpers import cached_property
+
+
 class Parser:
     """Abstract class implemented by the data parsers.
 
@@ -10,77 +14,70 @@ class Parser:
 
     """
 
-    # Public
-
-    options = []  # type: ignore
-
-    def __init__(self, loader, **options):
-        pass
+    def __init__(self, location, *, control=None, dialect=None):
+        self.__location = location
+        self.__control = control
+        self.__dialect = dialect
+        self.__loader = None
 
     @property
-    def closed(self):
-        """Flag telling if the parser is closed.
+    def location(self):
+        return self.__location
 
-        # Returns
-            bool: whether closed
+    @property
+    def control(self):
+        return self.__control
 
-        """
-        raise NotImplementedError
+    @property
+    def dialect(self):
+        return self.__dialect
 
-    def open(self, source, encoding=None):
-        """Open underlying file stream in the beginning of the file.
+    @property
+    def loader(self):
+        return self.__loader
 
-        The parser gets a byte or text stream from the `tabulator.Loader`
-        instance and start emitting items.
+    @property
+    def scheme(self):
+        return getattr(self.loader, 'scheme', self.location.scheme)
 
-        # Arguments
-            source (str): Path to source table.
-            encoding (str, optional): Source encoding. Auto-detect by default.
+    @property
+    def format(self):
+        return getattr(self.loader, 'format', self.location.format)
 
-        # Returns
-            None
-
-        """
-        raise NotImplementedError
-
-    def close(self):
-        """Closes underlying file stream.
-        """
-        raise NotImplementedError
-
-    def reset(self):
-        """Resets underlying stream and current items list.
-
-        After `reset()` is called, iterating over the items will start from the beginning.
-        """
-        raise NotImplementedError
+    @property
+    def hashing(self):
+        return getattr(self.loader, 'hashing', self.location.hashing)
 
     @property
     def encoding(self):
-        """Encoding
-
-        # Returns
-            str: encoding
-
-        """
-        raise NotImplementedError
+        return getattr(self.loader, 'encoding', self.location.encoding)
 
     @property
-    def extended_rows(self):
-        """Returns extended rows iterator.
+    def compression(self):
+        return getattr(self.loader, 'compression', self.location.compression)
 
-        The extended rows are tuples containing `(row_number, headers, row)`,
+    @property
+    def compression_file(self):
+        return getattr(self.loader, 'compression_file', self.location.compression_file)
 
-        # Raises
-            SourceError:
-                If a row can't be parsed, this exception will be raised.
+    @property
+    def stats(self):
+        return getattr(self.loader, 'stats', {})
 
-        Returns:
-            Iterator[Tuple[int, List[str], List[Any]]]:
-                Extended rows containing
-                `(row_number, headers, row)`, where `headers` is a list of the
-                header names (can be `None`), and `row` is a list of row
-                values.
+    # Close
 
-        """
+    def close(self):
+        if self.loader:
+            self.loader.close()
+
+    # Read
+
+    def read_line_stream(self):
+        self.__loader = self.read_line_stream_create_loader()
+        return self.read_line_stream_create()
+
+    def read_line_stream_create(self, loader):
         raise NotImplementedError
+
+    def read_line_stream_create_loader(self):
+        return system.create_loader(self.location, control=self.control)

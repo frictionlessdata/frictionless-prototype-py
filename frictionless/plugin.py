@@ -8,7 +8,7 @@ class Plugin:
     def create_loader(self, location, *, control=None):
         pass
 
-    def create_parser(self, location, *, dialect=None):
+    def create_parser(self, location, *, control=None, dialect=None):
         pass
 
     def create_server(self, name):

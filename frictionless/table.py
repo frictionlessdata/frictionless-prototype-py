@@ -293,61 +293,28 @@ class Table:
             TabulatorException: if an error
 
         """
-        source = self.__source
-        options = copy(self.__options)
-
-        # Get scheme and format if not already given
-        compression = None
-        if self.__scheme is None or self.__format is None:
-            detected_scheme, detected_format = helpers.detect_scheme_and_format(source)
-            scheme = self.__scheme or detected_scheme
-            format = self.__format or detected_format
-            # Get compression
-            for type in config.SUPPORTED_COMPRESSION:
-                if self.__compression == type or detected_format == type:
-                    compression = type
-        else:
-            scheme = self.__scheme
-            format = self.__format
-
-        # Initiate loader
-        loader = None
-        if scheme:
-            location = Location(
-                source,
-                scheme=scheme,
-                format=format,
-                hashing=self.__hashing_algorithm,
-                encoding=self.__encoding,
-                compression=self.__compression,
-            )
-            loader = system.create_loader(location)
-
-        # Initiate parser
-        parser_class = self.__custom_parsers.get(format)
-        if parser_class is None:
-            parser_class = helpers.import_attribute(config.PARSERS[format])
-        parser_options = helpers.extract_options(options, parser_class.options)
-        self.__parser = parser_class(loader, **parser_options)
-
-        # Bad options
-        if options:
-            message = 'Not supported option(s) "%s" for scheme "%s" and format "%s"'
-            message = message % (', '.join(options), scheme, format)
-            warnings.warn(message, UserWarning)
 
         # Open and setup
-        self.__parser.open(source, encoding=self.__encoding)
+        self.__location = Location(
+            self.__source,
+            scheme=self.__scheme,
+            format=self.__format,
+            hashing=self.__hashing_algorithm,
+            encoding=self.__encoding,
+            compression=self.__compression,
+        )
+        self.__parser = system.create_parser(self.__location)
+        self.__line_stream = self.__parser.create_line_stream()
         self.__extract_sample()
         self.__extract_headers()
         if not self.__allow_html:
             self.__detect_html()
 
         # Set scheme/format/encoding
-        self.__actual_scheme = scheme
-        self.__actual_format = format
+        self.__actual_scheme = self.__parser.scheme
+        self.__actual_format = self.__parser.format
         self.__actual_encoding = self.__parser.encoding
-        self.__actual_compression = compression
+        self.__actual_compression = self.__parser.compression
 
         return self
 
