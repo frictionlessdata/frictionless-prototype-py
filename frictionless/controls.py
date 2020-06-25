@@ -14,8 +14,8 @@ class Control(ControlledMetadata):
 
     """
 
-    def __init__(self, descriptor=None):
-        super().__init__(descriptor)
+    def __init__(self, descriptor=None, *, metadata_root=None):
+        super().__init__(descriptor, metadata_root=metadata_root)
 
     # Expand
 
@@ -65,12 +65,18 @@ class RemoteControl(Control):
     }
 
     def __init__(
-        self, descriptor=None, *, http_session=None, http_preload=None, http_timeout=None,
+        self,
+        descriptor=None,
+        *,
+        http_session=None,
+        http_preload=None,
+        http_timeout=None,
+        metadata_root=None
     ):
         self.setdefined('httpSession', http_session)
         self.setdefined('httpPreload', http_preload)
         self.setdefined('httpTimeout', http_timeout)
-        super().__init(descriptor)
+        super().__init(descriptor, metadata_root=metadata_root)
 
     @property
     def http_session(self):

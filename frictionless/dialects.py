@@ -13,8 +13,8 @@ class Dialect(ControlledMetadata):
 
     """
 
-    def __init__(self, descriptor=None):
-        super().__init__(descriptor)
+    def __init__(self, descriptor=None, metadata_root=None):
+        super().__init__(descriptor, metadata_root=metadata_root)
 
     # Expand
 
@@ -74,6 +74,7 @@ class CsvDialect(Dialect):
         header=None,
         comment_char=None,
         case_sensitive_header=None,
+        metadata_root=None,
     ):
         self.setdefined('delimiter', delimiter)
         self.setdefined('lineTerminator', line_terminator)
@@ -85,7 +86,7 @@ class CsvDialect(Dialect):
         self.setdefined('header', header)
         self.setdefined('commentChar', comment_char)
         self.setdefined('caseSensitiveHeader', case_sensitive_header)
-        super().__init__(descriptor)
+        super().__init__(descriptor, metadata_root=metadata_root)
 
     def __getattr__(self, name):
         # Interoperability with native
@@ -187,12 +188,13 @@ class ExcelDialect(Dialect):
         fill_merged_cells=None,
         preserve_formatting=None,
         adjust_floating_point_error=None,
+        metadata_root=None,
     ):
         self.setdefined('sheet', sheet)
         self.setdefined('fillMergedCells', fill_merged_cells)
         self.setdefined('preserveFormatting', preserve_formatting)
         self.setdefined('adjustFloatingPointError', adjust_floating_point_error)
-        super().__init__(descriptor)
+        super().__init__(descriptor, metadata_root=metadata_root)
 
     @property
     def sheet(self):
@@ -238,9 +240,9 @@ class InlineDialect(Dialect):
         'properties': {'keyed': {'type': 'boolean'}},
     }
 
-    def __init__(self, descriptor=None, *, keyed=None):
+    def __init__(self, descriptor=None, *, keyed=None, metadata_root=None):
         self.setdefined('keyed', keyed)
-        super().__init__(descriptor)
+        super().__init__(descriptor, metadata_root=metadata_root)
 
     @property
     def keyed(self):
@@ -271,12 +273,10 @@ class JsonDialect(Dialect):
         'properties': {'keyed': {'type': 'boolean'}, 'property': {'type': 'string'}},
     }
 
-    def __init__(
-        self, descriptor=None, *, keyed=None, property=None,
-    ):
+    def __init__(self, descriptor=None, *, keyed=None, property=None, metadata_root=None):
         self.setdefined('keyed', keyed)
         self.setdefined('property', property)
-        super().__init__(descriptor)
+        super().__init__(descriptor, metadata_root=metadata_root)
 
     @property
     def keyed(self):

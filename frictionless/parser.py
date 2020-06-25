@@ -16,7 +16,7 @@ class Parser:
 
     def __init__(self, file):
         self.__file = file
-        self.__file.dialect = self.Dialect(self.__file.dialect)
+        self.__file.dialect = self.Dialect(self.__file.dialect, metadata_root=file)
         self.__loader = None
         self.__cell_stream = None
 
@@ -46,9 +46,16 @@ class Parser:
     # Read
 
     def read_loader(self):
-        loader = system.create_loader(self.file)
-        loader.open()
+        loader = self.read_loader_create()
+        if loader:
+            self.read_loader_open(loader)
         return loader
+
+    def read_loader_create(self):
+        return system.create_loader(self.file)
+
+    def read_loader_open(self, loader):
+        loader.open()
 
     def read_cell_stream(self):
         return self.read_cell_stream_create()

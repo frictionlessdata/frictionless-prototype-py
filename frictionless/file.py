@@ -1,6 +1,8 @@
 import stringcase
 from .helpers import cached_property
 from .metadata import ControlledMetadata
+from .controls import Control
+from .dialects import Dialect
 from . import helpers
 from . import config
 
@@ -130,3 +132,16 @@ class File(ControlledMetadata):
         self.setdetault('hashing', self.hashing)
         self.setdetault('encoding', self.hashing)
         self.setdetault('compression', self.compression)
+
+    # Metadata
+
+    def metadata_process(self):
+        control = self.get('control')
+        if control is not None:
+            if not isinstance(control, Control) or control.metadata_root != self:
+                dict.__setitem__(self, 'control', Control(control, metadata_root=self))
+        dialect = self.get('dialect')
+        if dialect is not None:
+            if not isinstance(dialect, Dialect) or dialect.metadata_root != self:
+                dict.__setitem__(self, 'dialect', Dialect(dialect, metadata_root=self))
+        super().metadata_process()

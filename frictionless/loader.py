@@ -28,7 +28,7 @@ class Loader:
 
     def __init__(self, file):
         self.__file = file
-        self.__file.control = self.Control(self.__file.control)
+        self.__file.control = self.Control(self.__file.control, metadata_root=file)
         self.__byte_stream = None
         self.__text_stream = None
 
@@ -46,7 +46,7 @@ class Loader:
 
     # Manage
 
-    def open(self, mode='t'):
+    def open(self, *, mode='t'):
         self.close()
         self.__byte_stream = self.read_byte_stream()
         if mode == 't':

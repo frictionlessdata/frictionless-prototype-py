@@ -9,7 +9,7 @@ class InlineParser(Parser):
 
     # Read
 
-    def read_loader(self):
+    def read_loader_create(self):
         return None
 
     def read_cell_stream_create(self):
