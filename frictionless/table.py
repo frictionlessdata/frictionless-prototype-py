@@ -149,6 +149,8 @@ class Table:
         custom_loaders={},
         custom_parsers={},
         custom_writers={},
+        control=None,
+        dialect=None,
         **options
     ):
 
@@ -257,14 +259,16 @@ class Table:
 
         # Create file
         self.__file = File(
-            source=self.__source,
-            scheme=self.__scheme,
-            format=self.__format,
-            hashing=self.__hashing_algorithm,
-            encoding=self.__encoding,
-            compression=self.__compression,
-            compression_path=self.__options.get('filename'),
-            statistics={'size': 0, 'hash': ''},
+            source=source,
+            scheme=scheme,
+            format=format,
+            hashing=hashing_algorithm,
+            encoding=encoding,
+            compression=compression,
+            compression_path=options.get('filename'),
+            control=control,
+            dialect=dialect,
+            stats=None,
         )
 
         # Create parser
@@ -414,14 +418,34 @@ class Table:
         return self.__file.compression_path
 
     @property
-    def statistics(self):
-        """Returns statistics
+    def control(self):
+        """Control (if available)
+
+        # Returns
+            dict/None: dialect
+
+        """
+        return self.__file.control
+
+    @property
+    def dialect(self):
+        """Dialect (if available)
+
+        # Returns
+            dict/None: dialect
+
+        """
+        return self.__file.dialect
+
+    @property
+    def stats(self):
+        """Returns stats
 
         # Returns
             int/None: BYTE count
 
         """
-        return self.__file.statistics
+        return self.__file.stats
 
     @property
     def headers(self):
@@ -460,26 +484,6 @@ class Table:
 
         """
         return self.__schema
-
-    @property
-    def control(self):
-        """Control (if available)
-
-        # Returns
-            dict/None: dialect
-
-        """
-        return self.__parser.control
-
-    @property
-    def dialect(self):
-        """Dialect (if available)
-
-        # Returns
-            dict/None: dialect
-
-        """
-        return self.__parser.dialect
 
     def iter(self, keyed=False, extended=False):
         """Iterate over the rows.

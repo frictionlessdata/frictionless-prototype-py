@@ -1,9 +1,11 @@
 from collections import OrderedDict
 from ..parser import Parser
 from .. import exceptions
+from .. import dialects
 
 
 class InlineParser(Parser):
+    Dialect = dialects.InlineDialect
 
     # Read
 

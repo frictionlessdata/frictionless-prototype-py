@@ -16,7 +16,7 @@ class Loader:
     """Loader representation
 
     # Arguments
-        descriptor? (str|dict): loader descriptor
+        file (File): file
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
@@ -26,19 +26,14 @@ class Loader:
     Control = None
     network = False
 
-    def __init__(self, file, *, control=None):
+    def __init__(self, file):
         self.__file = file
-        self.__control = self.Control(control)
+        self.__file.control = self.Control(self.__file.control)
         self.__byte_stream = None
-        self.__stats = {}
 
     @property
     def file(self):
         return self.__file
-
-    @property
-    def control(self):
-        return self.__control
 
     @property
     def byte_stream(self):
@@ -106,7 +101,7 @@ class Loader:
 
     def read_byte_stream_detect_stats(self, byte_stream):
         byte_stream = ByteStreamWithStats(byte_stream, hashing=self.hashing)
-        self.file.statistics = byte_stream.statistics
+        self.file.stats = byte_stream.stats
         return byte_stream
 
     def read_byte_stream_detect_encoding(self, byte_stream):
@@ -163,14 +158,14 @@ class ByteStreamWithStats(object):
             error = errors.HashingError(note=str(exception))
             raise exceptions.FrictionlessException(error)
         self.__byte_stream = byte_stream
-        self.__statistics = {'size': 0, 'hash': ''}
+        self.__stats = {'size': 0, 'hash': ''}
 
     def __getattr__(self, name):
         return getattr(self.__byte_stream, name)
 
     @property
-    def statistics(self):
-        return self.__statistics
+    def stats(self):
+        return self.__stats
 
     @property
     def closed(self):
@@ -178,8 +173,8 @@ class ByteStreamWithStats(object):
 
     def read1(self, size=None):
         chunk = self.__byte_stream.read1(size)
-        self.__statistics['size'] += len(chunk)
+        self.__stats['size'] += len(chunk)
         if self.__hasher:
             self.__hasher.update(chunk)
-            self.__statistics['hash'] = self.__hasher.hexdigest()
+            self.__stats['hash'] = self.__hasher.hexdigest()
         return chunk

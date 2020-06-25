@@ -2,34 +2,26 @@ from .system import system
 
 
 class Parser:
-    """Abstract class implemented by the data parsers.
-
-    The parsers inherit and implement this class' methods to add support for a
-    new file type.
+    """Parser representation
 
     # Arguments
-        loader (tabulator.Loader): Loader instance to read the file.
-        **options (dict): Loader options
+        file (File): file
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
 
     """
 
-    def __init__(self, file, *, control=None, dialect=None):
+    Dialect = None
+
+    def __init__(self, file):
         self.__file = file
-        self.__control = control
-        self.__dialect = dialect
+        self.__file.dialect = self.Dialect(self.__file.dialect)
         self.__loader = None
 
     @property
     def file(self):
         return self.__file
-
-    @property
-    def control(self):
-        return getattr(self.loader, 'control', self.__control)
-
-    @property
-    def dialect(self):
-        return self.__dialect
 
     @property
     def loader(self):

@@ -15,22 +15,22 @@ from ..report import Report, ReportTable
 def validate_table(
     source,
     *,
-    # Source
+    # File
     scheme=None,
     format=None,
     hashing=None,
     encoding=None,
     compression=None,
-    compression_file=None,
-    # Headers
+    compression_path=None,
+    control=None,
+    dialect=None,
+    # Table
     headers_row=config.HEADERS_ROW,
     headers_joiner=config.HEADERS_JOINER,
-    # Fields
     pick_fields=None,
     skip_fields=None,
     limit_fields=None,
     offset_fields=None,
-    # Rows
     pick_rows=None,
     skip_rows=None,
     limit_rows=None,
@@ -43,9 +43,6 @@ def validate_table(
     infer_names=None,
     infer_volume=config.INFER_VOLUME,
     infer_confidence=config.INFER_CONFIDENCE,
-    # Control/Dialect
-    control=None,
-    dialect=None,
     # Integrity
     size=None,
     hash=None,

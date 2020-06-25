@@ -17,7 +17,9 @@ class File(ControlledMetadata):
             'encoding': {'type': 'string'},
             'compression': {'type': 'string'},
             'compressionPath': {'type': 'string'},
-            'statistics': {
+            'contorl': {'type': 'object'},
+            'dialect': {'type': 'object'},
+            'stats': {
                 'type': 'object',
                 'required': ['size', 'hash'],
                 'properties': {'size': {'type': 'number'}, 'hash': {'type': 'string'}},
@@ -36,7 +38,9 @@ class File(ControlledMetadata):
         encoding=None,
         compression=None,
         compression_path=None,
-        statistics=None,
+        control=None,
+        dialect=None,
+        stats=None,
     ):
         self.setdefined('source', source)
         self.setdefined('scheme', scheme)
@@ -45,7 +49,9 @@ class File(ControlledMetadata):
         self.setdefined('encoding', encoding)
         self.setdefined('compression', compression)
         self.setdefined('compressionPath', compression_path)
-        self.setdefined('statistics', statistics)
+        self.setdefined('control', control)
+        self.setdefined('dialect', dialect)
+        self.setdefined('stats', stats)
         super().__init__(descriptor)
         # Detect from source
         detect = helpers.detect_source_scheme_and_format(source)
@@ -64,7 +70,9 @@ class File(ControlledMetadata):
             'encoding',
             'compression',
             'compressionPath',
-            'statistics',
+            'control',
+            'dialect',
+            'stats',
         ]:
             self[stringcase.camelcase(name)] = value
         super().__setattr__(name, value)
@@ -103,8 +111,16 @@ class File(ControlledMetadata):
         return self.get('compressionPath')
 
     @cached_property
-    def statistics(self):
-        return self.get('statistics')
+    def control(self):
+        return self.get('control')
+
+    @cached_property
+    def dialect(self):
+        return self.get('dialect')
+
+    @cached_property
+    def stats(self):
+        return self.get('stats')
 
     # Expand
 
