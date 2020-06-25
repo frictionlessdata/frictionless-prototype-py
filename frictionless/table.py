@@ -257,7 +257,6 @@ class Table:
         self.__row_number = 0
         self.__stats = None
         self.__parser = None
-        self.__cell_stream = None
 
         # Create file
         self.__file = File(
@@ -428,7 +427,7 @@ class Table:
         """
         return self.__schema
 
-    # Admin
+    # Manage
 
     def open(self):
         """Opens the stream for reading.
@@ -439,7 +438,6 @@ class Table:
         """
         self.__parser = system.create_parser(self.__file)
         self.__parser.open()
-        self.__cell_stream = self.__parser.read_cell_stream()
         self.__extract_sample()
         self.__extract_headers()
         if not self.__allow_html:
@@ -450,7 +448,6 @@ class Table:
         """Closes the stream.
         """
         self.__parser.close()
-        self.__cell_stream = None
         self.__row_number = 0
 
     # Read
@@ -485,12 +482,12 @@ class Table:
         """
 
         # Error if closed
-        if not self.__cell_stream:
+        if not self.__parser:
             message = 'Stream is closed. Please call "stream.open()" first.'
             raise exceptions.TabulatorException(message)
 
         # Create iterator
-        iterator = chain(self.__sample_extended_rows, self.__cell_stream)
+        iterator = chain(self.__sample_extended_rows, self.__parser.cell_stream)
         iterator = self.__apply_processors(iterator)
 
         # Yield rows from iterator
@@ -598,7 +595,7 @@ class Table:
         self.__sample_extended_rows = []
         for _ in range(self.__sample_size):
             try:
-                row_number, headers, row = next(self.__cell_stream)
+                row_number, headers, row = next(self.__parser.cell_stream)
                 if self.__headers_row and self.__headers_row >= row_number:
                     if self.__check_if_row_for_skipping(row_number, headers, row):
                         self.__headers_row += 1

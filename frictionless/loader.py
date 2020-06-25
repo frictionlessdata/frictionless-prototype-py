@@ -30,6 +30,7 @@ class Loader:
         self.__file = file
         self.__file.control = self.Control(self.__file.control)
         self.__byte_stream = None
+        self.__text_stream = None
 
     @property
     def file(self):
@@ -39,11 +40,17 @@ class Loader:
     def byte_stream(self):
         return self.__byte_stream
 
+    @property
+    def text_stream(self):
+        return self.__text_stream
+
     # Admin
 
-    def open(self):
+    def open(self, mode='t'):
         self.close()
-        self.__byte_stream = self.read_byte_stream_open()
+        self.__byte_stream = self.read_byte_stream()
+        if mode == 't':
+            self.__text_stream = self.read_text_stream()
 
     def close(self):
         if self.__byte_stream:
@@ -59,9 +66,6 @@ class Loader:
             BinaryIO: I/O stream
 
         """
-        return self.byte_stream
-
-    def read_byte_stream_open(self):
         try:
             byte_stream = self.read_byte_stream_create()
             byte_stream = self.read_byte_stream_decompress(byte_stream)

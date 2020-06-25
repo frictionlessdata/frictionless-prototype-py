@@ -18,6 +18,7 @@ class Parser:
         self.__file = file
         self.__file.dialect = self.Dialect(self.__file.dialect)
         self.__loader = None
+        self.__cell_stream = None
 
     @property
     def file(self):
@@ -27,11 +28,16 @@ class Parser:
     def loader(self):
         return self.__loader
 
-    # Admin
+    @property
+    def cell_stream(self):
+        return self.__cell_stream
+
+    # Manage
 
     def open(self):
         self.close()
-        self.__loader = self.read_cell_stream_open()
+        self.__loader = self.read_loader()
+        self.__cell_stream = self.read_cell_stream()
 
     def close(self):
         if self.__loader:
@@ -39,13 +45,13 @@ class Parser:
 
     # Read
 
-    def read_cell_stream(self):
-        return self.read_cell_stream_create()
-
-    def read_cell_stream_open(self):
+    def read_loader(self):
         loader = system.create_loader(self.file)
         loader.open()
         return loader
+
+    def read_cell_stream(self):
+        return self.read_cell_stream_create()
 
     def read_cell_stream_create(self, loader):
         raise NotImplementedError
