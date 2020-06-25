@@ -83,7 +83,7 @@ class CsvDialect(Dialect):
         self.setdefined('header', header)
         self.setdefined('commentChar', comment_char)
         self.setdefined('caseSensitiveHeader', case_sensitive_header)
-        super().__init(descriptor)
+        super().__init__(descriptor)
 
     # Expand
 
@@ -135,7 +135,7 @@ class ExcelDialect(Dialect):
         self.setdefined('fillMergedCells', fill_merged_cells)
         self.setdefined('preserveFormatting', preserve_formatting)
         self.setdefined('adjustFloatingPointError', adjust_floating_point_error)
-        super().__init(descriptor)
+        super().__init__(descriptor)
 
     # Expand
 
@@ -168,7 +168,7 @@ class InlineDialect(Dialect):
     def __init__(self, descriptor=None, keyed=None, forced=None):
         self.setdefined('keyed', keyed)
         self.setdefined('forced', forced)
-        super().__init(descriptor)
+        super().__init__(descriptor)
 
     # Expand
 
@@ -201,7 +201,7 @@ class JsonDialect(Dialect):
     ):
         self.setdefined('keyed', keyed)
         self.setdefined('property', property)
-        super().__init(descriptor)
+        super().__init__(descriptor)
 
     # Expand
 

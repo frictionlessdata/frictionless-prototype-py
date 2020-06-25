@@ -41,6 +41,10 @@ class Loader:
 
     # Close
 
+    @property
+    def closed(self):
+        return not self.byte_stream or self.byte_stream.closed
+
     def close(self):
         if self.byte_stream:
             self.byte_stream.close()
@@ -66,6 +70,7 @@ class Loader:
             BinaryIO: I/O stream
 
         """
+        self.close()
         try:
             byte_stream = self.read_byte_stream_create()
         except IOError as exception:

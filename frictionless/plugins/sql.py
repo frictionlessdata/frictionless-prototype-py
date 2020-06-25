@@ -72,19 +72,7 @@ class SqlParser(Parser):
         for row_number, row in enumerate(iter(result), start=1):
             yield (row_number, row.keys(), list(row))
 
-
-class SqlWriter:
-    options = [
-        'table',
-    ]
-
-    def __init__(self, table=None, **options):
-
-        # Ensure table
-        if table is None:
-            raise exceptions.TabulatorException('Format `sql` requires `table` option.')
-
-        self.__table = table
+    # Write
 
     def write(self, source, target, headers, encoding=None):
         engine = create_engine(target)

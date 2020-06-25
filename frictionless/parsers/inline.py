@@ -7,10 +7,16 @@ from .. import dialects
 class InlineParser(Parser):
     Dialect = dialects.InlineDialect
 
+    # Close
+
+    @property
+    def closed(self):
+        return False
+
     # Read
 
     def read_line_stream_create(self):
-        for row_number, item in enumerate(self.source, start=1):
+        for row_number, item in enumerate(self.file.source, start=1):
             if isinstance(item, (tuple, list)):
                 yield (row_number, None, list(item))
             elif isinstance(item, dict):
@@ -26,3 +32,6 @@ class InlineParser(Parser):
             else:
                 message = 'Inline data item has to be tuple, list or dict'
                 raise exceptions.SourceError(message)
+
+    def read_line_stream_create_loader(self):
+        return None

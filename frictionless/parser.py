@@ -29,6 +29,10 @@ class Parser:
 
     # Close
 
+    @property
+    def closed(self):
+        return not self.loader or self.loader.closed
+
     def close(self):
         if self.loader:
             self.loader.close()
@@ -36,6 +40,7 @@ class Parser:
     # Read
 
     def read_line_stream(self):
+        self.close()
         self.__loader = self.read_line_stream_create_loader()
         return self.read_line_stream_create()
 
@@ -43,4 +48,4 @@ class Parser:
         raise NotImplementedError
 
     def read_line_stream_create_loader(self):
-        return system.create_loader(self.file, control=self.control)
+        return system.create_loader(self.file)

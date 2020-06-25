@@ -271,9 +271,6 @@ class Table:
             stats=None,
         )
 
-        # Create parser
-        self.__parser = system.create_parser(self.__file)
-
     def __enter__(self):
         if self.closed:
             self.open()
@@ -282,9 +279,6 @@ class Table:
     def __exit__(self, type, value, traceback):
         if not self.closed:
             self.close()
-
-    def __iter__(self):
-        return self.iter()
 
     @property
     def closed(self):
@@ -303,7 +297,8 @@ class Table:
             TabulatorException: if an error
 
         """
-        self.__line_stream = self.__parser.create_line_stream()
+        self.__parser = system.create_parser(self.__file)
+        self.__line_stream = self.__parser.read_line_stream()
         self.__extract_sample()
         self.__extract_headers()
         if not self.__allow_html:

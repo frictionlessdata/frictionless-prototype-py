@@ -70,8 +70,25 @@ class JsonParser(Parser):
                     raise exceptions.SourceError(message)
                 yield (row_number, None, [])
 
+    # Write
 
-class NdjsonParser(Parser):
+    def write(self, source, target, headers, encoding=None):
+        helpers.ensure_dir(target)
+        data = []
+        count = 0
+        if not self.__keyed:
+            data.append(headers)
+        for row in source:
+            if self.__keyed:
+                row = dict(zip(headers, row))
+            data.append(row)
+            count += 1
+        with open(target, 'w') as file:
+            json.dump(data, file, indent=2)
+        return count
+
+
+class JsonlParser(Parser):
     options = []  # type: ignore
 
     def __init__(self, loader):
@@ -123,27 +140,3 @@ class NdjsonParser(Parser):
                 if not dialect and not dialect.get('forced'):
                     raise exceptions.SourceError('JSON item has to be list or dict')
                 yield (row_number, None, [])
-
-
-class JsonWriter:
-    options = [
-        'keyed',
-    ]
-
-    def __init__(self, keyed=False):
-        self.__keyed = keyed
-
-    def write(self, source, target, headers, encoding=None):
-        helpers.ensure_dir(target)
-        data = []
-        count = 0
-        if not self.__keyed:
-            data.append(headers)
-        for row in source:
-            if self.__keyed:
-                row = dict(zip(headers, row))
-            data.append(row)
-            count += 1
-        with open(target, 'w') as file:
-            json.dump(data, file, indent=2)
-        return count

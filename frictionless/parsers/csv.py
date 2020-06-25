@@ -109,14 +109,7 @@ class CsvParser(Parser):
         self.__dialect = dialect
         return sample, dialect
 
-
-class CsvWriter:
-    options = [
-        'delimiter',
-    ]
-
-    def __init__(self, **options):
-        self.__options = options
+    # Write
 
     def write(self, source, target, headers, encoding=None):
         helpers.ensure_dir(target)
