@@ -90,7 +90,11 @@ class Schema(ControlledMetadata):
 
     @staticmethod
     def from_sample(
-        sample, *, names=None, confidence=config.INFER_CONFIDENCE, missing_values=None
+        sample,
+        *,
+        names=None,
+        confidence=config.DEFAULT_INFER_CONFIDENCE,
+        missing_values=None,
     ):
         """Infer schema from sample
 
@@ -206,7 +210,9 @@ class Schema(ControlledMetadata):
 
     # Infer
 
-    def infer(self, sample, *, type=None, names=None, confidence=config.INFER_CONFIDENCE):
+    def infer(
+        self, sample, *, type=None, names=None, confidence=config.DEFAULT_INFER_CONFIDENCE
+    ):
         """Infer schema
 
         # Arguments

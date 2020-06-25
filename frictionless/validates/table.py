@@ -25,8 +25,8 @@ def validate_table(
     control=None,
     dialect=None,
     # Table
-    headers_row=config.HEADERS_ROW,
-    headers_joiner=config.HEADERS_JOINER,
+    headers_row=config.DEFAULT_HEADERS_ROW,
+    headers_joiner=config.DEFAULT_HEADERS_JOINER,
     pick_fields=None,
     skip_fields=None,
     limit_fields=None,
@@ -41,8 +41,8 @@ def validate_table(
     patch_schema=False,
     infer_type=None,
     infer_names=None,
-    infer_volume=config.INFER_VOLUME,
-    infer_confidence=config.INFER_CONFIDENCE,
+    infer_volume=config.DEFAULT_INFER_VOLUME,
+    infer_confidence=config.DEFAULT_INFER_CONFIDENCE,
     # Integrity
     size=None,
     hash=None,
@@ -51,7 +51,7 @@ def validate_table(
     pick_errors=None,
     skip_errors=None,
     limit_errors=None,
-    limit_memory=config.LIMIT_MEMORY,
+    limit_memory=config.DEFAULT_LIMIT_MEMORY,
     extra_checks=None,
 ):
     """Validate table

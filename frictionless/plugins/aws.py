@@ -6,7 +6,6 @@ from urllib.parse import urlparse
 from ..controls import Control
 from ..plugin import Plugin
 from ..loader import Loader
-from .. import config
 
 
 # Plugin
@@ -47,7 +46,7 @@ class S3Control(Control):
         return (
             self.get('endpointUrl')
             or os.environ.get('S3_ENDPOINT_URL')
-            or config.S3_DEFAULT_ENDPOINT_URL
+            or S3_DEFAULT_ENDPOINT_URL
         )
 
     # Expand
@@ -75,3 +74,8 @@ class S3Loader(Loader):
         byte_stream.write(response['Body'].read())
         byte_stream.seek(0)
         return byte_stream
+
+
+# Internal
+
+S3_DEFAULT_ENDPOINT_URL = 'https://s3.amazonaws.com'

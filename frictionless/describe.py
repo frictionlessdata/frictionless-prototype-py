@@ -9,13 +9,13 @@ def describe(
     source,
     *,
     source_type=None,
-    headers_row=config.HEADERS_ROW,
+    headers_row=config.DEFAULT_HEADERS_ROW,
     expand=False,
     missing_values=None,
     infer_type=None,
     infer_names=None,
-    infer_volume=config.INFER_VOLUME,
-    infer_confidence=config.INFER_CONFIDENCE
+    infer_volume=config.DEFAULT_INFER_VOLUME,
+    infer_confidence=config.DEFAULT_INFER_CONFIDENCE
 ):
     """Describe data source
 

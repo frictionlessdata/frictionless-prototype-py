@@ -1,9 +1,9 @@
 import requests
-from .metadata import Metadata
+from .metadata import ControlledMetadata
 from . import config
 
 
-class Control(Metadata):
+class Control(ControlledMetadata):
     """Control representation
 
     # Arguments
@@ -21,9 +21,6 @@ class Control(Metadata):
 
     def expand(self):
         pass
-
-
-# TODO: move to plugins
 
 
 class LocalControl(Control):
@@ -68,7 +65,7 @@ class RemoteControl(Control):
     }
 
     def __init__(
-        self, descriptor=None, http_session=None, http_preload=None, http_timeout=None,
+        self, descriptor=None, *, http_session=None, http_preload=None, http_timeout=None,
     ):
         self.setdefined('httpSession', http_session)
         self.setdefined('httpPreload', http_preload)
@@ -116,7 +113,7 @@ class StreamControl(Control):
     }
 
 
-class TextControl(Metadata):
+class TextControl(Control):
     """Text control representation
 
     # Arguments

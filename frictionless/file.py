@@ -53,14 +53,14 @@ class File(ControlledMetadata):
         self.setdefined('dialect', dialect)
         self.setdefined('stats', stats)
         super().__init__(descriptor)
-        # Detect from source
-        detect = helpers.detect_source_scheme_and_format(source)
-        self.__detected_compression = None
-        if detect[1] in config.SUPPORTED_COMPRESSION:
-            self.__detected_compression = detect[1]
-            detect = helpers.detect_source_scheme_and_format(source[: -len(detect[1])])
-        self.__detected_scheme = detect[0]
-        self.__detected_format = detect[1]
+        # Infer from source
+        infer = helpers.infer_source_scheme_and_format(source)
+        self.__infered_compression = None
+        if infer[1] in config.COMPRESSION_FORMATS:
+            self.__infered_compression = infer[1]
+            infer = helpers.infer_source_scheme_and_format(source[: -len(infer[1])])
+        self.__infered_scheme = infer[0]
+        self.__infered_format = infer[1]
 
     def __setattr__(self, name, value):
         if name in [
@@ -87,11 +87,11 @@ class File(ControlledMetadata):
 
     @cached_property
     def scheme(self):
-        return self.get('scheme', self.__detected_scheme)
+        return self.get('scheme', self.__infered_scheme)
 
     @cached_property
     def format(self):
-        return self.get('format', self.__detected_format)
+        return self.get('format', self.__infered_format)
 
     @cached_property
     def hashing(self):
@@ -103,7 +103,7 @@ class File(ControlledMetadata):
 
     @cached_property
     def compression(self):
-        default = self.__detected_compression or config.DEFAULT_COMPRESSION
+        default = self.__infered_compression or config.DEFAULT_COMPRESSION
         return self.get('compression', default)
 
     @cached_property

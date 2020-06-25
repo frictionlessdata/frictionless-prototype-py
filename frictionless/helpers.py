@@ -56,7 +56,7 @@ def reset_cached_properties(obj):
                 obj.__dict__.pop(name)
 
 
-def detect_source_type(source):
+def infer_source_type(source):
     source_type = 'table'
     if isinstance(source, dict):
         if source.get('fields') is not None:
@@ -79,7 +79,7 @@ def detect_source_type(source):
     return source_type
 
 
-def detect_source_scheme_and_format(source):
+def infer_source_scheme_and_format(source):
     if hasattr(source, 'read'):
         return ('stream', None)
     if not isinstance(source, str):

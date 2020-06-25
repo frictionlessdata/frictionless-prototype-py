@@ -18,73 +18,30 @@ GEOJSON_PROFILE = json.loads(read_asset('profiles', 'geojson.json'))
 INQUIRY_PROFILE = json.loads(read_asset('profiles', 'inquiry.json'))
 REPORT_PROFILE = json.loads(read_asset('profiles', 'report.json'))
 SCHEMA_PROFILE = json.loads(read_asset('profiles', 'schema.json'))
+SQL_SCHEMES = ['firebird', 'mssql', 'mysql', 'oracle', 'postgresql', 'sqlite', 'sybase']
 REMOTE_SCHEMES = ['http', 'https', 'ftp', 'ftps']
-MISSING_VALUES = ['']
-INFER_VOLUME = 100
-INFER_CONFIDENCE = 0.9
-DETECT_ENCODING_VOLUME = 10000
-DETECT_ENCODING_CONFIDENCE = 0.5
-DEFAULT_HASHING = 'md5'
-DEFAULT_COMPRESSION = 'no'
-LIMIT_MEMORY = 1000
-HEADERS_ROW = 1
-HEADERS_JOINER = ' '
+COMPRESSION_FORMATS = ['zip', 'gz']
+INFER_ENCODING_VOLUME = 10000
+INFER_ENCODING_CONFIDENCE = 0.5
+INFER_DIALECT_VOLUME = 100
 
-# Tabulator
-# TODO: rework
+# Defaults
 
 DEFAULT_SCHEME = 'file'
+DEFAULT_HASHING = 'md5'
 DEFAULT_ENCODING = 'utf-8'
-DEFAULT_SAMPLE_SIZE = 100
-SUPPORTED_COMPRESSION = ['zip', 'gz']
-SUPPORTED_HASHING_ALGORITHMS = ['md5', 'sha1', 'sha256', 'sha512']
-ENCODING_CONFIDENCE = 0.5
-HTTP_HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) '
-    + 'AppleWebKit/537.36 (KHTML, like Gecko) '
-    + 'Chrome/54.0.2840.87 Safari/537.36'
-}
-HTTP_TIMEOUT = 10
-CSV_SAMPLE_LINES = 100
-# http://docs.sqlalchemy.org/en/latest/dialects/index.html
-SQL_SCHEMES = ['firebird', 'mssql', 'mysql', 'oracle', 'postgresql', 'sqlite', 'sybase']
-S3_DEFAULT_ENDPOINT_URL = 'https://s3.amazonaws.com'
-
-# Loaders
-
-LOADERS = {
-    's3': 'frictionless.plugins.aws.AwsLoader',
-    'file': 'frictionless.loaders.local.LocalLoader',
-    'http': 'frictionless.loaders.remote.RemoteLoader',
-    'https': 'frictionless.loaders.remote.RemoteLoader',
-    'ftp': 'frictionless.loaders.remote.RemoteLoader',
-    'ftps': 'frictionless.loaders.remote.RemoteLoader',
-    'stream': 'frictionless.loaders.stream.StreamLoader',
-    'text': 'frictionless.loaders.text.TextLoader',
-}
-
-# Parsers
-
-PARSERS = {
-    'csv': 'frictionless.plugins.csv.CsvParser',
-    'gsheet': 'frictionless.plugins.gsheet.GsheetParser',
-    'html': 'frictionless.plugins.html.HtmlTableParser',
-    'inline': 'frictionless.parsers.inline.InlineParser',
-    'json': 'frictionless.plugins.json.JsonParser',
-    'jsonl': 'frictionless.plugins.json.NdjsonParser',
-    'ndjson': 'frictionless.plugins.json.NdjsonParser',
-    'ods': 'frictionless.plugins.ods.OdsParser',
-    'sql': 'frictionless.plugins.sql.SqlParser',
-    'tsv': 'frictionless.plugins.tsv.TsvParser',
-    'xls': 'frictionless.plugins.excel.XlsParser',
-    'xlsx': 'frictionless.plugins.excel.XlsxParser',
-}
-
-# Writers
-
-WRITERS = {
-    'csv': 'frictionless.plugins.csv.CsvWriter',
-    'json': 'frictionless.plugins.json.JsonWriter',
-    'xlsx': 'frictionless.plugins.excel.XlsxWriter',
-    'sql': 'frictionless.plugins.sql.SqlWriter',
+DEFAULT_COMPRESSION = 'no'
+DEFAULT_HEADERS_ROW = 1
+DEFAULT_HEADERS_JOINER = ' '
+DEFAULT_MISSING_VALUES = ['']
+DEFAULT_LIMIT_MEMORY = 1000
+DEFAULT_INFER_VOLUME = 100
+DEFAULT_INFER_CONFIDENCE = 0.9
+DEFAULT_HTTP_TIMEOUT = 10
+DEFAULT_HTTP_HEADERS = {
+    'User-Agent': (
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) '
+        'AppleWebKit/537.36 (KHTML, like Gecko) '
+        'Chrome/54.0.2840.87 Safari/537.36'
+    )
 }

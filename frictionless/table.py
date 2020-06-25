@@ -121,19 +121,25 @@ class Table:
     def __init__(
         self,
         source,
-        headers=None,
+        *,
+        # File
         scheme=None,
         format=None,
+        hashing=None,
         encoding=None,
         compression=None,
+        compression_path=None,
+        control=None,
+        dialect=None,
+        # Table
+        headers=None,
         allow_html=False,
-        sample_size=config.DEFAULT_SAMPLE_SIZE,
+        sample_size=config.DEFAULT_INFER_VOLUME,
         ignore_blank_headers=False,
         ignore_listed_headers=None,
         ignore_not_listed_headers=None,
         multiline_headers_joiner=' ',
         multiline_headers_duplicates=False,
-        hashing_algorithm='sha256',
         force_strings=False,
         pick_columns=None,
         skip_columns=None,
@@ -149,8 +155,6 @@ class Table:
         custom_loaders={},
         custom_parsers={},
         custom_writers={},
-        control=None,
-        dialect=None,
         **options
     ):
 
@@ -240,7 +244,7 @@ class Table:
         self.__multiline_headers_joiner = multiline_headers_joiner
         self.__multiline_headers_duplicates = multiline_headers_duplicates
         self.__ignored_headers_indexes = []
-        self.__hashing_algorithm = hashing_algorithm
+        self.__hashing_algorithm = hashing
         self.__force_strings = force_strings
         self.__limit_fields = limit_fields
         self.__offset_fields = offset_fields
@@ -263,10 +267,10 @@ class Table:
             source=source,
             scheme=scheme,
             format=format,
-            hashing=hashing_algorithm,
+            hashing=hashing,
             encoding=encoding,
             compression=compression,
-            compression_path=options.get('filename'),
+            compression_path=compression_path,
             control=control,
             dialect=dialect,
             stats=None,

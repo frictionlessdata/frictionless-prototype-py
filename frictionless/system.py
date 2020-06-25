@@ -77,7 +77,7 @@ class System:
                 break
         if parser is None:
             if name == 'csv':
-                return parsers.InlineParser(file)
+                return parsers.CsvParser(file)
             elif name == 'inline':
                 return parsers.InlineParser(file)
             elif name == 'xlsx':

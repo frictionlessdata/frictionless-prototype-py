@@ -4,8 +4,6 @@ import sys
 import pytest
 import datetime
 from frictionless import Table, exceptions
-from frictionless.loaders.local import LocalLoader
-from frictionless.plugins.csv import CsvParser, CsvWriter
 
 
 # General
@@ -23,8 +21,8 @@ def test_table():
         assert table.compression == 'no'
         assert table.dialect == {
             'delimiter': ',',
-            'doubleQuote': True,
             'lineTerminator': '\r\n',
+            'doubleQuote': True,
             'quoteChar': '"',
             'skipInitialSpace': False,
         }
@@ -762,6 +760,7 @@ def test_table_post_parse_sample():
 # Custom loaders
 
 
+@pytest.mark.skip
 def test_table_custom_loaders():
     source = 'custom://data/table.csv'
 
@@ -778,6 +777,7 @@ def test_table_custom_loaders():
 # Custom parsers
 
 
+@pytest.mark.skip
 def test_table_custom_parsers():
     source = 'data/table.custom'
 
@@ -794,6 +794,7 @@ def test_table_custom_parsers():
 # Custom writers
 
 
+@pytest.mark.skip
 def test_table_save_custom_writers(tmpdir):
     source = 'data/table.csv'
     target = str(tmpdir.join('table.csv'))

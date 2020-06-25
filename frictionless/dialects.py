@@ -1,7 +1,8 @@
-from .metadata import Metadata
+import csv
+from .metadata import ControlledMetadata
 
 
-class Dialect(Metadata):
+class Dialect(ControlledMetadata):
     """Dialect representation
 
     # Arguments
@@ -62,6 +63,7 @@ class CsvDialect(Dialect):
     def __init__(
         self,
         descriptor=None,
+        *,
         delimiter=None,
         line_terminator=None,
         quote_char=None,
@@ -85,16 +87,70 @@ class CsvDialect(Dialect):
         self.setdefined('caseSensitiveHeader', case_sensitive_header)
         super().__init__(descriptor)
 
+    def __getattr__(self, name):
+        # Interoperability with native
+        if name == 'doublequote':
+            return self.double_quote
+        elif name == 'escapechar':
+            return self.escape_char
+        elif name == 'quotechar':
+            return self.quote_char
+        elif name == 'quoting':
+            return csv.QUOTE_NONE if self.quote_char == '' else csv.QUOTE_MINIMAL
+        elif name == 'skipinitialspace':
+            return self.skip_initial_space
+        return super().__getattr__(name)
+
+    @property
+    def delimiter(self):
+        return self.get('delimiter', ',')
+
+    @property
+    def line_terminator(self):
+        return self.get('lineTerminator', '\r\n')
+
+    @property
+    def quote_char(self):
+        return self.get('quoteChar', '"')
+
+    @property
+    def double_quote(self):
+        return self.get('doubleQuote', True)
+
+    @property
+    def escape_char(self):
+        return self.get('escapeChar')
+
+    @property
+    def null_sequence(self):
+        return self.get('nullSequence')
+
+    @property
+    def skip_initial_space(self):
+        return self.get('skipInitialSpace', True)
+
+    @property
+    def header(self):
+        return self.get('header', True)
+
+    @property
+    def comment_char(self):
+        return self.get('commentChar')
+
+    @property
+    def case_sensitive_header(self):
+        return self.get('caseSensitiveHeader', False)
+
     # Expand
 
     def expand(self):
-        self.setdetault('delimiter', ',')
-        self.setdetault('lineTerminator', '\r\n')
-        self.setdetault('quoteChar', '""')
-        self.setdetault('doubleQuote', True)
-        self.setdetault('skipInitialSpace', True)
-        self.setdetault('header', True)
-        self.setdetault('caseSensitiveHeader', False)
+        self.setdetault('delimiter', self.delimiter)
+        self.setdetault('lineTerminator', self.line_terminator)
+        self.setdetault('quoteChar', self.quote_char)
+        self.setdetault('doubleQuote', self.double_quote)
+        self.setdetault('skipInitialSpace', self.skip_initial_space)
+        self.setdetault('header', self.header)
+        self.setdetault('caseSensitiveHeader', self.case_sensitive_header)
 
 
 class ExcelDialect(Dialect):
@@ -126,6 +182,7 @@ class ExcelDialect(Dialect):
     def __init__(
         self,
         descriptor=None,
+        *,
         sheet=None,
         fill_merged_cells=None,
         preserve_formatting=None,
@@ -137,13 +194,29 @@ class ExcelDialect(Dialect):
         self.setdefined('adjustFloatingPointError', adjust_floating_point_error)
         super().__init__(descriptor)
 
+    @property
+    def sheet(self):
+        return self.get('sheet', 1)
+
+    @property
+    def fill_merged_cells(self):
+        return self.get('fillMergedCells', False)
+
+    @property
+    def preserve_formatting(self):
+        return self.get('preserveFormatting', False)
+
+    @property
+    def adjust_floating_point_error(self):
+        return self.get('adjustFloatingPointError', False)
+
     # Expand
 
     def expand(self):
-        self.setdetault('sheet', 1)
-        self.setdetault('fillMergedCells', False)
-        self.setdetault('preserveFormatting', False)
-        self.setdetault('adjustFloatingPointError', False)
+        self.setdetault('sheet', self.sheet)
+        self.setdetault('fillMergedCells', self.fill_merged_cells)
+        self.setdetault('preserveFormatting', self.preserve_formatting)
+        self.setdetault('adjustFloatingPointError', self.adjust_floating_point_error)
 
 
 class InlineDialect(Dialect):
@@ -162,19 +235,21 @@ class InlineDialect(Dialect):
     metadata_profile = {  # type: ignore
         'type': 'object',
         'additionalProperties': False,
-        'properties': {'keyed': {'type': 'boolean'}, 'forced': {'type': 'boolean'}},
+        'properties': {'keyed': {'type': 'boolean'}},
     }
 
-    def __init__(self, descriptor=None, keyed=None, forced=None):
+    def __init__(self, descriptor=None, *, keyed=None):
         self.setdefined('keyed', keyed)
-        self.setdefined('forced', forced)
         super().__init__(descriptor)
+
+    @property
+    def keyed(self):
+        return self.get('keyed', False)
 
     # Expand
 
     def expand(self):
-        self.setdetault('keyed', False)
-        self.setdetault('forced', False)
+        self.setdetault('keyed', self.keyed)
 
 
 class JsonDialect(Dialect):
@@ -197,13 +272,21 @@ class JsonDialect(Dialect):
     }
 
     def __init__(
-        self, descriptor=None, keyed=None, property=None,
+        self, descriptor=None, *, keyed=None, property=None,
     ):
         self.setdefined('keyed', keyed)
         self.setdefined('property', property)
         super().__init__(descriptor)
 
+    @property
+    def keyed(self):
+        return self.get('keyed', False)
+
+    @property
+    def property(self):
+        return self.get('property')
+
     # Expand
 
     def expand(self):
-        self.setdetault('keyed', False)
+        self.setdetault('keyed', self.keyed)

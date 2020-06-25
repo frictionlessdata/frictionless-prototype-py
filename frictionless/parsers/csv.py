@@ -3,111 +3,39 @@ import csv
 import unicodecsv
 from itertools import chain
 from ..parser import Parser
+from .. import dialects
 from .. import helpers
 from .. import config
 
 
 class CsvParser(Parser):
-    options = [
-        'delimiter',
-        'doublequote',
-        'escapechar',
-        'quotechar',
-        'quoting',
-        'skipinitialspace',
-        'lineterminator',
-    ]
+    Dialect = dialects.CsvDialect
 
-    def __init__(self, loader, **options):
-        self.__loader = loader
-        self.__options = options
-        self.__extended_rows = None
-        self.__encoding = None
-        self.__dialect = None
-        self.__text_stream = None
+    # Read
 
-    @property
-    def closed(self):
-        return self.__text_stream is None or self.__text_stream.closed
-
-    def open(self, source, encoding=None):
-        self.close()
-        self.__text_stream = self.__loader.read_text_stream()
-        self.__encoding = getattr(self.__text_stream, 'encoding', encoding)
-        if self.__encoding:
-            self.__encoding.lower()
-        self.reset()
-
-    def close(self):
-        if not self.closed:
-            self.__text_stream.close()
-
-    def reset(self):
-        helpers.reset_stream(self.__text_stream)
-        self.__extended_rows = self.__iter_extended_rows()
-
-    @property
-    def encoding(self):
-        return self.__encoding
-
-    @property
-    def dialect(self):
-        if self.__dialect:
-            dialect = {
-                'delimiter': self.__dialect.delimiter,
-                'doubleQuote': self.__dialect.doublequote,
-                'lineTerminator': self.__dialect.lineterminator,
-                'quoteChar': self.__dialect.quotechar,
-                'skipInitialSpace': self.__dialect.skipinitialspace,
-            }
-            if self.__dialect.escapechar is not None:
-                dialect['escapeChar'] = self.__dialect.escapechar
-            return dialect
-
-    @property
-    def extended_rows(self):
-        return self.__extended_rows
-
-    # Private
-
-    def __iter_extended_rows(self):
-        sample, dialect = self.__prepare_dialect(self.__text_stream)
-        items = csv.reader(chain(sample, self.__text_stream), dialect=dialect)
+    def read_cell_stream_create(self):
+        sample = self.read_cell_stream_infer_dialect()
+        source = chain(sample, self.loader.text_stream)
+        items = csv.reader(source, dialect=self.file.dialect)
         for row_number, item in enumerate(items, start=1):
             yield (row_number, None, list(item))
 
-    def __prepare_dialect(self, stream):
-
-        # Get sample
-        sample = []
-        while True:
-            try:
-                sample.append(next(stream))
-            except StopIteration:
-                break
-            if len(sample) >= config.CSV_SAMPLE_LINES:
-                break
-
-        # Get dialect
+    def read_cell_stream_infer_dialect(self):
+        sample = extract_samle(self.loader.text_stream)
+        delimiter = self.file.dialect.get('delimiter', ',\t;|')
         try:
-            separator = ''
-            delimiter = self.__options.get('delimiter', ',\t;|')
-            dialect = csv.Sniffer().sniff(separator.join(sample), delimiter)
-            if not dialect.escapechar:
-                dialect.doublequote = True
+            dialect = csv.Sniffer().sniff(''.join(sample), delimiter)
         except csv.Error:
-
-            class dialect(csv.excel):
-                pass
-
-        for key, value in self.__options.items():
-            setattr(dialect, key, value)
-        # https://github.com/frictionlessdata/FrictionlessDarwinCore/issues/1
+            dialect = csv.excel()
+        if not dialect.escapechar:
+            dialect.doublequote = True
         if getattr(dialect, 'quotechar', None) == '':
             setattr(dialect, 'quoting', csv.QUOTE_NONE)
-
-        self.__dialect = dialect
-        return sample, dialect
+        for name in INFER_NAMES:
+            value = getattr(dialect, name.lower())
+            if value is not None:
+                self.file.dialect.setdefault(name, value)
+        return sample
 
     # Write
 
@@ -122,3 +50,27 @@ class CsvParser(Parser):
                 count += 1
                 writer.writerow(row)
         return count
+
+
+# Internal
+
+INFER_NAMES = [
+    'delimiter',
+    'lineTerminator',
+    'doubleQuote',
+    'escapeChar',
+    'quoteChar',
+    'skipInitialSpace',
+]
+
+
+def extract_samle(text_stream):
+    sample = []
+    while True:
+        try:
+            sample.append(next(text_stream))
+        except StopIteration:
+            break
+        if len(sample) >= config.INFER_DIALECT_VOLUME:
+            break
+    return sample
