@@ -39,29 +39,18 @@ class Loader:
     def byte_stream(self):
         return self.__byte_stream
 
-    # Close
+    # Admin
 
-    @property
-    def closed(self):
-        return not self.byte_stream or self.byte_stream.closed
+    def open(self):
+        self.close()
+        self.__byte_stream = self.read_byte_stream_open()
 
     def close(self):
-        if self.byte_stream:
-            self.byte_stream.close()
+        if self.__byte_stream:
+            self.__byte_stream.close()
+        self.__byte_stream = None
 
     # Read
-
-    def read_text_stream(self):
-        """Create texts stream
-
-        # Returns
-            TextIO: I/O stream
-
-        """
-        byte_stream = self.read_byte_stream()
-        byte_stream = self.read_byte_stream_detect_encoding(byte_stream)
-        text_stream = io.TextIOWrapper(byte_stream, self.encoding)
-        return text_stream
 
     def read_byte_stream(self):
         """Create bytes stream
@@ -70,19 +59,25 @@ class Loader:
             BinaryIO: I/O stream
 
         """
-        self.close()
+        return self.byte_stream
+
+    def read_byte_stream_open(self):
         try:
             byte_stream = self.read_byte_stream_create()
+            byte_stream = self.read_byte_stream_decompress(byte_stream)
+            byte_stream = self.read_byte_stream_detect_stats(byte_stream)
         except IOError as exception:
             error = errors.SchemeError(note=str(exception))
             raise exceptions.FrictionlessException(error)
-        byte_stream = self.read_byte_stream_decompress(byte_stream)
-        byte_stream = self.read_byte_stream_detect_stats(byte_stream)
-        self.__byte_stream
         return byte_stream
 
     def read_byte_stream_create(self):
         raise NotImplementedError
+
+    def read_byte_stream_detect_stats(self, byte_stream):
+        byte_stream = ByteStreamWithStats(byte_stream, hashing=self.hashing)
+        self.file.stats = byte_stream.stats
+        return byte_stream
 
     def read_byte_stream_decompress(self, byte_stream):
         if self.compression == 'zip':
@@ -104,12 +99,18 @@ class Loader:
         note = f'Compression "{self.compression}" is not supported'
         raise exceptions.FrictionlessException(errors.CompressionError(note=note))
 
-    def read_byte_stream_detect_stats(self, byte_stream):
-        byte_stream = ByteStreamWithStats(byte_stream, hashing=self.hashing)
-        self.file.stats = byte_stream.stats
-        return byte_stream
+    def read_text_stream(self):
+        """Create texts stream
 
-    def read_byte_stream_detect_encoding(self, byte_stream):
+        # Returns
+            TextIO: I/O stream
+
+        """
+        self.read_byte_stream_detect_encoding(self.byte_stream)
+        text_stream = io.TextIOWrapper(self.byte_stream, self.encoding)
+        return text_stream
+
+    def read_text_stream_detect_encoding(self, byte_stream):
         encoding = self.file.encoding
         if encoding is None:
             sample = byte_stream.read(config.DETECT_ENCODING_VOLUME)
@@ -136,7 +137,10 @@ class Loader:
             if sample.startswith(codecs.BOM_UTF16_LE):
                 encoding = 'utf-16'
         self.file.encoding = encoding
-        return byte_stream
+
+    def read_text_stream_decode(self, byte_stream):
+        text_stream = io.TextIOWrapper(byte_stream, self.encoding)
+        return text_stream
 
 
 # Internal

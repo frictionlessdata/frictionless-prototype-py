@@ -256,6 +256,8 @@ class Table:
         self.__parser = None
         self.__row_number = 0
         self.__stats = None
+        self.__parser = None
+        self.__cell_stream = None
 
         # Create file
         self.__file = File(
@@ -272,65 +274,11 @@ class Table:
         )
 
     def __enter__(self):
-        if self.closed:
-            self.open()
+        self.open()
         return self
 
     def __exit__(self, type, value, traceback):
-        if not self.closed:
-            self.close()
-
-    @property
-    def closed(self):
-        """Returns True if the underlying stream is closed, False otherwise.
-
-        # Returns
-            bool: whether closed
-
-        """
-        return not self.__parser or self.__parser.closed
-
-    def open(self):
-        """Opens the stream for reading.
-
-        # Raises:
-            TabulatorException: if an error
-
-        """
-        self.__parser = system.create_parser(self.__file)
-        self.__line_stream = self.__parser.read_line_stream()
-        self.__extract_sample()
-        self.__extract_headers()
-        if not self.__allow_html:
-            self.__detect_html()
-        return self
-
-    def close(self):
-        """Closes the stream.
-        """
-        self.__parser.close()
-        self.__row_number = 0
-
-    def reset(self):
-        """Resets the stream pointer to the beginning of the file.
-        """
-        if self.__row_number > self.__sample_size:
-            self.__stats = {'size': 0, 'hash': ''}
-            self.__parser.reset()
-            self.__extract_sample()
-            self.__extract_headers()
-        self.__row_number = 0
-
-    @property
-    def field_positions(self):
-        if self.__field_positions is None:
-            self.__field_positions = []
-            if self.__headers:
-                size = len(self.__headers) + len(self.__ignored_headers_indexes)
-                for index in range(size):
-                    if index not in self.__ignored_headers_indexes:
-                        self.__field_positions.append(index + 1)
-        return self.__field_positions
+        self.close()
 
     @property
     def path(self):
@@ -480,6 +428,33 @@ class Table:
         """
         return self.__schema
 
+    # Admin
+
+    def open(self):
+        """Opens the stream for reading.
+
+        # Raises:
+            TabulatorException: if an error
+
+        """
+        self.__parser = system.create_parser(self.__file)
+        self.__parser.open()
+        self.__cell_stream = self.__parser.read_cell_stream()
+        self.__extract_sample()
+        self.__extract_headers()
+        if not self.__allow_html:
+            self.__detect_html()
+        return self
+
+    def close(self):
+        """Closes the stream.
+        """
+        self.__parser.close()
+        self.__cell_stream = None
+        self.__row_number = 0
+
+    # Read
+
     def iter(self, keyed=False, extended=False):
         """Iterate over the rows.
 
@@ -510,12 +485,12 @@ class Table:
         """
 
         # Error if closed
-        if self.closed:
+        if not self.__cell_stream:
             message = 'Stream is closed. Please call "stream.open()" first.'
             raise exceptions.TabulatorException(message)
 
         # Create iterator
-        iterator = chain(self.__sample_extended_rows, self.__line_stream)
+        iterator = chain(self.__sample_extended_rows, self.__cell_stream)
         iterator = self.__apply_processors(iterator)
 
         # Yield rows from iterator
@@ -567,6 +542,8 @@ class Table:
             if count == limit:
                 break
         return result
+
+    # Write
 
     def save(self, target, format=None, encoding=None, **options):
         """Save stream to the local filesystem.
@@ -621,7 +598,7 @@ class Table:
         self.__sample_extended_rows = []
         for _ in range(self.__sample_size):
             try:
-                row_number, headers, row = next(self.__line_stream)
+                row_number, headers, row = next(self.__cell_stream)
                 if self.__headers_row and self.__headers_row >= row_number:
                     if self.__check_if_row_for_skipping(row_number, headers, row):
                         self.__headers_row += 1

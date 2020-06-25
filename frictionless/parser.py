@@ -27,25 +27,25 @@ class Parser:
     def loader(self):
         return self.__loader
 
-    # Close
+    # Admin
 
-    @property
-    def closed(self):
-        return not self.loader or self.loader.closed
+    def open(self):
+        self.close()
+        self.__loader = self.read_cell_stream_open()
 
     def close(self):
-        if self.loader:
-            self.loader.close()
+        if self.__loader:
+            self.__loader.close()
 
     # Read
 
-    def read_line_stream(self):
-        self.close()
-        self.__loader = self.read_line_stream_create_loader()
-        return self.read_line_stream_create()
+    def read_cell_stream(self):
+        return self.read_cell_stream_create()
 
-    def read_line_stream_create(self, loader):
+    def read_cell_stream_open(self):
+        loader = system.create_loader(self.file)
+        loader.open()
+        return loader
+
+    def read_cell_stream_create(self, loader):
         raise NotImplementedError
-
-    def read_line_stream_create_loader(self):
-        return system.create_loader(self.file)
