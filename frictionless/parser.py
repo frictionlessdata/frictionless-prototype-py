@@ -13,6 +13,7 @@ class Parser:
     """
 
     Dialect = None
+    loader_mode = 't'
 
     def __init__(self, file):
         self.__file = file
@@ -46,16 +47,10 @@ class Parser:
     # Read
 
     def read_loader(self):
-        loader = self.read_loader_create()
-        if loader:
-            self.read_loader_open(loader)
-        return loader
-
-    def read_loader_create(self):
-        return system.create_loader(self.file)
-
-    def read_loader_open(self, loader):
-        loader.open()
+        if self.loader_mode:
+            loader = system.create_loader(self.file)
+            loader.open(mode=self.loader_mode)
+            return loader
 
     def read_cell_stream(self):
         return self.read_cell_stream_create()

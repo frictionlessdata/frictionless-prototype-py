@@ -1,5 +1,4 @@
 import os
-import io
 import sys
 import xlrd
 import shutil
@@ -10,9 +9,11 @@ from itertools import chain
 from tempfile import NamedTemporaryFile
 from ..parser import Parser
 from ..system import system
+from ..file import File
 from .. import exceptions
 from .. import dialects
 from .. import helpers
+from .. import errors
 
 
 class XlsxParser(Parser):
@@ -20,10 +21,11 @@ class XlsxParser(Parser):
 
     # Read
 
+    # TODO: we are not getting stats here
     def read_loader(self):
         source = self.file.source
-        workbook_cache = self.file.dialects.workbook_cache
         loader = system.create_loader(self.file)
+        workbook_cache = self.file.dialect.workbook_cache
 
         # Network
         # Create copy for remote source
@@ -32,65 +34,69 @@ class XlsxParser(Parser):
         if loader.network:
             # Cached
             if workbook_cache is not None and source in workbook_cache:
-                self.__bytes = io.open(workbook_cache[source], "rb")
+                loader = system.create_loader(File(source=source))
             # Not cached
             else:
-                prefix = "tabulator-"
+                prefix = 'tabulator-'
                 delete = workbook_cache is None
-                source_bytes = self.__loader.load(source, mode="b", encoding=encoding)
-                target_bytes = NamedTemporaryFile(prefix=prefix, delete=delete)
-                shutil.copyfileobj(source_bytes, target_bytes)
-                source_bytes.close()
-                target_bytes.seek(0)
-                self.__bytes = target_bytes
+                loader = system.create_loader(self.file)
+                loader.open(mode='b')
+                target = NamedTemporaryFile(prefix=prefix, delete=delete)
+                shutil.copyfileobj(loader.byte_stream, target)
+                loader.close()
+                target.seek(0)
+                loader = system.create_loader(File(source=target))
                 if workbook_cache is not None:
-                    workbook_cache[source] = target_bytes.name
-                    atexit.register(os.remove, target_bytes.name)
+                    workbook_cache[source] = target.name
+                    atexit.register(os.remove, target.name)
 
+        loader.open(mode='b')
         return loader
 
     def read_cell_stream_create(self):
+        dialect = self.file.dialect
 
         # Get book
         # To fill merged cells we can't use read-only because
         # `sheet.merged_cell_ranges` is not available in this mode
-        self.__book = openpyxl.load_workbook(
-            self.__bytes, read_only=not self.__fill_merged_cells, data_only=True
+        book = openpyxl.load_workbook(
+            self.loader.byte_stream,
+            read_only=not dialect.fill_merged_cells,
+            data_only=True,
         )
 
         # Get sheet
         try:
-            if isinstance(self.__sheet_pointer, str):
-                self.__sheet = self.__book[self.__sheet_pointer]
+            if isinstance(dialect.sheet, str):
+                sheet = book[dialect.sheet]
             else:
-                self.__sheet = self.__book.worksheets[self.__sheet_pointer - 1]
+                sheet = book.worksheets[dialect.sheet - 1]
         except (KeyError, IndexError):
-            message = 'Excel document "%s" doesn\'t have a sheet "%s"'
-            raise exceptions.SourceError(message % (source, self.__sheet_pointer))
-        self.__fragment = self.__sheet.title
-        self.__process_merged_cells()
+            note = 'Excel document "%s" doesn\'t have a sheet "%s"'
+            note = note % (self.file.source, dialect.sheet)
+            raise exceptions.FrictionlessException(errors.SourceError(note=note))
 
-        # Get cells
-        for row_number, row in enumerate(self.__sheet.iter_rows(), start=1):
+        # Fill merged cells
+        if dialect.fill_merged_cells:
+            for merged_cell_range in list(sheet.merged_cells.ranges):
+                merged_cell_range = str(merged_cell_range)
+                sheet.unmerge_cells(merged_cell_range)
+                merged_rows = openpyxl.utils.rows_from_range(merged_cell_range)
+                coordinates = list(chain(*merged_rows))
+                value = sheet[coordinates[0]].value
+                for coordinate in coordinates:
+                    cell = sheet[coordinate]
+                    cell.value = value
+
+        # Stream cells
+        for row_number, row in enumerate(sheet.iter_rows(), start=1):
             yield (
                 row_number,
                 None,
                 extract_row_values(
-                    row, self.__preserve_formatting, self.__adjust_floating_point_error
+                    row, dialect.preserve_formatting, dialect.adjust_floating_point_error
                 ),
             )
-
-    def read_cell_stream_merge_cells(self):
-        if self.__fill_merged_cells:
-            for merged_cell_range in list(self.__sheet.merged_cells.ranges):
-                merged_cell_range = str(merged_cell_range)
-                self.__sheet.unmerge_cells(merged_cell_range)
-                merged_rows = openpyxl.utils.rows_from_range(merged_cell_range)
-                coordinates = list(chain(*merged_rows))
-                value = self.__sheet[coordinates[0]].value
-                for coordinate in coordinates:
-                    cell = self.__sheet[coordinate]
-                    cell.value = value
 
     # Write
 
@@ -108,88 +114,42 @@ class XlsxParser(Parser):
 
 
 class XlsParser(Parser):
-    """Parser to parse Excel data format.
-    """
+    Dialect = dialects.ExcelDialect
+    loader_mode = 'b'
 
-    # Public
+    # Read
 
-    options = [
-        'sheet',
-        'fill_merged_cells',
-    ]
-
-    def __init__(self, loader, sheet=1, fill_merged_cells=False):
-        self.__loader = loader
-        self.__sheet_pointer = sheet
-        self.__fill_merged_cells = fill_merged_cells
-        self.__extended_rows = None
-        self.__encoding = None
-        self.__fragment = None
-        self.__bytes = None
-
-    @property
-    def closed(self):
-        return self.__bytes is None or self.__bytes.closed
-
-    def open(self, source, encoding=None):
-        self.close()
-        self.__encoding = encoding
-        self.__bytes = self.__loader.load(source, mode='b', encoding=encoding)
+    def read_cell_stream_create(self):
+        dialect = self.file.dialect
 
         # Get book
-        file_contents = self.__bytes.read()
+        bytes = self.loader.byte_stream.read()
         try:
-            self.__book = xlrd.open_workbook(
-                file_contents=file_contents,
-                encoding_override=encoding,
+            book = xlrd.open_workbook(
+                file_contents=bytes,
+                encoding_override=self.file.encoding,
                 formatting_info=True,
                 logfile=sys.stderr,
             )
         except NotImplementedError:
-            self.__book = xlrd.open_workbook(
-                file_contents=file_contents,
-                encoding_override=encoding,
+            book = xlrd.open_workbook(
+                file_contents=bytes,
+                encoding_override=self.file.encoding,
                 formatting_info=False,
                 logfile=sys.stderr,
             )
 
         # Get sheet
         try:
-            if isinstance(self.__sheet_pointer, str):
-                self.__sheet = self.__book.sheet_by_name(self.__sheet_pointer)
+            if isinstance(dialect.sheet, str):
+                sheet = book.sheet_by_name(dialect.sheet)
             else:
-                self.__sheet = self.__book.sheet_by_index(self.__sheet_pointer - 1)
+                sheet = book.sheet_by_index(dialect.sheet)
         except (xlrd.XLRDError, IndexError):
-            message = 'Excel document "%s" doesn\'t have a sheet "%s"'
-            raise exceptions.SourceError(message % (source, self.__sheet_pointer))
-        self.__fragment = self.__sheet.name
+            note = 'Excel document "%s" doesn\'t have a sheet "%s"'
+            note = note % (self.file.source, dialect.sheet)
+            raise exceptions.FrictionlessException(errors.SourceError(note=note))
 
-        # Reset parser
-        self.reset()
-
-    def close(self):
-        if not self.closed:
-            self.__bytes.close()
-
-    def reset(self):
-        helpers.reset_stream(self.__bytes)
-        self.__extended_rows = self.__iter_extended_rows()
-
-    @property
-    def encoding(self):
-        return self.__encoding
-
-    @property
-    def fragment(self):
-        return self.__fragment
-
-    @property
-    def extended_rows(self):
-        return self.__extended_rows
-
-    # Private
-
-    def __iter_extended_rows(self):
         def type_value(ctype, value):
             """ Detects boolean value, int value, datetime """
 
@@ -208,17 +168,17 @@ class XlsParser(Parser):
 
             return value
 
-        for x in range(0, self.__sheet.nrows):
+        # Stream cells
+        for x in range(0, sheet.nrows):
             row_number = x + 1
             row = []
-            for y, value in enumerate(self.__sheet.row_values(x)):
-                value = type_value(self.__sheet.cell(x, y).ctype, value)
-                if self.__fill_merged_cells:
-                    for xlo, xhi, ylo, yhi in self.__sheet.merged_cells:
+            for y, value in enumerate(sheet.row_values(x)):
+                value = type_value(sheet.cell(x, y).ctype, value)
+                if dialect.fill_merged_cells:
+                    for xlo, xhi, ylo, yhi in sheet.merged_cells:
                         if x in range(xlo, xhi) and y in range(ylo, yhi):
                             value = type_value(
-                                self.__sheet.cell(xlo, ylo).ctype,
-                                self.__sheet.cell_value(xlo, ylo),
+                                sheet.cell(xlo, ylo).ctype, sheet.cell_value(xlo, ylo),
                             )
                 row.append(value)
             yield (row_number, None, row)

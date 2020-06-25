@@ -76,14 +76,14 @@ class RemoteControl(Control):
         self.setdefined('httpSession', http_session)
         self.setdefined('httpPreload', http_preload)
         self.setdefined('httpTimeout', http_timeout)
-        super().__init(descriptor, metadata_root=metadata_root)
+        super().__init__(descriptor, metadata_root=metadata_root)
 
     @property
     def http_session(self):
         http_session = self.get('httpSession')
         if not http_session:
             http_session = requests.Session()
-            http_session.headers.update(config.HTTP_HEADERS)
+            http_session.headers.update(config.DEFAULT_HTTP_HEADERS)
         return http_session
 
     @property
@@ -92,7 +92,7 @@ class RemoteControl(Control):
 
     @property
     def http_timeout(self):
-        return self.get('httpTimeout', config.HTTP_TIMEOUT)
+        return self.get('httpTimeout', config.DEFAULT_HTTP_TIMEOUT)
 
     # Expand
 

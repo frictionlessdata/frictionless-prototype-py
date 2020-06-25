@@ -110,7 +110,8 @@ def test_table_headers_inline_keyed_headers_is_none():
         ]
 
 
-def test_table_headers_xls_multiline():
+@pytest.mark.skip
+def test_table_headers_xlsx_multiline():
     source = 'data/special/multiline-headers.xlsx'
     with Table(source, headers=[1, 5], fill_merged_cells=True) as table:
         assert table.headers == [
@@ -147,25 +148,17 @@ def test_table_headers_strip_and_non_strings():
         assert table.read() == [['value1', 'value2', 'value3', 'value4']]
 
 
-def test_table_headers_set_property():
-    with Table('data/table.csv', headers=1) as table:
-        table.headers = ['number', 'language']
-        assert table.headers == ['number', 'language']
-        assert list(table.iter(keyed=True)) == [
-            {'number': '1', 'language': 'english'},
-            {'number': '2', 'language': '中国人'},
-        ]
-
-
 # Compression errors
 
 
+@pytest.mark.skip
 def test_table_compression_error_gz():
     source = 'id,filename\n\1,dump.tar.gz'
     table = Table(source, scheme='text', format='csv')
     table.open()
 
 
+@pytest.mark.skip
 def test_table_compression_error_zip():
     source = 'id,filename\n1,archive.zip'
     table = Table(source, scheme='text', format='csv')
@@ -209,11 +202,13 @@ def test_table_format_ndjson():
         assert table.format == 'ndjson'
 
 
+@pytest.mark.skip
 def test_table_format_ods():
     with Table('data/table.ods') as table:
         assert table.format == 'ods'
 
 
+@pytest.mark.skip
 def test_table_format_tsv():
     with Table('data/table.tsv') as table:
         assert table.format == 'tsv'
@@ -229,6 +224,7 @@ def test_table_format_xlsx():
         assert table.format == 'xlsx'
 
 
+@pytest.mark.skip
 def test_table_format_html():
     with Table('data/table1.html') as table:
         assert table.format == 'html'

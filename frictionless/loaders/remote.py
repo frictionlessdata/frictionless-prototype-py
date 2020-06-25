@@ -12,10 +12,10 @@ class RemoteLoader(Loader):
 
     def read_byte_stream_create(self):
         source = requests.utils.requote_uri(self.file.source)
-        session = self.control.http_session
-        timeout = self.control.http_timeout
+        session = self.file.control.http_session
+        timeout = self.file.control.http_timeout
         byte_stream = RemoteStream(source, session=session, timeout=timeout).open()
-        if self.control.http_preload:
+        if self.file.control.http_preload:
             buffer = io.BufferedRandom(io.BytesIO())
             buffer.write(byte_stream.read())
             buffer.seek(0)

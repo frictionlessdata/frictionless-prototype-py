@@ -8,6 +8,7 @@ from .. import helpers
 from .. import config
 
 
+# TODO: should we open stream without new lines?
 class CsvParser(Parser):
     Dialect = dialects.CsvDialect
 

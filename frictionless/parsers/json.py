@@ -5,15 +5,14 @@ from ..parser import Parser
 from .. import exceptions
 from .. import dialects
 from .. import helpers
+from .. import errors
 
 
 class JsonParser(Parser):
     Dialect = dialects.JsonDialect
+    loader_mode = 'b'
 
     # Read
-
-    def read_loader_open(self, loader):
-        loader.open(mode='b')
 
     def read_cell_stream_create(self, dialect=None):
         path = 'item'
@@ -31,8 +30,8 @@ class JsonParser(Parser):
                     values.append(item[key])
                 yield (row_number, list(keys), list(values))
             else:
-                message = 'JSON item has to be list or dict'
-                raise exceptions.SourceError(message)
+                error = errors.SourceError(note='JSON item has to be list or dict')
+                raise exceptions.FrictionlessException(error)
 
     # Write
 
@@ -53,46 +52,12 @@ class JsonParser(Parser):
 
 
 class JsonlParser(Parser):
-    options = []  # type: ignore
+    Dialect = dialects.JsonDialect
 
-    def __init__(self, loader):
-        self.__loader = loader
-        self.__extended_rows = None
-        self.__encoding = None
-        self.__chars = None
+    # Read
 
-    @property
-    def closed(self):
-        return self.__chars is None or self.__chars.closed
-
-    def open(self, source, encoding=None):
-        self.close()
-        self.__chars = self.__loader.load(source, encoding=encoding)
-        self.__encoding = getattr(self.__chars, 'encoding', encoding)
-        if self.__encoding:
-            self.__encoding.lower()
-        self.reset()
-
-    def close(self):
-        if not self.closed:
-            self.__chars.close()
-
-    def reset(self):
-        helpers.reset_stream(self.__chars)
-        self.__extended_rows = self.__iter_extended_rows()
-
-    @property
-    def encoding(self):
-        return self.__encoding
-
-    @property
-    def extended_rows(self):
-        return self.__extended_rows
-
-    # Private
-
-    def __iter_extended_rows(self, dialect=None):
-        rows = jsonlines.Reader(self.__chars)
+    def read_cell_stream_create(self, dialect=None):
+        rows = jsonlines.Reader(self.loader.text_stream)
         for row_number, row in enumerate(rows, start=1):
             if isinstance(row, (tuple, list)):
                 yield row_number, None, list(row)
@@ -100,7 +65,5 @@ class JsonlParser(Parser):
                 keys, values = zip(*sorted(row.items()))
                 yield (row_number, list(keys), list(values))
             else:
-                # TODO: remove not dialect
-                if not dialect and not dialect.get('forced'):
-                    raise exceptions.SourceError('JSON item has to be list or dict')
-                yield (row_number, None, [])
+                error = errors.SourceError(note='JSON item has to be list or dict')
+                raise exceptions.FrictionlessException(error)

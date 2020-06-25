@@ -6,11 +6,9 @@ from .. import dialects
 
 class InlineParser(Parser):
     Dialect = dialects.InlineDialect
+    loader_mode = None
 
     # Read
-
-    def read_loader_create(self):
-        return None
 
     def read_cell_stream_create(self):
         for row_number, item in enumerate(self.file.source, start=1):
