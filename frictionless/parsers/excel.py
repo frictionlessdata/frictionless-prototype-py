@@ -8,21 +8,9 @@ import openpyxl
 import datetime
 from itertools import chain
 from tempfile import NamedTemporaryFile
-from ..plugin import Plugin
 from ..parser import Parser
 from .. import exceptions
 from .. import helpers
-
-
-# Plugin
-
-
-class ExcelPlugin(Plugin):
-    def create_parser(self, source, *, control=None, dialect=None):
-        pass
-
-
-# Parsers
 
 
 class XlsxParser(Parser):

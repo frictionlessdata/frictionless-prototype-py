@@ -21,40 +21,6 @@ class Dialect(Metadata):
         pass
 
 
-class InlineDialect(Dialect):
-    """Inline dialect representation
-
-    # Arguments
-        descriptor? (str|dict): descriptor
-        keyed? (bool): keyes
-        forced? (bool): forced
-
-    # Raises
-        FrictionlessException: raise any error that occurs during the process
-
-    """
-
-    metadata_profile = {  # type: ignore
-        'type': 'object',
-        'additionalProperties': False,
-        'properties': {'keyed': {'type': 'boolean'}, 'forced': {'type': 'boolean'}},
-    }
-
-    def __init__(self, descriptor=None, keyed=None, forced=None):
-        self.setdefined('keyed', keyed)
-        self.setdefined('forced', forced)
-        super().__init(descriptor)
-
-    # Expand
-
-    def expand(self):
-        self.setdetault('keyed', False)
-        self.setdetault('forced', False)
-
-
-# TODO: move to plugins
-
-
 class CsvDialect(Dialect):
     """Csv dialect representation
 
@@ -178,6 +144,37 @@ class ExcelDialect(Dialect):
         self.setdetault('fillMergedCells', False)
         self.setdetault('preserveFormatting', False)
         self.setdetault('adjustFloatingPointError', False)
+
+
+class InlineDialect(Dialect):
+    """Inline dialect representation
+
+    # Arguments
+        descriptor? (str|dict): descriptor
+        keyed? (bool): keyes
+        forced? (bool): forced
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
+    metadata_profile = {  # type: ignore
+        'type': 'object',
+        'additionalProperties': False,
+        'properties': {'keyed': {'type': 'boolean'}, 'forced': {'type': 'boolean'}},
+    }
+
+    def __init__(self, descriptor=None, keyed=None, forced=None):
+        self.setdefined('keyed', keyed)
+        self.setdefined('forced', forced)
+        super().__init(descriptor)
+
+    # Expand
+
+    def expand(self):
+        self.setdetault('keyed', False)
+        self.setdetault('forced', False)
 
 
 class JsonDialect(Dialect):

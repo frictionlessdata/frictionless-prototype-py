@@ -33,12 +33,9 @@ EXTRAS_REQUIRE = {
     'aws': ['boto3>=1.9'],
     'bigquery': ['google-api-python-client>=1.5'],
     'ckan': ['ckanapi>=4.3'],
-    'csv': ['unicodecsv'],
     'elastic': ['elasticsearch>=7.0,<8.0'],
-    'excel': ['openpyxl>=3.0', 'xlrd>=1.2'],
     'gsheet': ['google-api-python-client>=1.5'],
     'html': ['pyquery>=1.4'],
-    'json': ['ijson>=3.0', 'ndjson>=0.3'],
     'ods': ['ezodf>=0.3'],
     'pandas': ['pandas>=1.0'],
     'server': ['gunicorn>=20'],
@@ -47,22 +44,22 @@ EXTRAS_REQUIRE = {
     'tsv': ['linear-tsv>=1.0'],
     'dev': TESTS_REQUIRE,
 }
-INSTALL_REQUIRES = (
-    [
-        'click>=6.6',
-        'pyyaml>=5.3',
-        'chardet>=3.0',
-        'requests>=2.10',
-        'jsonschema>=2.5',
-        'statistics>=1.0',
-        'simpleeval>=0.9',
-        'stringcase>=1.2',
-        'datapackage>=1.14',
-    ]
-    + EXTRAS_REQUIRE['csv']
-    + EXTRAS_REQUIRE['excel']
-    + EXTRAS_REQUIRE['json']
-)
+INSTALL_REQUIRES = [
+    'click>=6.6',
+    'pyyaml>=5.3',
+    'chardet>=3.0',
+    'requests>=2.10',
+    'jsonschema>=2.5',
+    'statistics>=1.0',
+    'simpleeval>=0.9',
+    'stringcase>=1.2',
+    'datapackage>=1.14',
+    'unicodecsv>=0.14',
+    'openpyxl>=3.0',
+    'xlrd>=1.2',
+    'ijson>=3.0',
+    'jsonlines>=1.2',
+]
 README = read('README.md')
 VERSION = read(PACKAGE, 'assets', 'VERSION')
 PACKAGES = find_packages(exclude=['tests'])

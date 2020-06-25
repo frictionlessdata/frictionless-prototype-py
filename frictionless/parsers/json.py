@@ -1,21 +1,9 @@
 import json
 import ijson
 import jsonlines
-from ..plugin import Plugin
 from ..parser import Parser
 from .. import exceptions
 from .. import helpers
-
-
-# Plugin
-
-
-class JsonPlugin(Plugin):
-    def create_parser(self, source, *, control=None, dialect=None):
-        pass
-
-
-# Parsers
 
 
 class JsonParser(Parser):

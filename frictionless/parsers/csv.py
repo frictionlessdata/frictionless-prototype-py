@@ -2,22 +2,9 @@ import io
 import csv
 import unicodecsv
 from itertools import chain
-from ..plugin import Plugin
 from ..parser import Parser
-from ..system import system
 from .. import helpers
 from .. import config
-
-
-# Plugin
-
-
-class CsvPlugin(Plugin):
-    def create_parser(self, source, *, control=None, dialect=None):
-        pass
-
-
-# Parsers
 
 
 class CsvParser(Parser):
