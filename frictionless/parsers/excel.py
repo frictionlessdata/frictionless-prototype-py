@@ -9,72 +9,47 @@ import datetime
 from itertools import chain
 from tempfile import NamedTemporaryFile
 from ..parser import Parser
+from ..system import system
 from .. import exceptions
+from .. import dialects
 from .. import helpers
 
 
 class XlsxParser(Parser):
-    options = [
-        "sheet",
-        "workbook_cache",
-        "fill_merged_cells",
-        "preserve_formatting",
-        "adjust_floating_point_error",
-    ]
+    Dialect = dialects.ExcelDialect
 
-    def __init__(
-        self,
-        loader,
-        sheet=1,
-        workbook_cache=None,
-        fill_merged_cells=False,
-        preserve_formatting=False,
-        adjust_floating_point_error=False,
-    ):
-        self.__loader = loader
-        self.__sheet_pointer = sheet
-        self.__workbook_cache = workbook_cache
-        self.__fill_merged_cells = fill_merged_cells
-        self.__preserve_formatting = preserve_formatting
-        self.__adjust_floating_point_error = adjust_floating_point_error
-        self.__extended_rows = None
-        self.__encoding = None
-        self.__fragment = None
-        self.__bytes = None
+    # Read
 
-    @property
-    def closed(self):
-        return self.__bytes is None or self.__bytes.closed
+    def read_loader(self):
+        source = self.file.source
+        workbook_cache = self.file.dialects.workbook_cache
+        loader = system.create_loader(self.file)
 
-    def open(self, source, encoding=None):
-        self.close()
-        self.__encoding = encoding
-
-        # Remote
+        # Network
         # Create copy for remote source
         # For remote stream we need local copy (will be deleted on close by Python)
         # https://docs.python.org/3.5/library/tempfile.html#tempfile.TemporaryFile
-        if getattr(self.__loader, "remote", False):
+        if loader.network:
             # Cached
-            if self.__workbook_cache is not None and source in self.__workbook_cache:
-                self.__bytes = io.open(self.__workbook_cache[source], "rb")
+            if workbook_cache is not None and source in workbook_cache:
+                self.__bytes = io.open(workbook_cache[source], "rb")
             # Not cached
             else:
                 prefix = "tabulator-"
-                delete = self.__workbook_cache is None
+                delete = workbook_cache is None
                 source_bytes = self.__loader.load(source, mode="b", encoding=encoding)
                 target_bytes = NamedTemporaryFile(prefix=prefix, delete=delete)
                 shutil.copyfileobj(source_bytes, target_bytes)
                 source_bytes.close()
                 target_bytes.seek(0)
                 self.__bytes = target_bytes
-                if self.__workbook_cache is not None:
-                    self.__workbook_cache[source] = target_bytes.name
+                if workbook_cache is not None:
+                    workbook_cache[source] = target_bytes.name
                     atexit.register(os.remove, target_bytes.name)
 
-        # Local
-        else:
-            self.__bytes = self.__loader.load(source, mode="b", encoding=encoding)
+        return loader
+
+    def read_cell_stream_create(self):
 
         # Get book
         # To fill merged cells we can't use read-only because
@@ -95,32 +70,7 @@ class XlsxParser(Parser):
         self.__fragment = self.__sheet.title
         self.__process_merged_cells()
 
-        # Reset parser
-        self.reset()
-
-    def close(self):
-        if not self.closed:
-            self.__bytes.close()
-
-    def reset(self):
-        helpers.reset_stream(self.__bytes)
-        self.__extended_rows = self.__iter_extended_rows()
-
-    @property
-    def encoding(self):
-        return self.__encoding
-
-    @property
-    def fragment(self):
-        return self.__fragment
-
-    @property
-    def extended_rows(self):
-        return self.__extended_rows
-
-    # Private
-
-    def __iter_extended_rows(self):
+        # Get cells
         for row_number, row in enumerate(self.__sheet.iter_rows(), start=1):
             yield (
                 row_number,
@@ -130,7 +80,7 @@ class XlsxParser(Parser):
                 ),
             )
 
-    def __process_merged_cells(self):
+    def read_cell_stream_merge_cells(self):
         if self.__fill_merged_cells:
             for merged_cell_range in list(self.__sheet.merged_cells.ranges):
                 merged_cell_range = str(merged_cell_range)

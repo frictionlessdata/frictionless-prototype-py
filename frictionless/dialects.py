@@ -160,6 +160,7 @@ class ExcelDialect(Dialect):
     # Arguments
         descriptor? (str|dict): descriptor
         sheet? (int|str): sheet
+        workbook_cache? (dict): workbook_cache
         fill_merged_cells? (bool): fill_merged_cells
         preserve_formatting? (bool): preserve_formatting
         adjust_floating_point_error? (bool): adjust_floating_point_error
@@ -174,6 +175,7 @@ class ExcelDialect(Dialect):
         'additionalProperties': False,
         'properties': {
             'sheet': {'type': ['number', 'string']},
+            'workbookCache': {'type': 'object'},
             'fillMergedCells': {'type': 'boolean'},
             'preserveFormatting': {'type': 'boolean'},
             'adjustFloatingPointError': {'type': 'boolean'},
@@ -185,12 +187,14 @@ class ExcelDialect(Dialect):
         descriptor=None,
         *,
         sheet=None,
+        workbook_cache=None,
         fill_merged_cells=None,
         preserve_formatting=None,
         adjust_floating_point_error=None,
         metadata_root=None,
     ):
         self.setdefined('sheet', sheet)
+        self.setdefined('workbookCache', workbook_cache)
         self.setdefined('fillMergedCells', fill_merged_cells)
         self.setdefined('preserveFormatting', preserve_formatting)
         self.setdefined('adjustFloatingPointError', adjust_floating_point_error)
@@ -199,6 +203,10 @@ class ExcelDialect(Dialect):
     @property
     def sheet(self):
         return self.get('sheet', 1)
+
+    @property
+    def workbook_cache(self):
+        return self.get('workbookCache')
 
     @property
     def fill_merged_cells(self):
