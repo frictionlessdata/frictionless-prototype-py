@@ -60,7 +60,7 @@ class Schema(ControlledMetadata):
 
     @cached_property
     def missing_values(self):
-        missing_values = self.get('missingValues', config.MISSING_VALUES)
+        missing_values = self.get('missingValues', config.DEFAULT_MISSING_VALUES)
         return self.metadata_attach('missingValues', missing_values)
 
     @cached_property
@@ -204,7 +204,7 @@ class Schema(ControlledMetadata):
 
         """
         self.setdefault('fields', [])
-        self.setdefault('missingValues', config.MISSING_VALUES)
+        self.setdefault('missingValues', config.DEFAULT_MISSING_VALUES)
         for field in self.fields:
             field.expand()
 
@@ -311,7 +311,7 @@ class Schema(ControlledMetadata):
 
     def metadata_process(self):
         for index, field in enumerate(self.get('fields', [])):
-            if not isinstance(field, Field) or field.metadata_root != self:
+            if not isinstance(field, Field):
                 if not isinstance(field, dict):
                     field = {'name': f'field{index+1}', 'type': 'any'}
                 field = Field(

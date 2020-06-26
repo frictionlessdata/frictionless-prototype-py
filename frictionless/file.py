@@ -136,12 +136,13 @@ class File(ControlledMetadata):
     # Metadata
 
     def metadata_process(self):
-        control = self.get('control')
-        if control is not None:
-            if not isinstance(control, Control) or control.metadata_root != self:
-                dict.__setitem__(self, 'control', Control(control, metadata_root=self))
-        dialect = self.get('dialect')
-        if dialect is not None:
-            if not isinstance(dialect, Dialect) or dialect.metadata_root != self:
-                dict.__setitem__(self, 'dialect', Dialect(dialect, metadata_root=self))
+        for name, Class in [('control', Control), ('dialect', Dialect)]:
+            value = self.get(name)
+            if value is not None and not isinstance(value, Class):
+                value = Class(
+                    value,
+                    metadata_root=self.metadata_root,
+                    #  metadata_strict=self.metadata_strict,
+                )
+                dict.__setitem__(self, name, value)
         super().metadata_process()

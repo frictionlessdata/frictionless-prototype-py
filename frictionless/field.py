@@ -96,7 +96,7 @@ class Field(ControlledMetadata):
     @cached_property
     def missing_values(self):
         schema = self.__metadata_schema
-        default = schema.missing_values if schema else config.MISSING_VALUES
+        default = schema.missing_values if schema else config.DEFAULT_MISSING_VALUES
         missing_values = self.get('missingValues', default)
         return self.metadata_attach('missingValues', missing_values)
 

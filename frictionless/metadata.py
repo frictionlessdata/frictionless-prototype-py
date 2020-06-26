@@ -32,7 +32,7 @@ class Metadata(dict):
     def __init__(self, descriptor=None, *, metadata_root=None, metadata_strict=False):
         self.__errors = []
         self.__root = metadata_root or self
-        self.__raise = metadata_strict or not self.metadata_Error
+        self.__strict = metadata_strict or not self.metadata_Error
         self.__Error = self.metadata_Error or import_module('frictionless.errors').Error
         metadata = self.metadata_extract(descriptor)
         for key, value in metadata.items():
@@ -41,13 +41,18 @@ class Metadata(dict):
             self.metadata_process()
             self.metadata_validate()
 
+    def __setattr__(self, name, value):
+        if name in ['metadata_root', 'metadata_strict']:
+            self.__dict__[name] = value
+        super().__setattr__(name, value)
+
     @cached_property
     def metadata_root(self):
         return self.__root
 
     @cached_property
     def metadata_strict(self):
-        return self.__raise
+        return self.__strict
 
     @cached_property
     def metadata_valid(self):
@@ -186,7 +191,7 @@ class ControlledMetadata(Metadata):
         helpers.reset_cached_properties(self)
         for key, value in self.items():
             if isinstance(value, dict):
-                if getattr(value, 'metadata_root', None) != self.metadata_root:
+                if not hasattr(value, 'metadata_process'):
                     value = ControlledMetadata(
                         value,
                         metadata_root=self.metadata_root,
@@ -195,7 +200,7 @@ class ControlledMetadata(Metadata):
                     dict.__setitem__(self, key, value)
                 value.metadata_process()
             if isinstance(value, list):
-                if getattr(value, 'metadata_root', None) != self.metadata_root:
+                if not hasattr(value, 'metadata_process'):
                     value = ControlledMetadataList(
                         value,
                         metadata_root=self.metadata_root,
@@ -291,7 +296,7 @@ class ControlledMetadataList(list):
         list.extend(self, values)
         self.__errors = []
         self.__root = metadata_root or self
-        self.__raise = metadata_strict
+        self.__strict = metadata_strict
         self.__attach = metadata_attach
 
     @cached_property
@@ -300,7 +305,7 @@ class ControlledMetadataList(list):
 
     @cached_property
     def metadata_strict(self):
-        return self.__raise
+        return self.__strict
 
     @cached_property
     def metadata_errors(self):
@@ -330,7 +335,7 @@ class ControlledMetadataList(list):
     def metadata_process(self):
         for index, value in list(enumerate(self)):
             if isinstance(value, dict):
-                if getattr(value, 'metadata_root', None) != self.metadata_root:
+                if not hasattr(value, 'metadata_process'):
                     value = ControlledMetadata(
                         value,
                         metadata_root=self.metadata_root,
@@ -339,7 +344,7 @@ class ControlledMetadataList(list):
                     list.__setitem__(self, index, value)
                 value.metadata_process()
             if isinstance(value, list):
-                if getattr(value, 'metadata_root', None) != self.metadata_root:
+                if not hasattr(value, 'metadata_process'):
                     value = ControlledMetadataList(
                         value,
                         metadata_root=self.metadata_root,
