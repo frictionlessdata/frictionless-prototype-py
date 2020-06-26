@@ -143,7 +143,7 @@ class XlsParser(Parser):
             if isinstance(dialect.sheet, str):
                 sheet = book.sheet_by_name(dialect.sheet)
             else:
-                sheet = book.sheet_by_index(dialect.sheet)
+                sheet = book.sheet_by_index(dialect.sheet - 1)
         except (xlrd.XLRDError, IndexError):
             note = 'Excel document "%s" doesn\'t have a sheet "%s"'
             note = note % (self.file.source, dialect.sheet)
