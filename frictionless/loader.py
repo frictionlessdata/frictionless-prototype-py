@@ -89,6 +89,8 @@ class Loader:
         raise NotImplementedError
 
     def read_byte_stream_infer_stats(self, byte_stream):
+        if not self.file.stats:
+            return byte_stream
         return ByteStreamWithStats(
             byte_stream,
             hashing=self.file.hashing,
@@ -198,7 +200,7 @@ class ByteStreamWithStats(object):
             error = errors.HashingError(note=str(exception))
             raise exceptions.FrictionlessException(error)
         self.__byte_stream = byte_stream
-        self.__stats = stats
+        self.__stats = stats or {}
 
     def __getattr__(self, name):
         return getattr(self.__byte_stream, name)

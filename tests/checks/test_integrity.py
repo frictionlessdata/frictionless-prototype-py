@@ -5,84 +5,86 @@ from frictionless import validate
 
 
 def test_validate_size():
-    report = validate('data/table.csv', size=30)
+    report = validate('data/table.csv', stats={'bytes': 30})
     assert report.table['valid']
 
 
 def test_validate_size_invalid():
-    report = validate('data/table.csv', size=40)
-    assert report.flatten(['rowPosition', 'fieldPosition', 'code', 'note']) == [
-        [None, None, 'size-error', 'expected is "40" and actual is "30"'],
+    report = validate('data/table.csv', stats={'bytes': 40})
+    assert report.table.error.get('rowPosition') is None
+    assert report.table.error.get('fieldPosition') is None
+    assert report.flatten(['code', 'note']) == [
+        ['checksum-error', 'expected size in bytes is "40" and actual is "30"'],
     ]
 
 
 def test_validate_hash():
     hash = '6c2c61dd9b0e9c6876139a449ed87933'
-    report = validate('data/table.csv', hash=hash)
+    report = validate('data/table.csv', stats={'hash': hash})
     assert report.table['valid']
 
 
 def test_validate_hash_invalid():
     hash = '6c2c61dd9b0e9c6876139a449ed87933'
-    report = validate('data/table.csv', hash='bad')
-    assert report.flatten(['rowPosition', 'fieldPosition', 'code', 'note']) == [
-        [None, None, 'hash-error', 'expected is "bad" and actual is "%s"' % hash],
+    report = validate('data/table.csv', stats={'hash': 'bad'})
+    assert report.flatten(['code', 'note']) == [
+        ['checksum-error', 'expected hash in md5 is "bad" and actual is "%s"' % hash],
     ]
 
 
 def test_validate_hash_md5():
-    hash = 'md5:6c2c61dd9b0e9c6876139a449ed87933'
-    report = validate('data/table.csv', hash=hash)
+    hash = '6c2c61dd9b0e9c6876139a449ed87933'
+    report = validate('data/table.csv', stats={'hash': hash})
     assert report.table['valid']
 
 
 def test_validate_hash_md5_invalid():
     hash = '6c2c61dd9b0e9c6876139a449ed87933'
-    report = validate('data/table.csv', hash='md5:bad')
-    assert report.flatten(['rowPosition', 'fieldPosition', 'code', 'note']) == [
-        [None, None, 'hash-error', 'expected is "bad" and actual is "%s"' % hash],
+    report = validate('data/table.csv', stats={'hash': 'bad'})
+    assert report.flatten(['code', 'note']) == [
+        ['checksum-error', 'expected hash in md5 is "bad" and actual is "%s"' % hash],
     ]
 
 
 def test_validate_hash_sha1():
-    hash = 'sha1:db6ea2f8ff72a9e13e1d70c28ed1c6b42af3bb0e'
-    report = validate('data/table.csv', hash=hash)
+    hash = 'db6ea2f8ff72a9e13e1d70c28ed1c6b42af3bb0e'
+    report = validate('data/table.csv', hashing='sha1', stats={'hash': hash})
     assert report.table['valid']
 
 
 def test_validate_hash_sha1_invalid():
     hash = 'db6ea2f8ff72a9e13e1d70c28ed1c6b42af3bb0e'
-    report = validate('data/table.csv', hash='sha1:bad')
-    assert report.flatten(['rowPosition', 'fieldPosition', 'code', 'note']) == [
-        [None, None, 'hash-error', 'expected is "bad" and actual is "%s"' % hash],
+    report = validate('data/table.csv', hashing='sha1', stats={'hash': 'bad'})
+    assert report.flatten(['code', 'note']) == [
+        ['checksum-error', 'expected hash in sha1 is "bad" and actual is "%s"' % hash],
     ]
 
 
 def test_validate_hash_sha256():
-    hash = 'sha256:a1fd6c5ff3494f697874deeb07f69f8667e903dd94a7bc062dd57550cea26da8'
-    report = validate('data/table.csv', hash=hash)
+    hash = 'a1fd6c5ff3494f697874deeb07f69f8667e903dd94a7bc062dd57550cea26da8'
+    report = validate('data/table.csv', hashing='sha256', stats={'hash': hash})
     assert report.table['valid']
 
 
 def test_validate_hash_sha256_invalid():
     hash = 'a1fd6c5ff3494f697874deeb07f69f8667e903dd94a7bc062dd57550cea26da8'
-    report = validate('data/table.csv', hash='sha256:bad')
-    assert report.flatten(['rowPosition', 'fieldPosition', 'code', 'note']) == [
-        [None, None, 'hash-error', 'expected is "bad" and actual is "%s"' % hash],
+    report = validate('data/table.csv', hashing='sha256', stats={'hash': 'bad'})
+    assert report.flatten(['code', 'note']) == [
+        ['checksum-error', 'expected hash in sha256 is "bad" and actual is "%s"' % hash],
     ]
 
 
 def test_validate_hash_sha512():
-    hash = 'sha512:d52e3f5f5693894282f023b9985967007d7984292e9abd29dca64454500f27fa45b980132d7b496bc84d336af33aeba6caf7730ec1075d6418d74fb8260de4fd'
-    report = validate('data/table.csv', hash=hash)
+    hash = 'd52e3f5f5693894282f023b9985967007d7984292e9abd29dca64454500f27fa45b980132d7b496bc84d336af33aeba6caf7730ec1075d6418d74fb8260de4fd'
+    report = validate('data/table.csv', hashing='sha512', stats={'hash': hash})
     assert report.table['valid']
 
 
 def test_validate_hash_sha512_invalid():
     hash = 'd52e3f5f5693894282f023b9985967007d7984292e9abd29dca64454500f27fa45b980132d7b496bc84d336af33aeba6caf7730ec1075d6418d74fb8260de4fd'
-    report = validate('data/table.csv', hash='sha512:bad')
-    assert report.flatten(['rowPosition', 'fieldPosition', 'code', 'note']) == [
-        [None, None, 'hash-error', 'expected is "bad" and actual is "%s"' % hash],
+    report = validate('data/table.csv', hashing='sha512', stats={'hash': 'bad'})
+    assert report.flatten(['code', 'note']) == [
+        ['checksum-error', 'expected hash in sha512 is "bad" and actual is "%s"' % hash],
     ]
 
 

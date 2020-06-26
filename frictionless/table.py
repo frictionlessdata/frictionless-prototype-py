@@ -283,6 +283,9 @@ class Table:
     def __exit__(self, type, value, traceback):
         self.close()
 
+    def __iter__(self):
+        return self.iter()
+
     @property
     def path(self):
         """Path

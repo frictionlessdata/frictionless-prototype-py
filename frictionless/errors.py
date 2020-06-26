@@ -309,19 +309,11 @@ class CompressionError(Error):
     description = 'Data reading error because of a decompression problem.'
 
 
-class SizeError(Error):
-    code = 'size-error'
-    name = 'Size Error'
+class ChecksumError(Error):
+    code = 'checksum-error'
+    name = 'Checksum Error'
     tags = ['#table', '#integrity']
-    template = 'The data source does not match the expected size in bytes: {note}'
-    description = 'This error can happen if the data is corrupted.'
-
-
-class HashError(Error):
-    code = 'hash-error'
-    name = 'Hash Error'
-    tags = ['#table', '#integrity']
-    template = 'The data source does not match the expected hash: {note}'
+    template = 'The data source does not match the expected checksum: {note}'
     description = 'This error can happen if the data is corrupted.'
 
 

@@ -12,20 +12,20 @@ from . import config
 @click.argument('source', type=click.Path(), required=True)
 @click.option('--source-type', type=str, help='Source type')
 @click.option('--json', is_flag=True, help='Output report as JSON')
-# Source
+# File
 @click.option('--scheme', type=str, help='File scheme')
 @click.option('--format', type=str, help='File format')
+@click.option('--hashing', type=str, help='File hashing')
 @click.option('--encoding', type=str, help='File encoding')
 @click.option('--compression', type=str, help='File compression')
-# Headers
+@click.option('--compression-path', type=str, help='File compression path')
+# Table
 @click.option('--headers-row', type=int, multiple=True, help='Headers row')
 @click.option('--headers-joiner', type=str, help='Headers joiner')
-# Fields
 @click.option('--pick-fields', type=str, multiple=True, help='Pick fields')
 @click.option('--skip-fields', type=str, multiple=True, help='Skip fields')
 @click.option('--limit-fields', type=int, help='Limit fields')
 @click.option('--offset-fields', type=int, help='Offset fields')
-# Rows
 @click.option('--pick-rows', type=str, multiple=True, help='Pick rows')
 @click.option('--skip-rows', type=str, multiple=True, help='Skip rows')
 @click.option('--limit-rows', type=int, help='Limit rows')
@@ -38,15 +38,15 @@ from . import config
 @click.option('--infer-sample', type=int, help='Infer sample')
 @click.option('--infer-confidence', type=float, help='Infer confidence')
 # Integrity
-@click.option('--size', type=int, help='Expected size')
-@click.option('--hash', type=str, help='Expected hash')
+@click.option('--stats-hash', type=str, help='Expected hash based on hashing option')
+@click.option('--stats-bytes', type=int, help='Expected size in bytes')
 # Validation
 @click.option('--pick-errors', type=str, multiple=True, help='Pick errors')
 @click.option('--skip-errors', type=str, multiple=True, help='Skip errors')
 @click.option('--limit-errors', type=int, help='Limit errors')
 @click.option('--limit-memory', type=int, help='Limit memory')
 # Package/Resource
-@click.option('--exact', type=bool, help='Do not infer metadata')
+@click.option('--exact', type=bool, help='Validate exact metadata without inferring')
 def program(source, *, source_type, json, **options):
     for key, value in list(options.items()):
         if not value:

@@ -263,8 +263,8 @@ def detect_scheme_and_format(source):
     # General
     parsed = urlparse(source)
     scheme = parsed.scheme.lower()
-    if len(scheme) < 2:
-        scheme = config.DEFAULT_SCHEME
+    if len(scheme) == 1:
+        scheme = None
     format = os.path.splitext(parsed.path or parsed.netloc)[1][1:].lower() or None
     if format is None:
         # Test if query string contains a "format=" parameter.
@@ -278,45 +278,6 @@ def detect_scheme_and_format(source):
         return (None, 'datapackage')
 
     return (scheme, format)
-
-
-# TODO: consider merging cp1252/iso8859-1
-def detect_encoding(sample, encoding=None):
-    """Detect encoding of a byte string sample.
-    """
-    # TODO: remove
-    from . import config
-
-    if encoding is not None:
-        return normalize_encoding(sample, encoding)
-    result = chardet.detect(sample)
-    confidence = result['confidence'] or 0
-    encoding = result['encoding'] or 'ascii'
-    encoding = normalize_encoding(sample, encoding)
-    if confidence < config.ENCODING_CONFIDENCE:
-        encoding = config.DEFAULT_ENCODING
-    if encoding == 'ascii':
-        encoding = config.DEFAULT_ENCODING
-    return encoding
-
-
-def normalize_encoding(sample, encoding):
-    """Normalize encoding including 'utf-8-sig', 'utf-16-be', utf-16-le tweaks.
-    """
-    encoding = codecs.lookup(encoding).name
-    # Work around 'Incorrect detection of utf-8-sig encoding'
-    # <https://github.com/PyYoshi/cChardet/issues/28>
-    if encoding == 'utf-8':
-        if sample.startswith(codecs.BOM_UTF8):
-            encoding = 'utf-8-sig'
-    # Use the BOM stripping name (without byte-order) for UTF-16 encodings
-    elif encoding == 'utf-16-be':
-        if sample.startswith(codecs.BOM_UTF16_BE):
-            encoding = 'utf-16'
-    elif encoding == 'utf-16-le':
-        if sample.startswith(codecs.BOM_UTF16_LE):
-            encoding = 'utf-16'
-    return encoding
 
 
 def detect_html(text):

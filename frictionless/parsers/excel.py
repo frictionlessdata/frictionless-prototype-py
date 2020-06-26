@@ -162,7 +162,7 @@ class XlsParser(Parser):
 
             # Datetime
             if ctype == xlrd.XL_CELL_DATE:
-                return xlrd.xldate.xldate_as_datetime(value, self.__book.datemode)
+                return xlrd.xldate.xldate_as_datetime(value, book.datemode)
 
             return value
 

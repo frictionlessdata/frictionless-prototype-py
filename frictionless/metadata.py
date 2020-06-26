@@ -182,9 +182,11 @@ class ControlledMetadata(Metadata):
 
     # Process
 
-    def metadata_process(self):
+    def metadata_process(self, skip=[]):
         helpers.reset_cached_properties(self)
         for key, value in self.items():
+            if key in skip:
+                continue
             if isinstance(value, dict):
                 if not hasattr(value, 'metadata_process'):
                     value = ControlledMetadata(

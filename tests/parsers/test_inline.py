@@ -13,7 +13,6 @@ def test_table_inline():
         assert table.read() == [['id', 'name'], ['1', 'english'], ['2', '中国人']]
 
 
-@pytest.mark.skip
 def test_table_inline_iterator():
     source = iter([['id', 'name'], ['1', 'english'], ['2', '中国人']])
     with Table(source) as table:
@@ -27,10 +26,9 @@ def test_table_inline_generator_not_callable():
         yield ['1', 'english']
         yield ['2', '中国人']
 
-    with pytest.raises(exceptions.SourceError) as excinfo:
-        iterator = generator()
-        Table(iterator).open()
-    assert 'callable' in str(excinfo.value)
+    with Table(generator()) as table:
+        assert table.headers is None
+        assert table.read() == [['id', 'name'], ['1', 'english'], ['2', '中国人']]
 
 
 def test_table_inline_generator():
@@ -71,6 +69,7 @@ def test_table_inline_ordered_dict():
 # Write
 
 
+@pytest.mark.skip
 def test_table_save_inline_keyed_with_headers_argument(tmpdir):
     source = [{'key1': 'value1', 'key2': 'value2'}]
     target = str(tmpdir.join('table.csv'))

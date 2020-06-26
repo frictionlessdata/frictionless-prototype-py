@@ -1,5 +1,4 @@
 from .. import errors
-from .. import helpers
 from ..check import Check
 
 
@@ -7,15 +6,19 @@ class IntegrityCheck(Check):
     metadata_profile = {  # type: ignore
         'type': 'object',
         'properties': {
-            'size': {'type': ['number', 'null']},
-            'hash': {'type': ['string', 'null']},
+            'stats': {
+                'type': ['object', 'null'],
+                'properties': {
+                    'hash': {'type': ['string', 'null']},
+                    'bytes': {'type': ['number', 'null']},
+                },
+            },
             'lookup': {'type': ['object', 'null']},
         },
     }
     possible_Errors = [  # type: ignore
         # table
-        errors.SizeError,
-        errors.HashError,
+        errors.ChecksumError,
         # body
         errors.UniqueError,
         errors.PrimaryKeyError,
@@ -23,8 +26,9 @@ class IntegrityCheck(Check):
     ]
 
     def prepare(self):
-        self.size = self.get('size')
-        self.hash = self.get('hash')
+        self.stats = self.get('stats') or {}
+        self.stats_hash = self.stats.get('hash')
+        self.stats_bytes = self.stats.get('bytes')
         self.lookup = self.get('lookup')
         self.memory_unique = {}
         for field in self.schema.fields:
@@ -86,17 +90,17 @@ class IntegrityCheck(Check):
 
     def validate_table(self):
 
-        # Size error
-        if self.size:
-            if self.size != self.stream.size:
-                note = 'expected is "%s" and actual is "%s"'
-                note = note % (self.size, self.stream.size)
-                yield errors.SizeError(note=note)
+        # Hash
+        if self.stats_hash:
+            hashing = self.stream.hashing
+            if self.stats_hash != self.stream.stats['hash']:
+                note = f'expected hash in %s is "%s" and actual is "%s"'
+                note = note % (hashing, self.stats_hash, self.stream.stats['hash'])
+                yield errors.ChecksumError(note=note)
 
-        # Hash error
-        if self.hash:
-            hashing_digest = helpers.parse_hashing_digest(self.hash)
-            if hashing_digest != self.stream.hash:
-                note = 'expected is "%s" and actual is "%s"'
-                note = note % (hashing_digest, self.stream.hash)
-                yield errors.HashError(note=note)
+        # Bytes
+        if self.stats_bytes:
+            if self.stats_bytes != self.stream.stats['bytes']:
+                note = 'expected size in bytes is "%s" and actual is "%s"'
+                note = note % (self.stats_bytes, self.stream.stats['bytes'])
+                yield errors.ChecksumError(note=note)

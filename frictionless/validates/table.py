@@ -44,9 +44,7 @@ def validate_table(
     infer_volume=config.DEFAULT_INFER_VOLUME,
     infer_confidence=config.DEFAULT_INFER_CONFIDENCE,
     # Integrity
-    # TODO: rebase on stats
-    size=None,
-    hash=None,
+    stats=None,
     lookup=None,
     # Validation
     pick_errors=None,
@@ -62,17 +60,19 @@ def validate_table(
 
         scheme? (str)
         format? (str)
+        hashing? (str)
         encoding? (str)
         compression? (str)
+        compression_path? (str)
+        dialect? (dict)
+        control? (dict)
 
         headers_row? (int | int[])
         headers_joiner? (str)
-
         pick_fields? ((int | str)[])
         skip_fields? ((int | str)[])
         limit_fields? (int)
         offset_fields? (int)
-
         pick_rows? ((int | str)[])
         skip_rows? ((int | str)[])
         limit_rows? (int)
@@ -86,12 +86,7 @@ def validate_table(
         infer_volume? (int)
         infer_confidence? (float)
 
-        dialect? (dict)
-
-        control? (dict)
-
-        size? (int)
-        hash? (str)
+        stats? (dict)
         lookup? (dict)
 
         pick_errors? (str[])
@@ -120,8 +115,12 @@ def validate_table(
         source,
         scheme=scheme,
         format=format,
+        hashing=hashing,
         encoding=encoding,
         compression=compression,
+        compression_path=compression_path,
+        control=control,
+        dialect=dialect,
         headers=helpers.translate_headers(headers_row),
         multiline_headers_joiner=headers_joiner,
         pick_fields=helpers.translate_pick_fields(pick_fields),
@@ -133,9 +132,6 @@ def validate_table(
         limit_rows=limit_rows,
         offset_rows=offset_rows,
         sample_size=infer_volume,
-        hashing_algorithm=helpers.parse_hashing_algorithm(hash),
-        **helpers.translate_dialect(dialect or {}),
-        **helpers.translate_control(control or {}),
     )
 
     # Open table
@@ -202,7 +198,7 @@ def validate_table(
     if not exited:
         items = []
         items.append('baseline')
-        items.append(('integrity', {'size': size, 'hash': hash, 'lookup': lookup}))
+        items.append(('integrity', {'stats': stats, 'lookup': lookup}))
         items.extend(extra_checks or [])
         create = system.create_check
         for item in items:

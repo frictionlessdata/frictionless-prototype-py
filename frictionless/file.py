@@ -61,15 +61,15 @@ class File(ControlledMetadata):
         super().__init__(descriptor)
         # Infer from source
         infer = helpers.infer_source_scheme_and_format(source)
-        self.__infered_compression = None
+        self.__infered_compression = config.DEFAULT_COMPRESSION
         if infer[1] in config.COMPRESSION_FORMATS:
             self.__infered_compression = infer[1]
             source = source[: -len(infer[1]) - 1]
             if compression_path:
                 source = os.path.join(source, compression_path)
             infer = helpers.infer_source_scheme_and_format(source)
-        self.__infered_scheme = infer[0]
-        self.__infered_format = infer[1]
+        self.__infered_scheme = infer[0] or config.DEFAULT_SCHEME
+        self.__infered_format = infer[1] or config.DEFAULT_FORMAT
 
     def __setattr__(self, name, value):
         if name in [
@@ -113,8 +113,7 @@ class File(ControlledMetadata):
 
     @cached_property
     def compression(self):
-        default = self.__infered_compression or config.DEFAULT_COMPRESSION
-        return self.get('compression', default)
+        return self.get('compression', self.__infered_compression)
 
     @cached_property
     def compression_path(self):
@@ -157,4 +156,4 @@ class File(ControlledMetadata):
                     #  metadata_strict=self.metadata_strict,
                 )
                 dict.__setitem__(self, name, value)
-        super().metadata_process()
+        super().metadata_process(skip=['source'])
