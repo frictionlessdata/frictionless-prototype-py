@@ -41,11 +41,6 @@ class Metadata(dict):
             self.metadata_process()
             self.metadata_validate()
 
-    def __setattr__(self, name, value):
-        if name in ['metadata_root', 'metadata_strict']:
-            self.__dict__[name] = value
-        super().__setattr__(name, value)
-
     @cached_property
     def metadata_root(self):
         return self.__root

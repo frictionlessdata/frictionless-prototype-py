@@ -440,6 +440,7 @@ class Table:
             TabulatorException: if an error
 
         """
+        self.__file.stats = {'size': 0, 'hash': ''}
         self.__parser = system.create_parser(self.__file)
         self.__parser.open()
         self.__extract_sample()

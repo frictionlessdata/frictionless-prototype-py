@@ -34,7 +34,7 @@ class XlsxParser(Parser):
         if loader.network:
             # Cached
             if workbook_cache is not None and source in workbook_cache:
-                loader = system.create_loader(File(source=source))
+                loader = system.create_loader(File(source=source, stats=self.file.stats))
             # Not cached
             else:
                 prefix = 'tabulator-'

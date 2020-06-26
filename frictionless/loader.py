@@ -79,9 +79,9 @@ class Loader:
         raise NotImplementedError
 
     def read_byte_stream_infer_stats(self, byte_stream):
-        byte_stream = ByteStreamWithStats(byte_stream, hashing=self.file.hashing)
-        self.file.stats = byte_stream.stats
-        return byte_stream
+        return ByteStreamWithStats(
+            byte_stream, hashing=self.file.hashing, stats=self.file.stats
+        )
 
     def read_byte_stream_decompress(self, byte_stream):
         if self.file.compression == 'zip':
@@ -164,21 +164,19 @@ class ByteStreamWithStats(object):
 
     """
 
-    def __init__(self, byte_stream, *, hashing=None):
+    def __init__(self, byte_stream, *, hashing, stats):
         try:
             self.__hasher = getattr(hashlib, hashing)() if hashing else None
         except Exception as exception:
             error = errors.HashingError(note=str(exception))
             raise exceptions.FrictionlessException(error)
         self.__byte_stream = byte_stream
-        self.__stats = {'size': 0, 'hash': ''}
+        self.__stats = {}
+        if not stats['size'] and not stats['hash']:
+            self.__stats = stats
 
     def __getattr__(self, name):
         return getattr(self.__byte_stream, name)
-
-    @property
-    def stats(self):
-        return self.__stats
 
     @property
     def closed(self):
