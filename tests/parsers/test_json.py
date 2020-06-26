@@ -67,6 +67,7 @@ def test_table_ndjson():
 # Write
 
 
+@pytest.mark.skip
 def test_table_save_json(tmpdir):
     source = 'data/table.csv'
     target = str(tmpdir.join('table.json'))
@@ -80,6 +81,7 @@ def test_table_save_json(tmpdir):
         ]
 
 
+@pytest.mark.skip
 def test_table_save_json_keyed(tmpdir):
     source = 'data/table.csv'
     target = str(tmpdir.join('table.json'))
