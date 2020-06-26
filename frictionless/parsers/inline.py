@@ -6,7 +6,7 @@ from .. import dialects
 
 class InlineParser(Parser):
     Dialect = dialects.InlineDialect
-    loader_mode = None
+    loading = False
 
     # Read
 

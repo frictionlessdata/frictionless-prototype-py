@@ -115,7 +115,6 @@ class XlsxParser(Parser):
 
 class XlsParser(Parser):
     Dialect = dialects.ExcelDialect
-    loader_mode = 'b'
 
     # Read
 

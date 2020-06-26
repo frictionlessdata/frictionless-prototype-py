@@ -21,6 +21,7 @@ class File(ControlledMetadata):
             'compressionPath': {'type': 'string'},
             'contorl': {'type': 'object'},
             'dialect': {'type': 'object'},
+            'newline': {'type': 'string'},
             'stats': {
                 'type': 'object',
                 'required': ['size', 'hash'],
@@ -42,6 +43,7 @@ class File(ControlledMetadata):
         compression_path=None,
         control=None,
         dialect=None,
+        newline=None,
         stats=None,
     ):
         self.setdefined('source', source)
@@ -53,6 +55,7 @@ class File(ControlledMetadata):
         self.setdefined('compressionPath', compression_path)
         self.setdefined('control', control)
         self.setdefined('dialect', dialect)
+        self.setdefined('newline', newline)
         self.setdefined('stats', stats)
         super().__init__(descriptor)
         # Infer from source
@@ -74,6 +77,7 @@ class File(ControlledMetadata):
             'compressionPath',
             'control',
             'dialect',
+            'newline',
             'stats',
         ]:
             self[stringcase.camelcase(name)] = value
@@ -119,6 +123,10 @@ class File(ControlledMetadata):
     @cached_property
     def dialect(self):
         return self.get('dialect')
+
+    @cached_property
+    def newline(self):
+        return self.get('newline')
 
     @cached_property
     def stats(self):

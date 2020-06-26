@@ -10,7 +10,6 @@ from .. import errors
 
 class JsonParser(Parser):
     Dialect = dialects.JsonDialect
-    loader_mode = 'b'
 
     # Read
 

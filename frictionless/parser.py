@@ -13,13 +13,24 @@ class Parser:
     """
 
     Dialect = None
-    loader_mode = 't'
+    newline = None
+    loading = True
 
     def __init__(self, file):
         self.__file = file
-        self.__file.dialect = self.Dialect(self.__file.dialect, metadata_root=file)
         self.__loader = None
         self.__cell_stream = None
+        if self.Dialect is not None:
+            self.__file.dialect = self.Dialect(file.dialect, metadata_root=file)
+        if self.newline is not None:
+            self.__file.newline = self.newline
+
+    def __enter__(self):
+        self.open()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
 
     @property
     def file(self):
@@ -39,6 +50,7 @@ class Parser:
         self.close()
         self.__loader = self.read_loader()
         self.__cell_stream = self.read_cell_stream()
+        return self
 
     def close(self):
         if self.__loader:
@@ -47,9 +59,9 @@ class Parser:
     # Read
 
     def read_loader(self):
-        if self.loader_mode:
+        if self.loading:
             loader = system.create_loader(self.file)
-            loader.open(mode=self.loader_mode)
+            loader.open()
             return loader
 
     def read_cell_stream(self):

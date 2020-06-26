@@ -384,6 +384,16 @@ class Table:
         return self.__file.dialect
 
     @property
+    def newline(self):
+        """Newline (if available)
+
+        # Returns
+            dict/None: newline
+
+        """
+        return self.__file.newline
+
+    @property
     def stats(self):
         """Returns stats
 

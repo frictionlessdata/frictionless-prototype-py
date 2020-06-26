@@ -28,9 +28,17 @@ class Loader:
 
     def __init__(self, file):
         self.__file = file
-        self.__file.control = self.Control(self.__file.control, metadata_root=file)
         self.__byte_stream = None
         self.__text_stream = None
+        if self.Control is not None:
+            self.__file.control = self.Control(file.control, metadata_root=file)
+
+    def __enter__(self):
+        self.open()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
 
     @property
     def file(self):
@@ -42,15 +50,16 @@ class Loader:
 
     @property
     def text_stream(self):
+        if not self.__text_stream:
+            self.__text_stream = self.read_text_stream()
         return self.__text_stream
 
     # Manage
 
-    def open(self, *, mode='t'):
+    def open(self):
         self.close()
         self.__byte_stream = self.read_byte_stream()
-        if mode == 't':
-            self.__text_stream = self.read_text_stream()
+        return self
 
     def close(self):
         if self.__byte_stream:
@@ -112,7 +121,9 @@ class Loader:
         """
         if self.file.encoding is None:
             self.read_text_stream_infer_encoding(self.byte_stream)
-        text_stream = io.TextIOWrapper(self.byte_stream, self.file.encoding)
+        text_stream = io.TextIOWrapper(
+            self.byte_stream, encoding=self.file.encoding, newline=self.file.newline
+        )
         return text_stream
 
     def read_text_stream_infer_encoding(self, byte_stream):
