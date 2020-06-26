@@ -5,6 +5,7 @@ from frictionless import Table
 # Read
 
 
+@pytest.mark.skip
 @pytest.mark.parametrize(
     'source, selector',
     [

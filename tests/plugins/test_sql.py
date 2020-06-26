@@ -5,27 +5,32 @@ from frictionless import Table, exceptions
 # Read
 
 
+@pytest.mark.skip
 def test_table_format_sql(database_url):
     with Table(database_url, table='data') as table:
         assert table.read() == [[1, 'english'], [2, '中国人']]
 
 
+@pytest.mark.skip
 def test_table_format_sql_order_by(database_url):
     with Table(database_url, table='data', order_by='id') as table:
         assert table.read() == [[1, 'english'], [2, '中国人']]
 
 
+@pytest.mark.skip
 def test_table_format_sql_order_by_desc(database_url):
     with Table(database_url, table='data', order_by='id desc') as table:
         assert table.read() == [[2, '中国人'], [1, 'english']]
 
 
+@pytest.mark.skip
 def test_table_format_sql_table_is_required_error(database_url):
     with pytest.raises(exceptions.TabulatorException) as excinfo:
         Table(database_url).open()
     assert 'table' in str(excinfo.value)
 
 
+@pytest.mark.skip
 def test_table_format_sql_headers(database_url):
     with Table(database_url, table='data', headers=1) as table:
         assert table.headers == ['id', 'name']
@@ -35,6 +40,7 @@ def test_table_format_sql_headers(database_url):
 # Write
 
 
+@pytest.mark.skip
 def test_table_save_sqlite(database_url):
     source = 'data/table.csv'
     with Table(source, headers=1) as table:

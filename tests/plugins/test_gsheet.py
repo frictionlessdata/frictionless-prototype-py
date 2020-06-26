@@ -5,6 +5,7 @@ from frictionless import Table, exceptions
 # Read
 
 
+@pytest.mark.skip
 @pytest.mark.slow
 def test_table_gsheet():
     source = 'https://docs.google.com/spreadsheets/d/1mHIWnDvW9cALRMq9OdNfRwjAthCUFUOACPp0Lkyl7b4/edit?usp=sharing'
@@ -12,6 +13,7 @@ def test_table_gsheet():
         assert table.read() == [['id', 'name'], ['1', 'english'], ['2', '中国人']]
 
 
+@pytest.mark.skip
 @pytest.mark.slow
 def test_table_gsheet_with_gid():
     source = 'https://docs.google.com/spreadsheets/d/1mHIWnDvW9cALRMq9OdNfRwjAthCUFUOACPp0Lkyl7b4/edit#gid=960698813'
@@ -19,6 +21,7 @@ def test_table_gsheet_with_gid():
         assert table.read() == [['id', 'name'], ['2', '中国人'], ['3', 'german']]
 
 
+@pytest.mark.skip
 @pytest.mark.slow
 def test_table_gsheet_bad_url():
     table = Table('https://docs.google.com/spreadsheets/d/bad')

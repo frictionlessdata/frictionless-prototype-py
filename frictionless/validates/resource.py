@@ -50,14 +50,27 @@ def validate_resource(source, base_path=None, exact=False, lookup=None, **option
         headers_row = None
     if lookup is None:
         lookup = helpers.create_lookup(resource)
+    stats = None
+    hashing = None
+    stats_hash = resource.descriptor.get('hash')
+    stats_bytes = resource.descriptor.get('bytes')
+    if stats_hash:
+        stats = stats or {}
+        stats['hash'] = helpers.parse_hashing_digest(stats_hash)
+        hashing = helpers.parse_hashing_algorithm(stats_hash)
+    if stats_bytes:
+        stats = stats or {}
+        stats['bytes'] = stats_bytes
 
     # Validate table
     report = validate_table(
         source,
         scheme=resource.descriptor.get('scheme'),
         format=resource.descriptor.get('format'),
+        hashing=hashing,
         encoding=resource.descriptor.get('encoding'),
         compression=resource.descriptor.get('compression'),
+        dialect=dialect,
         headers_row=headers_row,
         pick_fields=resource.descriptor.get('pickFields'),
         skip_fields=resource.descriptor.get('skipFields'),
@@ -68,9 +81,7 @@ def validate_resource(source, base_path=None, exact=False, lookup=None, **option
         limit_rows=resource.descriptor.get('limitRows'),
         offset_rows=resource.descriptor.get('offsetRows'),
         schema=resource.descriptor.get('schema'),
-        dialect=dialect,
-        size=resource.descriptor.get('bytes'),
-        hash=resource.descriptor.get('hash'),
+        stats=stats,
         lookup=lookup,
         **options,
     )

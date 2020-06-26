@@ -1,6 +1,6 @@
 import pytest
 from collections import OrderedDict
-from frictionless import Table, exceptions
+from frictionless import Table
 
 
 # Read

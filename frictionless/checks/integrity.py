@@ -94,7 +94,7 @@ class IntegrityCheck(Check):
         if self.stats_hash:
             hashing = self.stream.hashing
             if self.stats_hash != self.stream.stats['hash']:
-                note = f'expected hash in %s is "%s" and actual is "%s"'
+                note = 'expected hash in %s is "%s" and actual is "%s"'
                 note = note % (hashing, self.stats_hash, self.stream.stats['hash'])
                 yield errors.ChecksumError(note=note)
 

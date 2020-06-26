@@ -1,8 +1,5 @@
 import re
 import os
-import codecs
-import hashlib
-import chardet
 import datetime
 import stringcase
 from copy import copy

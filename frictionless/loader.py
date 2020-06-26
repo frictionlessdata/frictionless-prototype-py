@@ -1,8 +1,6 @@
 import io
-import os
 import gzip
 import codecs
-import atexit
 import shutil
 import hashlib
 import chardet

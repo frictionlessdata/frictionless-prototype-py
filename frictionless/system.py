@@ -126,7 +126,7 @@ class System:
             if item.name.startswith('frictionless_'):
                 module = import_module(item.name)
                 modules[item.name] = module
-        module = import_module(f'frictionless.plugins')
+        module = import_module('frictionless.plugins')
         for _, name, _ in pkgutil.iter_modules([os.path.dirname(module.__file__)]):
             module = import_module(f'frictionless.plugins.{name}')
             modules[name] = module

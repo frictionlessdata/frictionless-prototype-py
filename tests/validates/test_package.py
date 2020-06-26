@@ -129,6 +129,7 @@ def test_validate_package_infer():
     assert report.valid
 
 
+@pytest.mark.skip
 def test_validate_package_dialect_header_false():
     descriptor = {
         'resources': [
@@ -172,8 +173,8 @@ def test_validate_integrity_invalid():
     source['resources'][0]['hash'] += 'a'
     report = validate(source)
     assert report.flatten(['rowPosition', 'fieldPosition', 'code']) == [
-        [None, None, 'size-error'],
-        [None, None, 'hash-error'],
+        [None, None, 'checksum-error'],
+        [None, None, 'checksum-error'],
     ]
 
 
@@ -190,7 +191,7 @@ def test_validate_integrity_size_invalid():
     source['resources'][0].pop('hash')
     report = validate(source)
     assert report.flatten(['rowPosition', 'fieldPosition', 'code']) == [
-        [None, None, 'size-error'],
+        [None, None, 'checksum-error'],
     ]
 
 
@@ -207,7 +208,7 @@ def test_check_file_integrity_hash_invalid():
     source['resources'][0]['hash'] += 'a'
     report = validate(source)
     assert report.flatten(['rowPosition', 'fieldPosition', 'code']) == [
-        [None, None, 'hash-error'],
+        [None, None, 'checksum-error'],
     ]
 
 

@@ -8,6 +8,7 @@ BASE_URL = 'https://raw.githubusercontent.com/okfn/tabulator-py/master/%s'
 # Read
 
 
+@pytest.mark.skip
 def test_table_ods():
     with Table('data/table.ods', headers=1) as table:
         assert table.headers == ['id', 'name']
@@ -17,6 +18,7 @@ def test_table_ods():
         ]
 
 
+@pytest.mark.skip
 @pytest.mark.remote
 def test_table_ods_remote():
     source = BASE_URL % 'data/table.ods'
@@ -24,34 +26,40 @@ def test_table_ods_remote():
         assert table.read() == [['id', 'name'], [1, 'english'], [2, '中国人']]
 
 
+@pytest.mark.skip
 def test_table_ods_sheet_by_index():
     with Table('data/table.ods', sheet=1) as table:
         assert table.read() == [['id', 'name'], [1, 'english'], [2, '中国人']]
 
 
+@pytest.mark.skip
 def test_table_ods_sheet_by_index_not_existent():
     with pytest.raises(exceptions.SourceError) as excinfo:
         Table('data/table.ods', sheet=3).open()
     assert 'sheet "3"' in str(excinfo.value)
 
 
+@pytest.mark.skip
 def test_table_ods_sheet_by_name():
     with Table('data/table.ods', sheet='Лист1') as table:
         assert table.read() == [['id', 'name'], [1, 'english'], [2, '中国人']]
 
 
+@pytest.mark.skip
 def test_table_ods_sheet_by_index_not_existent_2():
     with pytest.raises(exceptions.SourceError) as excinfo:
         Table('data/table.ods', sheet='not-existent').open()
     assert 'sheet "not-existent"' in str(excinfo.value)
 
 
+@pytest.mark.skip
 def test_table_ods_with_boolean():
     with Table('data/special/table-with-booleans.ods') as table:
         assert table.headers is None
         assert table.read() == [['id', 'boolean'], [1, True], [2, False]]
 
 
+@pytest.mark.skip
 def test_table_ods_with_ints_floats_dates():
     source = 'data/special/table-with-ints-floats-dates.ods'
     with Table(source) as table:

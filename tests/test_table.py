@@ -1,6 +1,5 @@
 import io
 import ast
-import sys
 import pytest
 import datetime
 from frictionless import Table, dialects, exceptions
@@ -761,7 +760,8 @@ def test_table_post_parse_sample():
 def test_table_custom_loaders():
     source = 'custom://data/table.csv'
 
-    class CustomLoader(LocalLoader):
+    #  class CustomLoader(LocalLoader):
+    class CustomLoader:
         def load(self, source, *args, **kwargs):
             return super(CustomLoader, self).load(
                 source.replace('custom://', ''), *args, **kwargs
@@ -778,7 +778,8 @@ def test_table_custom_loaders():
 def test_table_custom_parsers():
     source = 'data/table.custom'
 
-    class CustomParser(CsvParser):
+    #  class CustomParser(CsvParser):
+    class CustomParser:
         def open(self, source, *args, **kwargs):
             return super(CustomParser, self).open(
                 source.replace('custom', 'csv'), *args, **kwargs
@@ -796,7 +797,8 @@ def test_table_save_custom_writers(tmpdir):
     source = 'data/table.csv'
     target = str(tmpdir.join('table.csv'))
 
-    class CustomWriter(CsvWriter):
+    #  class CustomWriter(CsvWriter):
+    class CustomWriter:
         pass
 
     with Table(source, headers=1, custom_writers={'csv': CustomWriter}) as table:
