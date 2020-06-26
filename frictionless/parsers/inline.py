@@ -11,7 +11,10 @@ class InlineParser(Parser):
     # Read
 
     def read_cell_stream_create(self):
-        for row_number, item in enumerate(self.file.source, start=1):
+        items = self.file.source
+        if not hasattr(items, '__iter__'):
+            items = items()
+        for row_number, item in enumerate(items, start=1):
             if isinstance(item, (tuple, list)):
                 yield (row_number, None, list(item))
             elif isinstance(item, dict):

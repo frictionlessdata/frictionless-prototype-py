@@ -21,7 +21,7 @@ def validate_inquiry(source):
     tasks = []
     reports = []
     for task in inquiry.tasks:
-        source_type = task.get('sourceType') or helpers.detect_source_type(task['source'])
+        source_type = task.get('sourceType') or helpers.infer_source_type(task['source'])
         if source_type == 'inquiry':
             error = Error(note='Inquiry cannot contain nested inquiries')
             raise exceptions.FrictionlessException(error)

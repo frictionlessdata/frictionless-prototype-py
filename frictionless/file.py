@@ -1,3 +1,4 @@
+import os
 import stringcase
 from .helpers import cached_property
 from .metadata import ControlledMetadata
@@ -24,8 +25,8 @@ class File(ControlledMetadata):
             'newline': {'type': 'string'},
             'stats': {
                 'type': 'object',
-                'required': ['size', 'hash'],
-                'properties': {'size': {'type': 'number'}, 'hash': {'type': 'string'}},
+                'required': ['hash', 'bytes'],
+                'properties': {'hash': {'type': 'string'}, 'bytes': {'type': 'number'}},
             },
         },
     }
@@ -63,7 +64,10 @@ class File(ControlledMetadata):
         self.__infered_compression = None
         if infer[1] in config.COMPRESSION_FORMATS:
             self.__infered_compression = infer[1]
-            infer = helpers.infer_source_scheme_and_format(source[: -len(infer[1])])
+            source = source[: -len(infer[1]) - 1]
+            if compression_path:
+                source = os.path.join(source, compression_path)
+            infer = helpers.infer_source_scheme_and_format(source)
         self.__infered_scheme = infer[0]
         self.__infered_format = infer[1]
 

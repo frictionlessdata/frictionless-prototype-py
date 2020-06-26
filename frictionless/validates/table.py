@@ -44,6 +44,7 @@ def validate_table(
     infer_volume=config.DEFAULT_INFER_VOLUME,
     infer_confidence=config.DEFAULT_INFER_CONFIDENCE,
     # Integrity
+    # TODO: rebase on stats
     size=None,
     hash=None,
     lookup=None,

@@ -61,8 +61,7 @@ class Parser:
     def read_loader(self):
         if self.loading:
             loader = system.create_loader(self.file)
-            loader.open()
-            return loader
+            return loader.open()
 
     def read_cell_stream(self):
         return self.read_cell_stream_create()

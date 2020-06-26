@@ -3,10 +3,11 @@ import os
 import gzip
 import codecs
 import atexit
+import shutil
 import hashlib
 import chardet
 import zipfile
-import tempfile
+from tempfile import NamedTemporaryFile
 from . import exceptions
 from . import errors
 from . import config
@@ -77,8 +78,8 @@ class Loader:
         """
         try:
             byte_stream = self.read_byte_stream_create()
-            byte_stream = self.read_byte_stream_decompress(byte_stream)
             byte_stream = self.read_byte_stream_infer_stats(byte_stream)
+            byte_stream = self.read_byte_stream_decompress(byte_stream)
         except IOError as exception:
             error = errors.SchemeError(note=str(exception))
             raise exceptions.FrictionlessException(error)
@@ -89,20 +90,34 @@ class Loader:
 
     def read_byte_stream_infer_stats(self, byte_stream):
         return ByteStreamWithStats(
-            byte_stream, hashing=self.file.hashing, stats=self.file.stats
+            byte_stream,
+            hashing=self.file.hashing,
+            stats=self.file.stats if not self.file.stats['hash'] else {},
         )
 
     def read_byte_stream_decompress(self, byte_stream):
         if self.file.compression == 'zip':
-            self.network = False
+            # Network
+            if self.network:
+                self.network = False
+                target = NamedTemporaryFile()
+                shutil.copyfileobj(byte_stream, target)
+                target.seek(0)
+                byte_stream = target
+            # Stats
+            else:
+                bytes = True
+                while bytes:
+                    bytes = byte_stream.read1(io.DEFAULT_BUFFER_SIZE)
+                byte_stream.seek(0)
+            # Unzip
             with zipfile.ZipFile(byte_stream) as archive:
-                name = self.compression_file or archive.namelist()[0]
+                name = self.file.compression_path or archive.namelist()[0]
                 with archive.open(name) as file:
-                    byte_stream = tempfile.NamedTemporaryFile(suffix='.' + name)
-                    atexit.register(os.remove, byte_stream.name)
-                    for line in file:
-                        byte_stream.write(line)
-                    byte_stream.seek(0)
+                    target = NamedTemporaryFile()
+                    shutil.copyfileobj(file, target)
+                    target.seek(0)
+                byte_stream = target
             return byte_stream
         if self.file.compression == 'gz':
             byte_stream = gzip.open(byte_stream)
@@ -119,25 +134,26 @@ class Loader:
             TextIO: I/O stream
 
         """
-        if self.file.encoding is None:
-            self.read_text_stream_infer_encoding(self.byte_stream)
-        text_stream = io.TextIOWrapper(
-            self.byte_stream, encoding=self.file.encoding, newline=self.file.newline
+        self.read_text_stream_infer_encoding(self.byte_stream)
+        return io.TextIOWrapper(
+            buffer=self.byte_stream,
+            encoding=self.file.encoding,
+            newline=self.file.newline,
         )
-        return text_stream
 
     def read_text_stream_infer_encoding(self, byte_stream):
-        encoding = self.file.encoding
+        encoding = self.file.get('encoding')
         sample = byte_stream.read(config.INFER_ENCODING_VOLUME)
         sample = sample[: config.INFER_ENCODING_VOLUME]
         byte_stream.seek(0)
-        result = chardet.infer(sample)
-        confidence = result['confidence'] or 0
-        encoding = result['encoding'] or 'ascii'
-        if confidence < config.INFER_ENCODING_CONFIDENCE:
-            encoding = config.DEFAULT_ENCODING
-        if encoding == 'ascii':
-            encoding = config.DEFAULT_ENCODING
+        if encoding is None:
+            result = chardet.detect(sample)
+            confidence = result['confidence'] or 0
+            encoding = result['encoding'] or config.DEFAULT_ENCODING
+            if confidence < config.INFER_ENCODING_CONFIDENCE:
+                encoding = config.DEFAULT_ENCODING
+            if encoding == 'ascii':
+                encoding = config.DEFAULT_ENCODING
         encoding = codecs.lookup(encoding).name
         # Work around 'Incorrect inferion of utf-8-sig encoding'
         # <https://github.com/PyYoshi/cChardet/issues/28>
@@ -164,7 +180,7 @@ class Loader:
 class ByteStreamWithStats(object):
     """This class is intended to be used as
 
-    stats = {'size': 0, 'hash': ''}
+    stats = {'hash': '', 'bytes': 0}
     bytes = BytesStatsWrapper(bytes, stats)
 
     It will be updating the stats during reading.
@@ -182,9 +198,7 @@ class ByteStreamWithStats(object):
             error = errors.HashingError(note=str(exception))
             raise exceptions.FrictionlessException(error)
         self.__byte_stream = byte_stream
-        self.__stats = {}
-        if not stats['size'] and not stats['hash']:
-            self.__stats = stats
+        self.__stats = stats
 
     def __getattr__(self, name):
         return getattr(self.__byte_stream, name)
@@ -195,7 +209,7 @@ class ByteStreamWithStats(object):
 
     def read1(self, size=None):
         chunk = self.__byte_stream.read1(size)
-        self.__stats['size'] += len(chunk)
+        self.__stats['bytes'] += len(chunk)
         if self.__hasher:
             self.__hasher.update(chunk)
             self.__stats['hash'] = self.__hasher.hexdigest()

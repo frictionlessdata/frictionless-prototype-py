@@ -450,7 +450,8 @@ class Table:
             TabulatorException: if an error
 
         """
-        self.__file.stats = {'size': 0, 'hash': ''}
+        self.close()
+        self.__file.stats = {'hash': '', 'bytes': 0}
         self.__parser = system.create_parser(self.__file)
         self.__parser.open()
         self.__extract_sample()
@@ -462,7 +463,8 @@ class Table:
     def close(self):
         """Closes the stream.
         """
-        self.__parser.close()
+        if self.__parser:
+            self.__parser.close()
         self.__row_number = 0
 
     # Read
@@ -597,6 +599,20 @@ class Table:
         # Write data to target
         writer = writer_class(**writer_options)
         return writer.write(self.iter(), target, headers=self.headers, encoding=encoding)
+
+    # TODO: remove
+    # Legacy
+
+    @property
+    def field_positions(self):
+        if self.__field_positions is None:
+            self.__field_positions = []
+            if self.__headers:
+                size = len(self.__headers) + len(self.__ignored_headers_indexes)
+                for index in range(size):
+                    if index not in self.__ignored_headers_indexes:
+                        self.__field_positions.append(index + 1)
+        return self.__field_positions
 
     # Private
 

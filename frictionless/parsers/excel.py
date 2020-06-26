@@ -24,34 +24,33 @@ class XlsxParser(Parser):
     # TODO: we are not getting stats here
     def read_loader(self):
         source = self.file.source
+        dialect = self.file.dialect
         loader = system.create_loader(self.file)
-        workbook_cache = self.file.dialect.workbook_cache
+        if not loader.network:
+            return loader.open()
 
         # Network
         # Create copy for remote source
         # For remote stream we need local copy (will be deleted on close by Python)
         # https://docs.python.org/3.5/library/tempfile.html#tempfile.TemporaryFile
         if loader.network:
-            # Cached
-            if workbook_cache is not None and source in workbook_cache:
-                loader = system.create_loader(File(source=source, stats=self.file.stats))
-            # Not cached
-            else:
-                prefix = 'tabulator-'
-                delete = workbook_cache is None
-                loader = system.create_loader(self.file)
-                loader.open(mode='b')
-                target = NamedTemporaryFile(prefix=prefix, delete=delete)
-                shutil.copyfileobj(loader.byte_stream, target)
-                loader.close()
-                target.seek(0)
-                loader = system.create_loader(File(source=target))
-                if workbook_cache is not None:
-                    workbook_cache[source] = target.name
-                    atexit.register(os.remove, target.name)
 
-        loader.open(mode='b')
-        return loader
+            # Cached
+            if dialect.workbook_cache is not None and source in dialect.workbook_cache:
+                file = File(source=source, stats=self.file.stats)
+                loader = system.create_loader(file)
+                return loader.open()
+
+            with loader as loader:
+                target = NamedTemporaryFile(delete=dialect.workbook_cache is None)
+                shutil.copyfileobj(loader.byte_stream, target)
+                target.seek(0)
+            if not target.delete:
+                dialect.workbook_cache[source] = target.name
+                atexit.register(os.remove, target.name)
+            file = File(source=target)
+            loader = system.create_loader(file)
+            return loader.open()
 
     def read_cell_stream_create(self):
         dialect = self.file.dialect
