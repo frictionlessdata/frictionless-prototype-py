@@ -1,10 +1,14 @@
 import re
-from copy import copy
 from itertools import chain
+from copy import copy, deepcopy
 from collections import deque
+from .headers import Headers
+from .schema import Schema
 from .system import system
 from .file import File
+from .row import Row
 from . import exceptions
+from . import errors
 from . import helpers
 from . import config
 
@@ -132,6 +136,25 @@ class Table:
         control=None,
         dialect=None,
         # Table
+        headers_row=config.DEFAULT_HEADERS_ROW,
+        headers_joiner=config.DEFAULT_HEADERS_JOINER,
+        pick_fields=None,
+        skip_fields=None,
+        limit_fields=None,
+        offset_fields=None,
+        pick_rows=None,
+        skip_rows=None,
+        limit_rows=None,
+        offset_rows=None,
+        # Schema
+        schema=None,
+        sync_schema=False,
+        patch_schema=False,
+        infer_type=None,
+        infer_names=None,
+        infer_volume=config.DEFAULT_INFER_VOLUME,
+        infer_confidence=config.DEFAULT_INFER_CONFIDENCE,
+        # Legacy
         headers=None,
         allow_html=False,
         sample_size=config.DEFAULT_INFER_VOLUME,
@@ -143,14 +166,6 @@ class Table:
         force_strings=False,
         pick_columns=None,
         skip_columns=None,
-        pick_fields=None,
-        skip_fields=None,
-        limit_fields=None,
-        offset_fields=None,
-        pick_rows=None,
-        skip_rows=None,
-        limit_rows=None,
-        offset_rows=None,
         post_parse=[],
         custom_loaders={},
         custom_parsers={},
@@ -259,10 +274,32 @@ class Table:
         self.__field_positions = None
         self.__parser = None
         self.__row_number = 0
-        self.__stats = None
         self.__parser = None
-
-        # Create file
+        self.__sample = None
+        # Frictionless
+        self.__sample = None
+        self.__headers = None
+        self.__row_stream = None
+        self.__data_stream = None
+        self.__field_positions = None
+        self.__sample_positions = None
+        self.__headers_row = headers_row
+        self.__headers_joiner = headers_joiner
+        self.__pick_fields = pick_fields
+        self.__skip_fields = skip_fields
+        self.__limit_fields = limit_fields
+        self.__offset_fields = offset_fields
+        self.__pick_rows = pick_rows
+        self.__skip_rows = skip_rows
+        self.__limit_rows = limit_rows
+        self.__offset_rows = offset_rows
+        self.__schema = schema
+        self.__sync_schema = sync_schema
+        self.__patch_schema = patch_schema
+        self.__infer_type = infer_type
+        self.__infer_names = infer_names
+        self.__infer_volume = infer_volume
+        self.__infer_confidence = infer_confidence
         self.__file = File(
             source=source,
             scheme=scheme,
@@ -273,7 +310,6 @@ class Table:
             compression_path=compression_path,
             control=control,
             dialect=dialect,
-            stats=None,
         )
 
     def __enter__(self):
@@ -427,12 +463,7 @@ class Table:
             list[]: sample
 
         """
-        sample = []
-        iterator = iter(self.__sample_extended_rows)
-        iterator = self.__apply_processors(iterator)
-        for row_number, headers, row in iterator:
-            sample.append(row)
-        return sample
+        return self.__sample
 
     @property
     def schema(self):
@@ -443,6 +474,26 @@ class Table:
 
         """
         return self.__schema
+
+    @property
+    def data_stream(self):
+        """Data stream
+
+        # Returns
+            str[]/None: data_stream
+
+        """
+        return self.__data_stream
+
+    @property
+    def row_stream(self):
+        """Row stream
+
+        # Returns
+            str[]/None: row_stream
+
+        """
+        return self.__row_stream
 
     # Manage
 
@@ -457,10 +508,8 @@ class Table:
         self.__file.stats = {'hash': '', 'bytes': 0}
         self.__parser = system.create_parser(self.__file)
         self.__parser.open()
-        self.__extract_sample()
-        self.__extract_headers()
-        if not self.__allow_html:
-            self.__detect_html()
+        self.__data_stream = self.__read_data_stream()
+        self.__row_stream = self.__read_row_stream()
         return self
 
     def close(self):
@@ -471,6 +520,114 @@ class Table:
         self.__row_number = 0
 
     # Read
+
+    def read_data(self):
+        if not self.__data_stream:
+            note = 'Table is closed. Please call "table.open()" first.'
+            raise exceptions.FrictionlessException(errors.Error(note=note))
+        return list(self.__data_stream)
+
+    def __read_data_stream(self):
+        self.__read_data_stream_infer()
+        return self.__read_data_stream_create()
+
+    def __read_data_stream_create(self):
+        yield from self.__sample
+        for cells in self.__parser.data_stream:
+            # TODO: filter rows
+            yield cells
+
+    def __read_data_stream_infer(self):
+
+        # Prepare state
+        sample = []
+        headers = None
+        field_positions = []
+        sample_positions = []
+        schema = Schema(self.__schema)
+
+        # Infer table
+        headers_ready = False
+        for row_position, cells in enumerate(self.__parser.data_stream, start=1):
+            # TODO: filter rows
+
+            # Headers
+            if not headers_ready:
+                if not self.__headers_row:
+                    headers = None
+                elif row_position == self.__headers_row:
+                    headers = cells
+                headers_ready = True
+                field_positions = self.__read_data_stream_infer_field_positions(headers)
+                if headers is not None:
+                    continue
+
+            # Sample
+            sample.append(cells)
+            sample_positions.append(row_position)
+            if len(sample) >= self.__infer_volume:
+                break
+
+        # Infer schema
+        if not schema.fields:
+            schema.infer(
+                sample,
+                type=self.__infer_type,
+                names=self.__infer_names or headers,
+                confidence=self.__infer_confidence,
+            )
+
+        # Sync schema
+        if self.__sync_schema:
+            fields = []
+            mapping = {field.get('name'): field for field in schema.fields}
+            for name in headers:
+                fields.append(mapping.get(name, {'name': name, 'type': 'any'}))
+            schema.fields = fields
+
+        # Patch schema
+        if self.__patch_schema:
+            patch_schema = deepcopy(self.__patch_schema)
+            fields = patch_schema.pop('fields', {})
+            schema.update(patch_schema)
+            for field in schema.fields:
+                field.update((fields.get(field.get('name'), {})))
+
+        # Confirm schema
+        if len(schema.field_names) != len(set(schema.field_names)):
+            note = 'Schemas with duplicate field names are not supported'
+            raise exceptions.FrictionlessException(errors.SchemaError(note=note))
+
+        # Store state
+        self.__sample = sample
+        self.__schema = schema
+        self.__field_positions = field_positions
+        self.__sample_positions = sample_positions
+        self.__headers = Headers(
+            headers, fields=schema.fields, field_positions=field_positions
+        )
+
+    def __read_data_stream_infer_field_positions(self, headers):
+        # TODO: Filter headers in-place
+        # TODO: apply pick/skip/limit/offset
+        field_positions = list(range(1, len(headers) + 1))
+        return field_positions
+
+    def read_rows(self):
+        return list(self.__row_stream)
+
+    def __read_row_stream(self):
+        init = zip(self.__sample_positions, self.__sample)
+        rest = enumerate(self.__parser.data_stream)
+        for row_number, (row_position, cells) in enumerate(chain(init, rest), start=1):
+            # TODO: filter rows or reabase on self.__data_stream
+            yield Row(
+                cells,
+                fields=self.__schema.fields,
+                field_positions=self.__field_positions,
+                row_position=row_position,
+                row_number=row_number,
+            )
 
     # TODO: remove
     # Legacy

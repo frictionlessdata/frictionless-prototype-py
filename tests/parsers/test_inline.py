@@ -9,15 +9,15 @@ from frictionless import Table
 def test_table_inline():
     source = [['id', 'name'], ['1', 'english'], ['2', '中国人']]
     with Table(source) as table:
-        assert table.headers is None
-        assert table.read() == [['id', 'name'], ['1', 'english'], ['2', '中国人']]
+        assert table.headers == ['id', 'name']
+        assert table.read_data() == [['1', 'english'], ['2', '中国人']]
 
 
 def test_table_inline_iterator():
     source = iter([['id', 'name'], ['1', 'english'], ['2', '中国人']])
     with Table(source) as table:
-        assert table.headers is None
-        assert table.read() == [['id', 'name'], ['1', 'english'], ['2', '中国人']]
+        assert table.headers == ['id', 'name']
+        assert table.read_data() == [['1', 'english'], ['2', '中国人']]
 
 
 def test_table_inline_generator_not_callable():
@@ -27,8 +27,8 @@ def test_table_inline_generator_not_callable():
         yield ['2', '中国人']
 
     with Table(generator()) as table:
-        assert table.headers is None
-        assert table.read() == [['id', 'name'], ['1', 'english'], ['2', '中国人']]
+        assert table.headers == ['id', 'name']
+        assert table.read_data() == [['1', 'english'], ['2', '中国人']]
 
 
 def test_table_inline_generator():
@@ -38,22 +38,22 @@ def test_table_inline_generator():
         yield ['2', '中国人']
 
     with Table(generator) as table:
-        assert table.headers is None
-        assert table.read() == [['id', 'name'], ['1', 'english'], ['2', '中国人']]
+        assert table.headers == ['id', 'name']
+        assert table.read_data() == [['1', 'english'], ['2', '中国人']]
 
 
 def test_table_inline_keyed():
     source = [{'id': '1', 'name': 'english'}, {'id': '2', 'name': '中国人'}]
     with Table(source, format='inline') as table:
-        assert table.headers is None
-        assert table.read() == [['1', 'english'], ['2', '中国人']]
+        assert table.headers == ['id', 'name']
+        assert table.read_data() == [['1', 'english'], ['2', '中国人']]
 
 
 def test_table_inline_keyed_with_headers_argument():
     source = [{'id': '1', 'name': 'english'}, {'id': '2', 'name': '中国人'}]
-    with Table(source, format='inline', headers=['name', 'id']) as table:
-        assert table.headers == ['name', 'id']
-        assert table.read() == [['english', '1'], ['中国人', '2']]
+    with Table(source, format='inline') as table:
+        assert table.headers == ['id', 'name']
+        assert table.read_data() == [['1', 'english'], ['2', '中国人']]
 
 
 def test_table_inline_ordered_dict():
@@ -61,9 +61,9 @@ def test_table_inline_ordered_dict():
         OrderedDict([('name', 'english'), ('id', '1')]),
         OrderedDict([('name', '中国人'), ('id', '2')]),
     ]
-    with Table(source, headers=1) as table:
+    with Table(source) as table:
         assert table.headers == ['name', 'id']
-        assert table.read() == [['english', '1'], ['中国人', '2']]
+        assert table.read_data() == [['english', '1'], ['中国人', '2']]
 
 
 # Write

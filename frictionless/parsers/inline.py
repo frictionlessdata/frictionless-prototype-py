@@ -1,7 +1,9 @@
+from itertools import chain
 from collections import OrderedDict
 from ..parser import Parser
 from .. import exceptions
 from .. import dialects
+from .. import errors
 
 
 class InlineParser(Parser):
@@ -11,22 +13,31 @@ class InlineParser(Parser):
     # Read
 
     def read_data_stream_create(self):
-        items = self.file.source
-        if not hasattr(items, '__iter__'):
-            items = items()
-        for row_number, item in enumerate(items, start=1):
-            if isinstance(item, (tuple, list)):
-                yield (row_number, None, list(item))
-            elif isinstance(item, dict):
-                keys = []
-                values = []
-                iterator = item.keys()
-                if not isinstance(item, OrderedDict):
-                    iterator = sorted(iterator)
-                for key in iterator:
-                    keys.append(key)
-                    values.append(item[key])
-                yield (row_number, list(keys), list(values))
-            else:
-                message = 'Inline data item has to be tuple, list or dict'
-                raise exceptions.SourceError(message)
+        data = self.file.source
+        if not hasattr(data, '__iter__'):
+            data = data()
+        data = iter(data)
+
+        # Empty
+        try:
+            cells = next(data)
+        except StopIteration:
+            yield from []
+
+        # Lined
+        if isinstance(cells, (tuple, list)):
+            yield from chain([cells], data)
+
+        # Keyed
+        elif isinstance(cells, dict):
+            headers = list(cells.keys())
+            if not isinstance(cells, OrderedDict):
+                headers = sorted(headers)
+            yield headers
+            for cells in chain([cells], data):
+                yield [cells.get(header) for header in headers]
+
+        # Error
+        else:
+            note = 'Inline data item has to be tuple, list or dict'
+            raise exceptions.FrictionlessException(errors.SourceError(note=note))
