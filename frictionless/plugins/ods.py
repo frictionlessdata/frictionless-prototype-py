@@ -1,81 +1,48 @@
 import io
 import ezodf
 from datetime import datetime
+from ..dialects import Dialect
 from ..plugin import Plugin
 from ..parser import Parser
 from .. import exceptions
-from .. import helpers
+from .. import errors
 
 
 # Plugin
 
 
 class OdsPlugin(Plugin):
-    def create_parser(self, source, *, control=None, dialect=None):
-        pass
+    def create_parser(self, file):
+        if file.format == 'ods':
+            return OdsParser(file)
 
 
-# Parsers
+# Parser
 
 
 class OdsParser(Parser):
-    options = [
-        'sheet',
-    ]
+    Dialect = property(lambda self: OdsDialect)
 
-    def __init__(self, loader, sheet=1):
-        self.__loader = loader
-        self.__sheet_pointer = sheet
-        self.__extended_rows = None
-        self.__encoding = None
-        self.__bytes = None
-        self.__book = None
-        self.__sheet = None
+    # Read
 
-    @property
-    def closed(self):
-        return self.__bytes is None or self.__bytes.closed
-
-    def open(self, source, encoding=None):
-        self.close()
-        self.__encoding = encoding
-        self.__bytes = self.__loader.load(source, mode='b', encoding=encoding)
+    def read_cell_stream_create(self):
+        dialect = self.file.dialect
 
         # Get book
-        self.__book = ezodf.opendoc(io.BytesIO(self.__bytes.read()))
+        book = ezodf.opendoc(io.BytesIO(self.loader.byte_stream.read()))
 
         # Get sheet
         try:
-            if isinstance(self.__sheet_pointer, str):
-                self.__sheet = self.__book.sheets[self.__sheet_pointer]
+            if isinstance(dialect.sheet, str):
+                sheet = book.sheets[dialect.sheet]
             else:
-                self.__sheet = self.__book.sheets[self.__sheet_pointer - 1]
+                sheet = book.sheets[dialect.sheet - 1]
         except (KeyError, IndexError):
-            message = 'OpenOffice document "%s" doesn\'t have a sheet "%s"'
-            raise exceptions.SourceError(message % (source, self.__sheet_pointer))
+            note = 'OpenOffice document "%s" doesn\'t have a sheet "%s"'
+            note = note % (self.file.source, dialect.sheet)
+            raise exceptions.FrictionlessException(errors.SourceError(note=note))
 
-        # Rest parser
-        self.reset()
-
-    def close(self):
-        if not self.closed:
-            self.__bytes.close()
-
-    def reset(self):
-        helpers.reset_stream(self.__bytes)
-        self.__extended_rows = self.__iter_extended_rows()
-
-    @property
-    def encoding(self):
-        return self.__encoding
-
-    @property
-    def extended_rows(self):
-        return self.__extended_rows
-
-    # Private
-
-    def __iter_extended_rows(self):
+        # Type cells
         def type_value(cell):
             """Detects int value, date and datetime"""
 
@@ -96,5 +63,36 @@ class OdsParser(Parser):
 
             return value
 
-        for row_number, row in enumerate(self.__sheet.rows(), start=1):
+        # Stream cells
+        for row_number, row in enumerate(sheet.rows(), start=1):
             yield row_number, None, [type_value(cell) for cell in row]
+
+
+# Dialect
+
+
+class OdsDialect(Dialect):
+    """Ods dialect representation
+
+    # Arguments
+        descriptor? (str|dict): descriptor
+        sheet? (str): sheet
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
+    metadata_profile = {  # type: ignore
+        'type': 'object',
+        'additionalProperties': False,
+        'properties': {'sheet': {'type': ['number', 'string']}},
+    }
+
+    def __init__(self, descriptor=None, *, sheet=None, metadata_root=None):
+        self.setdefined('sheet', sheet)
+        super().__init__(descriptor, metadata_root=metadata_root)
+
+    @property
+    def sheet(self):
+        return self.get('sheet', 1)
