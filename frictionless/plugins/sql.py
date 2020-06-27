@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine, sql, MetaData, Table, Column, String
+from ..dialects import Dialect
 from ..plugin import Plugin
 from ..parser import Parser
 from .. import exceptions
@@ -8,67 +9,36 @@ from .. import exceptions
 
 
 class SqlPlugin(Plugin):
-    def create_parser(self, source, *, control=None, dialect=None):
-        pass
+    def create_parser(self, file):
+        if file.scheme in SQL_SCHEMES:
+            return SqlParser(file)
 
 
-# Parsers
+# Parser
 
 
 class SqlParser(Parser):
-    options = [
-        'table',
-        'order_by',
-    ]
+    Dialect = property(lambda self: SqlDialect)
+    loading = False
 
-    def __init__(self, loader, table=None, order_by=None):
+    # Read
+
+    def read_cell_stream_create(self):
+        dialect = self.file.dialect
 
         # Ensure table
-        if table is None:
-            raise exceptions.TabulatorException('Format `sql` requires `table` option.')
+        if not dialect.table:
+            raise exceptions.FrictionlessException(
+                'Format "sql" requires "table" option.'
+            )
 
-        # Set attributes
-        self.__loader = loader
-        self.__table = table
-        self.__order_by = order_by
-        self.__engine = None
-        self.__extended_rows = None
-        self.__encoding = None
-
-    @property
-    def closed(self):
-        return self.__engine is None
-
-    def open(self, source, encoding=None):
-        self.close()
-        self.__engine = create_engine(source)
-        self.__engine.update_execution_options(stream_results=True)
-        self.__encoding = encoding
-        self.reset()
-
-    def close(self):
-        if not self.closed:
-            self.__engine.dispose()
-            self.__engine = None
-
-    def reset(self):
-        self.__extended_rows = self.__iter_extended_rows()
-
-    @property
-    def encoding(self):
-        return self.__encoding
-
-    @property
-    def extended_rows(self):
-        return self.__extended_rows
-
-    # Private
-
-    def __iter_extended_rows(self):
-        table = sql.table(self.__table)
-        order = sql.text(self.__order_by) if self.__order_by else None
+        # Stream cells
+        engine = create_engine(self.file.source)
+        engine.update_execution_options(stream_results=True)
+        table = sql.table(dialect.table)
+        order = sql.text(dialect.order_by) if dialect.order_by else None
         query = sql.select(['*']).select_from(table).order_by(order)
-        result = self.__engine.execute(query)
+        result = engine.execute(query)
         for row_number, row in enumerate(iter(result), start=1):
             yield (row_number, row.keys(), list(row))
 
@@ -93,3 +63,46 @@ class SqlParser(Parser):
             if len(buffer):
                 conn.execute(table.insert().values(buffer))
         return count
+
+
+# Dialect
+
+
+class SqlDialect(Dialect):
+    """Sql dialect representation
+
+    # Arguments
+        descriptor? (str|dict): descriptor
+        table (str): table
+        order_by? (str): order_by
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
+    metadata_profile = {  # type: ignore
+        'type': 'object',
+        'required': ['table'],
+        'additionalProperties': False,
+        'properties': {'table': {'type': 'string'}, 'order_by': {'type': 'string'}},
+    }
+
+    def __init__(self, descriptor=None, *, table=None, order_by=None, metadata_root=None):
+        self.setdefined('table', table)
+        self.setdefined('order_by', order_by)
+        super().__init__(descriptor, metadata_root=metadata_root)
+
+    @property
+    def table(self):
+        return self.get('table')
+
+    @property
+    def order_by(self):
+        return self.get('order_by')
+
+
+# Internal
+
+
+SQL_SCHEMES = ['firebird', 'mssql', 'mysql', 'oracle', 'postgresql', 'sqlite', 'sybase']

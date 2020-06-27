@@ -1,25 +1,26 @@
 import pytest
 from frictionless import Table, exceptions
+from frictionless.plugins.sql import SqlDialect
 
 
 # Read
 
 
-@pytest.mark.skip
 def test_table_format_sql(database_url):
-    with Table(database_url, table='data') as table:
+    dialect = SqlDialect(table='data')
+    with Table(database_url, dialect=dialect) as table:
         assert table.read() == [[1, 'english'], [2, '中国人']]
 
 
-@pytest.mark.skip
 def test_table_format_sql_order_by(database_url):
-    with Table(database_url, table='data', order_by='id') as table:
+    dialect = SqlDialect(table='data', order_by='id')
+    with Table(database_url, dialect=dialect) as table:
         assert table.read() == [[1, 'english'], [2, '中国人']]
 
 
-@pytest.mark.skip
 def test_table_format_sql_order_by_desc(database_url):
-    with Table(database_url, table='data', order_by='id desc') as table:
+    dialect = SqlDialect(table='data', order_by='id desc')
+    with Table(database_url, dialect=dialect) as table:
         assert table.read() == [[2, '中国人'], [1, 'english']]
 
 
@@ -30,9 +31,9 @@ def test_table_format_sql_table_is_required_error(database_url):
     assert 'table' in str(excinfo.value)
 
 
-@pytest.mark.skip
 def test_table_format_sql_headers(database_url):
-    with Table(database_url, table='data', headers=1) as table:
+    dialect = SqlDialect(table='data')
+    with Table(database_url, dialect=dialect, headers=1) as table:
         assert table.headers == ['id', 'name']
         assert table.read() == [[1, 'english'], [2, '中国人']]
 

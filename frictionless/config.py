@@ -18,7 +18,6 @@ GEOJSON_PROFILE = json.loads(read_asset('profiles', 'geojson.json'))
 INQUIRY_PROFILE = json.loads(read_asset('profiles', 'inquiry.json'))
 REPORT_PROFILE = json.loads(read_asset('profiles', 'report.json'))
 SCHEMA_PROFILE = json.loads(read_asset('profiles', 'schema.json'))
-SQL_SCHEMES = ['firebird', 'mssql', 'mysql', 'oracle', 'postgresql', 'sqlite', 'sybase']
 REMOTE_SCHEMES = ['http', 'https', 'ftp', 'ftps']
 COMPRESSION_FORMATS = ['zip', 'gz']
 INFER_ENCODING_VOLUME = 10000

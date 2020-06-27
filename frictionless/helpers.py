@@ -87,9 +87,6 @@ def infer_source_scheme_and_format(source):
             return (None, 'gsheet')
         elif 'csv' in source:
             return ('https', 'csv')
-    for sql_scheme in config.SQL_SCHEMES:
-        if source.startswith('%s://' % sql_scheme):
-            return (None, 'sql')
     parsed = urlparse(source)
     scheme = parsed.scheme.lower()
     if len(scheme) < 2:
