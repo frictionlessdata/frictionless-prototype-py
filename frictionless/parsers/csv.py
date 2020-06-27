@@ -14,14 +14,14 @@ class CsvParser(Parser):
 
     # Read
 
-    def read_cell_stream_create(self):
-        sample = self.read_cell_stream_infer_dialect()
+    def read_data_stream_create(self):
+        sample = self.read_data_stream_infer_dialect()
         source = chain(sample, self.loader.text_stream)
         items = csv.reader(source, dialect=self.file.dialect)
         for row_number, item in enumerate(items, start=1):
             yield (row_number, None, list(item))
 
-    def read_cell_stream_infer_dialect(self):
+    def read_data_stream_infer_dialect(self):
         sample = extract_samle(self.loader.text_stream)
         delimiter = self.file.dialect.get('delimiter', ',\t;|')
         try:

@@ -10,7 +10,7 @@ class InlineParser(Parser):
 
     # Read
 
-    def read_cell_stream_create(self):
+    def read_data_stream_create(self):
         items = self.file.source
         if not hasattr(items, '__iter__'):
             items = items()

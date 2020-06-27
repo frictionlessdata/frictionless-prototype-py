@@ -23,7 +23,7 @@ class SqlParser(Parser):
 
     # Read
 
-    def read_cell_stream_create(self):
+    def read_data_stream_create(self):
         dialect = self.file.dialect
 
         # Ensure table

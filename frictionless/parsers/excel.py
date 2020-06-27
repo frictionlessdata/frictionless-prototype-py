@@ -52,7 +52,7 @@ class XlsxParser(Parser):
             loader = system.create_loader(file)
             return loader.open()
 
-    def read_cell_stream_create(self):
+    def read_data_stream_create(self):
         dialect = self.file.dialect
 
         # Get book
@@ -87,7 +87,7 @@ class XlsxParser(Parser):
                     cell = sheet[coordinate]
                     cell.value = value
 
-        # Stream cells
+        # Stream data
         for row_number, row in enumerate(sheet.iter_rows(), start=1):
             yield (
                 row_number,
@@ -117,7 +117,7 @@ class XlsParser(Parser):
 
     # Read
 
-    def read_cell_stream_create(self):
+    def read_data_stream_create(self):
         dialect = self.file.dialect
 
         # Get book
@@ -166,7 +166,7 @@ class XlsParser(Parser):
 
             return value
 
-        # Stream cells
+        # Stream data
         for x in range(0, sheet.nrows):
             row_number = x + 1
             row = []

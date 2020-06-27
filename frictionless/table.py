@@ -472,6 +472,9 @@ class Table:
 
     # Read
 
+    # TODO: remove
+    # Legacy
+
     def iter(self, keyed=False, extended=False):
         """Iterate over the rows.
 
@@ -507,7 +510,7 @@ class Table:
             raise exceptions.TabulatorException(message)
 
         # Create iterator
-        iterator = chain(self.__sample_extended_rows, self.__parser.cell_stream)
+        iterator = chain(self.__sample_extended_rows, self.__parser.data_stream)
         iterator = self.__apply_processors(iterator)
 
         # Yield rows from iterator
@@ -560,8 +563,6 @@ class Table:
                 break
         return result
 
-    # Write
-
     def save(self, target, format=None, encoding=None, **options):
         """Save stream to the local filesystem.
 
@@ -603,9 +604,6 @@ class Table:
         writer = writer_class(**writer_options)
         return writer.write(self.iter(), target, headers=self.headers, encoding=encoding)
 
-    # TODO: remove
-    # Legacy
-
     @property
     def field_positions(self):
         if self.__field_positions is None:
@@ -629,7 +627,7 @@ class Table:
         self.__sample_extended_rows = []
         for _ in range(self.__sample_size):
             try:
-                row_number, headers, row = next(self.__parser.cell_stream)
+                row_number, headers, row = next(self.__parser.data_stream)
                 if self.__headers_row and self.__headers_row >= row_number:
                     if self.__check_if_row_for_skipping(row_number, headers, row):
                         self.__headers_row += 1

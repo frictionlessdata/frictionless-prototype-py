@@ -21,7 +21,7 @@ class TsvParser(Parser):
 
     # Read
 
-    def read_cell_stream_create(self):
+    def read_data_stream_create(self):
         items = tsv.un(self.loader.text_stream)
         for row_number, item in enumerate(items, start=1):
             yield (row_number, None, list(item))

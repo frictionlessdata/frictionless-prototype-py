@@ -35,7 +35,7 @@ class GsheetParser(Parser):
 
     # Read
 
-    def read_cell_stream_create(self):
+    def read_data_stream_create(self):
         source = self.file.source
         url = 'https://docs.google.com/spreadsheets/d/%s/export?format=csv&id=%s'
         match = re.search(r'.*/d/(?P<key>[^/]+)/.*?(?:gid=(?P<gid>\d+))?$', source)
@@ -49,7 +49,7 @@ class GsheetParser(Parser):
         file = File(source=url, stats=self.file.stats)
         self.__parser = system.create_parser(file)
         self.__parser.open()
-        return self.__parser.cell_stream
+        return self.__parser.data_stream
 
 
 # Dialect

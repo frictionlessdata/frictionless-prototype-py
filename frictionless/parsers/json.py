@@ -13,7 +13,7 @@ class JsonParser(Parser):
 
     # Read
 
-    def read_cell_stream_create(self, dialect=None):
+    def read_data_stream_create(self, dialect=None):
         path = 'item'
         if self.file.dialect.property is not None:
             path = '%s.item' % self.file.dialect.property
@@ -55,7 +55,7 @@ class JsonlParser(Parser):
 
     # Read
 
-    def read_cell_stream_create(self, dialect=None):
+    def read_data_stream_create(self, dialect=None):
         rows = jsonlines.Reader(self.loader.text_stream)
         for row_number, row in enumerate(rows, start=1):
             if isinstance(row, (tuple, list)):
