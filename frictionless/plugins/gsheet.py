@@ -19,12 +19,9 @@ class GsheetPlugin(Plugin):
 
 
 class GsheetParser(Parser):
+    Dialect = property(lambda self: GsheetDialect)
     network = True
     loading = False
-
-    @property
-    def Dialect(self):
-        return GsheetDialect
 
     # Manage
 

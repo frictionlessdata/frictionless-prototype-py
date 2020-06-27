@@ -21,11 +21,8 @@ class AwsPlugin(Plugin):
 
 
 class S3Loader(Loader):
+    Control = property(lambda self: S3Control)
     network = True
-
-    @property
-    def Control(self):
-        return S3Control
 
     # Read
 

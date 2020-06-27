@@ -1,70 +1,35 @@
 from pyquery import PyQuery as pq
+from ..dialects import Dialect
 from ..plugin import Plugin
 from ..parser import Parser
-from .. import helpers
 
 
 # Plugin
 
 
 class HtmlPlugin(Plugin):
-    def create_parser(self, source, *, control=None, dialect=None):
-        pass
+    def create_parser(self, file):
+        if file.format == 'html':
+            return HtmlParser(file)
 
 
-# Parsers
+# Parser
 
 
-class HtmlTableParser(Parser):
-    options = [
-        'selector',
-    ]
+class HtmlParser(Parser):
+    Dialect = property(lambda self: HtmlDialect)
 
-    def __init__(self, loader, selector='table'):
-        self.__loader = loader
-        self.__selector = selector
-        self.__extended_rows = None
-        self.__encoding = None
-        self.__chars = None
+    # Read
 
-    @property
-    def closed(self):
-        return self.__chars is None or self.__chars.closed
-
-    def open(self, source, encoding=None):
-        self.close()
-        self.__encoding = encoding
-        self.__chars = self.__loader.load(source, encoding=encoding)
-        if self.__encoding:
-            self.__encoding.lower()
-        self.reset()
-
-    def close(self):
-        if not self.closed:
-            self.__chars.close()
-
-    def reset(self):
-        helpers.reset_stream(self.__chars)
-        self.__extended_rows = self.__iter_extended_rows()
-
-    @property
-    def encoding(self):
-        return self.__encoding
-
-    @property
-    def extended_rows(self):
-        return self.__extended_rows
-
-    # Private
-
-    def __iter_extended_rows(self):
+    def read_cell_stream_create(self):
+        dialect = self.file.dialect
 
         # Get Page content
-        page = pq(self.__chars.read(), parser='html')
+        page = pq(self.loader.text_stream.read(), parser='html')
 
         # Find required table
-        if self.__selector:
-            table = pq(page.find(self.__selector)[0])
+        if dialect.selector:
+            table = pq(page.find(dialect.selector)[0])
         else:
             table = page
 
@@ -86,3 +51,33 @@ class HtmlTableParser(Parser):
         # Yield rows
         for row_number, row in enumerate(rows, start=1):
             yield (row_number, headers, row)
+
+
+# Dialect
+
+
+class HtmlDialect(Dialect):
+    """Html dialect representation
+
+    # Arguments
+        descriptor? (str|dict): descriptor
+        selector? (str): selector
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
+    metadata_profile = {  # type: ignore
+        'type': 'object',
+        'additionalProperties': False,
+        'properties': {'selector': {'type': 'string'}},
+    }
+
+    def __init__(self, descriptor=None, *, selector=None, metadata_root=None):
+        self.setdefined('selector', selector)
+        super().__init__(descriptor, metadata_root=metadata_root)
+
+    @property
+    def selector(self):
+        return self.get('selector')
