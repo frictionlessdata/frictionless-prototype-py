@@ -1,34 +1,45 @@
 import re
-from ..table import Table
+from ..file import File
 from ..plugin import Plugin
 from ..parser import Parser
+from ..system import system
+from ..dialects import Dialect
 
 
 # Plugin
 
 
 class GsheetPlugin(Plugin):
-    def create_parser(self, source, *, control=None, dialect=None):
-        pass
+    def create_parser(self, file):
+        if file.format == 'gsheet':
+            return GsheetParser(file)
 
 
-# Parsers
+# Parser
 
 
 class GsheetParser(Parser):
-    options = []  # type: ignore
-
-    def __init__(self, loader):
-        self.__loader = loader
-        self.__stream = None
-        self.__encoding = None
+    network = True
+    loading = False
 
     @property
-    def closed(self):
-        return self.__stream is None or self.__stream.closed
+    def Dialect(self):
+        return GsheetDialect
 
-    def open(self, source, encoding=None):
-        self.close()
+    # Manage
+
+    def open(self):
+        self.__parser = None
+        super().open()
+
+    def close(self):
+        if self.__parser:
+            self.__parser.close()
+
+    # Read
+
+    def read_cell_stream_create(self):
+        source = self.file.source
         url = 'https://docs.google.com/spreadsheets/d/%s/export?format=csv&id=%s'
         match = re.search(r'.*/d/(?P<key>[^/]+)/.*?(?:gid=(?P<gid>\d+))?$', source)
         key, gid = '', ''
@@ -38,22 +49,28 @@ class GsheetParser(Parser):
         url = url % (key, key)
         if gid:
             url = '%s&gid=%s' % (url, gid)
-        self.__stream = Table(url, format='csv', encoding=encoding).open()
-        self.__extended_rows = self.__stream.iter(extended=True)
-        self.__encoding = encoding
+        file = File(source=url, stats=self.file.stats)
+        self.__parser = system.create_parser(file)
+        self.__parser.open()
+        return self.__parser.cell_stream
 
-    def close(self):
-        if not self.closed:
-            self.__stream.close()
 
-    def reset(self):
-        self.__stream.reset()
-        self.__extended_rows = self.__stream.iter(extended=True)
+# Dialect
 
-    @property
-    def encoding(self):
-        return self.__encoding
 
-    @property
-    def extended_rows(self):
-        return self.__extended_rows
+class GsheetDialect(Dialect):
+    """Gsheet dialect representation
+
+    # Arguments
+        descriptor? (str|dict): descriptor
+
+    # Raises
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
+    metadata_profile = {  # type: ignore
+        'type': 'object',
+        'additionalProperties': False,
+        'properties': {},
+    }

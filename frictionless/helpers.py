@@ -76,6 +76,7 @@ def infer_source_type(source):
     return source_type
 
 
+# TODO: move to file
 def infer_source_scheme_and_format(source):
     if hasattr(source, 'read'):
         return ('stream', None)

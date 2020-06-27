@@ -17,7 +17,31 @@ class AwsPlugin(Plugin):
             return S3Loader(file)
 
 
-# Controls
+# Loader
+
+
+class S3Loader(Loader):
+    network = True
+
+    @property
+    def Control(self):
+        return S3Control
+
+    # Read
+
+    def read_byte_stream_create(self):
+        client = boto3.client('s3', endpoint_url=self.file.control.endpoint_url)
+        source = requests.utils.requote_uri(self.file.source)
+        parts = urlparse(source, allow_fragments=False)
+        response = client.get_object(Bucket=parts.netloc, Key=parts.path[1:])
+        # https://github.com/frictionlessdata/tabulator-py/issues/271
+        byte_stream = io.BufferedRandom(io.BytesIO())
+        byte_stream.write(response['Body'].read())
+        byte_stream.seek(0)
+        return byte_stream
+
+
+# Control
 
 
 class S3Control(Control):
@@ -53,27 +77,6 @@ class S3Control(Control):
 
     def expand(self):
         self.setdetault('endpointUrl', self.endpoint_url)
-
-
-# Loaders
-
-
-class S3Loader(Loader):
-    Control = S3Control
-    network = True
-
-    # Read
-
-    def read_byte_stream_create(self):
-        client = boto3.client('s3', endpoint_url=self.file.control.endpoint_url)
-        source = requests.utils.requote_uri(self.file.source)
-        parts = urlparse(source, allow_fragments=False)
-        response = client.get_object(Bucket=parts.netloc, Key=parts.path[1:])
-        # https://github.com/frictionlessdata/tabulator-py/issues/271
-        byte_stream = io.BufferedRandom(io.BytesIO())
-        byte_stream.write(response['Body'].read())
-        byte_stream.seek(0)
-        return byte_stream
 
 
 # Internal
