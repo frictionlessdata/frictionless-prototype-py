@@ -12,9 +12,9 @@ from ..loader import Loader
 
 
 class AwsPlugin(Plugin):
-    def create_loader(self, file, *, control=None):
+    def create_loader(self, file):
         if file.scheme == 's3':
-            return S3Loader(file, control=control)
+            return S3Loader(file)
 
 
 # Controls
@@ -37,9 +37,9 @@ class S3Control(Control):
         'properties': {'endpointUrl': {'type': 'string'}},
     }
 
-    def __init__(self, descriptor=None, endpoint_url=None):
+    def __init__(self, descriptor=None, endpoint_url=None, metadata_root=None):
         self.setdefined('endpointUrl', endpoint_url)
-        super().__init(descriptor)
+        super().__init__(descriptor, metadata_root=metadata_root)
 
     @property
     def endpoint_url(self):
@@ -59,13 +59,13 @@ class S3Control(Control):
 
 
 class S3Loader(Loader):
-    Contol = S3Control
+    Control = S3Control
     network = True
 
     # Read
 
     def read_byte_stream_create(self):
-        client = boto3.client('s3', endpoint_url=self.control.endpoint_url)
+        client = boto3.client('s3', endpoint_url=self.file.control.endpoint_url)
         source = requests.utils.requote_uri(self.file.source)
         parts = urlparse(source, allow_fragments=False)
         response = client.get_object(Bucket=parts.netloc, Key=parts.path[1:])
