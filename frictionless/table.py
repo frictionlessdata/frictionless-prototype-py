@@ -437,6 +437,7 @@ class Table:
             yield cells
 
     def __read_data_stream_infer(self):
+        dialect = self.__file.dialect
 
         # Prepare state
         sample = []
@@ -447,17 +448,37 @@ class Table:
 
         # Infer table
         headers_ready = False
+        headers_memory = {}
         for row_position, cells in enumerate(self.__parser.data_stream, start=1):
             # TODO: filter rows
 
             # Headers
+            # TODO: move to infer_headers
             if not headers_ready:
-                if not self.__file.dialect.headers_row:
+                if not dialect.headers_row:
                     headers_ready = True
                     headers = None
-                elif row_position == self.__file.dialect.headers_row:
-                    headers_ready = True
-                    headers = cells
+                elif isinstance(dialect.headers_row, int):
+                    if dialect.headers_row == row_position:
+                        headers_ready = True
+                        headers = []
+                        for cell in cells:
+                            cell = str(cell).strip() if cell is not None else ""
+                            headers.append(cell)
+                elif isinstance(dialect.headers_row, (tuple, list)):
+                    if row_position in dialect.headers_row:
+                        headers = headers or []
+                        for index, cell in enumerate(cells):
+                            cell = str(cell).strip() if cell is not None else ""
+                            joiner = dialect.headers_joiner
+                            if headers_memory.get(index) != cell:
+                                try:
+                                    headers[index] = joiner.join([headers[index], cell])
+                                except IndexError:
+                                    headers.append(cell)
+                            headers_memory[index] = cell
+                        if row_position == max(dialect.headers_row):
+                            headers_ready = True
                 if headers_ready:
                     infer = self.__read_data_stream_infer_field_positions
                     field_positions = infer(headers, cells=cells)

@@ -21,7 +21,7 @@ class Dialect(ControlledMetadata):
         "type": "object",
         "additionalProperties": False,
         "properties": {
-            "headersRow": {"type": ["number", "null"]},
+            "headersRow": {"type": ["number", "array", "null"]},
             "headersJoiner": {"type": "string"},
         },
     }
@@ -89,7 +89,7 @@ class CsvDialect(Dialect):
             "header": {"type": "boolean"},
             "commentChar": {"type": "string"},
             "caseSensitiveHeader": {"type": "boolean"},
-            "headersRow": {"type": ["number", "null"]},
+            "headersRow": {"type": ["number", "array", "null"]},
             "headersJoiner": {"type": "string"},
         },
     }
@@ -221,7 +221,7 @@ class ExcelDialect(Dialect):
             "fillMergedCells": {"type": "boolean"},
             "preserveFormatting": {"type": "boolean"},
             "adjustFloatingPointError": {"type": "boolean"},
-            "headersRow": {"type": ["number", "null"]},
+            "headersRow": {"type": ["number", "array", "null"]},
             "headersJoiner": {"type": "string"},
         },
     }
@@ -299,7 +299,7 @@ class InlineDialect(Dialect):
         "additionalProperties": False,
         "properties": {
             "keyed": {"type": "boolean"},
-            "headersRow": {"type": ["number", "null"]},
+            "headersRow": {"type": ["number", "array", "null"]},
             "headersJoiner": {"type": "string"},
         },
     }
@@ -350,7 +350,7 @@ class JsonDialect(Dialect):
         "properties": {
             "keyed": {"type": "boolean"},
             "property": {"type": "string"},
-            "headersRow": {"type": ["number", "null"]},
+            "headersRow": {"type": ["number", "array", "null"]},
             "headersJoiner": {"type": "string"},
         },
     }
