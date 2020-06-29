@@ -69,12 +69,29 @@ class HtmlDialect(Dialect):
     metadata_profile = {  # type: ignore
         "type": "object",
         "additionalProperties": False,
-        "properties": {"selector": {"type": "string"}},
+        "properties": {
+            "selector": {"type": "string"},
+            "headersRow": {"type": "string"},
+            "headersJoiner": {"type": "string"},
+        },
     }
 
-    def __init__(self, descriptor=None, *, selector=None, metadata_root=None):
+    def __init__(
+        self,
+        descriptor=None,
+        *,
+        selector=None,
+        headers_row=None,
+        headers_joiner=None,
+        metadata_root=None
+    ):
         self.setdefined("selector", selector)
-        super().__init__(descriptor, metadata_root=metadata_root)
+        super().__init__(
+            descriptor,
+            headers_row=headers_row,
+            headers_joiner=headers_joiner,
+            metadata_root=metadata_root,
+        )
 
     @property
     def selector(self):

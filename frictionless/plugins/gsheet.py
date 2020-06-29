@@ -54,8 +54,4 @@ class GsheetDialect(Dialect):
 
     """
 
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {},
-    }
+    pass

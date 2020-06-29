@@ -1,5 +1,6 @@
 import csv
 from .metadata import ControlledMetadata
+from . import config
 
 
 class Dialect(ControlledMetadata):
@@ -7,19 +8,43 @@ class Dialect(ControlledMetadata):
 
     # Arguments
         descriptor? (str|dict): descriptor
+        headers_row? (int|int[]): headers_row
+        headers_joiner? (str): headers_joiner
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
 
     """
 
-    def __init__(self, descriptor=None, metadata_root=None):
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "headersRow": {"type": "string"},
+            "headersJoiner": {"type": "string"},
+        },
+    }
+
+    def __init__(
+        self, descriptor=None, headers_row=None, headers_joiner=None, metadata_root=None
+    ):
+        self.setdefined("headersRow", headers_row)
+        self.setdefined("headersJoiner", headers_joiner)
         super().__init__(descriptor, metadata_root=metadata_root)
+
+    @property
+    def headers_row(self):
+        return self.get("headersRow", config.DEFAULT_HEADERS_ROW)
+
+    @property
+    def headers_joiner(self):
+        return self.get("headersJoiner", config.DEFAULT_HEADERS_JOINER)
 
     # Expand
 
     def expand(self):
-        pass
+        self.setdetault("headersRow", self.headers_row)
+        self.setdetault("headersJoiner", self.headers_joiner)
 
 
 class CsvDialect(Dialect):
@@ -44,19 +69,21 @@ class CsvDialect(Dialect):
     """
 
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'additionalProperties': False,
-        'properties': {
-            'delimiter': {'type': 'string'},
-            'lineTerminator': {'type': 'string'},
-            'quoteChar': {'type': 'string'},
-            'doubleQuote': {'type': 'boolean'},
-            'escapeChar': {'type': 'string'},
-            'nullSequence': {'type': 'string'},
-            'skipInitialSpace': {'type': 'boolean'},
-            'header': {'type': 'boolean'},
-            'commentChar': {'type': 'string'},
-            'caseSensitiveHeader': {'type': 'boolean'},
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "delimiter": {"type": "string"},
+            "lineTerminator": {"type": "string"},
+            "quoteChar": {"type": "string"},
+            "doubleQuote": {"type": "boolean"},
+            "escapeChar": {"type": "string"},
+            "nullSequence": {"type": "string"},
+            "skipInitialSpace": {"type": "boolean"},
+            "header": {"type": "boolean"},
+            "commentChar": {"type": "string"},
+            "caseSensitiveHeader": {"type": "boolean"},
+            "headersRow": {"type": "string"},
+            "headersJoiner": {"type": "string"},
         },
     }
 
@@ -74,84 +101,92 @@ class CsvDialect(Dialect):
         header=None,
         comment_char=None,
         case_sensitive_header=None,
+        headers_row=None,
+        headers_joiner=None,
         metadata_root=None,
     ):
-        self.setdefined('delimiter', delimiter)
-        self.setdefined('lineTerminator', line_terminator)
-        self.setdefined('quoteChar', quote_char)
-        self.setdefined('doubleQuote', double_quote)
-        self.setdefined('escapeChar', escape_char)
-        self.setdefined('nullSequence', null_sequence)
-        self.setdefined('skipInitialSpace', skip_initial_space)
-        self.setdefined('header', header)
-        self.setdefined('commentChar', comment_char)
-        self.setdefined('caseSensitiveHeader', case_sensitive_header)
-        super().__init__(descriptor, metadata_root=metadata_root)
+        self.setdefined("delimiter", delimiter)
+        self.setdefined("lineTerminator", line_terminator)
+        self.setdefined("quoteChar", quote_char)
+        self.setdefined("doubleQuote", double_quote)
+        self.setdefined("escapeChar", escape_char)
+        self.setdefined("nullSequence", null_sequence)
+        self.setdefined("skipInitialSpace", skip_initial_space)
+        self.setdefined("header", header)
+        self.setdefined("commentChar", comment_char)
+        self.setdefined("caseSensitiveHeader", case_sensitive_header)
+        super().__init__(
+            descriptor,
+            headers_row=headers_row,
+            headers_joiner=headers_joiner,
+            metadata_root=metadata_root,
+        )
 
     def __getattr__(self, name):
         # Interoperability with native
-        if name == 'doublequote':
+        if name == "doublequote":
             return self.double_quote
-        elif name == 'escapechar':
+        elif name == "escapechar":
             return self.escape_char
-        elif name == 'quotechar':
+        elif name == "quotechar":
             return self.quote_char
-        elif name == 'quoting':
-            return csv.QUOTE_NONE if self.quote_char == '' else csv.QUOTE_MINIMAL
-        elif name == 'skipinitialspace':
+        elif name == "quoting":
+            return csv.QUOTE_NONE if self.quote_char == "" else csv.QUOTE_MINIMAL
+        elif name == "skipinitialspace":
             return self.skip_initial_space
         return super().__getattr__(name)
 
     @property
     def delimiter(self):
-        return self.get('delimiter', ',')
+        return self.get("delimiter", ",")
 
     @property
     def line_terminator(self):
-        return self.get('lineTerminator', '\r\n')
+        return self.get("lineTerminator", "\r\n")
 
     @property
     def quote_char(self):
-        return self.get('quoteChar', '"')
+        return self.get("quoteChar", '"')
 
     @property
     def double_quote(self):
-        return self.get('doubleQuote', True)
+        return self.get("doubleQuote", True)
 
     @property
     def escape_char(self):
-        return self.get('escapeChar')
+        return self.get("escapeChar")
 
     @property
     def null_sequence(self):
-        return self.get('nullSequence')
+        return self.get("nullSequence")
 
     @property
     def skip_initial_space(self):
-        return self.get('skipInitialSpace', True)
+        return self.get("skipInitialSpace", True)
 
     @property
     def header(self):
-        return self.get('header', True)
+        return self.get("header", True)
 
     @property
     def comment_char(self):
-        return self.get('commentChar')
+        return self.get("commentChar")
 
     @property
     def case_sensitive_header(self):
-        return self.get('caseSensitiveHeader', False)
+        return self.get("caseSensitiveHeader", False)
 
     # Expand
 
     def expand(self):
-        self.setdetault('delimiter', self.delimiter)
-        self.setdetault('lineTerminator', self.line_terminator)
-        self.setdetault('quoteChar', self.quote_char)
-        self.setdetault('doubleQuote', self.double_quote)
-        self.setdetault('skipInitialSpace', self.skip_initial_space)
-        self.setdetault('header', self.header)
-        self.setdetault('caseSensitiveHeader', self.case_sensitive_header)
+        super().expand()
+        self.setdetault("delimiter", self.delimiter)
+        self.setdetault("lineTerminator", self.line_terminator)
+        self.setdetault("quoteChar", self.quote_char)
+        self.setdetault("doubleQuote", self.double_quote)
+        self.setdetault("skipInitialSpace", self.skip_initial_space)
+        self.setdetault("header", self.header)
+        self.setdetault("caseSensitiveHeader", self.case_sensitive_header)
 
 
 class ExcelDialect(Dialect):
@@ -171,14 +206,16 @@ class ExcelDialect(Dialect):
     """
 
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'additionalProperties': False,
-        'properties': {
-            'sheet': {'type': ['number', 'string']},
-            'workbookCache': {'type': 'object'},
-            'fillMergedCells': {'type': 'boolean'},
-            'preserveFormatting': {'type': 'boolean'},
-            'adjustFloatingPointError': {'type': 'boolean'},
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "sheet": {"type": ["number", "string"]},
+            "workbookCache": {"type": "object"},
+            "fillMergedCells": {"type": "boolean"},
+            "preserveFormatting": {"type": "boolean"},
+            "adjustFloatingPointError": {"type": "boolean"},
+            "headersRow": {"type": "string"},
+            "headersJoiner": {"type": "string"},
         },
     }
 
@@ -191,42 +228,50 @@ class ExcelDialect(Dialect):
         fill_merged_cells=None,
         preserve_formatting=None,
         adjust_floating_point_error=None,
+        headers_row=None,
+        headers_joiner=None,
         metadata_root=None,
     ):
-        self.setdefined('sheet', sheet)
-        self.setdefined('workbookCache', workbook_cache)
-        self.setdefined('fillMergedCells', fill_merged_cells)
-        self.setdefined('preserveFormatting', preserve_formatting)
-        self.setdefined('adjustFloatingPointError', adjust_floating_point_error)
-        super().__init__(descriptor, metadata_root=metadata_root)
+        self.setdefined("sheet", sheet)
+        self.setdefined("workbookCache", workbook_cache)
+        self.setdefined("fillMergedCells", fill_merged_cells)
+        self.setdefined("preserveFormatting", preserve_formatting)
+        self.setdefined("adjustFloatingPointError", adjust_floating_point_error)
+        super().__init__(
+            descriptor,
+            headers_row=headers_row,
+            headers_joiner=headers_joiner,
+            metadata_root=metadata_root,
+        )
 
     @property
     def sheet(self):
-        return self.get('sheet', 1)
+        return self.get("sheet", 1)
 
     @property
     def workbook_cache(self):
-        return self.get('workbookCache')
+        return self.get("workbookCache")
 
     @property
     def fill_merged_cells(self):
-        return self.get('fillMergedCells', False)
+        return self.get("fillMergedCells", False)
 
     @property
     def preserve_formatting(self):
-        return self.get('preserveFormatting', False)
+        return self.get("preserveFormatting", False)
 
     @property
     def adjust_floating_point_error(self):
-        return self.get('adjustFloatingPointError', False)
+        return self.get("adjustFloatingPointError", False)
 
     # Expand
 
     def expand(self):
-        self.setdetault('sheet', self.sheet)
-        self.setdetault('fillMergedCells', self.fill_merged_cells)
-        self.setdetault('preserveFormatting', self.preserve_formatting)
-        self.setdetault('adjustFloatingPointError', self.adjust_floating_point_error)
+        super().expand()
+        self.setdetault("sheet", self.sheet)
+        self.setdetault("fillMergedCells", self.fill_merged_cells)
+        self.setdetault("preserveFormatting", self.preserve_formatting)
+        self.setdetault("adjustFloatingPointError", self.adjust_floating_point_error)
 
 
 class InlineDialect(Dialect):
@@ -243,23 +288,40 @@ class InlineDialect(Dialect):
     """
 
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'additionalProperties': False,
-        'properties': {'keyed': {'type': 'boolean'}},
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "keyed": {"type": "boolean"},
+            "headersRow": {"type": "string"},
+            "headersJoiner": {"type": "string"},
+        },
     }
 
-    def __init__(self, descriptor=None, *, keyed=None, metadata_root=None):
-        self.setdefined('keyed', keyed)
-        super().__init__(descriptor, metadata_root=metadata_root)
+    def __init__(
+        self,
+        descriptor=None,
+        *,
+        keyed=None,
+        headers_row=None,
+        headers_joiner=None,
+        metadata_root=None,
+    ):
+        self.setdefined("keyed", keyed)
+        super().__init__(
+            descriptor,
+            headers_row=headers_row,
+            headers_joiner=headers_joiner,
+            metadata_root=metadata_root,
+        )
 
     @property
     def keyed(self):
-        return self.get('keyed', False)
+        return self.get("keyed", False)
 
     # Expand
 
     def expand(self):
-        self.setdetault('keyed', self.keyed)
+        self.setdetault("keyed", self.keyed)
 
 
 class JsonDialect(Dialect):
@@ -276,25 +338,45 @@ class JsonDialect(Dialect):
     """
 
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'additionalProperties': False,
-        'properties': {'keyed': {'type': 'boolean'}, 'property': {'type': 'string'}},
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "keyed": {"type": "boolean"},
+            "property": {"type": "string"},
+            "headersRow": {"type": "string"},
+            "headersJoiner": {"type": "string"},
+        },
     }
 
-    def __init__(self, descriptor=None, *, keyed=None, property=None, metadata_root=None):
-        self.setdefined('keyed', keyed)
-        self.setdefined('property', property)
-        super().__init__(descriptor, metadata_root=metadata_root)
+    def __init__(
+        self,
+        descriptor=None,
+        *,
+        keyed=None,
+        property=None,
+        headers_row=None,
+        headers_joiner=None,
+        metadata_root=None,
+    ):
+        self.setdefined("keyed", keyed)
+        self.setdefined("property", property)
+        super().__init__(
+            descriptor,
+            headers_row=headers_row,
+            headers_joiner=headers_joiner,
+            metadata_root=metadata_root,
+        )
 
     @property
     def keyed(self):
-        return self.get('keyed', False)
+        return self.get("keyed", False)
 
     @property
     def property(self):
-        return self.get('property')
+        return self.get("property")
 
     # Expand
 
     def expand(self):
-        self.setdetault('keyed', self.keyed)
+        super().expand()
+        self.setdetault("keyed", self.keyed)

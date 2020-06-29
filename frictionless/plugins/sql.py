@@ -88,13 +88,32 @@ class SqlDialect(Dialect):
         "type": "object",
         "required": ["table"],
         "additionalProperties": False,
-        "properties": {"table": {"type": "string"}, "order_by": {"type": "string"}},
+        "properties": {
+            "table": {"type": "string"},
+            "order_by": {"type": "string"},
+            "headersRow": {"type": "string"},
+            "headersJoiner": {"type": "string"},
+        },
     }
 
-    def __init__(self, descriptor=None, *, table=None, order_by=None, metadata_root=None):
+    def __init__(
+        self,
+        descriptor=None,
+        *,
+        table=None,
+        order_by=None,
+        headers_row=None,
+        headers_joiner=None,
+        metadata_root=None
+    ):
         self.setdefined("table", table)
         self.setdefined("order_by", order_by)
-        super().__init__(descriptor, metadata_root=metadata_root)
+        super().__init__(
+            descriptor,
+            headers_row=headers_row,
+            headers_joiner=headers_joiner,
+            metadata_root=metadata_root,
+        )
 
     @property
     def table(self):

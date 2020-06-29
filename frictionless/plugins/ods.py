@@ -86,13 +86,36 @@ class OdsDialect(Dialect):
     metadata_profile = {  # type: ignore
         "type": "object",
         "additionalProperties": False,
-        "properties": {"sheet": {"type": ["number", "string"]}},
+        "properties": {
+            "sheet": {"type": ["number", "string"]},
+            "headersRow": {"type": "string"},
+            "headersJoiner": {"type": "string"},
+        },
     }
 
-    def __init__(self, descriptor=None, *, sheet=None, metadata_root=None):
+    def __init__(
+        self,
+        descriptor=None,
+        *,
+        sheet=None,
+        headers_row=None,
+        headers_joiner=None,
+        metadata_root=None
+    ):
         self.setdefined("sheet", sheet)
-        super().__init__(descriptor, metadata_root=metadata_root)
+        super().__init__(
+            descriptor,
+            headers_row=headers_row,
+            headers_joiner=headers_joiner,
+            metadata_root=metadata_root,
+        )
 
     @property
     def sheet(self):
         return self.get("sheet", 1)
+
+    # Expand
+
+    def expand(self):
+        super().expand()
+        self.setdetault("sheet", self.sheet)
