@@ -32,15 +32,18 @@ class SqlParser(Parser):
                 'Format "sql" requires "table" option.'
             )
 
-        # Stream cells
+        # Stream data
         engine = create_engine(self.file.source)
         engine.update_execution_options(stream_results=True)
         table = sql.table(dialect.table)
         order = sql.text(dialect.order_by) if dialect.order_by else None
-        query = sql.select(['*']).select_from(table).order_by(order)
-        result = engine.execute(query)
-        for row_number, row in enumerate(iter(result), start=1):
-            yield (row_number, row.keys(), list(row))
+        query = sql.select(["*"]).select_from(table).order_by(order)
+        data = iter(engine.execute(query))
+        item = next(data)
+        yield list(item.keys())
+        yield list(item)
+        for item in iter(data):
+            yield list(item)
 
     # Write
 
@@ -82,27 +85,27 @@ class SqlDialect(Dialect):
     """
 
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'required': ['table'],
-        'additionalProperties': False,
-        'properties': {'table': {'type': 'string'}, 'order_by': {'type': 'string'}},
+        "type": "object",
+        "required": ["table"],
+        "additionalProperties": False,
+        "properties": {"table": {"type": "string"}, "order_by": {"type": "string"}},
     }
 
     def __init__(self, descriptor=None, *, table=None, order_by=None, metadata_root=None):
-        self.setdefined('table', table)
-        self.setdefined('order_by', order_by)
+        self.setdefined("table", table)
+        self.setdefined("order_by", order_by)
         super().__init__(descriptor, metadata_root=metadata_root)
 
     @property
     def table(self):
-        return self.get('table')
+        return self.get("table")
 
     @property
     def order_by(self):
-        return self.get('order_by')
+        return self.get("order_by")
 
 
 # Internal
 
 
-SQL_SCHEMES = ['firebird', 'mssql', 'mysql', 'oracle', 'postgresql', 'sqlite', 'sybase']
+SQL_SCHEMES = ["firebird", "mssql", "mysql", "oracle", "postgresql", "sqlite", "sybase"]
