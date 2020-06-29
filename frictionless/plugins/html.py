@@ -9,7 +9,7 @@ from ..parser import Parser
 
 class HtmlPlugin(Plugin):
     def create_parser(self, file):
-        if file.format == 'html':
+        if file.format == "html":
             return HtmlParser(file)
 
 
@@ -25,7 +25,7 @@ class HtmlParser(Parser):
         dialect = self.file.dialect
 
         # Get Page content
-        page = pq(self.loader.text_stream.read(), parser='html')
+        page = pq(self.loader.text_stream.read(), parser="html")
 
         # Find required table
         if dialect.selector:
@@ -33,24 +33,22 @@ class HtmlParser(Parser):
         else:
             table = page
 
-        # Extract headers
-        rows = (
-            table.children('thead').children('tr')
-            + table.children('thead')
-            + table.children('tr')
-            + table.children('tbody').children('tr')
+        # Stream headers
+        data = (
+            table.children("thead").children("tr")
+            + table.children("thead")
+            + table.children("tr")
+            + table.children("tbody").children("tr")
         )
-        rows = [pq(r) for r in rows if len(r) > 0]
-        first_row = rows.pop(0)
-        headers = [pq(th).text() for th in first_row.find('th,td')]
+        data = [pq(r) for r in data if len(r) > 0]
+        first_row = data.pop(0)
+        headers = [pq(th).text() for th in first_row.find("th,td")]
+        yield headers
 
-        # Extract rows
-        rows = [pq(tr).find('td') for tr in rows]
-        rows = [[pq(td).text() for td in tr] for tr in rows if len(tr) > 0]
-
-        # Yield rows
-        for row_number, row in enumerate(rows, start=1):
-            yield (row_number, headers, row)
+        # Stream data
+        data = [pq(tr).find("td") for tr in data]
+        data = [[pq(td).text() for td in tr] for tr in data if len(tr) > 0]
+        yield from data
 
 
 # Dialect
@@ -69,15 +67,15 @@ class HtmlDialect(Dialect):
     """
 
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'additionalProperties': False,
-        'properties': {'selector': {'type': 'string'}},
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {"selector": {"type": "string"}},
     }
 
     def __init__(self, descriptor=None, *, selector=None, metadata_root=None):
-        self.setdefined('selector', selector)
+        self.setdefined("selector", selector)
         super().__init__(descriptor, metadata_root=metadata_root)
 
     @property
     def selector(self):
-        return self.get('selector')
+        return self.get("selector")
