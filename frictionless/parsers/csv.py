@@ -17,9 +17,8 @@ class CsvParser(Parser):
     def read_data_stream_create(self):
         sample = self.read_data_stream_infer_dialect()
         source = chain(sample, self.loader.text_stream)
-        items = csv.reader(source, dialect=self.file.dialect)
-        for row_number, item in enumerate(items, start=1):
-            yield (row_number, None, list(item))
+        data = csv.reader(source, dialect=self.file.dialect)
+        yield from data
 
     def read_data_stream_infer_dialect(self):
         sample = extract_samle(self.loader.text_stream)

@@ -554,13 +554,16 @@ class Table:
             # Headers
             if not headers_ready:
                 if not self.__headers_row:
+                    headers_ready = True
                     headers = None
                 elif row_position == self.__headers_row:
+                    headers_ready = True
                     headers = cells
-                headers_ready = True
-                field_positions = self.__read_data_stream_infer_field_positions(headers)
-                if headers is not None:
-                    continue
+                if headers_ready:
+                    infer = self.__read_data_stream_infer_field_positions
+                    field_positions = infer(headers, cells=cells)
+                    if headers is not None:
+                        continue
 
             # Sample
             sample.append(cells)
@@ -603,14 +606,16 @@ class Table:
         self.__schema = schema
         self.__field_positions = field_positions
         self.__sample_positions = sample_positions
-        self.__headers = Headers(
-            headers, fields=schema.fields, field_positions=field_positions
+        self.__headers = (
+            Headers(headers, fields=schema.fields, field_positions=field_positions)
+            if headers is not None
+            else None
         )
 
-    def __read_data_stream_infer_field_positions(self, headers):
+    def __read_data_stream_infer_field_positions(self, headers, *, cells):
         # TODO: Filter headers in-place
         # TODO: apply pick/skip/limit/offset
-        field_positions = list(range(1, len(headers) + 1))
+        field_positions = list(range(1, len(cells) + 1))
         return field_positions
 
     def read_rows(self):
