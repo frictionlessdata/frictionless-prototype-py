@@ -14,7 +14,7 @@ class InlineParser(Parser):
 
     def read_data_stream_create(self):
         data = self.file.source
-        if not hasattr(data, '__iter__'):
+        if not hasattr(data, "__iter__"):
             data = data()
         data = iter(data)
 
@@ -39,5 +39,5 @@ class InlineParser(Parser):
 
         # Error
         else:
-            note = 'Inline data item has to be tuple, list or dict'
+            note = "Data item has to be tuple, list or dict"
             raise exceptions.FrictionlessException(errors.SourceError(note=note))
