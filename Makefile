@@ -16,10 +16,10 @@ install:
 	test -f '.git/hooks/pre-commit' || cp .gitverify .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
 
 format:
-	black $(PACKAGE) tests --skip-string-normalization --line-length 90
+	black $(PACKAGE) tests
 
 lint:
-	black $(PACKAGE) tests --skip-string-normalization --line-length 90 --check
+	black $(PACKAGE) tests --check
 	pylama $(PACKAGE) tests
 	# mypy $(PACKAGE) --ignore-missing-imports
 

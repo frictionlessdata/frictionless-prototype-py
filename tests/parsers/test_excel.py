@@ -1,5 +1,6 @@
 import io
 import pytest
+from decimal import Decimal
 from datetime import datetime
 from frictionless import Table, dialects, exceptions
 
@@ -12,22 +13,24 @@ BASE_URL = "https://raw.githubusercontent.com/frictionlessdata/tabulator-py/mast
 def test_table_xlsx_table():
     source = io.open("data/table.xlsx", mode="rb")
     with Table(source, format="xlsx") as table:
-        assert table.headers is None
-        assert table.read() == [["id", "name"], [1.0, "english"], [2.0, "中国人"]]
+        assert table.headers == ["id", "name"]
+        assert table.read_data() == [[1.0, "english"], [2.0, "中国人"]]
 
 
 @pytest.mark.slow
 def test_table_xlsx_remote():
     source = BASE_URL % "data/table.xlsx"
     with Table(source) as table:
-        assert table.read() == [["id", "name"], [1.0, "english"], [2.0, "中国人"]]
+        assert table.headers == ["id", "name"]
+        assert table.read_data() == [[1.0, "english"], [2.0, "中国人"]]
 
 
 def test_table_xlsx_sheet_by_index():
     source = "data/special/sheet2.xlsx"
     dialect = dialects.ExcelDialect(sheet=2)
     with Table(source, dialect=dialect) as table:
-        assert table.read() == [["id", "name"], [1, "english"], [2, "中国人"]]
+        assert table.headers == ["id", "name"]
+        assert table.read_data() == [[1.0, "english"], [2.0, "中国人"]]
 
 
 @pytest.mark.skip
@@ -40,51 +43,52 @@ def test_table_xlsx_sheet_by_index_not_existent():
 
 def test_table_xlsx_sheet_by_name():
     source = "data/special/sheet2.xlsx"
-    dialect = dialects.ExcelDialect(sheet='Sheet2')
+    dialect = dialects.ExcelDialect(sheet="Sheet2")
     with Table(source, dialect=dialect) as table:
-        assert table.read() == [["id", "name"], [1, "english"], [2, "中国人"]]
+        assert table.headers == ["id", "name"]
+        assert table.read_data() == [[1.0, "english"], [2.0, "中国人"]]
 
 
 def test_table_xlsx_sheet_by_name_not_existent():
     source = "data/special/sheet2.xlsx"
-    dialect = dialects.ExcelDialect(sheet='bad')
-    with pytest.raises(exceptions.SourceError) as excinfo:
+    dialect = dialects.ExcelDialect(sheet="bad")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
         Table(source, dialect=dialect).open()
     assert 'sheet "bad"' in str(excinfo.value)
 
 
 def test_table_xlsx_merged_cells():
     source = "data/special/merged-cells.xlsx"
-    with Table(source) as table:
-        assert table.read() == [["data", None]]
+    with Table(source, headers_row=None) as table:
+        assert table.read_data() == [["data", None]]
 
 
 def test_table_xlsx_merged_cells_fill():
     source = "data/special/merged-cells.xlsx"
     dialect = dialects.ExcelDialect(fill_merged_cells=True)
-    with Table(source, dialect=dialect) as table:
-        assert table.read() == [["data", "data"], ["data", "data"], ["data", "data"]]
+    with Table(source, dialect=dialect, headers_row=None) as table:
+        assert table.read_data() == [["data", "data"], ["data", "data"], ["data", "data"]]
 
 
 def test_table_xlsx_adjust_floating_point_error():
     source = "data/special/adjust_floating_point_error.xlsx"
     dialect = dialects.ExcelDialect(preserve_formatting=True)
-    with Table(source, headers=1, ignore_blank_headers=True, dialect=dialect) as table:
-        assert table.read(keyed=True)[1]["actual PO4 (values)"] == 274.65999999999997
+    with Table(source, ignore_blank_headers=True, dialect=dialect) as table:
+        assert table.read_data()[1][2] == 274.65999999999997
     dialect = dialects.ExcelDialect(
         fill_merged_cells=False,
         preserve_formatting=True,
         adjust_floating_point_error=True,
     )
-    with Table(source, headers=1, ignore_blank_headers=True, dialect=dialect) as table:
-        assert table.read(keyed=True)[1]["actual PO4 (values)"] == 274.66
+    with Table(source, ignore_blank_headers=True, dialect=dialect) as table:
+        assert table.read_data()[1][2] == 274.66
 
 
 def test_table_xlsx_preserve_formatting():
     source = "data/special/preserve-formatting.xlsx"
     dialect = dialects.ExcelDialect(preserve_formatting=True)
-    with Table(source, headers=1, dialect=dialect) as table:
-        assert table.read(keyed=True) == [
+    with Table(source, dialect=dialect, infer_type="any") as table:
+        assert table.read_rows() == [
             {
                 # general
                 "empty": None,
@@ -107,8 +111,8 @@ def test_table_xlsx_preserve_formatting():
 def test_table_xlsx_preserve_formatting_percentage():
     source = "data/special/preserve-formatting-percentage.xlsx"
     dialect = dialects.ExcelDialect(preserve_formatting=True)
-    with Table(source, headers=1, dialect=dialect) as table:
-        assert table.read() == [
+    with Table(source, dialect=dialect) as table:
+        assert table.read_data() == [
             [123, "52.00%"],
             [456, "30.00%"],
             [789, "6.00%"],
@@ -118,8 +122,8 @@ def test_table_xlsx_preserve_formatting_percentage():
 def test_table_xlsx_preserve_formatting_number_multicode():
     source = "data/special/number_format_multicode.xlsx"
     dialect = dialects.ExcelDialect(preserve_formatting=True)
-    with Table(source, headers=1, ignore_blank_headers=True, dialect=dialect) as table:
-        assert table.read() == [["4.5"], ["-9.032"], ["15.8"]]
+    with Table(source, ignore_blank_headers=True, dialect=dialect) as table:
+        assert table.read_data() == [["4.5"], ["-9.032"], ["15.8"]]
 
 
 @pytest.mark.skip
@@ -133,85 +137,87 @@ def test_table_xlsx_workbook_cache():
 
 
 def test_table_local_xls():
-    with Table('data/table.xls') as table:
-        assert table.headers is None
-        assert table.read() == [['id', 'name'], [1, 'english'], [2, '中国人']]
+    with Table("data/table.xls") as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
 @pytest.mark.slow
 def test_table_remote_xls():
-    with Table(BASE_URL % 'data/table.xls') as table:
-        assert table.headers is None
-        assert table.read() == [['id', 'name'], [1, 'english'], [2, '中国人']]
+    with Table(BASE_URL % "data/table.xls") as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
 def test_table_xls_sheet_by_index():
-    source = 'data/special/sheet2.xls'
+    source = "data/special/sheet2.xls"
     dialect = dialects.ExcelDialect(sheet=2)
     with Table(source, dialect=dialect) as table:
-        assert table.read() == [['id', 'name'], [1, 'english'], [2, '中国人']]
+        assert table.headers == ["id", "name"]
+        assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
 def test_table_xls_sheet_by_index_not_existent():
-    source = 'data/special/sheet2.xls'
+    source = "data/special/sheet2.xls"
     dialect = dialects.ExcelDialect(sheet=3)
-    with pytest.raises(exceptions.SourceError) as excinfo:
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
         Table(source, dialect=dialect).open()
     assert 'sheet "3"' in str(excinfo.value)
 
 
 def test_table_xls_sheet_by_name():
-    source = 'data/special/sheet2.xls'
-    dialect = dialects.ExcelDialect(sheet='Sheet2')
+    source = "data/special/sheet2.xls"
+    dialect = dialects.ExcelDialect(sheet="Sheet2")
     with Table(source, dialect=dialect) as table:
-        assert table.read() == [['id', 'name'], [1, 'english'], [2, '中国人']]
+        assert table.headers == ["id", "name"]
+        assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
 def test_table_xls_sheet_by_name_not_existent():
-    source = 'data/special/sheet2.xls'
-    dialect = dialects.ExcelDialect(sheet='bad')
-    with pytest.raises(exceptions.SourceError) as excinfo:
+    source = "data/special/sheet2.xls"
+    dialect = dialects.ExcelDialect(sheet="bad")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
         Table(source, dialect=dialect).open()
     assert 'sheet "bad"' in str(excinfo.value)
 
 
 def test_table_xls_merged_cells():
-    source = 'data/special/merged-cells.xls'
-    with Table(source) as table:
-        assert table.read() == [['data', ''], ['', ''], ['', '']]
+    source = "data/special/merged-cells.xls"
+    with Table(source, headers_row=None) as table:
+        assert table.read_data() == [["data", ""], ["", ""], ["", ""]]
 
 
 def test_table_xls_merged_cells_fill():
-    source = 'data/special/merged-cells.xls'
+    source = "data/special/merged-cells.xls"
     dialect = dialects.ExcelDialect(fill_merged_cells=True)
-    with Table(source, dialect=dialect) as table:
-        assert table.read() == [['data', 'data'], ['data', 'data'], ['data', 'data']]
+    with Table(source, dialect=dialect, headers_row=None) as table:
+        assert table.read_data() == [["data", "data"], ["data", "data"], ["data", "data"]]
 
 
 def test_table_xls_with_boolean():
-    with Table('data/special/table-with-booleans.xls') as table:
-        assert table.headers is None
-        assert table.read() == [['id', 'boolean'], [1, True], [2, False]]
+    with Table("data/special/table-with-booleans.xls") as table:
+        assert table.headers == ["id", "boolean"]
+        assert table.read_data() == [[1, True], [2, False]]
 
 
 def test_table_xlsx_merged_cells_boolean():
-    source = 'data/special/merged-cells-boolean.xls'
-    with Table(source) as table:
-        assert table.read() == [[True, ''], ['', ''], ['', '']]
+    source = "data/special/merged-cells-boolean.xls"
+    with Table(source, headers_row=None) as table:
+        assert table.read_data() == [[True, ""], ["", ""], ["", ""]]
 
 
 def test_table_xlsx_merged_cells_fill_boolean():
-    source = 'data/special/merged-cells-boolean.xls'
+    source = "data/special/merged-cells-boolean.xls"
     dialect = dialects.ExcelDialect(fill_merged_cells=True)
-    with Table(source, dialect=dialect) as table:
-        assert table.read() == [[True, True], [True, True], [True, True]]
+    with Table(source, dialect=dialect, headers_row=None) as table:
+        assert table.read_data() == [[True, True], [True, True], [True, True]]
 
 
 def test_table_xls_with_ints_floats_dates():
-    source = 'data/special/table-with-ints-floats-dates.xls'
+    source = "data/special/table-with-ints-floats-dates.xls"
     with Table(source) as table:
-        assert table.read() == [
-            ['Int', 'Float', 'Date'],
+        assert table.headers == ["Int", "Float", "Date"]
+        assert table.read_data() == [
             [2013, 3.3, datetime(2009, 8, 16)],
             [1997, 5.6, datetime(2009, 9, 20)],
             [1969, 11.7, datetime(2012, 8, 23)],
@@ -220,9 +226,9 @@ def test_table_xls_with_ints_floats_dates():
 
 @pytest.mark.slow
 def test_fix_for_2007_xls():
-    source = 'https://ams3.digitaloceanspaces.com/budgetkey-files/spending-reports/2018-3-משרד התרבות והספורט-לשכת הפרסום הממשלתית-2018-10-22-c457.xls'
+    source = "https://ams3.digitaloceanspaces.com/budgetkey-files/spending-reports/2018-3-משרד התרבות והספורט-לשכת הפרסום הממשלתית-2018-10-22-c457.xls"
     with Table(source) as table:
-        assert len(table.read()) > 10
+        assert len(table.read_data()) > 10
 
 
 # Write

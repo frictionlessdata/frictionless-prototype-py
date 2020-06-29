@@ -21,7 +21,6 @@ class XlsxParser(Parser):
 
     # Read
 
-    # TODO: we are not getting stats here
     def read_loader(self):
         source = self.file.source
         dialect = self.file.dialect
@@ -76,6 +75,7 @@ class XlsxParser(Parser):
             raise exceptions.FrictionlessException(errors.SourceError(note=note))
 
         # Fill merged cells
+        # TODO: use algorithm from xls to merge after reading?
         if dialect.fill_merged_cells:
             for merged_cell_range in list(sheet.merged_cells.ranges):
                 merged_cell_range = str(merged_cell_range)
@@ -88,13 +88,9 @@ class XlsxParser(Parser):
                     cell.value = value
 
         # Stream data
-        for row_number, row in enumerate(sheet.iter_rows(), start=1):
-            yield (
-                row_number,
-                None,
-                extract_row_values(
-                    row, dialect.preserve_formatting, dialect.adjust_floating_point_error
-                ),
+        for cells in sheet.iter_rows():
+            yield extract_row_values(
+                cells, dialect.preserve_formatting, dialect.adjust_floating_point_error
             )
 
     # Write
@@ -103,7 +99,7 @@ class XlsxParser(Parser):
         helpers.ensure_dir(target)
         count = 0
         wb = openpyxl.Workbook(write_only=True)
-        ws = wb.create_sheet(title=self.__options.get('sheet'))
+        ws = wb.create_sheet(title=self.__options.get("sheet"))
         ws.append(headers)
         for row in source:
             ws.append(row)
@@ -168,8 +164,7 @@ class XlsParser(Parser):
 
         # Stream data
         for x in range(0, sheet.nrows):
-            row_number = x + 1
-            row = []
+            cells = []
             for y, value in enumerate(sheet.row_values(x)):
                 value = type_value(sheet.cell(x, y).ctype, value)
                 if dialect.fill_merged_cells:
@@ -178,8 +173,8 @@ class XlsParser(Parser):
                             value = type_value(
                                 sheet.cell(xlo, ylo).ctype, sheet.cell_value(xlo, ylo),
                             )
-                row.append(value)
-            yield (row_number, None, row)
+                cells.append(value)
+            yield cells
 
 
 # Internal
@@ -388,7 +383,7 @@ def convert_excel_number_format_string(excel_number, value):
     else:
         excel_number = multi_codes[0]
 
-    code = excel_number.split('.')
+    code = excel_number.split(".")
 
     if len(code) > 2:
         return None
