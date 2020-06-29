@@ -9,7 +9,7 @@ from ..dialects import Dialect
 
 class TsvPlugin(Plugin):
     def create_parser(self, file):
-        if file.format == 'tsv':
+        if file.format == "tsv":
             return TsvParser(file)
 
 
@@ -22,9 +22,8 @@ class TsvParser(Parser):
     # Read
 
     def read_data_stream_create(self):
-        items = tsv.un(self.loader.text_stream)
-        for row_number, item in enumerate(items, start=1):
-            yield (row_number, None, list(item))
+        data = tsv.un(self.loader.text_stream)
+        yield from data
 
 
 # Dialect
@@ -42,7 +41,7 @@ class TsvDialect(Dialect):
     """
 
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'additionalProperties': False,
-        'properties': {},
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {},
     }

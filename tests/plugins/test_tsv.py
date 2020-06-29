@@ -5,11 +5,10 @@ from frictionless import Table
 
 
 def test_table_format_tsv():
-    with Table('data/table.tsv') as table:
-        assert table.headers is None
-        assert table.read() == [
-            ['id', 'name'],
-            ['1', 'english'],
-            ['2', '中国人'],
-            ['3', None],
+    with Table("data/table.tsv") as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_data() == [
+            ["1", "english"],
+            ["2", "中国人"],
+            ["3", None],
         ]
