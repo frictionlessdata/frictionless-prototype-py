@@ -11,7 +11,7 @@ from ..dialects import Dialect
 
 class GsheetPlugin(Plugin):
     def create_parser(self, file):
-        if file.format == 'gsheet':
+        if file.format == "gsheet":
             return GsheetParser(file)
 
 
@@ -23,33 +23,21 @@ class GsheetParser(Parser):
     network = True
     loading = False
 
-    # Manage
-
-    def open(self):
-        self.__parser = None
-        super().open()
-
-    def close(self):
-        if self.__parser:
-            self.__parser.close()
-
     # Read
 
     def read_data_stream_create(self):
         source = self.file.source
-        url = 'https://docs.google.com/spreadsheets/d/%s/export?format=csv&id=%s'
-        match = re.search(r'.*/d/(?P<key>[^/]+)/.*?(?:gid=(?P<gid>\d+))?$', source)
-        key, gid = '', ''
+        match = re.search(r".*/d/(?P<key>[^/]+)/.*?(?:gid=(?P<gid>\d+))?$", source)
+        source = "https://docs.google.com/spreadsheets/d/%s/export?format=csv&id=%s"
+        key, gid = "", ""
         if match:
-            key = match.group('key')
-            gid = match.group('gid')
-        url = url % (key, key)
+            key = match.group("key")
+            gid = match.group("gid")
+        source = source % (key, key)
         if gid:
-            url = '%s&gid=%s' % (url, gid)
-        file = File(source=url, stats=self.file.stats)
-        self.__parser = system.create_parser(file)
-        self.__parser.open()
-        return self.__parser.data_stream
+            source = "%s&gid=%s" % (source, gid)
+        with system.create_parser(File(source=source, stats=self.file.stats)) as parser:
+            yield from parser.data_stream
 
 
 # Dialect
@@ -67,7 +55,7 @@ class GsheetDialect(Dialect):
     """
 
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'additionalProperties': False,
-        'properties': {},
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {},
     }
