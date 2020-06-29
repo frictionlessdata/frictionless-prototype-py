@@ -91,7 +91,7 @@ class SqlDialect(Dialect):
         "properties": {
             "table": {"type": "string"},
             "order_by": {"type": "string"},
-            "headersRow": {"type": "string"},
+            "headersRow": {"type": ["number", "null"]},
             "headersJoiner": {"type": "string"},
         },
     }

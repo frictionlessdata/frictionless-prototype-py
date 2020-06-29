@@ -10,23 +10,23 @@ from . import config
 
 class File(ControlledMetadata):
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'required': ['source'],
-        'properties': {
-            'source': {},
-            'scheme': {'type': 'string'},
-            'format': {'type': 'string'},
-            'hashing': {'type': 'string'},
-            'encoding': {'type': 'string'},
-            'compression': {'type': 'string'},
-            'compressionPath': {'type': 'string'},
-            'contorl': {'type': 'object'},
-            'dialect': {'type': 'object'},
-            'newline': {'type': 'string'},
-            'stats': {
-                'type': 'object',
-                'required': ['hash', 'bytes'],
-                'properties': {'hash': {'type': 'string'}, 'bytes': {'type': 'number'}},
+        "type": "object",
+        "required": ["source"],
+        "properties": {
+            "source": {},
+            "scheme": {"type": "string"},
+            "format": {"type": "string"},
+            "hashing": {"type": "string"},
+            "encoding": {"type": "string"},
+            "compression": {"type": "string"},
+            "compressionPath": {"type": "string"},
+            "contorl": {"type": "object"},
+            "dialect": {"type": "object"},
+            "newline": {"type": "string"},
+            "stats": {
+                "type": "object",
+                "required": ["hash", "bytes"],
+                "properties": {"hash": {"type": "string"}, "bytes": {"type": "number"}},
             },
         },
     }
@@ -47,17 +47,17 @@ class File(ControlledMetadata):
         newline=None,
         stats=None,
     ):
-        self.setdefined('source', source)
-        self.setdefined('scheme', scheme)
-        self.setdefined('format', format)
-        self.setdefined('hashing', hashing)
-        self.setdefined('encoding', encoding)
-        self.setdefined('compression', compression)
-        self.setdefined('compressionPath', compression_path)
-        self.setdefined('control', control)
-        self.setdefined('dialect', dialect)
-        self.setdefined('newline', newline)
-        self.setdefined('stats', stats)
+        self.setdefined("source", source)
+        self.setdefined("scheme", scheme)
+        self.setdefined("format", format)
+        self.setdefined("hashing", hashing)
+        self.setdefined("encoding", encoding)
+        self.setdefined("compression", compression)
+        self.setdefined("compressionPath", compression_path)
+        self.setdefined("control", control)
+        self.setdefined("dialect", dialect)
+        self.setdefined("newline", newline)
+        self.setdefined("stats", stats)
         super().__init__(descriptor)
         # Infer from source
         infer = helpers.infer_source_scheme_and_format(source)
@@ -73,16 +73,16 @@ class File(ControlledMetadata):
 
     def __setattr__(self, name, value):
         if name in [
-            'scheme',
-            'format',
-            'hashing',
-            'encoding',
-            'compression',
-            'compressionPath',
-            'control',
-            'dialect',
-            'newline',
-            'stats',
+            "scheme",
+            "format",
+            "hashing",
+            "encoding",
+            "compression",
+            "compressionPath",
+            "control",
+            "dialect",
+            "newline",
+            "stats",
         ]:
             self[stringcase.camelcase(name)] = value
         super().__setattr__(name, value)
@@ -90,65 +90,67 @@ class File(ControlledMetadata):
     @cached_property
     def path(self):
         # TODO: allow setting path in dict
-        return self.source if isinstance(self.source, str) else 'memory'
+        return self.source if isinstance(self.source, str) else "memory"
 
     @cached_property
     def source(self):
-        return self.get('source')
+        return self.get("source")
 
     @cached_property
     def scheme(self):
-        return self.get('scheme', self.__infered_scheme)
+        return self.get("scheme", self.__infered_scheme)
 
     @cached_property
     def format(self):
-        return self.get('format', self.__infered_format)
+        return self.get("format", self.__infered_format)
 
     @cached_property
     def hashing(self):
-        return self.get('hashing', config.DEFAULT_HASHING)
+        return self.get("hashing", config.DEFAULT_HASHING)
 
     @cached_property
     def encoding(self):
-        return self.get('encoding', config.DEFAULT_ENCODING)
+        return self.get("encoding", config.DEFAULT_ENCODING)
 
     @cached_property
     def compression(self):
-        return self.get('compression', self.__infered_compression)
+        return self.get("compression", self.__infered_compression)
 
     @cached_property
     def compression_path(self):
-        return self.get('compressionPath')
+        return self.get("compressionPath")
 
     @cached_property
     def control(self):
-        return self.get('control')
+        control = self.get("control", {})
+        return self.metadata_attach("control", control)
 
     @cached_property
     def dialect(self):
-        return self.get('dialect')
+        dialect = self.get("dialect", {})
+        return self.metadata_attach("dialect", dialect)
 
     @cached_property
     def newline(self):
-        return self.get('newline')
+        return self.get("newline")
 
     @cached_property
     def stats(self):
-        return self.get('stats')
+        return self.get("stats")
 
     # Expand
 
     def expand(self):
-        self.setdetault('scheme', self.scheme)
-        self.setdetault('format', self.format)
-        self.setdetault('hashing', self.hashing)
-        self.setdetault('encoding', self.hashing)
-        self.setdetault('compression', self.compression)
+        self.setdefault("scheme", self.scheme)
+        self.setdefault("format", self.format)
+        self.setdefault("hashing", self.hashing)
+        self.setdefault("encoding", self.encoding)
+        self.setdefault("compression", self.compression)
 
     # Metadata
 
     def metadata_process(self):
-        for name, Class in [('control', Control), ('dialect', Dialect)]:
+        for name, Class in [("control", Control), ("dialect", Dialect)]:
             value = self.get(name)
             if value is not None and not isinstance(value, Class):
                 value = Class(
@@ -157,4 +159,4 @@ class File(ControlledMetadata):
                     #  metadata_strict=self.metadata_strict,
                 )
                 dict.__setitem__(self, name, value)
-        super().metadata_process(skip=['source'])
+        super().metadata_process(skip=["source"])

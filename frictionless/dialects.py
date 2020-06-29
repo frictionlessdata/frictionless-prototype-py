@@ -1,4 +1,5 @@
 import csv
+import stringcase
 from .metadata import ControlledMetadata
 from . import config
 
@@ -20,7 +21,7 @@ class Dialect(ControlledMetadata):
         "type": "object",
         "additionalProperties": False,
         "properties": {
-            "headersRow": {"type": "string"},
+            "headersRow": {"type": ["number", "null"]},
             "headersJoiner": {"type": "string"},
         },
     }
@@ -31,6 +32,12 @@ class Dialect(ControlledMetadata):
         self.setdefined("headersRow", headers_row)
         self.setdefined("headersJoiner", headers_joiner)
         super().__init__(descriptor, metadata_root=metadata_root)
+
+    def __setattr__(self, name, value):
+        if name in ["headers_row", "headers_joiner"]:
+            self[stringcase.camelcase(name)] = value
+        else:
+            super().__setattr__(name, value)
 
     @property
     def headers_row(self):
@@ -82,7 +89,7 @@ class CsvDialect(Dialect):
             "header": {"type": "boolean"},
             "commentChar": {"type": "string"},
             "caseSensitiveHeader": {"type": "boolean"},
-            "headersRow": {"type": "string"},
+            "headersRow": {"type": ["number", "null"]},
             "headersJoiner": {"type": "string"},
         },
     }
@@ -214,7 +221,7 @@ class ExcelDialect(Dialect):
             "fillMergedCells": {"type": "boolean"},
             "preserveFormatting": {"type": "boolean"},
             "adjustFloatingPointError": {"type": "boolean"},
-            "headersRow": {"type": "string"},
+            "headersRow": {"type": ["number", "null"]},
             "headersJoiner": {"type": "string"},
         },
     }
@@ -292,7 +299,7 @@ class InlineDialect(Dialect):
         "additionalProperties": False,
         "properties": {
             "keyed": {"type": "boolean"},
-            "headersRow": {"type": "string"},
+            "headersRow": {"type": ["number", "null"]},
             "headersJoiner": {"type": "string"},
         },
     }
@@ -343,7 +350,7 @@ class JsonDialect(Dialect):
         "properties": {
             "keyed": {"type": "boolean"},
             "property": {"type": "string"},
-            "headersRow": {"type": "string"},
+            "headersRow": {"type": ["number", "null"]},
             "headersJoiner": {"type": "string"},
         },
     }

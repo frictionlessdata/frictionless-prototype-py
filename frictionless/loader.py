@@ -92,11 +92,11 @@ class Loader:
         return ByteStreamWithStats(
             byte_stream,
             hashing=self.file.hashing,
-            stats=self.file.stats if not self.file.stats['hash'] else {},
+            stats=self.file.stats if not self.file.stats["hash"] else {},
         )
 
     def read_byte_stream_decompress(self, byte_stream):
-        if self.file.compression == 'zip':
+        if self.file.compression == "zip":
             # Network
             if self.network:
                 self.network = False
@@ -119,10 +119,10 @@ class Loader:
                     target.seek(0)
                 byte_stream = target
             return byte_stream
-        if self.file.compression == 'gz':
+        if self.file.compression == "gz":
             byte_stream = gzip.open(byte_stream)
             return byte_stream
-        if self.file.compression == 'no':
+        if self.file.compression == "no":
             return byte_stream
         note = f'Compression "{self.compression}" is not supported'
         raise exceptions.FrictionlessException(errors.CompressionError(note=note))
@@ -142,31 +142,31 @@ class Loader:
         )
 
     def read_text_stream_infer_encoding(self, byte_stream):
-        encoding = self.file.get('encoding')
+        encoding = self.file.get("encoding")
         sample = byte_stream.read(config.INFER_ENCODING_VOLUME)
         sample = sample[: config.INFER_ENCODING_VOLUME]
         byte_stream.seek(0)
         if encoding is None:
             result = chardet.detect(sample)
-            confidence = result['confidence'] or 0
-            encoding = result['encoding'] or config.DEFAULT_ENCODING
+            confidence = result["confidence"] or 0
+            encoding = result["encoding"] or config.DEFAULT_ENCODING
             if confidence < config.INFER_ENCODING_CONFIDENCE:
                 encoding = config.DEFAULT_ENCODING
-            if encoding == 'ascii':
+            if encoding == "ascii":
                 encoding = config.DEFAULT_ENCODING
         encoding = codecs.lookup(encoding).name
         # Work around 'Incorrect inferion of utf-8-sig encoding'
         # <https://github.com/PyYoshi/cChardet/issues/28>
-        if encoding == 'utf-8':
+        if encoding == "utf-8":
             if sample.startswith(codecs.BOM_UTF8):
-                encoding = 'utf-8-sig'
+                encoding = "utf-8-sig"
         # Use the BOM stripping name (without byte-order) for UTF-16 encodings
-        elif encoding == 'utf-16-be':
+        elif encoding == "utf-16-be":
             if sample.startswith(codecs.BOM_UTF16_BE):
-                encoding = 'utf-16'
-        elif encoding == 'utf-16-le':
+                encoding = "utf-16"
+        elif encoding == "utf-16-le":
             if sample.startswith(codecs.BOM_UTF16_LE):
-                encoding = 'utf-16'
+                encoding = "utf-16"
         self.file.encoding = encoding
 
     def read_text_stream_decode(self, byte_stream):
@@ -209,8 +209,8 @@ class ByteStreamWithStats(object):
 
     def read1(self, size=None):
         chunk = self.__byte_stream.read1(size)
-        self.__stats['bytes'] += len(chunk)
+        self.__stats["bytes"] += len(chunk)
         if self.__hasher:
             self.__hasher.update(chunk)
-            self.__stats['hash'] = self.__hasher.hexdigest()
+            self.__stats["hash"] = self.__hasher.hexdigest()
         return chunk

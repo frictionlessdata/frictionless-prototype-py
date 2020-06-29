@@ -42,10 +42,10 @@ class Schema(ControlledMetadata):
         metadata_strict=False,
         metadata_resource=None,
     ):
-        self.setdefined('fields', fields)
-        self.setdefined('missingValues', missing_values)
-        self.setdefined('primaryKey', primary_key)
-        self.setdefined('foreignKeys', foreign_keys)
+        self.setdefined("fields", fields)
+        self.setdefined("missingValues", missing_values)
+        self.setdefined("primaryKey", primary_key)
+        self.setdefined("foreignKeys", foreign_keys)
         self.__metadata_resource = metadata_resource
         super().__init__(
             descriptor=descriptor,
@@ -54,37 +54,38 @@ class Schema(ControlledMetadata):
         )
 
     def __setattr__(self, name, value):
-        if name in ['fields', 'missing_values', 'primary_key', 'foreign_keys']:
+        if name in ["fields", "missing_values", "primary_key", "foreign_keys"]:
             self[stringcase.camelcase(name)] = value
-        super().__setattr__(name, value)
+        else:
+            super().__setattr__(name, value)
 
     @cached_property
     def missing_values(self):
-        missing_values = self.get('missingValues', config.DEFAULT_MISSING_VALUES)
-        return self.metadata_attach('missingValues', missing_values)
+        missing_values = self.get("missingValues", config.DEFAULT_MISSING_VALUES)
+        return self.metadata_attach("missingValues", missing_values)
 
     @cached_property
     def primary_key(self):
-        primary_key = self.get('primaryKey', [])
+        primary_key = self.get("primaryKey", [])
         if not isinstance(primary_key, list):
             primary_key = [primary_key]
-        return self.metadata_attach('primaryKey', primary_key)
+        return self.metadata_attach("primaryKey", primary_key)
 
     @cached_property
     def foreign_keys(self):
-        foreign_keys = deepcopy(self.get('foreignKeys', []))
+        foreign_keys = deepcopy(self.get("foreignKeys", []))
         for index, fk in enumerate(foreign_keys):
             if not isinstance(fk, dict):
                 continue
-            fk.setdefault('fields', [])
-            fk.setdefault('reference', {})
-            fk['reference'].setdefault('resource', '')
-            fk['reference'].setdefault('fields', [])
-            if not isinstance(fk['fields'], list):
-                fk['fields'] = [fk['fields']]
-            if not isinstance(fk['reference']['fields'], list):
-                fk['reference']['fields'] = [fk['reference']['fields']]
-        return self.metadata_attach('foreignKeys', foreign_keys)
+            fk.setdefault("fields", [])
+            fk.setdefault("reference", {})
+            fk["reference"].setdefault("resource", "")
+            fk["reference"].setdefault("fields", [])
+            if not isinstance(fk["fields"], list):
+                fk["fields"] = [fk["fields"]]
+            if not isinstance(fk["reference"]["fields"], list):
+                fk["reference"]["fields"] = [fk["reference"]["fields"]]
+        return self.metadata_attach("foreignKeys", foreign_keys)
 
     # Create
 
@@ -118,8 +119,8 @@ class Schema(ControlledMetadata):
             Field[]: an array of field instances
 
         """
-        fields = self.get('fields', [])
-        return self.metadata_attach('fields', fields)
+        fields = self.get("fields", [])
+        return self.metadata_attach("fields", fields)
 
     @cached_property
     def field_names(self):
@@ -143,8 +144,8 @@ class Schema(ControlledMetadata):
             Field/None: added `Field` instance or `None` if not added
 
         """
-        self.setdefault('fields', [])
-        self['fields'].append(descriptor)
+        self.setdefault("fields", [])
+        self["fields"].append(descriptor)
         return self.fields[-1]
 
     def del_field(self, name):
@@ -162,7 +163,7 @@ class Schema(ControlledMetadata):
         field = self.get_field(name)
         if field:
             predicat = lambda field: field.name != name
-            self['fields'] = list(filter(predicat, self.fields))
+            self["fields"] = list(filter(predicat, self.fields))
         return field
 
     def get_field(self, name):
@@ -203,8 +204,8 @@ class Schema(ControlledMetadata):
         It will add default values to the schema.
 
         """
-        self.setdefault('fields', [])
-        self.setdefault('missingValues', config.DEFAULT_MISSING_VALUES)
+        self.setdefault("fields", [])
+        self.setdefault("missingValues", config.DEFAULT_MISSING_VALUES)
         for field in self.fields:
             field.expand()
 
@@ -224,18 +225,18 @@ class Schema(ControlledMetadata):
 
         # Prepare names
         if not names:
-            names = [f'field{number}' for number in range(1, len(sample[0]) + 1)]
+            names = [f"field{number}" for number in range(1, len(sample[0]) + 1)]
         if len(names) != len(set(names)):
             seen_names = []
             names = names.copy()
             for index, name in enumerate(names):
                 count = seen_names.count(name) + 1
-                names[index] = '%s%s' % (name, count) if count > 1 else name
+                names[index] = "%s%s" % (name, count) if count > 1 else name
                 seen_names.append(name)
 
         # Handle type
         if type:
-            self.fields = [{'name': name, 'type': type} for name in names]
+            self.fields = [{"name": name, "type": type} for name in names]
             return
 
         # Prepare candidates
@@ -243,8 +244,8 @@ class Schema(ControlledMetadata):
         for index, name in enumerate(names):
             candidates.append([])
             for type in INFER_TYPES:
-                field = Field({'name': name, 'type': type}, metadata_schema=self)
-                candidates[index].append({'field': field, 'score': 0})
+                field = Field({"name": name, "type": type}, metadata_schema=self)
+                candidates[index].append({"field": field, "score": 0})
 
         # Prepare fields
         fields = [None] * len(names)
@@ -254,12 +255,12 @@ class Schema(ControlledMetadata):
                     continue
                 source = cells[index] if len(cells) > index else None
                 for candidate in candidates[index]:
-                    if candidate['score'] < len(sample) * (confidence - 1):
+                    if candidate["score"] < len(sample) * (confidence - 1):
                         continue
-                    target, notes = candidate['field'].read_cell(source)
-                    candidate['score'] += 1 if not notes else -1
-                    if candidate['score'] >= len(sample) * confidence:
-                        fields[index] = candidate['field']
+                    target, notes = candidate["field"].read_cell(source)
+                    candidate["score"] += 1 if not notes else -1
+                    if candidate["score"] >= len(sample) * confidence:
+                        fields[index] = candidate["field"]
                         break
 
         # Apply fields
@@ -310,17 +311,17 @@ class Schema(ControlledMetadata):
     # Metadata
 
     def metadata_process(self):
-        for index, field in enumerate(self.get('fields', [])):
+        for index, field in enumerate(self.get("fields", [])):
             if not isinstance(field, Field):
                 if not isinstance(field, dict):
-                    field = {'name': f'field{index+1}', 'type': 'any'}
+                    field = {"name": f"field{index+1}", "type": "any"}
                 field = Field(
                     field,
                     metadata_root=self.metadata_root,
                     metadata_strict=self.metadata_strict,
                     metadata_schema=self,
                 )
-                list.__setitem__(self['fields'], index, field)
+                list.__setitem__(self["fields"], index, field)
         super().metadata_process()
 
     def metadata_validate(self):
@@ -335,33 +336,33 @@ class Schema(ControlledMetadata):
 
         # Foreign Keys
         for fk in self.foreign_keys:
-            for name in fk['fields']:
+            for name in fk["fields"]:
                 if name not in self.field_names:
                     note = 'foreign key "%s" does not match the fields "%s"'
                     note = note % (fk, self.field_names)
                     self.metadata_errors.append(errors.SchemaError(note=note))
-            if len(fk['fields']) != len(fk['reference']['fields']):
+            if len(fk["fields"]) != len(fk["reference"]["fields"]):
                 note = 'foreign key fields "%s" does not match the reference fields "%s"'
-                note = note % (fk['fields'], fk['reference']['fields'])
+                note = note % (fk["fields"], fk["reference"]["fields"])
                 self.metadata_errors.append(errors.SchemaError(note=note))
 
 
 # Internal
 
 INFER_TYPES = [
-    'yearmonth',
-    'duration',
-    'geojson',
-    'geopoint',
-    'object',
-    'array',
-    'datetime',
-    'time',
-    'date',
-    'integer',
-    'number',
-    'boolean',
-    'year',
-    'string',
-    'any',
+    "yearmonth",
+    "duration",
+    "geojson",
+    "geopoint",
+    "object",
+    "array",
+    "datetime",
+    "time",
+    "date",
+    "integer",
+    "number",
+    "boolean",
+    "year",
+    "string",
+    "any",
 ]

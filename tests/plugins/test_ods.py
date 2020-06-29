@@ -1,6 +1,7 @@
 import pytest
 from datetime import datetime
 from frictionless import Table, exceptions
+from frictionless.plugins.ods import OdsDialect
 
 BASE_URL = "https://raw.githubusercontent.com/okfn/tabulator-py/master/%s"
 
@@ -23,29 +24,33 @@ def test_table_ods_remote():
 
 
 def test_table_ods_sheet_by_index():
-    with Table("data/table.ods", sheet=1) as table:
+    dialect = OdsDialect(sheet=1)
+    with Table("data/table.ods", dialect=dialect) as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
 @pytest.mark.skip
 def test_table_ods_sheet_by_index_not_existent():
+    dialect = OdsDialect(sheet=3)
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        Table("data/table.ods", sheet=3).open()
+        Table("data/table.ods", dialect=dialect).open()
     assert 'sheet "3"' in str(excinfo.value)
 
 
 def test_table_ods_sheet_by_name():
-    with Table("data/table.ods", sheet="Лист1") as table:
+    dialect = OdsDialect(sheet="Лист1")
+    with Table("data/table.ods", dialect=dialect) as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
 @pytest.mark.skip
 def test_table_ods_sheet_by_index_not_existent_2():
+    dialect = OdsDialect(sheet="bad")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        Table("data/table.ods", sheet="not-existent").open()
-    assert 'sheet "not-existent"' in str(excinfo.value)
+        Table("data/table.ods", dialct=dialect.sheet).open()
+    assert 'sheet "bad"' in str(excinfo.value)
 
 
 def test_table_ods_with_boolean():

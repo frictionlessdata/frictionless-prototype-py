@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 from itertools import chain
 from copy import copy, deepcopy
 from collections import deque
@@ -126,7 +127,7 @@ class Table:
         self,
         source,
         *,
-        # File
+        # Table
         scheme=None,
         format=None,
         hashing=None,
@@ -135,9 +136,7 @@ class Table:
         compression_path=None,
         control=None,
         dialect=None,
-        # Table
-        headers_row=config.DEFAULT_HEADERS_ROW,
-        headers_joiner=config.DEFAULT_HEADERS_JOINER,
+        headers=config.DEFAULT_HEADERS_ROW,
         pick_fields=None,
         skip_fields=None,
         limit_fields=None,
@@ -154,137 +153,32 @@ class Table:
         infer_names=None,
         infer_volume=config.DEFAULT_INFER_VOLUME,
         infer_confidence=config.DEFAULT_INFER_CONFIDENCE,
-        # Legacy
-        headers=None,
-        allow_html=False,
-        sample_size=config.DEFAULT_INFER_VOLUME,
-        ignore_blank_headers=False,
-        ignore_listed_headers=None,
-        ignore_not_listed_headers=None,
-        multiline_headers_joiner=' ',
-        multiline_headers_duplicates=False,
-        force_strings=False,
-        pick_columns=None,
-        skip_columns=None,
-        post_parse=[],
-        custom_loaders={},
-        custom_parsers={},
-        custom_writers={},
-        **options
     ):
 
-        # Translate aliases
-        if pick_fields is not None:
-            pick_columns = pick_fields
-        if skip_fields is not None:
-            skip_columns = skip_fields
-        if pick_columns is not None:
-            ignore_not_listed_headers = pick_columns
-        if skip_columns is not None:
-            ignore_listed_headers = skip_columns
-            if '' in skip_columns:
-                ignore_blank_headers = True
-
-        # Set headers
-        self.__headers = None
-        self.__headers_row = None
-        self.__headers_row_last = None
-        if isinstance(headers, int):
-            self.__headers_row = headers
-            self.__headers_row_last = headers
-        elif isinstance(headers, (tuple, list)):
-            if (
-                len(headers) == 2
-                and isinstance(headers[0], int)
-                and isinstance(headers[1], int)
-            ):
-                self.__headers_row = headers[0]
-                self.__headers_row_last = headers[1]
-            else:
-                self.__headers = list(headers)
-
-        # Set pick rows
-        self.__pick_rows = pick_rows
-        self.__pick_rows_by_numbers = []
-        self.__pick_rows_by_patterns = []
-        self.__pick_rows_by_comments = []
-        self.__pick_rows_by_presets = {}
-        for directive in copy(pick_rows or []):
-            if isinstance(directive, int):
-                self.__pick_rows_by_numbers.append(directive)
-            elif isinstance(directive, dict):
-                if directive['type'] == 'regex':
-                    self.__pick_rows_by_patterns.append(re.compile(directive['value']))
-                elif directive['type'] == 'preset' and directive['value'] == 'blank':
-                    self.__pick_rows_by_presets['blank'] = True
-                else:
-                    raise ValueError('Not supported pick rows: %s' % directive)
-            else:
-                self.__pick_rows_by_comments.append(str(directive))
-
-        # Set skip rows
-        self.__skip_rows = skip_rows
-        self.__skip_rows_by_numbers = []
-        self.__skip_rows_by_patterns = []
-        self.__skip_rows_by_comments = []
-        self.__skip_rows_by_presets = {}
-        for directive in copy(skip_rows or []):
-            if isinstance(directive, int):
-                self.__skip_rows_by_numbers.append(directive)
-            elif isinstance(directive, dict):
-                if directive['type'] == 'regex':
-                    self.__skip_rows_by_patterns.append(re.compile(directive['value']))
-                elif directive['type'] == 'preset' and directive['value'] == 'blank':
-                    self.__skip_rows_by_presets['blank'] = True
-                else:
-                    raise ValueError('Not supported skip rows: %s' % directive)
-            else:
-                self.__skip_rows_by_comments.append(str(directive))
-
-        # Support for pathlib.Path
-        if hasattr(source, 'joinpath'):
+        # Update source
+        # TODO: move to File
+        if isinstance(source, Path):
             source = str(source)
 
-        # Set attributes
-        self.__source = source
-        self.__scheme = scheme
-        self.__format = format
-        self.__encoding = encoding
-        self.__compression = compression
-        self.__allow_html = allow_html
-        self.__sample_size = sample_size
-        self.__ignore_blank_headers = ignore_blank_headers
-        self.__ignore_listed_headers = ignore_listed_headers
-        self.__ignore_not_listed_headers = ignore_not_listed_headers
-        self.__multiline_headers_joiner = multiline_headers_joiner
-        self.__multiline_headers_duplicates = multiline_headers_duplicates
-        self.__ignored_headers_indexes = []
-        self.__hashing_algorithm = hashing
-        self.__force_strings = force_strings
-        self.__limit_fields = limit_fields
-        self.__offset_fields = offset_fields
-        self.__limit_rows = limit_rows
-        self.__offset_rows = offset_rows
-        self.__post_parse = copy(post_parse)
-        self.__custom_loaders = copy(custom_loaders)
-        self.__custom_parsers = copy(custom_parsers)
-        self.__custom_writers = copy(custom_writers)
-        self.__options = options
-        self.__sample_extended_rows = []
-        self.__field_positions = None
+        # Update dialect
+        if headers != config.DEFAULT_HEADERS_ROW:
+            dialect = dialect or {}
+            if isinstance(headers, (type(None), int)):
+                dialect["headersRow"] = headers
+            elif isinstance(headers[0], int):
+                dialect["headersRow"] = headers
+            elif isinstance(headers[1], str):
+                dialect["headersRow"] = headers[0]
+                dialect["headersJoiner"] = headers[1]
+
+        # Store state
         self.__parser = None
-        self.__row_number = 0
-        self.__parser = None
-        self.__sample = None
-        # Frictionless
         self.__sample = None
         self.__headers = None
         self.__row_stream = None
         self.__data_stream = None
         self.__field_positions = None
         self.__sample_positions = None
-        self.__headers_row = headers_row
-        self.__headers_joiner = headers_joiner
         self.__pick_fields = pick_fields
         self.__skip_fields = skip_fields
         self.__limit_fields = limit_fields
@@ -300,6 +194,8 @@ class Table:
         self.__infer_names = infer_names
         self.__infer_volume = infer_volume
         self.__infer_confidence = infer_confidence
+
+        # Create file
         self.__file = File(
             source=source,
             scheme=scheme,
@@ -320,7 +216,10 @@ class Table:
         self.close()
 
     def __iter__(self):
-        return self.iter()
+        if not self.__row_stream:
+            note = 'Table is closed. Please call "table.open()" first.'
+            raise exceptions.FrictionlessException(errors.Error(note=note))
+        return iter(self.__row_stream)
 
     @property
     def path(self):
@@ -505,7 +404,7 @@ class Table:
 
         """
         self.close()
-        self.__file.stats = {'hash': '', 'bytes': 0}
+        self.__file.stats = {"hash": "", "bytes": 0}
         self.__parser = system.create_parser(self.__file)
         self.__parser.open()
         self.__data_stream = self.__read_data_stream()
@@ -517,7 +416,7 @@ class Table:
         """
         if self.__parser:
             self.__parser.close()
-        self.__row_number = 0
+            self.__parser = None
 
     # Read
 
@@ -553,10 +452,10 @@ class Table:
 
             # Headers
             if not headers_ready:
-                if not self.__headers_row:
+                if not self.__file.dialect.headers_row:
                     headers_ready = True
                     headers = None
-                elif row_position == self.__headers_row:
+                elif row_position == self.__file.dialect.headers_row:
                     headers_ready = True
                     headers = cells
                 if headers_ready:
@@ -583,22 +482,22 @@ class Table:
         # Sync schema
         if self.__sync_schema:
             fields = []
-            mapping = {field.get('name'): field for field in schema.fields}
+            mapping = {field.get("name"): field for field in schema.fields}
             for name in headers:
-                fields.append(mapping.get(name, {'name': name, 'type': 'any'}))
+                fields.append(mapping.get(name, {"name": name, "type": "any"}))
             schema.fields = fields
 
         # Patch schema
         if self.__patch_schema:
             patch_schema = deepcopy(self.__patch_schema)
-            fields = patch_schema.pop('fields', {})
+            fields = patch_schema.pop("fields", {})
             schema.update(patch_schema)
             for field in schema.fields:
-                field.update((fields.get(field.get('name'), {})))
+                field.update((fields.get(field.get("name"), {})))
 
         # Confirm schema
         if len(schema.field_names) != len(set(schema.field_names)):
-            note = 'Schemas with duplicate field names are not supported'
+            note = "Schemas with duplicate field names are not supported"
             raise exceptions.FrictionlessException(errors.SchemaError(note=note))
 
         # Store state
@@ -619,6 +518,9 @@ class Table:
         return field_positions
 
     def read_rows(self):
+        if not self.__row_stream:
+            note = 'Table is closed. Please call "table.open()" first.'
+            raise exceptions.FrictionlessException(errors.Error(note=note))
         return list(self.__row_stream)
 
     def __read_row_stream(self):
@@ -759,7 +661,7 @@ class Table:
         writer_options = helpers.extract_options(options, writer_class.options)
         if options:
             message = 'Not supported options "%s" for format "%s"'
-            message = message % (', '.join(options), format)
+            message = message % (", ".join(options), format)
             raise exceptions.TabulatorException(message)
 
         # Write data to target
@@ -813,7 +715,7 @@ class Table:
 
         # Sample is too short
         if self.__headers_row > self.__sample_size:
-            message = 'Headers row (%s) can\'t be more than sample_size (%s)'
+            message = "Headers row (%s) can't be more than sample_size (%s)"
             message = message % (self.__headers_row, self.__sample_size)
             raise exceptions.TabulatorException(message)
 
@@ -857,7 +759,7 @@ class Table:
             for index, header in list(enumerate(raw_headers)):
                 ignore = False
                 # Ignore blank headers
-                if header in ['', None]:
+                if header in ["", None]:
                     ignore = True
                 # Ignore listed headers
                 if self.__ignore_listed_headers is not None:
@@ -868,8 +770,8 @@ class Table:
                         ignore = True
                     # Regex
                     for item in self.__ignore_listed_headers:
-                        if isinstance(item, dict) and item.get('type') == 'regex':
-                            if bool(re.search(item['value'], header)):
+                        if isinstance(item, dict) and item.get("type") == "regex":
+                            if bool(re.search(item["value"], header)):
                                 ignore = True
                 # Ignore not-listed headers
                 if self.__ignore_not_listed_headers is not None:
@@ -880,8 +782,8 @@ class Table:
                         ignore = True
                     # Regex
                     for item in self.__ignore_not_listed_headers:
-                        if isinstance(item, dict) and item.get('type') == 'regex':
-                            if bool(re.search(item['value'], header)):
+                        if isinstance(item, dict) and item.get("type") == "regex":
+                            if bool(re.search(item["value"], header)):
                                 ignore = False
                 # Add to the list and skip
                 if ignore:
@@ -924,13 +826,13 @@ class Table:
         if isinstance(self.__headers, list):
             str_headers = []
             for header in self.__headers:
-                str_headers.append(str(header) if header is not None else '')
+                str_headers.append(str(header) if header is not None else "")
             self.__headers = str_headers
 
     def __detect_html(self):
 
         # Prepare text
-        text = ''
+        text = ""
         for row_number, headers, row in self.__sample_extended_rows:
             for value in row:
                 if isinstance(value, str):
@@ -939,7 +841,7 @@ class Table:
         # Detect html content
         html_source = helpers.detect_html(text)
         if html_source:
-            message = 'Format has been detected as HTML (not supported)'
+            message = "Format has been detected as HTML (not supported)"
             raise exceptions.FormatError(message)
 
     def __apply_processors(self, iterator):
@@ -969,11 +871,11 @@ class Table:
 
         # Skip nagative rows processor
         def skip_negative_rows(extended_rows):
-            '''
+            """
             This processor will skip rows which counts from the end, e.g.
             -1: skip last row, -2: skip pre-last row, etc.
             Rows to skip are taken from  Stream.__skip_rows_by_numbers
-            '''
+            """
             rows_to_skip = [n for n in self.__skip_rows_by_numbers if n < 0]
             buffer_size = abs(min(rows_to_skip))
             # collections.deque - takes O[1] time to push/pop values from any side.
@@ -1026,11 +928,11 @@ class Table:
             cell = row[0] if row else None
 
             # Handle blank cell/row
-            if cell in [None, '']:
-                if '' in self.__pick_rows_by_comments:
+            if cell in [None, ""]:
+                if "" in self.__pick_rows_by_comments:
                     return False
-                if self.__pick_rows_by_presets.get('blank'):
-                    if not list(filter(lambda cell: cell not in [None, ''], row)):
+                if self.__pick_rows_by_presets.get("blank"):
+                    if not list(filter(lambda cell: cell not in [None, ""], row)):
                         return False
                 return True
 
@@ -1058,11 +960,11 @@ class Table:
             cell = row[0] if row else None
 
             # Handle blank cell/row
-            if cell in [None, '']:
-                if '' in self.__skip_rows_by_comments:
+            if cell in [None, ""]:
+                if "" in self.__skip_rows_by_comments:
                     return True
-                if self.__skip_rows_by_presets.get('blank'):
-                    if not list(filter(lambda cell: cell not in [None, ''], row)):
+                if self.__skip_rows_by_presets.get("blank"):
+                    if not list(filter(lambda cell: cell not in [None, ""], row)):
                         return True
                 return False
 

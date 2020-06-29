@@ -71,7 +71,7 @@ class HtmlDialect(Dialect):
         "additionalProperties": False,
         "properties": {
             "selector": {"type": "string"},
-            "headersRow": {"type": "string"},
+            "headersRow": {"type": ["number", "null"]},
             "headersJoiner": {"type": "string"},
         },
     }
