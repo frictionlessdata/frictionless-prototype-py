@@ -13,7 +13,7 @@ from .. import errors
 
 class OdsPlugin(Plugin):
     def create_parser(self, file):
-        if file.format == 'ods':
+        if file.format == "ods":
             return OdsParser(file)
 
 
@@ -55,17 +55,17 @@ class OdsParser(Parser):
                 return int(value)
 
             # Date or datetime
-            if ctype == 'date':
+            if ctype == "date":
                 if len(value) == 10:
-                    return datetime.strptime(value, '%Y-%m-%d').date()
+                    return datetime.strptime(value, "%Y-%m-%d").date()
                 else:
-                    return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S')
+                    return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S")
 
             return value
 
-        # Stream cells
-        for row_number, row in enumerate(sheet.rows(), start=1):
-            yield row_number, None, [type_value(cell) for cell in row]
+        # Stream data
+        for cells in sheet.rows():
+            yield [type_value(cell) for cell in cells]
 
 
 # Dialect
@@ -84,15 +84,15 @@ class OdsDialect(Dialect):
     """
 
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'additionalProperties': False,
-        'properties': {'sheet': {'type': ['number', 'string']}},
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {"sheet": {"type": ["number", "string"]}},
     }
 
     def __init__(self, descriptor=None, *, sheet=None, metadata_root=None):
-        self.setdefined('sheet', sheet)
+        self.setdefined("sheet", sheet)
         super().__init__(descriptor, metadata_root=metadata_root)
 
     @property
     def sheet(self):
-        return self.get('sheet', 1)
+        return self.get("sheet", 1)
