@@ -447,41 +447,22 @@ class Table:
         schema = Schema(self.__schema)
 
         # Infer table
+        row_number = 0
+        headers_data = []
         headers_ready = False
-        headers_memory = {}
+        headers_numbers = dialect.headers_row or [config.DEFAULT_HEADERS_ROW]
         for row_position, cells in enumerate(self.__parser.data_stream, start=1):
             # TODO: filter rows
+            row_number += 1
 
             # Headers
-            # TODO: move to infer_headers
             if not headers_ready:
-                if not dialect.headers_row:
+                if row_number in headers_numbers:
+                    headers_data.append(helpers.stringify_headers(cells))
+                if row_number >= max(headers_numbers):
+                    infer = self.__read_data_stream_infer_headers
+                    headers, field_positions = infer(headers_data)
                     headers_ready = True
-                    headers = None
-                elif isinstance(dialect.headers_row, int):
-                    if dialect.headers_row == row_position:
-                        headers_ready = True
-                        headers = []
-                        for cell in cells:
-                            cell = str(cell).strip() if cell is not None else ""
-                            headers.append(cell)
-                elif isinstance(dialect.headers_row, (tuple, list)):
-                    if row_position in dialect.headers_row:
-                        headers = headers or []
-                        for index, cell in enumerate(cells):
-                            cell = str(cell).strip() if cell is not None else ""
-                            joiner = dialect.headers_joiner
-                            if headers_memory.get(index) != cell:
-                                try:
-                                    headers[index] = joiner.join([headers[index], cell])
-                                except IndexError:
-                                    headers.append(cell)
-                            headers_memory[index] = cell
-                        if row_position == max(dialect.headers_row):
-                            headers_ready = True
-                if headers_ready:
-                    infer = self.__read_data_stream_infer_field_positions
-                    field_positions = infer(headers, cells=cells)
                 if not headers_ready or headers is not None:
                     continue
 
@@ -532,11 +513,30 @@ class Table:
             else None
         )
 
-    def __read_data_stream_infer_field_positions(self, headers, *, cells):
-        # TODO: Filter headers in-place
-        # TODO: apply pick/skip/limit/offset
-        field_positions = list(range(1, len(cells) + 1))
-        return field_positions
+    def __read_data_stream_infer_headers(self, headers_data):
+        dialect = self.__file.dialect
+
+        # No headers
+        if not dialect.headers_row:
+            return None, list(range(1, len(headers_data[0]) + 1))
+
+        # Get headers
+        headers = []
+        prev_cells = {}
+        for cells in headers_data:
+            for index, cell in enumerate(cells):
+                if prev_cells.get(index) == cell:
+                    continue
+                prev_cells[index] = cell
+                if len(headers) <= index:
+                    headers.append(cell)
+                    continue
+                headers[index] = dialect.headers_joiner.join([headers[index], cell])
+
+        # Get field positions
+        field_positions = list(range(1, len(headers) + 1))
+
+        return headers, field_positions
 
     def read_rows(self):
         if not self.__row_stream:

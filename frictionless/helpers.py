@@ -26,6 +26,10 @@ def create_descriptor(**options):
     return {stringcase.camelcase(key): value for key, value in options.items()}
 
 
+def stringify_headers(cells):
+    return ["" if cell is None else str(cell).strip() for cell in cells]
+
+
 def ensure_dir(path):
     dirpath = os.path.dirname(path)
     if dirpath and not os.path.exists(dirpath):
@@ -34,15 +38,15 @@ def ensure_dir(path):
 
 def parse_hashing_algorithm(hash):
     if not hash:
-        return 'md5'
-    parts = hash.split(':', maxsplit=1)
-    return parts[0] if len(parts) > 1 else 'md5'
+        return "md5"
+    parts = hash.split(":", maxsplit=1)
+    return parts[0] if len(parts) > 1 else "md5"
 
 
 def parse_hashing_digest(hash):
     if not hash:
-        return ''
-    parts = hash.split(':', maxsplit=1)
+        return ""
+    parts = hash.split(":", maxsplit=1)
     return parts[1] if len(parts) > 1 else hash
 
 
@@ -54,39 +58,39 @@ def reset_cached_properties(obj):
 
 
 def infer_source_type(source):
-    source_type = 'table'
+    source_type = "table"
     if isinstance(source, dict):
-        if source.get('fields') is not None:
-            source_type = 'schema'
-        if source.get('path') is not None or source.get('data') is not None:
-            source_type = 'resource'
-        if source.get('resources') is not None:
-            source_type = 'package'
-        if source.get('tasks') is not None:
-            source_type = 'inquiry'
+        if source.get("fields") is not None:
+            source_type = "schema"
+        if source.get("path") is not None or source.get("data") is not None:
+            source_type = "resource"
+        if source.get("resources") is not None:
+            source_type = "package"
+        if source.get("tasks") is not None:
+            source_type = "inquiry"
     if isinstance(source, str):
-        if source.endswith('schema.json'):
-            source_type = 'schema'
-        if source.endswith('resource.json'):
-            source_type = 'resource'
-        if source.endswith('datapackage.json'):
-            source_type = 'package'
-        if source.endswith('inquiry.json'):
-            source_type = 'inquiry'
+        if source.endswith("schema.json"):
+            source_type = "schema"
+        if source.endswith("resource.json"):
+            source_type = "resource"
+        if source.endswith("datapackage.json"):
+            source_type = "package"
+        if source.endswith("inquiry.json"):
+            source_type = "inquiry"
     return source_type
 
 
 # TODO: move to file
 def infer_source_scheme_and_format(source):
-    if hasattr(source, 'read'):
-        return ('stream', None)
+    if hasattr(source, "read"):
+        return ("stream", None)
     if not isinstance(source, str):
-        return (None, 'inline')
-    if 'docs.google.com/spreadsheets' in source:
-        if 'export' not in source and 'pub' not in source:
-            return (None, 'gsheet')
-        elif 'csv' in source:
-            return ('https', 'csv')
+        return (None, "inline")
+    if "docs.google.com/spreadsheets" in source:
+        if "export" not in source and "pub" not in source:
+            return (None, "gsheet")
+        elif "csv" in source:
+            return ("https", "csv")
     parsed = urlparse(source)
     scheme = parsed.scheme.lower()
     if len(scheme) < 2:
@@ -98,18 +102,18 @@ def infer_source_scheme_and_format(source):
         query_string_format = query_string.get("format")
         if query_string_format is not None and len(query_string_format) == 1:
             format = query_string_format[0]
-    if parsed.path.endswith('datapackage.json'):
-        return (None, 'package')
+    if parsed.path.endswith("datapackage.json"):
+        return (None, "package")
     return (scheme, format)
 
 
 def create_lookup(resource, *, package=None):
     lookup = {}
     for fk in resource.schema.foreign_keys:
-        source_name = fk['reference']['resource']
-        source_key = tuple(fk['reference']['fields'])
+        source_name = fk["reference"]["resource"]
+        source_key = tuple(fk["reference"]["fields"])
         source_res = package.get_resource(source_name) if source_name else resource
-        if source_name != '' and not package:
+        if source_name != "" and not package:
             continue
         lookup.setdefault(source_name, {})
         if source_key in lookup[source_name]:
@@ -135,11 +139,11 @@ def get_current_memory_usage():
     # This will only work on systems with a /proc file system (like Linux)
     # https://stackoverflow.com/questions/897941/python-equivalent-of-phps-memory-get-usage
     try:
-        with open('/proc/self/status') as status:
+        with open("/proc/self/status") as status:
             for line in status:
                 parts = line.split()
                 key = parts[0][2:-1].lower()
-                if key == 'rss':
+                if key == "rss":
                     return int(parts[1]) / 1000
     except Exception:
         pass
@@ -172,31 +176,31 @@ def translate_headers(headers):
 
 def translate_pick_fields(pick_fields):
     for index, item in enumerate(pick_fields or []):
-        if isinstance(item, str) and item.startswith('<regex>'):
-            pick_fields[index] = {'type': 'regex', 'value': item.replace('<regex>', '')}
+        if isinstance(item, str) and item.startswith("<regex>"):
+            pick_fields[index] = {"type": "regex", "value": item.replace("<regex>", "")}
     return pick_fields
 
 
 def translate_skip_fields(skip_fields):
     for index, item in enumerate(skip_fields or []):
-        if isinstance(item, str) and item.startswith('<regex>'):
-            skip_fields[index] = {'type': 'regex', 'value': item.replace('<regex>', '')}
+        if isinstance(item, str) and item.startswith("<regex>"):
+            skip_fields[index] = {"type": "regex", "value": item.replace("<regex>", "")}
     return skip_fields
 
 
 def translate_pick_rows(pick_rows):
     for index, item in enumerate(pick_rows or []):
-        if isinstance(item, str) and item.startswith('<regex>'):
-            pick_rows[index] = {'type': 'regex', 'value': item.replace('<regex>', '')}
+        if isinstance(item, str) and item.startswith("<regex>"):
+            pick_rows[index] = {"type": "regex", "value": item.replace("<regex>", "")}
     return pick_rows
 
 
 def translate_skip_rows(skip_rows):
     for index, item in enumerate(skip_rows or []):
-        if isinstance(item, str) and item.startswith('<regex>'):
-            skip_rows[index] = {'type': 'regex', 'value': item.replace('<regex>', '')}
-        if isinstance(item, str) and item.startswith('<blank>'):
-            skip_rows[index] = {'type': 'preset', 'value': 'blank'}
+        if isinstance(item, str) and item.startswith("<regex>"):
+            skip_rows[index] = {"type": "regex", "value": item.replace("<regex>", "")}
+        if isinstance(item, str) and item.startswith("<blank>"):
+            skip_rows[index] = {"type": "preset", "value": "blank"}
     return skip_rows
 
 
@@ -204,16 +208,16 @@ def translate_dialect(dialect):
     options = {
         stringcase.lowercase(key): dialect.pop(key)
         for key in [
-            'doubleQuote',
-            'escapeChar',
-            'lineTerminator',
-            'quoteChar',
-            'skipInitialSpace',
+            "doubleQuote",
+            "escapeChar",
+            "lineTerminator",
+            "quoteChar",
+            "skipInitialSpace",
         ]
         if key in dialect
     }
-    options.pop('header', None)
-    options.pop('caseSensitiveHeader', None)
+    options.pop("header", None)
+    options.pop("caseSensitiveHeader", None)
     options.update(create_options(dialect))
     return options
 
@@ -236,24 +240,24 @@ def detect_scheme_and_format(source):
     from . import config
 
     # Scheme: stream
-    if hasattr(source, 'read'):
-        return ('stream', None)
+    if hasattr(source, "read"):
+        return ("stream", None)
 
     # Format: inline
     if not isinstance(source, str):
-        return (None, 'inline')
+        return (None, "inline")
 
     # Format: gsheet
-    if 'docs.google.com/spreadsheets' in source:
-        if 'export' not in source and 'pub' not in source:
-            return (None, 'gsheet')
-        elif 'csv' in source:
-            return ('https', 'csv')
+    if "docs.google.com/spreadsheets" in source:
+        if "export" not in source and "pub" not in source:
+            return (None, "gsheet")
+        elif "csv" in source:
+            return ("https", "csv")
 
     # Format: sql
     for sql_scheme in config.SQL_SCHEMES:
-        if source.startswith('%s://' % sql_scheme):
-            return (None, 'sql')
+        if source.startswith("%s://" % sql_scheme):
+            return (None, "sql")
 
     # General
     parsed = urlparse(source)
@@ -269,8 +273,8 @@ def detect_scheme_and_format(source):
             format = query_string_format[0]
 
     # Format: datapackage
-    if parsed.path.endswith('datapackage.json'):
-        return (None, 'datapackage')
+    if parsed.path.endswith("datapackage.json"):
+        return (None, "datapackage")
 
     return (scheme, format)
 
@@ -278,7 +282,7 @@ def detect_scheme_and_format(source):
 def detect_html(text):
     """Detect if text is HTML.
     """
-    pattern = re.compile('\\s*<(!doctype|html)', re.IGNORECASE)
+    pattern = re.compile("\\s*<(!doctype|html)", re.IGNORECASE)
     return bool(pattern.match(text))
 
 
@@ -296,7 +300,7 @@ def reset_stream(stream):
         try:
             stream.seek(0)
         except Exception:
-            message = 'It\'s not possible to reset this stream'
+            message = "It's not possible to reset this stream"
             raise exceptions.TabulatorException(message)
 
 
@@ -312,7 +316,7 @@ def requote_uri(uri):
 def import_attribute(path):
     """Import attribute by path like `package.module.attribute`
     """
-    module_name, attribute_name = path.rsplit('.', 1)
+    module_name, attribute_name = path.rsplit(".", 1)
     module = import_module(module_name)
     attribute = getattr(module, attribute_name)
     return attribute
@@ -333,11 +337,11 @@ def stringify_value(value):
     """Convert any value to string.
     """
     if value is None:
-        return u''
-    isoformat = getattr(value, 'isoformat', None)
+        return ""
+    isoformat = getattr(value, "isoformat", None)
     if isoformat is not None:
         value = isoformat()
-    return type(u'')(value)
+    return type("")(value)
 
 
 # Backports

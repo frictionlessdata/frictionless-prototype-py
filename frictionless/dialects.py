@@ -41,7 +41,12 @@ class Dialect(ControlledMetadata):
 
     @property
     def headers_row(self):
-        return self.get("headersRow", config.DEFAULT_HEADERS_ROW)
+        headers_row = self.get("headersRow", config.DEFAULT_HEADERS_ROW)
+        if isinstance(headers_row, int):
+            headers_row = [headers_row]
+        if headers_row is not None:
+            self.metadata_attach("headersRow", headers_row)
+        return headers_row
 
     @property
     def headers_joiner(self):
