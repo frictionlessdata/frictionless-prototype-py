@@ -19,7 +19,6 @@ class Dialect(ControlledMetadata):
 
     metadata_profile = {  # type: ignore
         "type": "object",
-        "additionalProperties": False,
         "properties": {
             "headersRow": {"type": ["number", "array", "null"]},
             "headersJoiner": {"type": "string"},

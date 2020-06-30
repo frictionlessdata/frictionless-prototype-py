@@ -438,10 +438,30 @@ class Table:
         return self.__read_data_stream_create()
 
     def __read_data_stream_create(self):
-        yield from self.__sample
-        for cells in self.__parser.data_stream:
-            # TODO: filter rows
-            yield helpers.filter_cells(cells, self.__field_positions)
+        row_number = 0
+        limit = self.__limit_rows
+        offset = self.__offset_rows or 0
+        sample_iterator = self.__read_data_stream_create_sample_iterator()
+        parser_iterator = self.__read_data_stream_create_parser_iterator()
+        for row_position, cells in chain(sample_iterator, parser_iterator):
+            if offset:
+                offset -= 1
+                continue
+            yield cells
+            row_number += 1
+            if limit and limit <= row_number:
+                break
+
+    def __read_data_stream_create_sample_iterator(self):
+        return zip(self.__sample_positions, self.__sample)
+
+    def __read_data_stream_create_parser_iterator(self):
+        start = max(self.__sample_positions) + 1
+        iterator = enumerate(self.__parser.data_stream, start=start)
+        for row_position, cells in iterator:
+            if self.__read_data_stream_pick_skip_row(row_position, cells):
+                cells = helpers.filter_cells(cells, self.__field_positions)
+                yield row_position, cells
 
     def __read_data_stream_infer(self):
         dialect = self.__file.dialect
@@ -459,25 +479,25 @@ class Table:
         headers_ready = False
         headers_numbers = dialect.headers_row or [config.DEFAULT_HEADERS_ROW]
         for row_position, cells in enumerate(self.__parser.data_stream, start=1):
-            # TODO: filter rows
-            row_number += 1
+            if self.__read_data_stream_pick_skip_row(row_position, cells):
 
-            # Headers
-            if not headers_ready:
-                if row_number in headers_numbers:
-                    headers_data.append(helpers.stringify_headers(cells))
-                if row_number >= max(headers_numbers):
-                    infer = self.__read_data_stream_infer_headers
-                    headers, field_positions = infer(headers_data)
-                    headers_ready = True
-                if not headers_ready or headers is not None:
-                    continue
+                # Headers
+                row_number += 1
+                if not headers_ready:
+                    if row_number in headers_numbers:
+                        headers_data.append(helpers.stringify_headers(cells))
+                    if row_number >= max(headers_numbers):
+                        infer = self.__read_data_stream_infer_headers
+                        headers, field_positions = infer(headers_data)
+                        headers_ready = True
+                    if not headers_ready or headers is not None:
+                        continue
 
-            # Sample
-            sample.append(helpers.filter_cells(cells, field_positions))
-            sample_positions.append(row_position)
-            if len(sample) >= self.__infer_volume:
-                break
+                # Sample
+                sample.append(helpers.filter_cells(cells, field_positions))
+                sample_positions.append(row_position)
+                if len(sample) >= self.__infer_volume:
+                    break
 
         # Infer schema
         if not schema.fields:
@@ -546,12 +566,14 @@ class Table:
         limit = self.__limit_fields
         offset = self.__offset_fields or 0
         for field_position, header in enumerate(headers, start=1):
-            match = self.__read_data_stream_pick_skip_field(field_position, header)
-            if match and field_position > offset:
+            if self.__read_data_stream_pick_skip_field(field_position, header):
+                if offset:
+                    offset -= 1
+                    continue
                 filter_headers.append(header)
                 field_positions.append(field_position)
-            if limit and limit <= len(filter_headers):
-                break
+                if limit and limit <= len(filter_headers):
+                    break
 
         return filter_headers, field_positions
 
@@ -562,16 +584,34 @@ class Table:
             if not items:
                 continue
             match = match and name == "skip"
-            if field_position in items:
-                match = not match
-            if header in items:
-                match = not match
-            if match and name == "pick":
-                continue
             for item in items:
-                if not isinstance(item, typing.Pattern):
-                    continue
-                if item.search(header):
+                if isinstance(item, str) and item == header:
+                    match = not match
+                elif isinstance(item, int) and item == field_position:
+                    match = not match
+                elif isinstance(item, typing.Pattern) and item.match(header):
+                    match = not match
+        return match
+
+    def __read_data_stream_pick_skip_row(self, row_position, cells):
+        match = True
+        cell = cells[0] if cells else None
+        cell = "" if cell is None else str(cell)
+        for name in ["pick", "skip"]:
+            items = self.__pick_rows if name == "pick" else self.__skip_rows
+            if not items:
+                continue
+            match = match and name == "skip"
+            for item in items:
+                if item == "<blank>":
+                    if not any(cell for cell in cells if cell not in ["", None]):
+                        match = not match
+                elif isinstance(item, str):
+                    if item == cell or (item and cell.startswith(item)):
+                        match = not match
+                elif isinstance(item, int) and item == row_position:
+                    match = not match
+                elif isinstance(item, typing.Pattern) and item.match(cell):
                     match = not match
         return match
 
