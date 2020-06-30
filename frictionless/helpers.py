@@ -30,6 +30,24 @@ def stringify_headers(cells):
     return ["" if cell is None else str(cell).strip() for cell in cells]
 
 
+def filter_cells(cells, field_positions):
+    result = []
+    for field_position, cell in enumerate(cells, start=1):
+        if field_position in field_positions:
+            result.append(cell)
+    return result
+
+
+def compile_regex(items):
+    if items is not None:
+        result = []
+        for item in items:
+            if isinstance(item, str) and item.startswith("<regex>"):
+                item = re.compile(item.replace("<regex>", ""))
+            result.append(item)
+        return result
+
+
 def ensure_dir(path):
     dirpath = os.path.dirname(path)
     if dirpath and not os.path.exists(dirpath):

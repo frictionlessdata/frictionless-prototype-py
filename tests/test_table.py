@@ -448,116 +448,116 @@ def test_table_headers_strip_and_non_strings():
 
 def test_table_pick_fields():
     source = "text://header1,header2,header3\nvalue1,value2,value3"
-    with Table(source, format="csv", headers=1, pick_fields=["header2"]) as table:
+    with Table(source, format="csv", pick_fields=["header2"]) as table:
         assert table.headers == ["header2"]
-        assert table.field_positions == [2]
-        assert table.read(keyed=True) == [
+        assert table.headers.field_positions == [2]
+        assert table.read_rows() == [
             {"header2": "value2"},
         ]
 
 
 def test_table_pick_fields_position():
     source = "text://header1,header2,header3\nvalue1,value2,value3"
-    with Table(source, format="csv", headers=1, pick_fields=[2]) as table:
+    with Table(source, format="csv", pick_fields=[2]) as table:
         assert table.headers == ["header2"]
-        assert table.field_positions == [2]
-        assert table.read(keyed=True) == [
+        assert table.headers.field_positions == [2]
+        assert table.read_rows() == [
             {"header2": "value2"},
         ]
 
 
 def test_table_pick_fields_position_and_prefix():
     source = "text://header1,header2,header3\nvalue1,value2,value3"
-    with Table(source, format="csv", headers=1, pick_fields=[2, "header3"]) as table:
+    with Table(source, format="csv", pick_fields=[2, "header3"]) as table:
         assert table.headers == ["header2", "header3"]
-        assert table.field_positions == [2, 3]
-        assert table.read(keyed=True) == [
+        assert table.headers.field_positions == [2, 3]
+        assert table.read_rows() == [
             {"header2": "value2", "header3": "value3"},
         ]
 
 
 def test_table_pick_fields_keyed_source():
     source = [{"id": 1, "name": "london"}, {"id": 2, "name": "paris"}]
-    with Table(source, headers=1, skip_fields=["id"]) as table:
+    with Table(source, skip_fields=["id"]) as table:
         assert table.headers == ["name"]
-        assert table.read() == [["london"], ["paris"]]
-    with Table(source, headers=1, skip_fields=[1]) as table:
+        assert table.read_data() == [["london"], ["paris"]]
+    with Table(source, skip_fields=[1]) as table:
         assert table.headers == ["name"]
-        assert table.read() == [["london"], ["paris"]]
-    with Table(source, headers=1, skip_fields=["name"]) as table:
+        assert table.read_data() == [["london"], ["paris"]]
+    with Table(source, skip_fields=["name"]) as table:
         assert table.headers == ["id"]
-        assert table.read() == [[1], [2]]
-    with Table(source, headers=1, skip_fields=[2]) as table:
+        assert table.read_data() == [[1], [2]]
+    with Table(source, skip_fields=[2]) as table:
         assert table.headers == ["id"]
-        assert table.read() == [[1], [2]]
+        assert table.read_data() == [[1], [2]]
 
 
 def test_table_skip_fields():
     source = "text://header1,header2,header3\nvalue1,value2,value3"
-    with Table(source, format="csv", headers=1, skip_fields=["header2"]) as table:
+    with Table(source, format="csv", skip_fields=["header2"]) as table:
         assert table.headers == ["header1", "header3"]
-        assert table.field_positions == [1, 3]
-        assert table.read(keyed=True) == [
+        assert table.headers.field_positions == [1, 3]
+        assert table.read_rows() == [
             {"header1": "value1", "header3": "value3"},
         ]
 
 
 def test_table_skip_fields_position():
     source = "text://header1,header2,header3\nvalue1,value2,value3"
-    with Table(source, format="csv", headers=1, skip_fields=[2]) as table:
+    with Table(source, format="csv", skip_fields=[2]) as table:
         assert table.headers == ["header1", "header3"]
-        assert table.field_positions == [1, 3]
-        assert table.read(keyed=True) == [
+        assert table.headers.field_positions == [1, 3]
+        assert table.read_rows() == [
             {"header1": "value1", "header3": "value3"},
         ]
 
 
 def test_table_skip_fields_position_and_prefix():
     source = "text://header1,header2,header3\nvalue1,value2,value3"
-    with Table(source, format="csv", headers=1, skip_fields=[2, "header3"]) as table:
+    with Table(source, format="csv", skip_fields=[2, "header3"]) as table:
         assert table.headers == ["header1"]
-        assert table.field_positions == [1]
-        assert table.read(keyed=True) == [
+        assert table.headers.field_positions == [1]
+        assert table.read_rows() == [
             {"header1": "value1"},
         ]
 
 
 def test_table_skip_fields_blank_header():
     source = "text://header1,,header3\nvalue1,value2,value3"
-    with Table(source, format="csv", headers=1, skip_fields=[""]) as table:
+    with Table(source, format="csv", skip_fields=[""]) as table:
         assert table.headers == ["header1", "header3"]
-        assert table.field_positions == [1, 3]
-        assert table.read(keyed=True) == [
+        assert table.headers.field_positions == [1, 3]
+        assert table.read_rows() == [
             {"header1": "value1", "header3": "value3"},
         ]
 
 
 def test_table_limit_fields():
     source = "text://header1,header2,header3\nvalue1,value2,value3"
-    with Table(source, format="csv", headers=1, limit_fields=1) as table:
+    with Table(source, format="csv", limit_fields=1) as table:
         assert table.headers == ["header1"]
-        assert table.field_positions == [1]
-        assert table.read(keyed=True) == [
+        assert table.headers.field_positions == [1]
+        assert table.read_rows() == [
             {"header1": "value1"},
         ]
 
 
 def test_table_offset_fields():
     source = "text://header1,header2,header3\nvalue1,value2,value3"
-    with Table(source, format="csv", headers=1, offset_fields=1) as table:
+    with Table(source, format="csv", offset_fields=1) as table:
         assert table.headers == ["header2", "header3"]
-        assert table.field_positions == [2, 3]
-        assert table.read(keyed=True) == [
+        assert table.headers.field_positions == [2, 3]
+        assert table.read_rows() == [
             {"header2": "value2", "header3": "value3"},
         ]
 
 
 def test_table_limit_offset_fields():
     source = "text://header1,header2,header3\nvalue1,value2,value3"
-    with Table(source, format="csv", headers=1, limit_fields=1, offset_fields=1) as table:
+    with Table(source, format="csv", limit_fields=1, offset_fields=1) as table:
         assert table.headers == ["header2"]
-        assert table.field_positions == [2]
-        assert table.read(keyed=True) == [
+        assert table.headers.field_positions == [2]
+        assert table.read_rows() == [
             {"header2": "value2"},
         ]
 
@@ -587,7 +587,7 @@ def test_table_pick_rows_regex():
         ["Alex", 2],
     ]
     pick_rows = [{"type": "regex", "value": r"^(name|John|Alex)"}]
-    with Table(source, headers=1, pick_rows=pick_rows) as table:
+    with Table(source, pick_rows=pick_rows) as table:
         assert table.headers == ["name", "order"]
         assert table.read() == [["John", 1], ["Alex", 2]]
 
@@ -617,20 +617,20 @@ def test_table_skip_rows_no_double_skip():
 
 def test_table_skip_rows_excel_empty_column():
     source = "data/special/skip-rows.xlsx"
-    with Table(source, headers=1, skip_rows=[""]) as table:
+    with Table(source, skip_rows=[""]) as table:
         assert table.read() == [["A", "B"], [8, 9]]
 
 
 def test_table_skip_rows_with_headers():
     source = "data/special/skip-rows.csv"
-    with Table(source, headers=1, skip_rows=["#"]) as table:
+    with Table(source, skip_rows=["#"]) as table:
         assert table.headers == ["id", "name"]
         assert table.read() == [["1", "english"], ["2", "中国人"]]
 
 
 def test_table_skip_rows_with_headers_example_from_readme():
     source = [["#comment"], ["name", "order"], ["John", 1], ["Alex", 2]]
-    with Table(source, headers=1, skip_rows=["#"]) as table:
+    with Table(source, skip_rows=["#"]) as table:
         assert table.headers == ["name", "order"]
         assert table.read() == [["John", 1], ["Alex", 2]]
 
@@ -645,7 +645,7 @@ def test_table_skip_rows_regex():
         ["Alex", 2],
     ]
     skip_rows = ["# comment", {"type": "regex", "value": r"^# (cat|dog)"}]
-    with Table(source, headers=1, skip_rows=skip_rows) as table:
+    with Table(source, skip_rows=skip_rows) as table:
         assert table.headers == ["name", "order"]
         assert table.read() == [["John", 1], ["Alex", 2]]
 
@@ -663,28 +663,28 @@ def test_table_skip_rows_preset():
         ["", None],
     ]
     skip_rows = [{"type": "preset", "value": "blank"}]
-    with Table(source, headers=1, skip_rows=skip_rows) as table:
+    with Table(source, skip_rows=skip_rows) as table:
         assert table.headers == ["name", "order"]
         assert table.read() == [["Ray", 0], ["John", 1], ["Alex", 2], ["", 3], [None, 4]]
 
 
 def test_table_limit_rows():
     source = "data/special/long.csv"
-    with Table(source, headers=1, limit_rows=1) as table:
+    with Table(source, limit_rows=1) as table:
         assert table.headers == ["id", "name"]
         assert table.read() == [["1", "a"]]
 
 
 def test_table_offset_rows():
     source = "data/special/long.csv"
-    with Table(source, headers=1, offset_rows=5) as table:
+    with Table(source, offset_rows=5) as table:
         assert table.headers == ["id", "name"]
         assert table.read() == [["6", "f"]]
 
 
 def test_table_limit_offset_rows():
     source = "data/special/long.csv"
-    with Table(source, headers=1, limit_rows=2, offset_rows=2) as table:
+    with Table(source, limit_rows=2, offset_rows=2) as table:
         assert table.headers == ["id", "name"]
         assert table.read() == [["3", "c"], ["4", "d"]]
 
@@ -781,7 +781,7 @@ def test_table_hash_remote():
 def test_table_save_xls_not_supported(tmpdir):
     source = "data/table.csv"
     target = str(tmpdir.join("table.xls"))
-    with Table(source, headers=1) as table:
+    with Table(source) as table:
         with pytest.raises(exceptions.FormatError) as excinfo:
             table.save(target)
         assert "xls" in str(excinfo.value)
@@ -790,11 +790,9 @@ def test_table_save_xls_not_supported(tmpdir):
 @pytest.mark.skip
 def test_table_save_sqlite(database_url):
     source = "data/table.csv"
-    with Table(source, headers=1) as table:
+    with Table(source) as table:
         table.save(database_url, table="test_stream_save_sqlite")
-    with Table(
-        database_url, table="test_table_save_sqlite", order_by="id", headers=1
-    ) as table:
+    with Table(database_url, table="test_table_save_sqlite", order_by="id") as table:
         assert table.read() == [["1", "english"], ["2", "中国人"]]
         assert table.headers == ["id", "name"]
 
@@ -814,7 +812,7 @@ def test_table_reset_on_close_issue_190():
 
 def test_table_skip_blank_at_the_end_issue_bco_dmo_33():
     source = "data/special/skip-blank-at-the-end.csv"
-    with Table(source, headers=1, skip_rows=["#"]) as table:
+    with Table(source, skip_rows=["#"]) as table:
         assert table.headers == ["test1", "test2"]
         assert table.read() == [["1", "2"], []]
 
@@ -836,7 +834,7 @@ def test_table_not_existent_remote_file_with_no_format_issue_287():
 @pytest.mark.slow
 def test_table_chardet_raises_remote_issue_305():
     source = "https://gist.githubusercontent.com/roll/56b91d7d998c4df2d4b4aeeefc18cab5/raw/a7a577cd30139b3396151d43ba245ac94d8ddf53/tabulator-issue-305.csv"
-    with Table(source, headers=1) as table:
+    with Table(source) as table:
         assert table.encoding == "utf-8"
         assert len(table.read()) == 343
 
@@ -849,7 +847,7 @@ def test_table_wrong_encoding_detection_issue_265():
 
 def test_table_skip_rows_non_string_cell_issue_322():
     source = [["id", "name"], [1, "english"], [2, "spanish"]]
-    with Table(source, headers=1, skip_rows="1") as table:
+    with Table(source, skip_rows="1") as table:
         assert table.headers == ["id", "name"]
         assert table.read() == [[2, "spanish"]]
 
@@ -883,7 +881,7 @@ def test_table_bytes_sample_size():
 @pytest.mark.skip
 def test_table_ignore_blank_headers_false():
     source = "text://header1,,header3\nvalue1,value2,value3"
-    with Table(source, format="csv", headers=1) as table:
+    with Table(source, format="csv") as table:
         assert table.headers == ["header1", "", "header3"]
         assert table.read(keyed=True) == [
             {"header1": "value1", "": "value2", "header3": "value3"},
@@ -896,7 +894,7 @@ def test_table_ignore_blank_headers_true():
     data = [
         {"header1": "value1", "header3": "value3", "header5": "value5"},
     ]
-    with Table(source, format="csv", headers=1, ignore_blank_headers=True) as table:
+    with Table(source, format="csv", ignore_blank_headers=True) as table:
         assert table.headers == ["header1", "header3", "header5"]
         assert table.sample == [["value1", "value3", "value5"]]
         assert table.sample == [["value1", "value3", "value5"]]
@@ -912,9 +910,7 @@ def test_table_ignore_blank_headers_true():
 @pytest.mark.skip
 def test_table_ignore_listed_headers():
     source = "text://header1,header2,header3\nvalue1,value2,value3"
-    with Table(
-        source, format="csv", headers=1, ignore_listed_headers=["header2"]
-    ) as table:
+    with Table(source, format="csv", ignore_listed_headers=["header2"]) as table:
         assert table.headers == ["header1", "header3"]
         assert table.read(keyed=True) == [
             {"header1": "value1", "header3": "value3"},
@@ -924,9 +920,7 @@ def test_table_ignore_listed_headers():
 @pytest.mark.skip
 def test_table_ignore_not_listed_headers():
     source = "text://header1,header2,header3\nvalue1,value2,value3"
-    with Table(
-        source, format="csv", headers=1, ignore_not_listed_headers=["header2"]
-    ) as table:
+    with Table(source, format="csv", ignore_not_listed_headers=["header2"]) as table:
         assert table.headers == ["header2"]
         assert table.read(keyed=True) == [
             {"header2": "value2"},
@@ -1056,7 +1050,7 @@ def test_table_post_parse_chain():
     # Table
     source = [["id", "name"], ["#1", "english"], [], ["2", "中国人"]]
     post_parse = [skip_commented_rows, skip_blank_rows, cast_rows]
-    with Table(source, headers=1, post_parse=post_parse) as table:
+    with Table(source, post_parse=post_parse) as table:
         assert table.headers == ["id", "name"]
         assert table.read() == [[2, "中国人"]]
 
@@ -1123,9 +1117,9 @@ def test_table_save_custom_writers(tmpdir):
     class CustomWriter:
         pass
 
-    with Table(source, headers=1, custom_writers={"csv": CustomWriter}) as table:
+    with Table(source, custom_writers={"csv": CustomWriter}) as table:
         table.save(target)
-    with Table(target, headers=1) as table:
+    with Table(target) as table:
         assert table.headers == ["id", "name"]
         assert table.read(extended=True) == [
             (2, ["id", "name"], ["1", "english"]),
@@ -1138,5 +1132,5 @@ def test_table_save_custom_writers(tmpdir):
 
 @pytest.mark.skip
 def test_table_field_positions():
-    with Table("data/table.csv", headers=1) as table:
+    with Table("data/table.csv") as table:
         assert table.field_positions == [1, 2]

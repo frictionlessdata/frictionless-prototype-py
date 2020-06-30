@@ -1,8 +1,7 @@
-import re
+import typing
 from pathlib import Path
+from copy import deepcopy
 from itertools import chain
-from copy import copy, deepcopy
-from collections import deque
 from .headers import Headers
 from .schema import Schema
 from .system import system
@@ -156,13 +155,12 @@ class Table:
     ):
 
         # Update source
-        # TODO: move to File
         if isinstance(source, Path):
             source = str(source)
 
         # Update dialect
         if headers != config.DEFAULT_HEADERS_ROW:
-            dialect = dialect or {}
+            dialect = (dialect or {}).copy()
             if isinstance(headers, (type(None), int)):
                 dialect["headersRow"] = headers
             elif isinstance(headers[0], int):
@@ -171,14 +169,23 @@ class Table:
                 dialect["headersRow"] = headers[0]
                 dialect["headersJoiner"] = headers[1]
 
+        # Update filters
+        pick_fields = helpers.compile_regex(pick_fields)
+        skip_fields = helpers.compile_regex(skip_fields)
+        pick_rows = helpers.compile_regex(pick_rows)
+        skip_rows = helpers.compile_regex(skip_rows)
+
         # Store state
         self.__parser = None
         self.__sample = None
+        self.__schema = None
         self.__headers = None
         self.__row_stream = None
         self.__data_stream = None
         self.__field_positions = None
         self.__sample_positions = None
+
+        # Store params
         self.__pick_fields = pick_fields
         self.__skip_fields = skip_fields
         self.__limit_fields = limit_fields
@@ -187,7 +194,7 @@ class Table:
         self.__skip_rows = skip_rows
         self.__limit_rows = limit_rows
         self.__offset_rows = offset_rows
-        self.__schema = schema
+        self.__init_schema = schema
         self.__sync_schema = sync_schema
         self.__patch_schema = patch_schema
         self.__infer_type = infer_type
@@ -434,7 +441,7 @@ class Table:
         yield from self.__sample
         for cells in self.__parser.data_stream:
             # TODO: filter rows
-            yield cells
+            yield helpers.filter_cells(cells, self.__field_positions)
 
     def __read_data_stream_infer(self):
         dialect = self.__file.dialect
@@ -444,7 +451,7 @@ class Table:
         headers = None
         field_positions = []
         sample_positions = []
-        schema = Schema(self.__schema)
+        schema = Schema(self.__init_schema)
 
         # Infer table
         row_number = 0
@@ -467,7 +474,7 @@ class Table:
                     continue
 
             # Sample
-            sample.append(cells)
+            sample.append(helpers.filter_cells(cells, field_positions))
             sample_positions.append(row_position)
             if len(sample) >= self.__infer_volume:
                 break
@@ -533,10 +540,40 @@ class Table:
                     continue
                 headers[index] = dialect.headers_joiner.join([headers[index], cell])
 
-        # Get field positions
-        field_positions = list(range(1, len(headers) + 1))
+        # Filter headers
+        filter_headers = []
+        field_positions = []
+        limit = self.__limit_fields
+        offset = self.__offset_fields or 0
+        for field_position, header in enumerate(headers, start=1):
+            match = self.__read_data_stream_pick_skip_field(field_position, header)
+            if match and field_position > offset:
+                filter_headers.append(header)
+                field_positions.append(field_position)
+            if limit and limit <= len(filter_headers):
+                break
 
-        return headers, field_positions
+        return filter_headers, field_positions
+
+    def __read_data_stream_pick_skip_field(self, field_position, header):
+        match = True
+        for name in ["pick", "skip"]:
+            items = self.__pick_fields if name == "pick" else self.__skip_fields
+            if not items:
+                continue
+            match = match and name == "skip"
+            if field_position in items:
+                match = not match
+            if header in items:
+                match = not match
+            if match and name == "pick":
+                continue
+            for item in items:
+                if not isinstance(item, typing.Pattern):
+                    continue
+                if item.search(header):
+                    match = not match
+        return match
 
     def read_rows(self):
         if not self.__row_stream:
@@ -548,7 +585,8 @@ class Table:
         init = zip(self.__sample_positions, self.__sample)
         rest = enumerate(self.__parser.data_stream)
         for row_number, (row_position, cells) in enumerate(chain(init, rest), start=1):
-            # TODO: filter rows or reabase on self.__data_stream
+            # TODO: filter rows
+            # TODO: filter fields
             yield Row(
                 cells,
                 fields=self.__schema.fields,
