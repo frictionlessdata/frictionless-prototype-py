@@ -128,7 +128,7 @@ def test_table_csv_skipinitialspace():
     source = "header1, header2\nvalue1, value2\nvalue3, value4"
     dialect = dialects.CsvDialect(skip_initial_space=False)
     with Table(source, scheme="text", format="csv", dialect=dialect) as table:
-        assert table.headers == ["header1", " header2"]
+        assert table.headers == ["header1", "header2"]
         assert table.read_data() == [["value1", " value2"], ["value3", " value4"]]
 
 
