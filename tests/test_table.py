@@ -20,12 +20,40 @@ def test_table():
         assert table.compression == "no"
         assert table.headers == ["id", "name"]
         assert table.sample == [["1", "english"], ["2", "中国人"]]
-        assert table.dialect == {
-            "delimiter": ",",
-            "lineTerminator": "\r\n",
-            "doubleQuote": True,
-            "quoteChar": '"',
-            "skipInitialSpace": False,
+        assert table.read_data() == [["1", "english"], ["2", "中国人"]]
+        assert table.schema == {
+            "fields": [
+                {"name": "id", "type": "integer"},
+                {"name": "name", "type": "string"},
+            ]
+        }
+
+
+def test_table_empty():
+    with Table("data/empty.csv") as table:
+        assert table.headers is None
+        assert table.schema == {}
+        assert table.read_data() == []
+
+
+def test_table_without_rows():
+    with Table("data/without-rows.csv") as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_data() == []
+        assert table.schema == {
+            "fields": [{"name": "id", "type": "any"}, {"name": "name", "type": "any"}]
+        }
+
+
+def test_table_without_headers():
+    with Table("data/without-headers.csv", headers=None) as table:
+        assert table.headers is None
+        assert table.read_data() == [["1", "english"], ["2", "中国人"], ["3", "german"]]
+        assert table.schema == {
+            "fields": [
+                {"name": "field1", "type": "integer"},
+                {"name": "field2", "type": "string"},
+            ]
         }
 
 
@@ -346,6 +374,22 @@ def test_table_compression_error_zip():
     source = "id,filename\n1,archive.zip"
     table = Table(source, scheme="text", format="csv")
     table.open()
+
+
+# Dialect
+
+
+def test_table_dialect():
+    with Table("data/table.csv") as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_data() == [["1", "english"], ["2", "中国人"]]
+        assert table.dialect == {
+            "delimiter": ",",
+            "lineTerminator": "\r\n",
+            "doubleQuote": True,
+            "quoteChar": '"',
+            "skipInitialSpace": False,
+        }
 
 
 # Headers

@@ -48,9 +48,13 @@ class Parser:
 
     def open(self):
         self.close()
-        self.__loader = self.read_loader()
-        self.__data_stream = self.read_data_stream()
-        return self
+        try:
+            self.__loader = self.read_loader()
+            self.__data_stream = self.read_data_stream()
+            return self
+        except Exception:
+            self.close()
+            raise
 
     def close(self):
         if self.__loader:

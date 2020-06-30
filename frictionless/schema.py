@@ -225,6 +225,8 @@ class Schema(ControlledMetadata):
 
         # Prepare names
         if not names:
+            if not sample:
+                return
             names = [f"field{number}" for number in range(1, len(sample[0]) + 1)]
         if len(names) != len(set(names)):
             seen_names = []
@@ -234,9 +236,9 @@ class Schema(ControlledMetadata):
                 names[index] = "%s%s" % (name, count) if count > 1 else name
                 seen_names.append(name)
 
-        # Handle type
-        if type:
-            self.fields = [{"name": name, "type": type} for name in names]
+        # Handle type/empty
+        if type or not sample:
+            self.fields = [{"name": name, "type": type or "any"} for name in names]
             return
 
         # Prepare candidates

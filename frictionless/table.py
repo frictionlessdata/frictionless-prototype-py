@@ -411,12 +411,16 @@ class Table:
 
         """
         self.close()
-        self.__file.stats = {"hash": "", "bytes": 0}
-        self.__parser = system.create_parser(self.__file)
-        self.__parser.open()
-        self.__data_stream = self.__read_data_stream()
-        self.__row_stream = self.__read_row_stream()
-        return self
+        try:
+            self.__file.stats = {"hash": "", "bytes": 0}
+            self.__parser = system.create_parser(self.__file)
+            self.__parser.open()
+            self.__data_stream = self.__read_data_stream()
+            self.__row_stream = self.__read_row_stream()
+            return self
+        except Exception:
+            self.close()
+            raise
 
     def close(self):
         """Closes the stream.
@@ -456,7 +460,7 @@ class Table:
         return zip(self.__sample_positions, self.__sample)
 
     def __read_data_stream_create_parser_iterator(self):
-        start = max(self.__sample_positions) + 1
+        start = max(self.__sample_positions or [0]) + 1
         iterator = enumerate(self.__parser.data_stream, start=start)
         for row_position, cells in iterator:
             if self.__read_data_stream_pick_skip_row(row_position, cells):

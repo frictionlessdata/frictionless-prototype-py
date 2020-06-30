@@ -57,8 +57,12 @@ class Loader:
 
     def open(self):
         self.close()
-        self.__byte_stream = self.read_byte_stream()
-        return self
+        try:
+            self.__byte_stream = self.read_byte_stream()
+            return self
+        except Exception:
+            self.close()
+            raise
 
     def close(self):
         if self.__byte_stream:
