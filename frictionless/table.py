@@ -412,7 +412,7 @@ class Table:
         """
         self.close()
         try:
-            self.__file.stats = {"hash": "", "bytes": 0}
+            self.__file.stats = {"hash": "", "bytes": 0, "rows": 0}
             self.__parser = system.create_parser(self.__file)
             self.__parser.open()
             self.__data_stream = self.__read_data_stream()
@@ -450,7 +450,7 @@ class Table:
         return self.__read_data_stream_create()
 
     def __read_data_stream_create(self):
-        row_number = 0
+        stats = self.__file.stats
         limit = self.__limit_rows
         offset = self.__offset_rows or 0
         sample_iterator = self.__read_data_stream_create_sample_iterator()
@@ -459,9 +459,9 @@ class Table:
             if offset:
                 offset -= 1
                 continue
+            stats["rows"] += 1
             yield cells
-            row_number += 1
-            if limit and limit <= row_number:
+            if limit and limit <= stats["rows"]:
                 break
 
     def __read_data_stream_create_sample_iterator(self):
@@ -492,9 +492,9 @@ class Table:
         headers_numbers = dialect.headers_row or [config.DEFAULT_HEADERS_ROW]
         for row_position, cells in enumerate(self.__parser.data_stream, start=1):
             if self.__read_data_stream_pick_skip_row(row_position, cells):
+                row_number += 1
 
                 # Headers
-                row_number += 1
                 if not headers_ready:
                     if row_number in headers_numbers:
                         headers_data.append(helpers.stringify_headers(cells))

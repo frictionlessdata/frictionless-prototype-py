@@ -1053,23 +1053,42 @@ def test_table_stats_hash_remote():
         assert table.stats["hash"] == "d82306001266c4343a2af4830321ead8"
 
 
-def test_table_stats_size():
+def test_table_stats_bytes():
     with Table("data/special/doublequote.csv") as table:
         table.read_data()
         assert table.stats["bytes"] == 7346
 
 
-def test_table_stats_size_compressed():
+def test_table_stats_bytes_compressed():
     with Table("data/special/doublequote.csv.zip") as table:
         table.read_data()
         assert table.stats["bytes"] == 1265
 
 
 @pytest.mark.slow
-def test_table_stats_size_remote():
+def test_table_stats_bytes_remote():
     with Table(BASE_URL % "data/special/doublequote.csv") as table:
         table.read_data()
         assert table.stats["bytes"] == 7346
+
+
+def test_table_stats_rows():
+    with Table("data/special/doublequote.csv") as table:
+        table.read_data()
+        assert table.stats["rows"] == 5
+
+
+@pytest.mark.slow
+def test_table_stats_rows_remote():
+    with Table(BASE_URL % "data/special/doublequote.csv") as table:
+        table.read_data()
+        assert table.stats["rows"] == 5
+
+
+def test_table_stats_rows_significant():
+    with Table("data/table1.csv", headers=None) as table:
+        table.read_data()
+        assert table.stats["rows"] == 10000
 
 
 # Reopen
@@ -1088,7 +1107,7 @@ def test_table_reopen():
         assert contents1 == contents2
 
 
-def test_table_reopen_and_sample_size():
+def test_table_reopen_and_infer_volume():
     with Table("data/special/long.csv", infer_volume=3) as table:
         # Before reset
         assert table.sample == [["1", "a"], ["2", "b"], ["3", "c"]]

@@ -25,8 +25,12 @@ class File(ControlledMetadata):
             "newline": {"type": "string"},
             "stats": {
                 "type": "object",
-                "required": ["hash", "bytes"],
-                "properties": {"hash": {"type": "string"}, "bytes": {"type": "number"}},
+                "required": ["hash", "bytes", "rows"],
+                "properties": {
+                    "hash": {"type": "string"},
+                    "bytes": {"type": "number"},
+                    "rows": {"type": "number"},
+                },
             },
         },
     }
