@@ -29,7 +29,7 @@ def describe(
         infer_confidence
 
     """
-    with Table(source, headers=headers_row, sample_size=infer_volume) as table:
+    with Table(source, headers=headers_row, infer_volume=infer_volume) as table:
         schema = Schema.from_sample(
             table.sample,
             names=infer_names or table.headers,

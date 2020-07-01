@@ -589,7 +589,9 @@ class Table:
                 continue
             match = match and name == "skip"
             for item in items:
-                if isinstance(item, str) and item == header:
+                if item == "<blank>" and header == "":
+                    match = not match
+                elif isinstance(item, str) and item == header:
                     match = not match
                 elif isinstance(item, int) and item == field_position:
                     match = not match

@@ -35,12 +35,12 @@ class Row(OrderedDict):
             for field_position, cell in enumerate(iterator, start=start):
                 self.__errors.append(
                     errors.ExtraCellError(
-                        note='',
+                        note="",
                         cells=list(map(str, cells)),
                         row_number=row_number,
                         row_position=row_position,
                         cell=str(cell),
-                        field_name='',
+                        field_name="",
                         field_number=len(fields) + field_position - start,
                         field_position=field_position,
                     )
@@ -55,11 +55,11 @@ class Row(OrderedDict):
                     cells.append(None)
                     self.__errors.append(
                         errors.MissingCellError(
-                            note='',
+                            note="",
                             cells=list(map(str, cells)),
                             row_number=row_number,
                             row_position=row_position,
-                            cell='',
+                            cell="",
                             field_name=field.name,
                             field_number=field_number,
                             field_position=field_position
@@ -74,7 +74,7 @@ class Row(OrderedDict):
 
             # Read cell
             target, notes = field.read_cell(source)
-            type_note = notes.pop('type', None) if notes else None
+            type_note = notes.pop("type", None) if notes else None
             if target is None and not type_note:
                 self.__blank_cells[field.name] = source
             self[field.name] = target
@@ -115,7 +115,7 @@ class Row(OrderedDict):
         if len(self) == len(self.__blank_cells):
             self.__errors = [
                 errors.BlankRowError(
-                    note='',
+                    note="",
                     cells=list(map(str, cells)),
                     row_number=row_number,
                     row_position=row_position,
@@ -145,3 +145,7 @@ class Row(OrderedDict):
     @cached_property
     def errors(self):
         return self.__errors
+
+    @cached_property
+    def valid(self):
+        return not self.__errors

@@ -35,9 +35,9 @@ class LocalControl(Control):
     """
 
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'additionalProperties': False,
-        'properties': {},
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {},
     }
 
 
@@ -56,11 +56,12 @@ class RemoteControl(Control):
     """
 
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'properties': {
-            'httpSession': {},
-            'httpPreload': {'type': 'boolean'},
-            'httpTimeout': {'type': 'number'},
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "httpSession": {},
+            "httpPreload": {"type": "boolean"},
+            "httpTimeout": {"type": "number"},
         },
     }
 
@@ -73,14 +74,14 @@ class RemoteControl(Control):
         http_timeout=None,
         metadata_root=None
     ):
-        self.setdefined('httpSession', http_session)
-        self.setdefined('httpPreload', http_preload)
-        self.setdefined('httpTimeout', http_timeout)
+        self.setdefined("httpSession", http_session)
+        self.setdefined("httpPreload", http_preload)
+        self.setdefined("httpTimeout", http_timeout)
         super().__init__(descriptor, metadata_root=metadata_root)
 
     @property
     def http_session(self):
-        http_session = self.get('httpSession')
+        http_session = self.get("httpSession")
         if not http_session:
             http_session = requests.Session()
             http_session.headers.update(config.DEFAULT_HTTP_HEADERS)
@@ -88,17 +89,17 @@ class RemoteControl(Control):
 
     @property
     def http_preload(self):
-        return self.get('httpPreload', False)
+        return self.get("httpPreload", False)
 
     @property
     def http_timeout(self):
-        return self.get('httpTimeout', config.DEFAULT_HTTP_TIMEOUT)
+        return self.get("httpTimeout", config.DEFAULT_HTTP_TIMEOUT)
 
     # Expand
 
     def expand(self):
-        self.setdetault('httpPreload', self.http_preload)
-        self.setdetault('httpTimeout', self.http_timeout)
+        self.setdetault("httpPreload", self.http_preload)
+        self.setdetault("httpTimeout", self.http_timeout)
 
 
 class StreamControl(Control):
@@ -113,9 +114,9 @@ class StreamControl(Control):
     """
 
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'additionalProperties': False,
-        'properties': {},
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {},
     }
 
 
@@ -131,7 +132,7 @@ class TextControl(Control):
     """
 
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'additionalProperties': False,
-        'properties': {},
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {},
     }

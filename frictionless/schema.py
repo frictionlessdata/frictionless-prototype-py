@@ -228,6 +228,8 @@ class Schema(ControlledMetadata):
             if not sample:
                 return
             names = [f"field{number}" for number in range(1, len(sample[0]) + 1)]
+
+        # Deduplicate names
         if len(names) != len(set(names)):
             seen_names = []
             names = names.copy()
