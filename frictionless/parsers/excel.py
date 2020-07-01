@@ -57,11 +57,15 @@ class XlsxParser(Parser):
         # Get book
         # To fill merged cells we can't use read-only because
         # `sheet.merged_cell_ranges` is not available in this mode
-        book = openpyxl.load_workbook(
-            self.loader.byte_stream,
-            read_only=not dialect.fill_merged_cells,
-            data_only=True,
-        )
+        try:
+            book = openpyxl.load_workbook(
+                self.loader.byte_stream,
+                read_only=not dialect.fill_merged_cells,
+                data_only=True,
+            )
+        except Exception as exception:
+            error = errors.FormatError(note=f'invlid excel file "{self.file.path}"')
+            raise exceptions.FrictionlessException(error) from exception
 
         # Get sheet
         try:

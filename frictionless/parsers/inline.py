@@ -39,5 +39,5 @@ class InlineParser(Parser):
 
         # Error
         else:
-            note = "Data item has to be tuple, list or dict"
+            note = "data item has to be tuple, list or dict"
             raise exceptions.FrictionlessException(errors.SourceError(note=note))

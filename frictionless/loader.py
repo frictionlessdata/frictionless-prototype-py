@@ -85,6 +85,9 @@ class Loader:
         except IOError as exception:
             error = errors.SchemeError(note=str(exception))
             raise exceptions.FrictionlessException(error)
+        except (zipfile.BadZipFile, gzip.BadGzipFile) as exception:
+            error = errors.CompressionError(note=str(exception))
+            raise exceptions.FrictionlessException(error)
         return byte_stream
 
     def read_byte_stream_create(self):
@@ -93,7 +96,7 @@ class Loader:
     def read_byte_stream_infer_stats(self, byte_stream):
         if not self.file.stats:
             return byte_stream
-        return ByteStreamWithStats(
+        return ByteStreamWithStatsHandling(
             byte_stream,
             hashing=self.file.hashing,
             stats=self.file.stats if not self.file.stats["hash"] else {},
@@ -128,7 +131,7 @@ class Loader:
             return byte_stream
         if self.file.compression == "no":
             return byte_stream
-        note = f'Compression "{self.compression}" is not supported'
+        note = f'compression "{self.file.compression}" is not supported'
         raise exceptions.FrictionlessException(errors.CompressionError(note=note))
 
     def read_text_stream(self):
@@ -138,12 +141,12 @@ class Loader:
             TextIO: I/O stream
 
         """
-        self.read_text_stream_infer_encoding(self.byte_stream)
-        return io.TextIOWrapper(
-            buffer=self.byte_stream,
-            encoding=self.file.encoding,
-            newline=self.file.newline,
-        )
+        try:
+            self.read_text_stream_infer_encoding(self.byte_stream)
+        except (LookupError, UnicodeDecodeError) as exception:
+            error = errors.EncodingError(note=str(exception))
+            raise exceptions.FrictionlessException(error) from exception
+        return self.read_text_stream_decode(self.byte_stream)
 
     def read_text_stream_infer_encoding(self, byte_stream):
         encoding = self.file.get("encoding")
@@ -174,30 +177,18 @@ class Loader:
         self.file.encoding = encoding
 
     def read_text_stream_decode(self, byte_stream):
-        text_stream = io.TextIOWrapper(byte_stream, self.encoding)
-        return text_stream
+        return io.TextIOWrapper(
+            byte_stream, self.file.encoding, newline=self.file.newline
+        )
 
 
 # Internal
 
 
-class ByteStreamWithStats(object):
-    """This class is intended to be used as
-
-    stats = {'hash': '', 'bytes': 0}
-    bytes = BytesStatsWrapper(bytes, stats)
-
-    It will be updating the stats during reading.
-
-    # Arguments
-        byte_stream
-        hashing
-
-    """
-
+class ByteStreamWithStatsHandling:
     def __init__(self, byte_stream, *, hashing, stats):
         try:
-            self.__hasher = getattr(hashlib, hashing)() if hashing else None
+            self.__hasher = hashlib.new(hashing) if hashing else None
         except Exception as exception:
             error = errors.HashingError(note=str(exception))
             raise exceptions.FrictionlessException(error)

@@ -1,4 +1,8 @@
+import gzip
+import zipfile
 from .system import system
+from . import exceptions
+from . import errors
 
 
 class Parser:
@@ -68,7 +72,41 @@ class Parser:
             return loader.open()
 
     def read_data_stream(self):
-        return self.read_data_stream_create()
+        data_stream = self.read_data_stream_create()
+        data_stream = self.read_data_stream_handle_errors(data_stream)
+        return data_stream
 
     def read_data_stream_create(self, loader):
         raise NotImplementedError
+
+    def read_data_stream_handle_errors(self, data_stream):
+        return DataStreamWithErrorHandling(data_stream)
+
+
+# Internal
+
+
+# Try moving loader related to loader
+class DataStreamWithErrorHandling:
+    def __init__(self, data_stream):
+        self.data_stream = data_stream
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        try:
+            return self.data_stream.__next__()
+        except StopIteration:
+            raise
+        except exceptions.FrictionlessException:
+            raise
+        except (zipfile.BadZipFile, gzip.BadGzipFile) as exception:
+            error = errors.CompressionError(note=str(exception))
+            raise exceptions.FrictionlessException(error)
+        except UnicodeDecodeError as exception:
+            error = errors.EncodingError(note=str(exception))
+            raise exceptions.FrictionlessException(error) from exception
+        except Exception as exception:
+            error = errors.SourceError(note=str(exception))
+            raise exceptions.FrictionlessException(error) from exception

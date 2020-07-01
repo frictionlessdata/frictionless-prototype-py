@@ -14,7 +14,7 @@ class RemoteLoader(Loader):
         source = requests.utils.requote_uri(self.file.source)
         session = self.file.control.http_session
         timeout = self.file.control.http_timeout
-        byte_stream = RemoteStream(source, session=session, timeout=timeout).open()
+        byte_stream = RemoteByteStream(source, session=session, timeout=timeout).open()
         if self.file.control.http_preload:
             buffer = io.BufferedRandom(io.BytesIO())
             buffer.write(byte_stream.read())
@@ -26,10 +26,7 @@ class RemoteLoader(Loader):
 # Internal
 
 
-class RemoteStream(object):
-    # It's possible to implement cache for bytes sample
-    # size to prevent additional HTTP calls used in seek
-
+class RemoteByteStream(object):
     def __init__(self, source, *, session, timeout):
         self.__source = source
         self.__session = session

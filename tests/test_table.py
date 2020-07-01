@@ -79,13 +79,6 @@ def test_table_row_stream():
         assert list(table.row_stream) == []
 
 
-def test_table_row_stream():
-    with Table("data/table.csv") as table:
-        assert table.headers == ["id", "name"]
-        assert list(table.data_stream) == [["1", "english"], ["2", "中国人"]]
-        assert list(table.data_stream) == []
-
-
 def test_table_row_stream_iterate():
     with Table("data/table.csv") as table:
         assert table.headers == ["id", "name"]
@@ -153,72 +146,22 @@ def test_table_without_headers():
         }
 
 
-def test_table_source_error_data():
-    table = Table("[1,2]", scheme="text", format="json")
-    with pytest.raises(exceptions.FrictionlessException):
-        table.open()
-        table.read_data()
-
-
-def test_table_read_closed():
+def test_table_error_read_closed():
     table = Table("data/table.csv")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.read_data()
-    assert "table.open()" in str(excinfo.value)
+    error = excinfo.value.error
+    assert error.code == "error"
+    assert error.note == 'the table has not been opened by "table.open()"'
 
 
-def test_table_reopen():
-    with Table("data/table.csv") as table:
-        headers1 = table.headers
-        contents1 = table.read_data()
+def test_table_source_error_data():
+    table = Table("[1,2]", scheme="text", format="json")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
-        headers2 = table.headers
-        contents2 = table.read_data()
-        assert headers1 == ["id", "name"]
-        assert contents1 == [["1", "english"], ["2", "中国人"]]
-        assert headers1 == headers2
-        assert contents1 == contents2
-
-
-def test_table_reopen_and_sample_size():
-    with Table("data/special/long.csv", infer_volume=3) as table:
-        # Before reset
-        assert table.sample == [["1", "a"], ["2", "b"], ["3", "c"]]
-        assert table.read_data() == [
-            ["1", "a"],
-            ["2", "b"],
-            ["3", "c"],
-            ["4", "d"],
-            ["5", "e"],
-            ["6", "f"],
-        ]
-        assert table.read_data() == []
-        # Reopen table
-        table.open()
-        # After reopen
-        assert table.sample == [["1", "a"], ["2", "b"], ["3", "c"]]
-        assert table.read_data() == [
-            ["1", "a"],
-            ["2", "b"],
-            ["3", "c"],
-            ["4", "d"],
-            ["5", "e"],
-            ["6", "f"],
-        ]
-
-
-def test_table_reopen_generator():
-    def generator():
-        yield [1]
-        yield [2]
-
-    with Table(generator, headers=None) as table:
-        # Before reopen
-        assert table.read_data() == [[1], [2]]
-        # Reset table
-        table.open()
-        # After reopen
-        assert table.read_data() == [[1], [2]]
+    error = excinfo.value.error
+    assert error.code == "source-error"
+    assert error.note == "data item has to be tuple, list or dict"
 
 
 # Scheme
@@ -245,25 +188,58 @@ def test_table_scheme_text():
         assert table.scheme == "text"
 
 
-def test_table_scheme_error():
+def test_table_scheme_error_bad_scheme():
     table = Table("", scheme="bad")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
-    assert "bad" in str(excinfo.value)
+    error = excinfo.value.error
+    assert error.code == "scheme-error"
+    assert error.note == 'cannot create loader "bad". Try installing "frictionless-bad"'
 
 
-def test_table_io_error():
+def test_table_scheme_error_bad_scheme_and_format():
+    table = Table("bad://bad.bad")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        table.open()
+    error = excinfo.value.error
+    assert error.code == "scheme-error"
+    assert error.note == 'cannot create loader "bad". Try installing "frictionless-bad"'
+
+
+def test_table_scheme_error_file_not_found():
     table = Table("bad.csv")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
-    assert "bad.csv" in str(excinfo.value)
+    error = excinfo.value.error
+    assert error.code == "scheme-error"
+    assert error.note == "[Errno 2] No such file or directory: 'bad.csv'"
 
 
-def test_table_http_error():
-    table = Table("http://github.com/bad.csv")
+def test_table_scheme_error_file_not_found_remote():
+    table = Table("https://example.com/bad.csv")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
-    assert "bad.csv" in str(excinfo.value)
+    error = excinfo.value.error
+    assert error.code == "scheme-error"
+    assert error.note[18:] == "Not Found for url: https://example.com/bad.csv"
+
+
+def test_table_scheme_error_file_not_found_bad_format():
+    table = Table("bad.bad")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        table.open()
+    error = excinfo.value.error
+    assert error.code == "scheme-error"
+    assert error.note == "[Errno 2] No such file or directory: 'bad.bad'"
+
+
+def test_table_scheme_error_file_not_found_bad_compression():
+    table = Table("bad.csv", compression="bad")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        table.open()
+    error = excinfo.value.error
+    assert error.code == "scheme-error"
+    assert error.note == "[Errno 2] No such file or directory: 'bad.csv'"
 
 
 # Format
@@ -304,11 +280,48 @@ def test_table_format_html():
         assert table.format == "html"
 
 
-def test_table_format_error():
+def test_table_format_error_bad_format():
     table = Table("data/special/table.bad")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
-    assert "bad" in str(excinfo.value)
+    error = excinfo.value.error
+    assert error.code == "format-error"
+    assert error.note == 'cannot create parser "bad". Try installing "frictionless-bad"'
+
+
+def test_table_format_error_non_matching_format():
+    table = Table("data/table.csv", format="xlsx")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        table.open()
+    error = excinfo.value.error
+    assert error.code == "format-error"
+    assert error.note == 'invlid excel file "data/table.csv"'
+
+
+# Hashing
+
+
+def test_table_hashing():
+    with Table("data/table.csv") as table:
+        table.read_data()
+        assert table.hashing == "md5"
+        assert table.stats["hash"] == "6c2c61dd9b0e9c6876139a449ed87933"
+
+
+def test_table_hashing_provided():
+    with Table("data/table.csv", hashing="sha1") as table:
+        table.read_data()
+        assert table.hashing == "sha1"
+        assert table.stats["hash"] == "db6ea2f8ff72a9e13e1d70c28ed1c6b42af3bb0e"
+
+
+def test_table_hashing_error_bad_hashing():
+    table = Table("data/table.csv", hashing="bad")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        table.open()
+    error = excinfo.value.error
+    assert error.code == "hashing-error"
+    assert error.note == "unsupported hash type bad"
 
 
 # Encoding
@@ -343,37 +356,47 @@ def test_table_encoding_utf_16():
         assert table.read_data() == [[u"en", u"English"], [u"ja", u"日本語"]]
 
 
-@pytest.mark.skip
-def test_table_encoding_missmatch_handle_errors():
+def test_table_encoding_error_bad_encoding():
+    table = Table("data/table.csv", encoding="bad")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        table.open()
+    error = excinfo.value.error
+    assert error.code == "encoding-error"
+    assert error.note == "unknown encoding: bad"
+
+
+def test_table_encoding_error_non_matching_encoding():
     table = Table("data/table.csv", encoding="ascii")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
-    assert (
-        str(excinfo.value)
-        == 'Cannot parse the source "data/table.csv" using "ascii" encoding at "20"'
-    )
+    error = excinfo.value.error
+    assert error.code == "encoding-error"
+    assert error.note[:51] == "'ascii' codec can't decode byte 0xe4 in position 20"
 
 
 # Compression
 
 
-def test_table_local_csv_zip():
+def test_table_compression_local_csv_zip():
     with Table("data/table.csv.zip") as table:
         assert table.compression == "zip"
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
-def test_table_local_csv_zip_multiple_files():
-    with Table("data/2-files.zip", compression_path="table.csv") as table:
-        assert table.headers == ["id", "name"]
-        assert table.read_data() == [["1", "english"], ["2", "中国人"]]
-    with Table("data/2-files.zip", compression_path="table-reverse.csv") as table:
+def test_table_compression_local_csv_zip_multiple_files():
+    with Table("data/2-files.zip") as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "中国人"], ["2", "english"]]
 
 
-def test_table_local_csv_zip_multiple_open():
+def test_table_compression_local_csv_zip_multiple_files_compression_path():
+    with Table("data/2-files.zip", compression_path="table.csv") as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_data() == [["1", "english"], ["2", "中国人"]]
+
+
+def test_table_compression_local_csv_zip_multiple_open():
     # That's how `tableschema.iter()` acts
     table = Table("data/table.csv.zip")
     table.open()
@@ -386,20 +409,20 @@ def test_table_local_csv_zip_multiple_open():
     table.close()
 
 
-def test_table_local_csv_gz():
+def test_table_compression_local_csv_gz():
     with Table("data/table.csv.gz") as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
-def test_table_filelike_csv_zip():
+def test_table_compression_filelike_csv_zip():
     with open("data/table.csv.zip", "rb") as file:
         with Table(file, format="csv", compression="zip") as table:
             assert table.headers == ["id", "name"]
             assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
-def test_table_filelike_csv_gz():
+def test_table_compression_filelike_csv_gz():
     with open("data/table.csv.gz", "rb") as file:
         with Table(file, format="csv", compression="gz") as table:
             assert table.headers == ["id", "name"]
@@ -407,7 +430,7 @@ def test_table_filelike_csv_gz():
 
 
 @pytest.mark.slow
-def test_table_remote_csv_zip():
+def test_table_compression_remote_csv_zip():
     source = "https://raw.githubusercontent.com/frictionlessdata/tabulator-py/master/data/table.csv.zip"
     with Table(source) as table:
         assert table.headers == ["id", "name"]
@@ -415,36 +438,40 @@ def test_table_remote_csv_zip():
 
 
 @pytest.mark.slow
-def test_table_remote_csv_gz():
+def test_table_compression_remote_csv_gz():
     source = "https://raw.githubusercontent.com/frictionlessdata/tabulator-py/master/data/table.csv.gz"
     with Table(source) as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
-@pytest.mark.skip
-def test_table_compression_invalid():
+def test_table_compression_error_bad():
+    table = Table("data/table.csv", compression="bad")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        Table("table.csv", compression="bad").open()
-    assert "bad" in str(excinfo.value)
+        table.open()
+    error = excinfo.value.error
+    assert error.code == "compression-error"
+    assert error.note == 'compression "bad" is not supported'
 
 
-@pytest.mark.skip
-def test_table_compression_error_zip():
+def test_table_compression_error_invalid_zip():
     source = "id,filename\n1,archive.zip"
     table = Table(source, scheme="text", format="csv")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
-    assert excinfo
+    error = excinfo.value.error
+    assert error.code == "compression-error"
+    assert error.note == "File is not a zip file"
 
 
-@pytest.mark.skip
-def test_table_compression_error_gz():
+def test_table_compression_error_invalid_gz():
     source = "id,filename\n\1,dump.tar.gz"
     table = Table(source, scheme="text", format="csv")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
-    assert excinfo
+    error = excinfo.value.error
+    assert error.code == "compression-error"
+    assert error.note == "Not a gzipped file (b'id')"
 
 
 # Control
@@ -459,10 +486,14 @@ def test_table_control():
         assert table.control == {"httpPreload": True}
 
 
+# TODO: rebase on control error
 def test_table_control_bad_property():
     table = Table(BASE_URL % "data/table.csv", control={"bad": True})
-    with pytest.raises(exceptions.FrictionlessException):
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
+    error = excinfo.value.error
+    assert error.code == "error"
+    assert error.note.count("bad")
 
 
 # Dialect
@@ -489,10 +520,14 @@ def test_table_dialect_json_property():
         assert table.read_data() == [["value1", "value2"]]
 
 
+# TODO: rebase on dialect error
 def test_table_dialect_bad_property():
     table = Table("data/table.csv", dialect={"bad": True})
-    with pytest.raises(exceptions.FrictionlessException):
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
+    error = excinfo.value.error
+    assert error.code == "error"
+    assert error.note.count("bad")
 
 
 # Headers
@@ -961,47 +996,28 @@ def test_table_schema_infer_names():
 # Stats
 
 
-def test_table_size():
-    with Table("data/special/doublequote.csv") as table:
-        table.read_data()
-        assert table.stats["bytes"] == 7346
-
-
-def test_table_size_compressed():
-    with Table("data/special/doublequote.csv.zip") as table:
-        table.read_data()
-        assert table.stats["bytes"] == 1265
-
-
-@pytest.mark.slow
-def test_table_size_remote():
-    with Table(BASE_URL % "data/special/doublequote.csv") as table:
-        table.read_data()
-        assert table.stats["bytes"] == 7346
-
-
-def test_table_hash():
+def test_table_stats_hash():
     with Table("data/special/doublequote.csv") as table:
         table.read_data()
         assert table.hashing == "md5"
         assert table.stats["hash"] == "d82306001266c4343a2af4830321ead8"
 
 
-def test_table_hash_md5():
+def test_table_stats_hash_md5():
     with Table("data/special/doublequote.csv", hashing="md5") as table:
         table.read_data()
         assert table.hashing == "md5"
         assert table.stats["hash"] == "d82306001266c4343a2af4830321ead8"
 
 
-def test_table_hash_sha1():
+def test_table_stats_hash_sha1():
     with Table("data/special/doublequote.csv", hashing="sha1") as table:
         table.read_data()
         assert table.hashing == "sha1"
         assert table.stats["hash"] == "2842768834a6804d8644dd689da61c7ab71cbb33"
 
 
-def test_table_hash_sha256():
+def test_table_stats_hash_sha256():
     with Table("data/special/doublequote.csv", hashing="sha256") as table:
         table.read_data()
         assert table.hashing == "sha256"
@@ -1011,7 +1027,7 @@ def test_table_hash_sha256():
         )
 
 
-def test_table_hash_sha512():
+def test_table_stats_hash_sha512():
     with Table("data/special/doublequote.csv", hashing="sha512") as table:
         table.read_data()
         assert table.hashing == "sha512"
@@ -1021,13 +1037,7 @@ def test_table_hash_sha512():
         )
 
 
-def test_table_hash_not_supported():
-    with pytest.raises(exceptions.FrictionlessException):
-        with Table("data/special/doublequote.csv", hashing="bad") as table:
-            table.read_data()
-
-
-def test_table_hash_compressed():
+def test_table_stats_hash_compressed():
     with Table("data/special/doublequote.csv.zip") as table:
         table.read_data()
         assert table.hashing == "md5"
@@ -1035,24 +1045,90 @@ def test_table_hash_compressed():
 
 
 @pytest.mark.slow
-def test_table_hash_remote():
+def test_table_stats_hash_remote():
     with Table(BASE_URL % "data/special/doublequote.csv") as table:
         table.read_data()
         assert table.hashing == "md5"
         assert table.stats["hash"] == "d82306001266c4343a2af4830321ead8"
 
 
+def test_table_stats_size():
+    with Table("data/special/doublequote.csv") as table:
+        table.read_data()
+        assert table.stats["bytes"] == 7346
+
+
+def test_table_stats_size_compressed():
+    with Table("data/special/doublequote.csv.zip") as table:
+        table.read_data()
+        assert table.stats["bytes"] == 1265
+
+
+@pytest.mark.slow
+def test_table_stats_size_remote():
+    with Table(BASE_URL % "data/special/doublequote.csv") as table:
+        table.read_data()
+        assert table.stats["bytes"] == 7346
+
+
+# Reopen
+
+
+def test_table_reopen():
+    with Table("data/table.csv") as table:
+        headers1 = table.headers
+        contents1 = table.read_data()
+        table.open()
+        headers2 = table.headers
+        contents2 = table.read_data()
+        assert headers1 == ["id", "name"]
+        assert contents1 == [["1", "english"], ["2", "中国人"]]
+        assert headers1 == headers2
+        assert contents1 == contents2
+
+
+def test_table_reopen_and_sample_size():
+    with Table("data/special/long.csv", infer_volume=3) as table:
+        # Before reset
+        assert table.sample == [["1", "a"], ["2", "b"], ["3", "c"]]
+        assert table.read_data() == [
+            ["1", "a"],
+            ["2", "b"],
+            ["3", "c"],
+            ["4", "d"],
+            ["5", "e"],
+            ["6", "f"],
+        ]
+        assert table.read_data() == []
+        # Reopen table
+        table.open()
+        # After reopen
+        assert table.sample == [["1", "a"], ["2", "b"], ["3", "c"]]
+        assert table.read_data() == [
+            ["1", "a"],
+            ["2", "b"],
+            ["3", "c"],
+            ["4", "d"],
+            ["5", "e"],
+            ["6", "f"],
+        ]
+
+
+def test_table_reopen_generator():
+    def generator():
+        yield [1]
+        yield [2]
+
+    with Table(generator, headers=None) as table:
+        # Before reopen
+        assert table.read_data() == [[1], [2]]
+        # Reset table
+        table.open()
+        # After reopen
+        assert table.read_data() == [[1], [2]]
+
+
 # Save
-
-
-@pytest.mark.skip
-def test_table_save_xls_not_supported(tmpdir):
-    source = "data/table.csv"
-    target = str(tmpdir.join("table.xls"))
-    with Table(source) as table:
-        with pytest.raises(exceptions.FormatError) as excinfo:
-            table.save(target)
-        assert "xls" in str(excinfo.value)
 
 
 @pytest.mark.skip
@@ -1063,6 +1139,16 @@ def test_table_save_sqlite(database_url):
     with Table(database_url, table="test_table_save_sqlite", order_by="id") as table:
         assert table.read() == [["1", "english"], ["2", "中国人"]]
         assert table.headers == ["id", "name"]
+
+
+@pytest.mark.skip
+def test_table_save_xls_not_supported(tmpdir):
+    source = "data/table.csv"
+    target = str(tmpdir.join("table.xls"))
+    with Table(source) as table:
+        with pytest.raises(exceptions.FormatError) as excinfo:
+            table.save(target)
+        assert "xls" in str(excinfo.value)
 
 
 # Issues
@@ -1085,18 +1171,22 @@ def test_table_skip_blank_at_the_end_issue_bco_dmo_33():
         assert table.read_data() == [["1", "2"], []]
 
 
-@pytest.mark.skip
 def test_table_not_existent_local_file_with_no_format_issue_287():
-    with pytest.raises(exceptions.IOError) as excinfo:
-        Table("bad").open()
-    assert "bad" in str(excinfo.value)
+    table = Table("bad")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        table.open()
+    error = excinfo.value.error
+    assert error.code == "scheme-error"
+    assert error.note == "[Errno 2] No such file or directory: 'bad'"
 
 
-@pytest.mark.skip
 def test_table_not_existent_remote_file_with_no_format_issue_287():
-    with pytest.raises(exceptions.HTTPError) as excinfo:
-        Table("http://example.com/bad").open()
-    assert "bad" in str(excinfo.value)
+    table = Table("http://example.com/bad")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        table.open()
+    error = excinfo.value.error
+    assert error.code == "scheme-error"
+    assert error.note == "404 Client Error: Not Found for url: http://example.com/bad"
 
 
 @pytest.mark.slow

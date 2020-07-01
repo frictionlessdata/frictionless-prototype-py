@@ -224,7 +224,7 @@ class Table:
 
     def __iter__(self):
         if not self.__row_stream:
-            note = 'Table is closed. Please call "table.open()" first.'
+            note = 'the table has not been opened by "table.open()"'
             raise exceptions.FrictionlessException(errors.Error(note=note))
         return iter(self.__row_stream)
 
@@ -418,6 +418,14 @@ class Table:
             self.__data_stream = self.__read_data_stream()
             self.__row_stream = self.__read_row_stream()
             return self
+        except exceptions.FrictionlessException as exception:
+            self.close()
+            # Ensure not found file is a scheme error
+            if exception.error.code == "format-error":
+                loader = system.create_loader(self.__file)
+                loader.open()
+                loader.close()
+            raise
         except Exception:
             self.close()
             raise
@@ -433,7 +441,7 @@ class Table:
 
     def read_data(self):
         if not self.__data_stream:
-            note = 'Table is closed. Please call "table.open()" first.'
+            note = 'the table has not been opened by "table.open()"'
             raise exceptions.FrictionlessException(errors.Error(note=note))
         return list(self.__data_stream)
 
@@ -623,7 +631,7 @@ class Table:
 
     def read_rows(self):
         if not self.__row_stream:
-            note = 'Table is closed. Please call "table.open()" first.'
+            note = 'the table has not been opened by "table.open()"'
             raise exceptions.FrictionlessException(errors.Error(note=note))
         return list(self.__row_stream)
 
