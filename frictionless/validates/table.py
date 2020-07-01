@@ -15,7 +15,7 @@ from ..report import Report, ReportTable
 def validate_table(
     source,
     *,
-    # File
+    # Table
     scheme=None,
     format=None,
     hashing=None,
@@ -24,7 +24,6 @@ def validate_table(
     compression_path=None,
     control=None,
     dialect=None,
-    # Table
     headers_row=config.DEFAULT_HEADERS_ROW,
     headers_joiner=config.DEFAULT_HEADERS_JOINER,
     pick_fields=None,
@@ -43,10 +42,9 @@ def validate_table(
     infer_names=None,
     infer_volume=config.DEFAULT_INFER_VOLUME,
     infer_confidence=config.DEFAULT_INFER_CONFIDENCE,
-    # Integrity
+    # Validation
     stats=None,
     lookup=None,
-    # Validation
     pick_errors=None,
     skip_errors=None,
     limit_errors=None,
@@ -138,7 +136,7 @@ def validate_table(
     try:
         table.open()
         if not table.sample:
-            message = 'There are no rows available'
+            message = "There are no rows available"
             raise exceptions.SourceError(message)
     except Exception as exception:
         errors.add(Error.from_exception(exception), force=True)
@@ -167,17 +165,17 @@ def validate_table(
         # Sync schema
         if sync_schema:
             fields = []
-            mapping = {field.get('name'): field for field in schema.fields}
+            mapping = {field.get("name"): field for field in schema.fields}
             for name in table.headers:
-                fields.append(mapping.get(name, {'name': name, 'type': 'any'}))
+                fields.append(mapping.get(name, {"name": name, "type": "any"}))
             schema.fields = fields
 
         # Patch schema
         if patch_schema:
-            fields = patch_schema.pop('fields', {})
+            fields = patch_schema.pop("fields", {})
             schema.update(patch_schema)
             for field in schema.fields:
-                field.update((fields.get(field.get('name'), {})))
+                field.update((fields.get(field.get("name"), {})))
 
         # Validate schema
         if schema.metadata_errors:
@@ -188,7 +186,7 @@ def validate_table(
 
         # Confirm schema
         if schema and len(schema.field_names) != len(set(schema.field_names)):
-            note = 'Schemas with duplicate field names are not supported'
+            note = "Schemas with duplicate field names are not supported"
             error = SchemaError(note=note)
             errors.add(error, force=True)
             schema = None
@@ -197,8 +195,8 @@ def validate_table(
     # Create checks
     if not exited:
         items = []
-        items.append('baseline')
-        items.append(('integrity', {'stats': stats, 'lookup': lookup}))
+        items.append("baseline")
+        items.append(("integrity", {"stats": stats, "lookup": lookup}))
         items.extend(extra_checks or [])
         create = system.create_check
         for item in items:
@@ -287,7 +285,7 @@ def validate_table(
 
     # Return report
     time = timer.get_time()
-    source = table.source if isinstance(table.source, str) else 'inline'
+    source = table.source if isinstance(table.source, str) else "inline"
     return Report(
         time=time,
         errors=task_errors,
