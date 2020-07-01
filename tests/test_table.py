@@ -299,7 +299,6 @@ def test_table_format_xlsx():
         assert table.format == "xlsx"
 
 
-@pytest.mark.skip
 def test_table_format_html():
     with Table("data/table1.html") as table:
         assert table.format == "html"

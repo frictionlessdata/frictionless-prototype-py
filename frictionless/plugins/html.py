@@ -33,6 +33,8 @@ class HtmlParser(Parser):
         else:
             table = page
 
+        print(table)
+
         # Stream headers
         data = (
             table.children("thead").children("tr")
@@ -95,4 +97,10 @@ class HtmlDialect(Dialect):
 
     @property
     def selector(self):
-        return self.get("selector")
+        return self.get("selector", "table")
+
+    # Expand
+
+    def expand(self):
+        super().expand()
+        self.setdetault("selector", self.selector)
