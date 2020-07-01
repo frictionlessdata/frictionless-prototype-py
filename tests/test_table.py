@@ -247,7 +247,6 @@ def test_table_scheme_text():
         assert table.scheme == "text"
 
 
-@pytest.mark.skip
 def test_table_scheme_error():
     table = Table("", scheme="bad")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
@@ -255,19 +254,18 @@ def test_table_scheme_error():
     assert "bad" in str(excinfo.value)
 
 
-@pytest.mark.skip
 def test_table_io_error():
-    table = Table("bad_path.csv")
-    with pytest.raises(exceptions.IOError) as excinfo:
+    table = Table("bad.csv")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
-    assert "bad_path.csv" in str(excinfo.value)
+    assert "bad.csv" in str(excinfo.value)
 
 
-@pytest.mark.skip
 def test_table_http_error():
-    table = Table("http://github.com/bad_path.csv")
-    with pytest.raises(exceptions.HTTPError):
+    table = Table("http://github.com/bad.csv")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
+    assert "bad.csv" in str(excinfo.value)
 
 
 # Format
@@ -283,13 +281,11 @@ def test_table_format_ndjson():
         assert table.format == "ndjson"
 
 
-@pytest.mark.skip
 def test_table_format_ods():
     with Table("data/table.ods") as table:
         assert table.format == "ods"
 
 
-@pytest.mark.skip
 def test_table_format_tsv():
     with Table("data/table.tsv") as table:
         assert table.format == "tsv"
@@ -311,19 +307,11 @@ def test_table_format_html():
         assert table.format == "html"
 
 
-@pytest.mark.skip
 def test_table_format_error():
     table = Table("data/special/table.bad")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
     assert "bad" in str(excinfo.value)
-
-
-@pytest.mark.skip
-def test_table_format_error_html():
-    table = Table("data/special/table.csv.html", format="csv")
-    with pytest.raises(exceptions.FrictionlessException):
-        table.open()
 
 
 # Encoding
@@ -360,9 +348,9 @@ def test_table_encoding_utf_16():
 
 @pytest.mark.skip
 def test_table_encoding_missmatch_handle_errors():
+    table = Table("data/table.csv", encoding="ascii")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        with Table("data/table.csv", encoding="ascii") as table:
-            table.read()
+        table.open()
     assert (
         str(excinfo.value)
         == 'Cannot parse the source "data/table.csv" using "ascii" encoding at "20"'
@@ -370,13 +358,6 @@ def test_table_encoding_missmatch_handle_errors():
 
 
 # Compression
-
-
-@pytest.mark.skip
-def test_table_compression_error_gz():
-    source = "id,filename\n\1,dump.tar.gz"
-    table = Table(source, scheme="text", format="csv")
-    table.open()
 
 
 def test_table_local_csv_zip():
@@ -455,7 +436,18 @@ def test_table_compression_invalid():
 def test_table_compression_error_zip():
     source = "id,filename\n1,archive.zip"
     table = Table(source, scheme="text", format="csv")
-    table.open()
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        table.open()
+    assert excinfo
+
+
+@pytest.mark.skip
+def test_table_compression_error_gz():
+    source = "id,filename\n\1,dump.tar.gz"
+    table = Table(source, scheme="text", format="csv")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        table.open()
+    assert excinfo
 
 
 # Control
@@ -521,17 +513,6 @@ def test_table_headers_unicode():
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
-@pytest.mark.skip
-def test_table_headers_user_set():
-    source = [["1", "english"], ["2", "中国人"]]
-    with Table(source, headers=["id", "name"]) as table:
-        assert table.headers == ["id", "name"]
-        assert list(table.iter(keyed=True)) == [
-            {"id": "1", "name": "english"},
-            {"id": "2", "name": "中国人"},
-        ]
-
-
 def test_table_headers_stream_context_manager():
     source = io.open("data/table.csv", mode="rb")
     with Table(source, format="csv") as table:
@@ -567,17 +548,17 @@ def test_table_headers_inline_keyed_headers_is_none():
         assert table.read_data() == [["id", "name"], ["1", "english"], ["2", "中国人"]]
 
 
-@pytest.mark.skip
 def test_table_headers_xlsx_multiline():
     source = "data/special/multiline-headers.xlsx"
-    with Table(source, headers=[1, 5], fill_merged_cells=True) as table:
+    dialect = dialects.ExcelDialect(fill_merged_cells=True)
+    with Table(source, dialect=dialect, headers=[1, 2, 3, 4, 5]) as table:
         assert table.headers == [
             "Region",
             "Caloric contribution (%)",
             "Cumulative impact of changes on cost of food basket from previous quarter",
             "Cumulative impact of changes on cost of food basket from baseline (%)",
         ]
-        assert table.read() == [["A", "B", "C", "D"]]
+        assert table.read_data() == [["A", "B", "C", "D"]]
 
 
 def test_table_headers_csv_multiline_headers_joiner():
@@ -785,25 +766,6 @@ def test_table_skip_rows():
     with Table(source, skip_rows=["#", 5]) as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"]]
-
-
-@pytest.mark.skip
-def test_table_skip_rows_from_the_end():
-    source = "data/special/skip-rows.csv"
-    with Table(source, skip_rows=[1, -2]) as table:
-        assert table.read() == [["id", "name"], ["1", "english"], ["2", "中国人"]]
-    with Table(source, skip_rows=[1, -1, -2]) as table:
-        assert table.read() == [["id", "name"], ["1", "english"]]
-
-
-@pytest.mark.skip
-def test_table_skip_rows_no_double_skip():
-    source = "data/special/skip-rows.csv"
-    with Table(source, skip_rows=[1, 4, -2]) as table:
-        assert table.read() == [["id", "name"], ["1", "english"], ["2", "中国人"]]
-    # no double skip at the very last row
-    with Table(source, skip_rows=[1, 5, -1]) as table:
-        assert table.read() == [["id", "name"], ["1", "english"], ["# it's a comment!"]]
 
 
 def test_table_skip_rows_excel_empty_column():
@@ -1062,10 +1024,9 @@ def test_table_hash_sha512():
         )
 
 
-@pytest.mark.skip
 def test_table_hash_not_supported():
-    with pytest.raises(AssertionError):
-        with Table("data/special/doublequote.csv", hashing_algorithm="bad") as table:
+    with pytest.raises(exceptions.FrictionlessException):
+        with Table("data/special/doublequote.csv", hashing="bad") as table:
             table.read_data()
 
 
@@ -1167,160 +1128,3 @@ def test_table_skip_rows_non_string_cell_issue_320():
     dialect = dialects.ExcelDialect(fill_merged_cells=True)
     with Table(source, dialect=dialect, headers=[10, 11, 12]) as table:
         assert table.headers[7] == "Current Population Analysed % of total county Pop"
-
-
-# Legacy
-# TODO: remove
-
-
-# Force strings
-
-
-@pytest.mark.skip
-def test_table_force_strings():
-    temp = datetime.datetime(2000, 1, 1, 17)
-    date = datetime.date(2000, 1, 1)
-    time = datetime.time(17, 00)
-    source = [["John", 21, 1.5, temp, date, time]]
-    with Table(source, force_strings=True) as table:
-        assert table.read() == [
-            ["John", "21", "1.5", "2000-01-01T17:00:00", "2000-01-01", "17:00:00"]
-        ]
-        assert table.sample == [
-            ["John", "21", "1.5", "2000-01-01T17:00:00", "2000-01-01", "17:00:00"]
-        ]
-
-
-# Force parse
-
-
-@pytest.mark.skip
-@pytest.mark.skip
-def test_table_force_parse_inline():
-    source = [["John", 21], "bad-row", ["Alex", 33]]
-    with Table(source, force_parse=True) as table:
-        assert table.read(extended=True) == [
-            (1, None, ["John", 21]),
-            (2, None, []),
-            (3, None, ["Alex", 33]),
-        ]
-
-
-@pytest.mark.skip
-@pytest.mark.skip
-def test_table_force_parse_json():
-    source = '[["John", 21], "bad-row", ["Alex", 33]]'
-    with Table(source, scheme="text", format="json", force_parse=True) as table:
-        assert table.read(extended=True) == [
-            (1, None, ["John", 21]),
-            (2, None, []),
-            (3, None, ["Alex", 33]),
-        ]
-
-
-@pytest.mark.skip
-def test_table_post_parse_chain():
-
-    # Processors
-    def skip_commented_rows(extended_rows):
-        for row_number, headers, row in extended_rows:
-            if row and hasattr(row[0], "startswith") and row[0].startswith("#"):
-                continue
-            yield (row_number, headers, row)
-
-    def skip_blank_rows(extended_rows):
-        for row_number, headers, row in extended_rows:
-            if not row:
-                continue
-            yield (row_number, headers, row)
-
-    def cast_rows(extended_rows):
-        for row_number, headers, row in extended_rows:
-            crow = []
-            for value in row:
-                try:
-                    if isinstance(value, str):
-                        value = ast.literal_eval(value)
-                except Exception:
-                    pass
-                crow.append(value)
-            yield (row_number, headers, crow)
-
-    # Table
-    source = [["id", "name"], ["#1", "english"], [], ["2", "中国人"]]
-    post_parse = [skip_commented_rows, skip_blank_rows, cast_rows]
-    with Table(source, post_parse=post_parse) as table:
-        assert table.headers == ["id", "name"]
-        assert table.read() == [[2, "中国人"]]
-
-
-@pytest.mark.skip
-def test_table_post_parse_sample():
-
-    # Processors
-    def only_first_row(extended_rows):
-        for row_number, header, row in extended_rows:
-            if row_number == 1:
-                yield (row_number, header, row)
-
-    # Table
-    with Table("data/table.csv", post_parse=[only_first_row]) as table:
-        assert table.sample == [["id", "name"]]
-
-
-# Custom loaders
-
-
-@pytest.mark.skip
-def test_table_custom_loaders():
-    source = "custom://data/table.csv"
-
-    #  class CustomLoader(LocalLoader):
-    class CustomLoader:
-        def load(self, source, *args, **kwargs):
-            return super(CustomLoader, self).load(
-                source.replace("custom://", ""), *args, **kwargs
-            )
-
-    with Table(source, custom_loaders={"custom": CustomLoader}) as table:
-        assert table.read() == [["id", "name"], ["1", "english"], ["2", "中国人"]]
-
-
-# Custom parsers
-
-
-@pytest.mark.skip
-def test_table_custom_parsers():
-    source = "data/table.custom"
-
-    #  class CustomParser(CsvParser):
-    class CustomParser:
-        def open(self, source, *args, **kwargs):
-            return super(CustomParser, self).open(
-                source.replace("custom", "csv"), *args, **kwargs
-            )
-
-    with Table(source, custom_parsers={"custom": CustomParser}) as table:
-        assert table.read() == [["id", "name"], ["1", "english"], ["2", "中国人"]]
-
-
-# Custom writers
-
-
-@pytest.mark.skip
-def test_table_save_custom_writers(tmpdir):
-    source = "data/table.csv"
-    target = str(tmpdir.join("table.csv"))
-
-    #  class CustomWriter(CsvWriter):
-    class CustomWriter:
-        pass
-
-    with Table(source, custom_writers={"csv": CustomWriter}) as table:
-        table.save(target)
-    with Table(target) as table:
-        assert table.headers == ["id", "name"]
-        assert table.read(extended=True) == [
-            (2, ["id", "name"], ["1", "english"]),
-            (3, ["id", "name"], ["2", "中国人"]),
-        ]
