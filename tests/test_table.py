@@ -215,6 +215,7 @@ def test_table_scheme_error_file_not_found():
     assert error.note == "[Errno 2] No such file or directory: 'bad.csv'"
 
 
+@pytest.mark.slow
 def test_table_scheme_error_file_not_found_remote():
     table = Table("https://example.com/bad.csv")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
@@ -488,7 +489,7 @@ def test_table_control():
 
 # TODO: rebase on control error
 def test_table_control_bad_property():
-    table = Table(BASE_URL % "data/table.csv", control={"bad": True})
+    table = Table("data/table.csv", control={"bad": True})
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
     error = excinfo.value.error
@@ -1180,6 +1181,7 @@ def test_table_not_existent_local_file_with_no_format_issue_287():
     assert error.note == "[Errno 2] No such file or directory: 'bad'"
 
 
+@pytest.mark.slow
 def test_table_not_existent_remote_file_with_no_format_issue_287():
     table = Table("http://example.com/bad")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
