@@ -4,8 +4,8 @@ from ..field import Field
 
 class BooleanField(Field):
     supported_constraints = [
-        'required',
-        'enum',
+        "required",
+        "enum",
     ]
 
     # Read
@@ -18,19 +18,20 @@ class BooleanField(Field):
     @cached_property
     def read_cell_cast_mapping(self):
         mapping = {}
-        for value in self.get('trueValues', TRUE_VALUES):
+        for value in self.get("trueValues", TRUE_VALUES):
             mapping[value] = True
-        for value in self.get('falseValues', FALSE_VALUES):
+        for value in self.get("falseValues", FALSE_VALUES):
             mapping[value] = False
         return mapping
 
     # Write
 
+    # TODO: implement proper casting
     def write_cell_cast(self, cell):
         return str(cell)
 
 
 # Internal
 
-TRUE_VALUES = ['true', 'True', 'TRUE', '1']
-FALSE_VALUES = ['false', 'False', 'FALSE', '0']
+TRUE_VALUES = ["true", "True", "TRUE", "1"]
+FALSE_VALUES = ["false", "False", "FALSE", "0"]

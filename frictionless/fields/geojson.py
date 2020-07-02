@@ -6,8 +6,8 @@ from ..field import Field
 
 class GeojsonField(Field):
     supported_constraints = [
-        'required',
-        'enum',
+        "required",
+        "enum",
     ]
 
     def __init__(self, descriptor):
@@ -26,16 +26,17 @@ class GeojsonField(Field):
                 return None
         if not isinstance(cell, dict):
             return None
-        if self.format == 'default':
+        if self.format == "default":
             try:
                 self.__validator.validate(cell)
             except Exception:
                 return None
-        elif self.format == 'topojson':
+        elif self.format == "topojson":
             pass  # Accept any dict as possibly topojson for now
         return cell
 
     # Write
 
+    # TODO: implement proper casting
     def write_cell_cast(self, cell):
         return str(cell)

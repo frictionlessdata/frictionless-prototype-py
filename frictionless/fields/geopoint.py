@@ -6,8 +6,8 @@ from ..field import Field
 
 class GeopointField(Field):
     supported_constraints = [
-        'required',
-        'enum',
+        "required",
+        "enum",
     ]
 
     # Read
@@ -17,19 +17,19 @@ class GeopointField(Field):
         # Parse
         if isinstance(cell, str):
             try:
-                if self.format == 'default':
-                    lon, lat = cell.split(',')
+                if self.format == "default":
+                    lon, lat = cell.split(",")
                     lon = lon.strip()
                     lat = lat.strip()
-                elif self.format == 'array':
+                elif self.format == "array":
                     lon, lat = json.loads(cell)
-                elif self.format == 'object':
+                elif self.format == "object":
                     if isinstance(cell, str):
                         cell = json.loads(cell)
                     if len(cell) != 2:
                         return None
-                    lon = cell['lon']
-                    lat = cell['lat']
+                    lon = cell["lon"]
+                    lat = cell["lat"]
                 cell = geopoint(Decimal(lon), Decimal(lat))
             except Exception:
                 return None
@@ -48,11 +48,12 @@ class GeopointField(Field):
 
     # Write
 
+    # TODO: implement proper casting
     def write_cell_cast(self, cell):
         return str(cell)
 
 
 # Internal
 
-geopoint = namedtuple('geopoint', ['lon', 'lat'])
+geopoint = namedtuple("geopoint", ["lon", "lat"])
 geopoint.__repr__ = lambda self: str([float(self[0]), float(self[1])])  # type: ignore

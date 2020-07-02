@@ -6,10 +6,10 @@ from ..field import Field
 
 class IntegerField(Field):
     supported_constraints = [
-        'required',
-        'minimum',
-        'maximum',
-        'enum',
+        "required",
+        "minimum",
+        "maximum",
+        "enum",
     ]
 
     # Read
@@ -17,7 +17,7 @@ class IntegerField(Field):
     def read_cell_cast(self, cell):
         if isinstance(cell, str):
             if self.read_cell_cast_pattern:
-                cell = self.read_cell_cast_pattern.sub('', cell)
+                cell = self.read_cell_cast_pattern.sub("", cell)
             try:
                 return int(cell)
             except Exception:
@@ -34,11 +34,12 @@ class IntegerField(Field):
 
     @cached_property
     def read_cell_cast_pattern(self):
-        if not self.get('bareNumber', DEFAULT_BARE_NUMBER):
-            return re.compile(r'((^\D*)|(\D*$))')
+        if not self.get("bareNumber", DEFAULT_BARE_NUMBER):
+            return re.compile(r"((^\D*)|(\D*$))")
 
     # Write
 
+    # TODO: implement proper casting
     def write_cell_cast(self, cell):
         return str(cell)
 

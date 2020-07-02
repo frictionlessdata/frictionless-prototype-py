@@ -181,8 +181,10 @@ class Table:
         self.__sample = None
         self.__schema = None
         self.__headers = None
-        self.__row_stream = None
         self.__data_stream = None
+        self.__row_stream = None
+        self.__row_number = None
+        self.__row_position = None
         self.__field_positions = None
         self.__sample_positions = None
 
@@ -416,6 +418,8 @@ class Table:
             self.__parser.open()
             self.__data_stream = self.__read_data_stream()
             self.__row_stream = self.__read_row_stream()
+            self.__row_number = 0
+            self.__row_position = 0
             return self
         except exceptions.FrictionlessException as exception:
             self.close()
@@ -453,10 +457,12 @@ class Table:
         sample_iterator = self.__read_data_stream_create_sample_iterator()
         parser_iterator = self.__read_data_stream_create_parser_iterator()
         for row_position, cells in chain(sample_iterator, parser_iterator):
+            self.__row_position = row_position
             if offset:
                 offset -= 1
                 continue
-            stats["rows"] += 1
+            self.__row_number += 1
+            stats["rows"] = self.__row_number
             yield cells
             if limit and limit <= stats["rows"]:
                 break
@@ -636,17 +642,16 @@ class Table:
         return list(self.__row_stream)
 
     def __read_row_stream(self):
-        init = zip(self.__sample_positions, self.__sample)
-        rest = enumerate(self.__parser.data_stream)
-        for row_number, (row_position, cells) in enumerate(chain(init, rest), start=1):
-            # TODO: filter rows
-            # TODO: filter fields
+        return self.__read_row_stream_create()
+
+    def __read_row_stream_create(self):
+        for cells in self.__data_stream:
             yield Row(
                 cells,
                 fields=self.__schema.fields,
                 field_positions=self.__field_positions,
-                row_position=row_position,
-                row_number=row_number,
+                row_position=self.__row_position,
+                row_number=self.__file.stats["rows"],
             )
 
     def __read_row_stream_raise_closed(self):
@@ -684,10 +689,14 @@ class Table:
         )
 
         # Write file
-        # TODO: we need to convert rows to data using fields.write
-        self.__read_data_stream_raise_closed()
-        data_stream = self.__data_stream
-        if self.__headers is not None:
-            data_stream = chain([self.__headers], data_stream)
+        data_stream = self.__write_data_stream_create()
         parser = system.create_parser(file)
         parser.write(data_stream)
+
+    def __write_data_stream_create(self):
+        self.__read_data_stream_raise_closed()
+        yield self.__schema.field_names
+        for row in self.row_stream:
+            cells = list(row.values())
+            cells, notes = self.__schema.write_cells(cells)
+            yield cells

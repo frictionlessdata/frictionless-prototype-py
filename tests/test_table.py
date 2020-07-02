@@ -1170,14 +1170,17 @@ def test_table_write(tmpdir):
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
-@pytest.mark.skip
-def test_table_save_xls_not_supported(tmpdir):
+def test_table_write_format_error_bad_format(tmpdir):
     source = "data/table.csv"
-    target = str(tmpdir.join("table.xls"))
+    target = str(tmpdir.join("table.bad"))
     with Table(source) as table:
-        with pytest.raises(exceptions.FormatError) as excinfo:
-            table.save(target)
-        assert "xls" in str(excinfo.value)
+        with pytest.raises(exceptions.FrictionlessException) as excinfo:
+            table.write(target)
+        error = excinfo.value.error
+        assert error.code == "format-error"
+        assert (
+            error.note == 'cannot create parser "bad". Try installing "frictionless-bad"'
+        )
 
 
 # Issues

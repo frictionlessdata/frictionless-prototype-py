@@ -4,10 +4,10 @@ from ..field import Field
 
 class YearmonthField(Field):
     supported_constraints = [
-        'required',
-        'minimum',
-        'maximum',
-        'enum',
+        "required",
+        "minimum",
+        "maximum",
+        "enum",
     ]
 
     # Read
@@ -19,7 +19,7 @@ class YearmonthField(Field):
             cell = yearmonth(cell[0], cell[1])
         elif isinstance(cell, str):
             try:
-                year, month = cell.split('-')
+                year, month = cell.split("-")
                 year = int(year)
                 month = int(month)
                 if month < 1 or month > 12:
@@ -33,10 +33,11 @@ class YearmonthField(Field):
 
     # Write
 
+    # TODO: implement proper casting
     def write_cell_cast(self, cell):
         return str(cell)
 
 
 # Internal
 
-yearmonth = namedtuple('yearmonth', ['year', 'month'])
+yearmonth = namedtuple("yearmonth", ["year", "month"])

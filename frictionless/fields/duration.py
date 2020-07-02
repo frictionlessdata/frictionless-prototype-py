@@ -5,8 +5,8 @@ from ..field import Field
 
 class DurationField(Field):
     supported_constraints = [
-        'required',
-        'enum',
+        "required",
+        "enum",
     ]
 
     # Read
@@ -23,5 +23,6 @@ class DurationField(Field):
 
     # Write
 
+    # TODO: implement proper casting
     def write_cell_cast(self, cell):
         return str(cell)

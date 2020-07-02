@@ -6,10 +6,10 @@ from ..field import Field
 
 class NumberField(Field):
     supported_constraints = [
-        'required',
-        'minimum',
-        'maximum',
-        'enum',
+        "required",
+        "minimum",
+        "maximum",
+        "enum",
     ]
 
     # Read
@@ -34,32 +34,33 @@ class NumberField(Field):
 
     @cached_property
     def read_cell_cast_processor(self):
-        if set(['groupChar', 'decimalChar', 'bareNumber']).intersection(self.keys()):
-            group_char = self.get('groupChar', DEFAULT_GROUP_CHAR)
-            decimal_char = self.get('decimalChar', DEFAULT_DECIMAL_CHAR)
+        if set(["groupChar", "decimalChar", "bareNumber"]).intersection(self.keys()):
+            group_char = self.get("groupChar", DEFAULT_GROUP_CHAR)
+            decimal_char = self.get("decimalChar", DEFAULT_DECIMAL_CHAR)
 
             def processor(cell):
-                cell = cell.replace(group_char, '')
-                cell = cell.replace(decimal_char, '.')
+                cell = cell.replace(group_char, "")
+                cell = cell.replace(decimal_char, ".")
                 if self.read_cell_cast_pattern:
-                    cell = self.read_cell_cast_pattern.sub('', cell)
+                    cell = self.read_cell_cast_pattern.sub("", cell)
                 return cell
 
             return processor
 
     @cached_property
     def read_cell_cast_pattern(self):
-        if not self.get('bareNumber', DEFAULT_BARE_NUMBER):
-            return re.compile(r'((^\D*)|(\D*$))')
+        if not self.get("bareNumber", DEFAULT_BARE_NUMBER):
+            return re.compile(r"((^\D*)|(\D*$))")
 
     # Write
 
+    # TODO: implement proper casting
     def write_cell_cast(self, cell):
         return str(cell)
 
 
 # Internal
 
-DEFAULT_GROUP_CHAR = ''
-DEFAULT_DECIMAL_CHAR = '.'
+DEFAULT_GROUP_CHAR = ""
+DEFAULT_DECIMAL_CHAR = "."
 DEFAULT_BARE_NUMBER = True

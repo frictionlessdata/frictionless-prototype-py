@@ -5,10 +5,10 @@ from ..field import Field
 
 class TimeField(Field):
     supported_constraints = [
-        'required',
-        'minimum',
-        'maximum',
-        'enum',
+        "required",
+        "minimum",
+        "maximum",
+        "enum",
     ]
 
     # Read
@@ -18,9 +18,9 @@ class TimeField(Field):
             if not isinstance(cell, str):
                 return None
             try:
-                if self.format == 'default':
+                if self.format == "default":
                     cell = datetime.strptime(cell, DEFAULT_PATTERN).time()
-                elif self.format == 'any':
+                elif self.format == "any":
                     cell = parse(cell).time()
                 else:
                     cell = datetime.strptime(cell, self.format).time()
@@ -30,10 +30,11 @@ class TimeField(Field):
 
     # Write
 
+    # TODO: implement proper casting
     def write_cell_cast(self, cell):
         return str(cell)
 
 
 # Internal
 
-DEFAULT_PATTERN = '%H:%M:%S'
+DEFAULT_PATTERN = "%H:%M:%S"

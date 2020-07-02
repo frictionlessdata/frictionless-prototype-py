@@ -5,10 +5,10 @@ from ..field import Field
 
 class DateField(Field):
     supported_constraints = [
-        'required',
-        'minimum',
-        'maximum',
-        'enum',
+        "required",
+        "minimum",
+        "maximum",
+        "enum",
     ]
 
     # Read
@@ -29,9 +29,9 @@ class DateField(Field):
 
         # Parse string date
         try:
-            if self.format == 'default':
+            if self.format == "default":
                 cell = datetime.strptime(cell, DEFAULT_PATTERN).date()
-            elif self.format == 'any':
+            elif self.format == "any":
                 cell = parse(cell).date()
             else:
                 cell = datetime.strptime(cell, self.format).date()
@@ -42,10 +42,11 @@ class DateField(Field):
 
     # Write
 
+    # TODO: implement proper casting
     def write_cell_cast(self, cell):
         return str(cell)
 
 
 # Internal
 
-DEFAULT_PATTERN = '%Y-%m-%d'
+DEFAULT_PATTERN = "%Y-%m-%d"

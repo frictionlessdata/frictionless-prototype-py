@@ -3,8 +3,8 @@ from ..field import Field
 
 class AnyField(Field):
     supported_constraints = [
-        'required',
-        'enum',
+        "required",
+        "enum",
     ]
 
     # Read
@@ -14,5 +14,6 @@ class AnyField(Field):
 
     # Write
 
+    # TODO: implement proper casting
     def write_cell_cast(self, cell):
         return str(cell)
