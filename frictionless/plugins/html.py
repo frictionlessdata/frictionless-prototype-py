@@ -16,6 +16,7 @@ class HtmlPlugin(Plugin):
 # Parser
 
 
+# TODO: implement write
 class HtmlParser(Parser):
     Dialect = property(lambda self: HtmlDialect)
 

@@ -18,6 +18,7 @@ class GsheetPlugin(Plugin):
 # Parser
 
 
+# TODO: implement write (error not supported)
 class GsheetParser(Parser):
     Dialect = property(lambda self: GsheetDialect)
     network = True

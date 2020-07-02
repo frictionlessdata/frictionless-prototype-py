@@ -17,6 +17,7 @@ class SqlPlugin(Plugin):
 # Parser
 
 
+# TODO: implement write
 class SqlParser(Parser):
     Dialect = property(lambda self: SqlDialect)
     loading = False

@@ -16,6 +16,7 @@ class TsvPlugin(Plugin):
 # Parser
 
 
+# TODO: implement write
 class TsvParser(Parser):
     Dialect = property(lambda self: TsvDialect)
 
