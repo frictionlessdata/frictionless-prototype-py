@@ -32,12 +32,18 @@ def test_table_xlsx_sheet_by_index():
         assert table.read_data() == [[1.0, "english"], [2.0, "中国人"]]
 
 
-@pytest.mark.skip
-def test_table_xlsx_sheet_by_index_not_existent():
+def test_table_xlsx_format_error_sheet_by_index_not_existent():
     source = "data/special/sheet2.xlsx"
-    with pytest.raises(exceptions.SourceError) as excinfo:
-        Table(source, sheet=3).open()
-    assert 'sheet "3"' in str(excinfo.value)
+    dialect = dialects.ExcelDialect(sheet=3)
+    table = Table(source, dialect=dialect)
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        table.open()
+    error = excinfo.value.error
+    assert error.code == "format-error"
+    assert (
+        error.note
+        == 'Excel document "data/special/sheet2.xlsx" does not have a sheet "3"'
+    )
 
 
 def test_table_xlsx_sheet_by_name():
@@ -48,12 +54,18 @@ def test_table_xlsx_sheet_by_name():
         assert table.read_data() == [[1.0, "english"], [2.0, "中国人"]]
 
 
-def test_table_xlsx_sheet_by_name_not_existent():
+def test_table_xlsx_format_errors_sheet_by_name_not_existent():
     source = "data/special/sheet2.xlsx"
     dialect = dialects.ExcelDialect(sheet="bad")
+    table = Table(source, dialect=dialect)
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        Table(source, dialect=dialect).open()
-    assert 'sheet "bad"' in str(excinfo.value)
+        table.open()
+    error = excinfo.value.error
+    assert error.code == "format-error"
+    assert (
+        error.note
+        == 'Excel document "data/special/sheet2.xlsx" does not have a sheet "bad"'
+    )
 
 
 def test_table_xlsx_merged_cells():
@@ -125,14 +137,13 @@ def test_table_xlsx_preserve_formatting_number_multicode():
         assert table.read_data() == [["4.5"], ["-9.032"], ["15.8"]]
 
 
-@pytest.mark.skip
 def test_table_xlsx_workbook_cache():
     source = BASE_URL % "data/special/sheets.xlsx"
     for sheet in ["Sheet1", "Sheet2", "Sheet3"]:
         dialect = dialects.ExcelDialect(sheet=sheet, workbook_cache={})
-        with Table(source, sheet=sheet, dialect=dialect) as table:
+        with Table(source, dialect=dialect) as table:
             assert len(dialect.workbook_cache) == 1
-            assert table.read()
+            assert table.read_data()
 
 
 def test_table_local_xls():
@@ -233,29 +244,22 @@ def test_fix_for_2007_xls():
 # Write
 
 
-@pytest.mark.skip
 def test_table_save_xlsx(tmpdir):
     source = "data/table.csv"
     target = str(tmpdir.join("table.xlsx"))
-    with Table(source, headers=1) as table:
-        assert table.save(target) == 2
-    with Table(target, headers=1) as table:
+    with Table(source) as table:
+        table.write(target)
+    with Table(target) as table:
         assert table.headers == ["id", "name"]
-        assert table.read(extended=True) == [
-            (2, ["id", "name"], ["1", "english"]),
-            (3, ["id", "name"], ["2", "中国人"]),
-        ]
+        assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
-@pytest.mark.skip
 def test_table_save_xlsx_sheet_name(tmpdir):
     source = "data/table.csv"
     target = str(tmpdir.join("table.xlsx"))
-    with Table(source, headers=1) as table:
-        assert table.save(target, sheet="my-data") == 2
-    with Table(target, headers=1, sheet="my-data") as table:
+    dialect = dialects.ExcelDialect(sheet="sheet")
+    with Table(source) as table:
+        table.write(target, dialect=dialect)
+    with Table(target, dialect=dialect) as table:
         assert table.headers == ["id", "name"]
-        assert table.read(extended=True) == [
-            (2, ["id", "name"], ["1", "english"]),
-            (3, ["id", "name"], ["2", "中国人"]),
-        ]
+        assert table.read_data() == [["1", "english"], ["2", "中国人"]]

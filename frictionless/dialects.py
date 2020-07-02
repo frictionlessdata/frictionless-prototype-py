@@ -288,6 +288,12 @@ class ExcelDialect(Dialect):
         self.setdetault("preserveFormatting", self.preserve_formatting)
         self.setdetault("adjustFloatingPointError", self.adjust_floating_point_error)
 
+    # Metadata
+
+    # TODO: remove
+    def metadata_process(self):
+        super().metadata_process(skip=["workbookCache"])
+
 
 # TODO: Consider headers prop for keyed sources
 class InlineDialect(Dialect):

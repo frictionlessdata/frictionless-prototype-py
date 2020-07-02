@@ -64,7 +64,7 @@ class XlsxParser(Parser):
                 data_only=True,
             )
         except Exception as exception:
-            error = errors.FormatError(note=f'invlid excel file "{self.file.path}"')
+            error = errors.FormatError(note=f'invalid excel file "{self.file.path}"')
             raise exceptions.FrictionlessException(error) from exception
 
         # Get sheet
@@ -74,9 +74,9 @@ class XlsxParser(Parser):
             else:
                 sheet = book.worksheets[dialect.sheet - 1]
         except (KeyError, IndexError):
-            note = 'Excel document "%s" doesn\'t have a sheet "%s"'
-            note = note % (self.file.source, dialect.sheet)
-            raise exceptions.FrictionlessException(errors.SourceError(note=note))
+            note = 'Excel document "%s" does not have a sheet "%s"'
+            error = errors.FormatError(note=note % (self.file.source, dialect.sheet))
+            raise exceptions.FrictionlessException(error)
 
         # Fill merged cells
         # TODO: use algorithm from xls to merge after reading?
@@ -99,17 +99,17 @@ class XlsxParser(Parser):
 
     # Write
 
-    def write(self, source, target, headers, encoding=None):
-        helpers.ensure_dir(target)
-        count = 0
-        wb = openpyxl.Workbook(write_only=True)
-        ws = wb.create_sheet(title=self.__options.get("sheet"))
-        ws.append(headers)
-        for row in source:
-            ws.append(row)
-            count += 1
-        wb.save(target)
-        return count
+    def write(self, data_stream):
+        dialect = self.file.dialect
+        helpers.ensure_dir(self.file.source)
+        book = openpyxl.Workbook(write_only=True)
+        title = dialect.sheet
+        if isinstance(title, int):
+            title = f"Sheet {dialect.sheet}"
+        sheet = book.create_sheet(title=title)
+        for cells in data_stream:
+            sheet.append(cells)
+        book.save(self.file.source)
 
 
 class XlsParser(Parser):
@@ -144,9 +144,9 @@ class XlsParser(Parser):
             else:
                 sheet = book.sheet_by_index(dialect.sheet - 1)
         except (xlrd.XLRDError, IndexError):
-            note = 'Excel document "%s" doesn\'t have a sheet "%s"'
-            note = note % (self.file.source, dialect.sheet)
-            raise exceptions.FrictionlessException(errors.SourceError(note=note))
+            note = 'Excel document "%s" does not have a sheet "%s"'
+            error = errors.FormatError(note=note % (self.file.source, dialect.sheet))
+            raise exceptions.FrictionlessException(error)
 
         def type_value(ctype, value):
             """ Detects boolean value, int value, datetime """
