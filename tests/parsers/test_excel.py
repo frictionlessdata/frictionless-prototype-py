@@ -263,3 +263,24 @@ def test_table_save_xlsx_sheet_name(tmpdir):
     with Table(target, dialect=dialect) as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
+
+
+def test_table_save_xls(tmpdir):
+    source = "data/table.csv"
+    target = str(tmpdir.join("table.xls"))
+    with Table(source) as table:
+        table.write(target)
+    with Table(target) as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_data() == [["1", "english"], ["2", "中国人"]]
+
+
+def test_table_save_xls_sheet_name(tmpdir):
+    source = "data/table.csv"
+    target = str(tmpdir.join("table.xls"))
+    dialect = dialects.ExcelDialect(sheet="sheet")
+    with Table(source) as table:
+        table.write(target, dialect=dialect)
+    with Table(target, dialect=dialect) as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_data() == [["1", "english"], ["2", "中国人"]]

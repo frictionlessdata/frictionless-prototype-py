@@ -1,12 +1,13 @@
 import os
 import sys
 import xlrd
+import xlwt
 import shutil
 import atexit
+import tempfile
 import openpyxl
 import datetime
 from itertools import chain
-from tempfile import NamedTemporaryFile
 from ..parser import Parser
 from ..system import system
 from ..file import File
@@ -41,7 +42,8 @@ class XlsxParser(Parser):
                 return loader.open()
 
             with loader as loader:
-                target = NamedTemporaryFile(delete=dialect.workbook_cache is None)
+                delete = dialect.workbook_cache is None
+                target = tempfile.NamedTemporaryFile(delete=delete)
                 shutil.copyfileobj(loader.byte_stream, target)
                 target.seek(0)
             if not target.delete:
@@ -106,7 +108,7 @@ class XlsxParser(Parser):
         title = dialect.sheet
         if isinstance(title, int):
             title = f"Sheet {dialect.sheet}"
-        sheet = book.create_sheet(title=title)
+        sheet = book.create_sheet(title)
         for cells in data_stream:
             sheet.append(cells)
         book.save(self.file.source)
@@ -179,6 +181,21 @@ class XlsParser(Parser):
                             )
                 cells.append(value)
             yield cells
+
+    # Write
+
+    def write(self, data_stream):
+        dialect = self.file.dialect
+        helpers.ensure_dir(self.file.source)
+        book = xlwt.Workbook()
+        title = dialect.sheet
+        if isinstance(title, int):
+            title = f"Sheet {dialect.sheet}"
+        sheet = book.add_sheet(title)
+        for row_index, cells in enumerate(data_stream):
+            for column_index, cell in enumerate(cells):
+                sheet.write(row_index, column_index, cell)
+        book.save(self.file.source)
 
 
 # Internal

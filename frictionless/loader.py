@@ -4,7 +4,7 @@ import codecs
 import shutil
 import hashlib
 import zipfile
-from tempfile import NamedTemporaryFile
+import tempfile
 from . import exceptions
 from . import errors
 from . import config
@@ -106,7 +106,7 @@ class Loader:
             # Network
             if self.network:
                 self.network = False
-                target = NamedTemporaryFile()
+                target = tempfile.NamedTemporaryFile()
                 shutil.copyfileobj(byte_stream, target)
                 target.seek(0)
                 byte_stream = target
@@ -120,7 +120,7 @@ class Loader:
             with zipfile.ZipFile(byte_stream) as archive:
                 name = self.file.compression_path or archive.namelist()[0]
                 with archive.open(name) as file:
-                    target = NamedTemporaryFile()
+                    target = tempfile.NamedTemporaryFile()
                     shutil.copyfileobj(file, target)
                     target.seek(0)
                 byte_stream = target
