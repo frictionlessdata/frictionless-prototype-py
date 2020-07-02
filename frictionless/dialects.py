@@ -136,6 +136,9 @@ class CsvDialect(Dialect):
 
     def __getattr__(self, name):
         # Interoperability with native
+        # Find a better way like to_native/from_native
+        if name == "lineterminator":
+            return self.line_terminator
         if name == "doublequote":
             return self.double_quote
         elif name == "escapechar":

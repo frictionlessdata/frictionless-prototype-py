@@ -1159,14 +1159,15 @@ def test_table_reopen_generator():
 # Save
 
 
-@pytest.mark.skip
-def test_table_save_sqlite(database_url):
+def test_table_write(tmpdir):
     source = "data/table.csv"
+    target = str(tmpdir.join("table.csv"))
     with Table(source) as table:
-        table.save(database_url, table="test_stream_save_sqlite")
-    with Table(database_url, table="test_table_save_sqlite", order_by="id") as table:
-        assert table.read() == [["1", "english"], ["2", "中国人"]]
+        table.write(target)
+        assert table.stats["rows"] == 2
+    with Table(target) as table:
         assert table.headers == ["id", "name"]
+        assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
 @pytest.mark.skip

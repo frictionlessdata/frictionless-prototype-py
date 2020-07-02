@@ -15,7 +15,7 @@ from ..report import Report, ReportTable
 def validate_table(
     source,
     *,
-    # Table
+    # File
     scheme=None,
     format=None,
     hashing=None,
@@ -24,6 +24,7 @@ def validate_table(
     compression_path=None,
     control=None,
     dialect=None,
+    # Table
     headers_row=config.DEFAULT_HEADERS_ROW,
     headers_joiner=config.DEFAULT_HEADERS_JOINER,
     pick_fields=None,

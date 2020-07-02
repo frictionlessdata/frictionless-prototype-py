@@ -38,17 +38,19 @@ class CsvParser(Parser):
 
     # Write
 
-    def write(self, source, target, headers, encoding=None):
-        helpers.ensure_dir(target)
-        count = 0
-        with io.open(target, "wb") as file:
-            writer = unicodecsv.writer(file, encoding=encoding, **self.__options)
-            if headers:
-                writer.writerow(headers)
-            for row in source:
-                count += 1
-                writer.writerow(row)
-        return count
+    def write(self, data_stream):
+        options = {}
+        dialect = self.file.dialect
+        for name in INFER_DIALECT_NAMES + ["quoting"]:
+            name = name.lower()
+            value = getattr(dialect, name, None)
+            if value is not None:
+                options[name] = value
+        helpers.ensure_dir(self.file.source)
+        with io.open(self.file.source, "wb") as file:
+            writer = unicodecsv.writer(file, encoding=self.file.encoding, **options)
+            for cells in data_stream:
+                writer.writerow(cells)
 
 
 # Internal

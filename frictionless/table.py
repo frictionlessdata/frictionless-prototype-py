@@ -126,7 +126,7 @@ class Table:
         self,
         source,
         *,
-        # Table
+        # File
         scheme=None,
         format=None,
         hashing=None,
@@ -135,6 +135,7 @@ class Table:
         compression_path=None,
         control=None,
         dialect=None,
+        # Table
         headers=config.DEFAULT_HEADERS_ROW,
         pick_fields=None,
         skip_fields=None,
@@ -223,9 +224,7 @@ class Table:
         self.close()
 
     def __iter__(self):
-        if not self.__row_stream:
-            note = 'the table has not been opened by "table.open()"'
-            raise exceptions.FrictionlessException(errors.Error(note=note))
+        self.__read_row_stream_raise_closed()
         return iter(self.__row_stream)
 
     @property
@@ -440,9 +439,7 @@ class Table:
     # Read
 
     def read_data(self):
-        if not self.__data_stream:
-            note = 'the table has not been opened by "table.open()"'
-            raise exceptions.FrictionlessException(errors.Error(note=note))
+        self.__read_data_stream_raise_closed()
         return list(self.__data_stream)
 
     def __read_data_stream(self):
@@ -629,10 +626,13 @@ class Table:
                     match = not match
         return match
 
-    def read_rows(self):
-        if not self.__row_stream:
+    def __read_data_stream_raise_closed(self):
+        if not self.__data_stream:
             note = 'the table has not been opened by "table.open()"'
             raise exceptions.FrictionlessException(errors.Error(note=note))
+
+    def read_rows(self):
+        self.__read_row_stream_raise_closed()
         return list(self.__row_stream)
 
     def __read_row_stream(self):
@@ -648,3 +648,46 @@ class Table:
                 row_position=row_position,
                 row_number=row_number,
             )
+
+    def __read_row_stream_raise_closed(self):
+        if not self.__row_stream:
+            note = 'the table has not been opened by "table.open()"'
+            raise exceptions.FrictionlessException(errors.Error(note=note))
+
+    # Write
+
+    def write(
+        self,
+        target,
+        *,
+        scheme=None,
+        format=None,
+        hashing=None,
+        encoding=None,
+        compression=None,
+        compression_path=None,
+        control=None,
+        dialect=None,
+    ):
+
+        # Create file
+        file = File(
+            source=target,
+            scheme=scheme,
+            format=format,
+            hashing=hashing,
+            encoding=encoding,
+            compression=compression,
+            compression_path=compression_path,
+            control=control,
+            dialect=dialect,
+        )
+
+        # Write file
+        # TODO: we need to convert rows to data using fields.write
+        self.__read_data_stream_raise_closed()
+        data_stream = self.__data_stream
+        if self.__headers is not None:
+            data_stream = chain([self.__headers], data_stream)
+        parser = system.create_parser(file)
+        parser.write(data_stream)

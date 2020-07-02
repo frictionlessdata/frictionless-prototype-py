@@ -33,8 +33,6 @@ class HtmlParser(Parser):
         else:
             table = page
 
-        print(table)
-
         # Stream headers
         data = (
             table.children("thead").children("tr")

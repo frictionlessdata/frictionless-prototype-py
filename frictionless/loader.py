@@ -167,7 +167,6 @@ class Loader:
         elif encoding == "utf-16-le":
             if sample.startswith(codecs.BOM_UTF16_LE):
                 encoding = "utf-16"
-        print(encoding)
         self.file.encoding = encoding
 
     def read_text_stream_decode(self, byte_stream):
