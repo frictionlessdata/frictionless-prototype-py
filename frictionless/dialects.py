@@ -17,6 +17,7 @@ class Dialect(ControlledMetadata):
 
     """
 
+    # TODO: add not additionalProperties?
     metadata_profile = {  # type: ignore
         "type": "object",
         "properties": {

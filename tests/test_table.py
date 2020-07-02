@@ -478,8 +478,16 @@ def test_table_compression_error_invalid_gz():
 # Control
 
 
-@pytest.mark.slow
 def test_table_control():
+    control = controls.Control(detect_encoding=lambda sample: "utf-8")
+    with Table("data/table.csv", control=control) as table:
+        assert table.encoding == "utf-8"
+        assert table.headers == ["id", "name"]
+        assert table.sample == [["1", "english"], ["2", "中国人"]]
+
+
+@pytest.mark.slow
+def test_table_control_http_preload():
     control = controls.RemoteControl(http_preload=True)
     with Table(BASE_URL % "data/table.csv", control=control) as table:
         assert table.headers == ["id", "name"]

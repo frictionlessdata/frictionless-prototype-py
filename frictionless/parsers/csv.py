@@ -5,12 +5,11 @@ from itertools import chain
 from ..parser import Parser
 from .. import dialects
 from .. import helpers
-from .. import config
 
 
 class CsvParser(Parser):
     Dialect = dialects.CsvDialect
-    newline = ''
+    newline = ""
 
     # Read
 
@@ -22,16 +21,16 @@ class CsvParser(Parser):
 
     def read_data_stream_infer_dialect(self):
         sample = extract_samle(self.loader.text_stream)
-        delimiter = self.file.dialect.get('delimiter', ',\t;|')
+        delimiter = self.file.dialect.get("delimiter", ",\t;|")
         try:
-            dialect = csv.Sniffer().sniff(''.join(sample), delimiter)
+            dialect = csv.Sniffer().sniff("".join(sample), delimiter)
         except csv.Error:
             dialect = csv.excel()
         if not dialect.escapechar:
             dialect.doublequote = True
-        if getattr(dialect, 'quotechar', None) == '':
-            setattr(dialect, 'quoting', csv.QUOTE_NONE)
-        for name in INFER_NAMES:
+        if getattr(dialect, "quotechar", None) == "":
+            setattr(dialect, "quoting", csv.QUOTE_NONE)
+        for name in INFER_DIALECT_NAMES:
             value = getattr(dialect, name.lower())
             if value is not None:
                 self.file.dialect.setdefault(name, value)
@@ -42,7 +41,7 @@ class CsvParser(Parser):
     def write(self, source, target, headers, encoding=None):
         helpers.ensure_dir(target)
         count = 0
-        with io.open(target, 'wb') as file:
+        with io.open(target, "wb") as file:
             writer = unicodecsv.writer(file, encoding=encoding, **self.__options)
             if headers:
                 writer.writerow(headers)
@@ -54,13 +53,14 @@ class CsvParser(Parser):
 
 # Internal
 
-INFER_NAMES = [
-    'delimiter',
-    'lineTerminator',
-    'doubleQuote',
-    'escapeChar',
-    'quoteChar',
-    'skipInitialSpace',
+INFER_DIALECT_VOLUME = 100
+INFER_DIALECT_NAMES = [
+    "delimiter",
+    "lineTerminator",
+    "doubleQuote",
+    "escapeChar",
+    "quoteChar",
+    "skipInitialSpace",
 ]
 
 
@@ -71,6 +71,6 @@ def extract_samle(text_stream):
             sample.append(next(text_stream))
         except StopIteration:
             break
-        if len(sample) >= config.INFER_DIALECT_VOLUME:
+        if len(sample) >= INFER_DIALECT_VOLUME:
             break
     return sample

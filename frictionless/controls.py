@@ -1,5 +1,7 @@
+import chardet
 import requests
 from .metadata import ControlledMetadata
+from . import helpers
 from . import config
 
 
@@ -8,14 +10,26 @@ class Control(ControlledMetadata):
 
     # Arguments
         descriptor? (str|dict): descriptor
+        detectEncoding? (func): detectEncoding
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
 
     """
 
-    def __init__(self, descriptor=None, *, metadata_root=None):
+    # TODO: add not additionalProperties?
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "properties": {"detectEncoding": {}},
+    }
+
+    def __init__(self, descriptor=None, *, detect_encoding=None, metadata_root=None):
+        self.setdefined("detectEncoding", detect_encoding)
         super().__init__(descriptor, metadata_root=metadata_root)
+
+    @property
+    def detect_encoding(self):
+        return helpers.detect_encoding
 
     # Expand
 
@@ -37,7 +51,7 @@ class LocalControl(Control):
     metadata_profile = {  # type: ignore
         "type": "object",
         "additionalProperties": False,
-        "properties": {},
+        "properties": {"detectEncoding": {}},
     }
 
 
@@ -49,6 +63,7 @@ class RemoteControl(Control):
         http_session? (any): http_session
         http_preload? (bool): http_preload
         http_timeout? (int): http_timeout
+        detectEncoding? (func): detectEncoding
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
@@ -62,6 +77,7 @@ class RemoteControl(Control):
             "httpSession": {},
             "httpPreload": {"type": "boolean"},
             "httpTimeout": {"type": "number"},
+            "detectEncoding": {},
         },
     }
 
@@ -72,12 +88,15 @@ class RemoteControl(Control):
         http_session=None,
         http_preload=None,
         http_timeout=None,
+        detect_encoding=None,
         metadata_root=None
     ):
         self.setdefined("httpSession", http_session)
         self.setdefined("httpPreload", http_preload)
         self.setdefined("httpTimeout", http_timeout)
-        super().__init__(descriptor, metadata_root=metadata_root)
+        super().__init__(
+            descriptor, detect_encoding=detect_encoding, metadata_root=metadata_root
+        )
 
     @property
     def http_session(self):
@@ -98,6 +117,7 @@ class RemoteControl(Control):
     # Expand
 
     def expand(self):
+        super().expand()
         self.setdetault("httpPreload", self.http_preload)
         self.setdetault("httpTimeout", self.http_timeout)
 
@@ -116,7 +136,7 @@ class StreamControl(Control):
     metadata_profile = {  # type: ignore
         "type": "object",
         "additionalProperties": False,
-        "properties": {},
+        "properties": {"detectEncoding": {}},
     }
 
 
@@ -134,5 +154,5 @@ class TextControl(Control):
     metadata_profile = {  # type: ignore
         "type": "object",
         "additionalProperties": False,
-        "properties": {},
+        "properties": {"detectEncoding": {}},
     }

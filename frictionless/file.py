@@ -63,17 +63,17 @@ class File(ControlledMetadata):
         self.setdefined("newline", newline)
         self.setdefined("stats", stats)
         super().__init__(descriptor)
-        # Infer from source
-        infer = helpers.infer_source_scheme_and_format(source)
-        self.__infered_compression = config.DEFAULT_COMPRESSION
-        if infer[1] in config.COMPRESSION_FORMATS:
-            self.__infered_compression = infer[1]
-            source = source[: -len(infer[1]) - 1]
+        # Detect from source
+        detect = helpers.detect_source_scheme_and_format(source)
+        self.__detected_compression = config.DEFAULT_COMPRESSION
+        if detect[1] in config.COMPRESSION_FORMATS:
+            self.__detected_compression = detect[1]
+            source = source[: -len(detect[1]) - 1]
             if compression_path:
                 source = os.path.join(source, compression_path)
-            infer = helpers.infer_source_scheme_and_format(source)
-        self.__infered_scheme = infer[0] or config.DEFAULT_SCHEME
-        self.__infered_format = infer[1] or config.DEFAULT_FORMAT
+            detect = helpers.detect_source_scheme_and_format(source)
+        self.__detected_scheme = detect[0] or config.DEFAULT_SCHEME
+        self.__detected_format = detect[1] or config.DEFAULT_FORMAT
 
     def __setattr__(self, name, value):
         if name in [
@@ -102,11 +102,11 @@ class File(ControlledMetadata):
 
     @cached_property
     def scheme(self):
-        return self.get("scheme", self.__infered_scheme)
+        return self.get("scheme", self.__detected_scheme)
 
     @cached_property
     def format(self):
-        return self.get("format", self.__infered_format)
+        return self.get("format", self.__detected_format)
 
     @cached_property
     def hashing(self):
@@ -118,7 +118,7 @@ class File(ControlledMetadata):
 
     @cached_property
     def compression(self):
-        return self.get("compression", self.__infered_compression)
+        return self.get("compression", self.__detected_compression)
 
     @cached_property
     def compression_path(self):

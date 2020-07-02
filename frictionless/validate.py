@@ -13,8 +13,8 @@ def validate(source, source_type=None, **options):
 
     # Detect source type
     if not source_type:
-        source_type = helpers.infer_source_type(source)
+        source_type = helpers.detect_source_type(source)
 
     # Validate source
-    validate = getattr(validates, 'validate_%s' % source_type)
+    validate = getattr(validates, "validate_%s" % source_type)
     return validate(source, **options)

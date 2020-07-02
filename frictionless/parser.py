@@ -48,7 +48,7 @@ class Parser:
     def data_stream(self):
         return self.__data_stream
 
-    # Manage
+    # Open
 
     def open(self):
         self.close()

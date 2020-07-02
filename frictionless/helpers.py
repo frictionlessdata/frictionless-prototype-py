@@ -1,12 +1,10 @@
 import re
 import os
+import chardet
 import datetime
 import stringcase
-from copy import copy
-from importlib import import_module
 from urllib.parse import urlparse, parse_qs
 from _thread import RLock  # type: ignore
-from . import exceptions
 from . import config
 
 
@@ -75,7 +73,18 @@ def reset_cached_properties(obj):
                 obj.__dict__.pop(name)
 
 
-def infer_source_type(source):
+def detect_encoding(sample):
+    result = chardet.detect(sample)
+    confidence = result["confidence"] or 0
+    encoding = result["encoding"] or config.DEFAULT_ENCODING
+    if confidence < config.DEFAULT_INFER_ENCODING_CONFIDENCE:
+        encoding = config.DEFAULT_ENCODING
+    if encoding == "ascii":
+        encoding = config.DEFAULT_ENCODING
+    return encoding
+
+
+def detect_source_type(source):
     source_type = "table"
     if isinstance(source, dict):
         if source.get("fields") is not None:
@@ -98,8 +107,7 @@ def infer_source_type(source):
     return source_type
 
 
-# TODO: move to file
-def infer_source_scheme_and_format(source):
+def detect_source_scheme_and_format(source):
     if hasattr(source, "read"):
         return ("stream", None)
     if not isinstance(source, str):
@@ -176,192 +184,6 @@ class Timer:
         return round((current - self.__initial).total_seconds(), 3)
 
 
-# Compatability
-
-
-def translate_headers(headers):
-    # frictionless: [2, 3, 4] (pandas-like)
-    # tabulator: [2, 4] (range-like)
-    if headers and isinstance(headers, list):
-        if len(headers) == 1:
-            return headers[0]
-        if len(headers) > 1:
-            headers = [headers[0], headers[-1]]
-            for header in headers:
-                assert isinstance(header, int)
-    return headers
-
-
-def translate_pick_fields(pick_fields):
-    for index, item in enumerate(pick_fields or []):
-        if isinstance(item, str) and item.startswith("<regex>"):
-            pick_fields[index] = {"type": "regex", "value": item.replace("<regex>", "")}
-    return pick_fields
-
-
-def translate_skip_fields(skip_fields):
-    for index, item in enumerate(skip_fields or []):
-        if isinstance(item, str) and item.startswith("<regex>"):
-            skip_fields[index] = {"type": "regex", "value": item.replace("<regex>", "")}
-    return skip_fields
-
-
-def translate_pick_rows(pick_rows):
-    for index, item in enumerate(pick_rows or []):
-        if isinstance(item, str) and item.startswith("<regex>"):
-            pick_rows[index] = {"type": "regex", "value": item.replace("<regex>", "")}
-    return pick_rows
-
-
-def translate_skip_rows(skip_rows):
-    for index, item in enumerate(skip_rows or []):
-        if isinstance(item, str) and item.startswith("<regex>"):
-            skip_rows[index] = {"type": "regex", "value": item.replace("<regex>", "")}
-        if isinstance(item, str) and item.startswith("<blank>"):
-            skip_rows[index] = {"type": "preset", "value": "blank"}
-    return skip_rows
-
-
-def translate_dialect(dialect):
-    options = {
-        stringcase.lowercase(key): dialect.pop(key)
-        for key in [
-            "doubleQuote",
-            "escapeChar",
-            "lineTerminator",
-            "quoteChar",
-            "skipInitialSpace",
-        ]
-        if key in dialect
-    }
-    options.pop("header", None)
-    options.pop("caseSensitiveHeader", None)
-    options.update(create_options(dialect))
-    return options
-
-
-def translate_control(control):
-    return create_options(control)
-
-
-# Tabulator
-
-
-def detect_scheme_and_format(source):
-    """Detect scheme and format based on source and return as a tuple.
-
-    Scheme is a minimum 2 letters before `://` (will be lower cased).
-    For example `http` from `http://example.com/table.csv`
-
-    """
-    # TODO: remove
-    from . import config
-
-    # Scheme: stream
-    if hasattr(source, "read"):
-        return ("stream", None)
-
-    # Format: inline
-    if not isinstance(source, str):
-        return (None, "inline")
-
-    # Format: gsheet
-    if "docs.google.com/spreadsheets" in source:
-        if "export" not in source and "pub" not in source:
-            return (None, "gsheet")
-        elif "csv" in source:
-            return ("https", "csv")
-
-    # Format: sql
-    for sql_scheme in config.SQL_SCHEMES:
-        if source.startswith("%s://" % sql_scheme):
-            return (None, "sql")
-
-    # General
-    parsed = urlparse(source)
-    scheme = parsed.scheme.lower()
-    if len(scheme) == 1:
-        scheme = None
-    format = os.path.splitext(parsed.path or parsed.netloc)[1][1:].lower() or None
-    if format is None:
-        # Test if query string contains a "format=" parameter.
-        query_string = parse_qs(parsed.query)
-        query_string_format = query_string.get("format")
-        if query_string_format is not None and len(query_string_format) == 1:
-            format = query_string_format[0]
-
-    # Format: datapackage
-    if parsed.path.endswith("datapackage.json"):
-        return (None, "datapackage")
-
-    return (scheme, format)
-
-
-def detect_html(text):
-    """Detect if text is HTML.
-    """
-    pattern = re.compile("\\s*<(!doctype|html)", re.IGNORECASE)
-    return bool(pattern.match(text))
-
-
-def reset_stream(stream):
-    """Reset stream pointer to the first element.
-
-    If stream is not seekable raise Exception.
-
-    """
-    try:
-        position = stream.tell()
-    except Exception:
-        position = True
-    if position != 0:
-        try:
-            stream.seek(0)
-        except Exception:
-            message = "It's not possible to reset this stream"
-            raise exceptions.TabulatorException(message)
-
-
-def requote_uri(uri):
-    """Requote uri if it contains non-ascii chars, spaces etc.
-    """
-    # To reduce tabulator import time
-    import requests.utils
-
-    return requests.utils.requote_uri(uri)
-
-
-def import_attribute(path):
-    """Import attribute by path like `package.module.attribute`
-    """
-    module_name, attribute_name = path.rsplit(".", 1)
-    module = import_module(module_name)
-    attribute = getattr(module, attribute_name)
-    return attribute
-
-
-def extract_options(options, names):
-    """Return options for names and remove it from given options in-place.
-    """
-    result = {}
-    for name, value in copy(options).items():
-        if name in names:
-            result[name] = value
-            del options[name]
-    return result
-
-
-def stringify_value(value):
-    """Convert any value to string.
-    """
-    if value is None:
-        return ""
-    isoformat = getattr(value, "isoformat", None)
-    if isoformat is not None:
-        value = isoformat()
-    return type("")(value)
-
-
 # Backports
 
 
@@ -396,12 +218,12 @@ class cached_property:
                 f"instance to cache {self.attrname!r} property."
             )
             raise TypeError(msg) from None
-        val = cache.get(self.attrname, _NOT_FOUND)
-        if val is _NOT_FOUND:
+        val = cache.get(self.attrname, config.UNDEFINED)
+        if val is config.UNDEFINED:
             with self.lock:
                 # check if another thread filled cache while we awaited lock
-                val = cache.get(self.attrname, _NOT_FOUND)
-                if val is _NOT_FOUND:
+                val = cache.get(self.attrname, config.UNDEFINED)
+                if val is config.UNDEFINED:
                     val = self.func(instance)
                     try:
                         cache[self.attrname] = val
@@ -412,6 +234,3 @@ class cached_property:
                         )
                         raise TypeError(msg) from None
         return val
-
-
-_NOT_FOUND = object()

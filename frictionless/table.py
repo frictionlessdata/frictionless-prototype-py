@@ -401,7 +401,7 @@ class Table:
         """
         return self.__row_stream
 
-    # Manage
+    # Open
 
     def open(self):
         """Opens the stream for reading.

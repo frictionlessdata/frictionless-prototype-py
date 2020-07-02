@@ -21,11 +21,11 @@ def validate_inquiry(source):
     tasks = []
     reports = []
     for task in inquiry.tasks:
-        source_type = task.get('sourceType') or helpers.infer_source_type(task['source'])
-        if source_type == 'inquiry':
-            error = Error(note='Inquiry cannot contain nested inquiries')
+        source_type = task.get("sourceType") or helpers.detect_source_type(task["source"])
+        if source_type == "inquiry":
+            error = Error(note="Inquiry cannot contain nested inquiries")
             raise exceptions.FrictionlessException(error)
-        if source_type == 'package':
+        if source_type == "package":
             # For now, we don't flatten inquiry completely and for the case
             # of a list of packages with one resource we don't get proper multiprocessing
             report = validate(**helpers.create_options(task))
@@ -48,6 +48,6 @@ def validate_inquiry(source):
     errors = []
     tables = []
     for report in reports:
-        errors.extend(report['errors'])
-        tables.extend(report['tables'])
+        errors.extend(report["errors"])
+        tables.extend(report["tables"])
     return Report(time=time, errors=errors, tables=tables)

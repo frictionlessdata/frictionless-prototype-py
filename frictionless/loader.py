@@ -3,7 +3,6 @@ import gzip
 import codecs
 import shutil
 import hashlib
-import chardet
 import zipfile
 from tempfile import NamedTemporaryFile
 from . import exceptions
@@ -53,7 +52,7 @@ class Loader:
             self.__text_stream = self.read_text_stream()
         return self.__text_stream
 
-    # Manage
+    # Open
 
     def open(self):
         self.close()
@@ -149,21 +148,15 @@ class Loader:
         return self.read_text_stream_decode(self.byte_stream)
 
     def read_text_stream_infer_encoding(self, byte_stream):
+        control = self.file.control
         encoding = self.file.get("encoding")
-        sample = byte_stream.read(config.INFER_ENCODING_VOLUME)
-        sample = sample[: config.INFER_ENCODING_VOLUME]
+        sample = byte_stream.read(config.DEFAULT_INFER_ENCODING_VOLUME)
+        sample = sample[: config.DEFAULT_INFER_ENCODING_VOLUME]
         byte_stream.seek(0)
         if encoding is None:
-            result = chardet.detect(sample)
-            confidence = result["confidence"] or 0
-            encoding = result["encoding"] or config.DEFAULT_ENCODING
-            if confidence < config.INFER_ENCODING_CONFIDENCE:
-                encoding = config.DEFAULT_ENCODING
-            if encoding == "ascii":
-                encoding = config.DEFAULT_ENCODING
+            encoding = control.detect_encoding(sample)
         encoding = codecs.lookup(encoding).name
-        # Work around 'Incorrect inferion of utf-8-sig encoding'
-        # <https://github.com/PyYoshi/cChardet/issues/28>
+        # Work around  for incorrect inferion of utf-8-sig encoding
         if encoding == "utf-8":
             if sample.startswith(codecs.BOM_UTF8):
                 encoding = "utf-8-sig"
@@ -174,6 +167,7 @@ class Loader:
         elif encoding == "utf-16-le":
             if sample.startswith(codecs.BOM_UTF16_LE):
                 encoding = "utf-16"
+        print(encoding)
         self.file.encoding = encoding
 
     def read_text_stream_decode(self, byte_stream):
@@ -185,6 +179,7 @@ class Loader:
 # Internal
 
 
+# Try buffering byte sample especially for remote
 class ByteStreamWithStatsHandling:
     def __init__(self, byte_stream, *, hashing, stats):
         try:

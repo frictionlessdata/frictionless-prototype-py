@@ -119,6 +119,7 @@ class System:
 
     # Plugins
 
+    # Consider plugins priority
     @cached_property
     def plugins(self):
         modules = OrderedDict()
