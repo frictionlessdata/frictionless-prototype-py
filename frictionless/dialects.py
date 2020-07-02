@@ -134,9 +134,9 @@ class CsvDialect(Dialect):
             metadata_root=metadata_root,
         )
 
+    # TODO: Find a better way like to_native/from_native
     def __getattr__(self, name):
         # Interoperability with native
-        # Find a better way like to_native/from_native
         if name == "lineterminator":
             return self.line_terminator
         if name == "doublequote":
@@ -289,6 +289,7 @@ class ExcelDialect(Dialect):
         self.setdetault("adjustFloatingPointError", self.adjust_floating_point_error)
 
 
+# TODO: Consider headers prop for keyed sources
 class InlineDialect(Dialect):
     """Inline dialect representation
 
@@ -339,6 +340,7 @@ class InlineDialect(Dialect):
         self.setdetault("keyed", self.keyed)
 
 
+# TODO: Consider headers prop for keyed sources
 class JsonDialect(Dialect):
     """Json dialect representation
 

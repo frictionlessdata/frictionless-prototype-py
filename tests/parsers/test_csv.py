@@ -183,7 +183,6 @@ def test_table_csv_write(tmpdir):
     target = str(tmpdir.join("table.csv"))
     with Table(source) as table:
         table.write(target)
-        assert table.stats["rows"] == 2
     with Table(target) as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
@@ -195,7 +194,6 @@ def test_table_csv_write_delimiter(tmpdir):
     dialect = dialects.CsvDialect(delimiter=";")
     with Table(source) as table:
         table.write(target, dialect=dialect)
-        assert table.stats["rows"] == 2
     with Table(target, dialect=dialect) as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
@@ -206,3 +204,13 @@ def test_table_csv_write_delimiter(tmpdir):
             "quoteChar": '"',
             "skipInitialSpace": False,
         }
+
+
+def test_table_csv_write_inline_source(tmpdir):
+    source = [{"key1": "value1", "key2": "value2"}]
+    target = str(tmpdir.join("table.csv"))
+    with Table(source) as table:
+        table.write(target)
+    with Table(target) as table:
+        assert table.headers == ["key1", "key2"]
+        assert table.read_data() == [["value1", "value2"]]

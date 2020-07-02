@@ -1084,6 +1084,9 @@ def test_table_stats_rows():
     with Table("data/special/doublequote.csv") as table:
         table.read_data()
         assert table.stats["rows"] == 5
+        table.open()
+        table.read_rows()
+        assert table.stats["rows"] == 5
 
 
 @pytest.mark.slow

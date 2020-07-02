@@ -38,6 +38,7 @@ class CsvParser(Parser):
 
     # Write
 
+    # TODO: use tempfile to prevent loosing data
     def write(self, data_stream):
         options = {}
         dialect = self.file.dialect

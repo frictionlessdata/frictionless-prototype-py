@@ -1,6 +1,6 @@
 import json
 import pytest
-from frictionless import Table
+from frictionless import Table, dialects
 
 BASE_URL = "https://raw.githubusercontent.com/okfn/tabulator-py/master/%s"
 
@@ -25,14 +25,6 @@ def test_table_text_json_dicts():
     with Table(source, scheme="text", format="json") as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
-
-
-@pytest.mark.skip
-def test_table_text_json_dicts_with_headers_argument():
-    source = '[{"id": 1, "name": "english" }, {"id": 2, "name": "中国人" }]'
-    with Table(source, scheme="text", format="json", headers=["name", "id"]) as table:
-        assert table.headers == ["name", "id"]
-        assert table.read() == [["english", 1], ["中国人", 2]]
 
 
 def test_table_text_json_lists():
@@ -65,12 +57,11 @@ def test_table_ndjson():
 # Write
 
 
-@pytest.mark.skip
-def test_table_save_json(tmpdir):
+def test_table_json_write(tmpdir):
     source = "data/table.csv"
     target = str(tmpdir.join("table.json"))
-    with Table(source, headers=1) as table:
-        assert table.save(target) == 2
+    with Table(source) as table:
+        table.write(target)
     with open(target) as file:
         assert json.load(file) == [
             ["id", "name"],
@@ -79,12 +70,12 @@ def test_table_save_json(tmpdir):
         ]
 
 
-@pytest.mark.skip
-def test_table_save_json_keyed(tmpdir):
+def test_table_json_write_keyed(tmpdir):
     source = "data/table.csv"
     target = str(tmpdir.join("table.json"))
-    with Table(source, headers=1) as table:
-        assert table.save(target, keyed=True) == 2
+    dialect = dialects.JsonDialect(keyed=True)
+    with Table(source) as table:
+        table.write(target, dialect=dialect)
     with open(target) as file:
         assert json.load(file) == [
             {"id": "1", "name": "english"},

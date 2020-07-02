@@ -64,17 +64,3 @@ def test_table_inline_ordered_dict():
     with Table(source) as table:
         assert table.headers == ["name", "id"]
         assert table.read_data() == [["english", "1"], ["中国人", "2"]]
-
-
-# Write
-
-
-@pytest.mark.skip
-def test_table_save_inline_keyed_with_headers_argument(tmpdir):
-    source = [{"key1": "value1", "key2": "value2"}]
-    target = str(tmpdir.join("table.csv"))
-    with Table(source, headers=["key2", "key1"]) as table:
-        table.save(target)
-    with Table(target, headers=1) as table:
-        assert table.headers == ["key2", "key1"]
-        assert table.read() == [["value2", "value1"]]

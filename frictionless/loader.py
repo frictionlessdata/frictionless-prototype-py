@@ -178,7 +178,7 @@ class Loader:
 # Internal
 
 
-# Try buffering byte sample especially for remote
+# TODO: Try buffering byte sample especially for remote
 class ByteStreamWithStatsHandling:
     def __init__(self, byte_stream, *, hashing, stats):
         try:
