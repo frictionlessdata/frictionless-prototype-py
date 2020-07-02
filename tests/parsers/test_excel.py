@@ -1,6 +1,5 @@
 import io
 import pytest
-from decimal import Decimal
 from datetime import datetime
 from frictionless import Table, dialects, exceptions
 

@@ -178,15 +178,31 @@ def test_table_csv_quotechar_is_empty_string():
 # Save
 
 
-@pytest.mark.skip
-def test_table_save_csv(tmpdir):
+def test_table_csv_write(tmpdir):
     source = "data/table.csv"
     target = str(tmpdir.join("table.csv"))
-    with Table(source, headers=1) as table:
-        assert table.save(target) == 2
-    with Table(target, headers=1) as table:
+    with Table(source) as table:
+        table.write(target)
+        assert table.stats["rows"] == 2
+    with Table(target) as table:
         assert table.headers == ["id", "name"]
-        assert table.read(extended=True) == [
-            (2, ["id", "name"], ["1", "english"]),
-            (3, ["id", "name"], ["2", "中国人"]),
-        ]
+        assert table.read_data() == [["1", "english"], ["2", "中国人"]]
+
+
+def test_table_csv_write_delimiter(tmpdir):
+    source = "data/table.csv"
+    target = str(tmpdir.join("table.csv"))
+    dialect = dialects.CsvDialect(delimiter=";")
+    with Table(source) as table:
+        table.write(target, dialect=dialect)
+        assert table.stats["rows"] == 2
+    with Table(target, dialect=dialect) as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_data() == [["1", "english"], ["2", "中国人"]]
+        assert table.dialect == {
+            "delimiter": ";",
+            "lineTerminator": "\r\n",
+            "doubleQuote": True,
+            "quoteChar": '"',
+            "skipInitialSpace": False,
+        }
