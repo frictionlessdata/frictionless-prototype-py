@@ -41,3 +41,15 @@ class InlineParser(Parser):
         else:
             note = "data item has to be tuple, list or dict"
             raise exceptions.FrictionlessException(errors.SourceError(note=note))
+
+    # Write
+
+    def write(self, data_stream):
+        dialect = self.file.dialect
+        headers = next(data_stream)
+        if not dialect.keyed:
+            self.file.source.append(headers)
+        for item in data_stream:
+            if dialect.keyed:
+                item = dict(zip(headers, item))
+            self.file.source.append(item)
