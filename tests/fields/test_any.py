@@ -6,16 +6,16 @@ from frictionless import Field
 
 
 @pytest.mark.parametrize(
-    'format, source, target',
+    "format, source, target",
     [
-        ('default', 1, 1),
-        ('default', '1', '1'),
-        ('default', '3.14', '3.14'),
-        ('default', True, True),
-        ('default', '', None),
+        ("default", 1, 1),
+        ("default", "1", "1"),
+        ("default", "3.14", "3.14"),
+        ("default", True, True),
+        ("default", "", None),
     ],
 )
 def test_read_cell_any(format, source, target):
-    field = Field({'name': 'name', 'type': 'any', 'format': format})
+    field = Field({"name": "name", "type": "any", "format": format})
     cell, notes = field.read_cell(source)
     assert cell == target

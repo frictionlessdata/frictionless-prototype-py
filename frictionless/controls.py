@@ -1,4 +1,3 @@
-import chardet
 import requests
 from .metadata import ControlledMetadata
 from . import helpers

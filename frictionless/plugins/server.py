@@ -8,7 +8,7 @@ from ..server import Server
 
 class ServerPlugin(Plugin):
     def create_server(self, name):
-        if name == 'api':
+        if name == "api":
             return ApiServer()
 
 

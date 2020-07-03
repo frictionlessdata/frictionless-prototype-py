@@ -4,9 +4,9 @@ from .. import errors
 
 class BaselineCheck(Check):
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'properties': {},
-        'additionalProperties': False,
+        "type": "object",
+        "properties": {},
+        "additionalProperties": False,
     }
     possible_Errors = [  # type: ignore
         # head

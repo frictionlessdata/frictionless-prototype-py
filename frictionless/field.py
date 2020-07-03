@@ -34,9 +34,9 @@ class Field(ControlledMetadata):
 
     metadata_Error = errors.SchemaError  # type: ignore
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'required': ['name'],
-        'properties': {'name': {'type': 'string'}},
+        "type": "object",
+        "required": ["name"],
+        "properties": {"name": {"type": "string"}},
     }
     supported_constraints = []  # type: ignore
 
@@ -53,11 +53,11 @@ class Field(ControlledMetadata):
         metadata_strict=False,
         metadata_schema=None,
     ):
-        self.setdefined('name', name)
-        self.setdefined('type', type)
-        self.setdefined('format', format)
-        self.setdefined('missingValues', missing_values)
-        self.setdefined('constraints', constraints)
+        self.setdefined("name", name)
+        self.setdefined("type", type)
+        self.setdefined("format", format)
+        self.setdefined("missingValues", missing_values)
+        self.setdefined("constraints", constraints)
         self.__metadata_schema = metadata_schema
         super().__init__(
             descriptor=descriptor,
@@ -66,55 +66,55 @@ class Field(ControlledMetadata):
         )
 
     def __setattr__(self, name, value):
-        if name in ['name', 'type', 'format', 'missing_values', 'constraints']:
+        if name in ["name", "type", "format", "missing_values", "constraints"]:
             self[stringcase.camelcase(name)] = value
-        elif name == 'required':
-            self.constraints['required'] = value
+        elif name == "required":
+            self.constraints["required"] = value
         else:
             super().__setattr__(name, value)
 
     @cached_property
     def name(self):
-        return self.get('name', 'field')
+        return self.get("name", "field")
 
     @cached_property
     def type(self):
-        return self.get('type', 'any')
+        return self.get("type", "any")
 
     @cached_property
     def format(self):
-        format = self.get('format', 'default')
-        if format.startswith('fmt:'):
+        format = self.get("format", "default")
+        if format.startswith("fmt:"):
             warnings.warn(
                 'Format "fmt:<PATTERN>" is deprecated. '
                 'Please use "<PATTERN>" without "fmt:" prefix.',
                 UserWarning,
             )
-            format = format.replace('fmt:', '')
+            format = format.replace("fmt:", "")
         return format
 
     @cached_property
     def missing_values(self):
         schema = self.__metadata_schema
         default = schema.missing_values if schema else config.DEFAULT_MISSING_VALUES
-        missing_values = self.get('missingValues', default)
-        return self.metadata_attach('missingValues', missing_values)
+        missing_values = self.get("missingValues", default)
+        return self.metadata_attach("missingValues", missing_values)
 
     @cached_property
     def constraints(self):
-        constraints = self.get('constraints', {})
-        return self.metadata_attach('constraints', constraints)
+        constraints = self.get("constraints", {})
+        return self.metadata_attach("constraints", constraints)
 
     @cached_property
     def required(self):
-        return self.constraints.get('required', False)
+        return self.constraints.get("required", False)
 
     # Expand
 
     def expand(self):
-        self.setdefault('name', 'field')
-        self.setdefault('type', 'any')
-        self.setdefault('format', 'default')
+        self.setdefault("name", "field")
+        self.setdefault("type", "any")
+        self.setdefault("format", "default")
 
     # Read
 
@@ -136,7 +136,7 @@ class Field(ControlledMetadata):
             cell = self.__proxy.read_cell_cast(cell)
             if cell is None:
                 notes = notes or OrderedDict()
-                notes['type'] = f'type is "{self.type}/{self.format}"'
+                notes["type"] = f'type is "{self.type}/{self.format}"'
         if not notes and self.read_cell_checks:
             for name, check in self.read_cell_checks.items():
                 if not check(cell):
@@ -168,11 +168,11 @@ class Field(ControlledMetadata):
         for name in self.__proxy.supported_constraints:
             constraint = self.constraints.get(name)
             if constraint is not None:
-                if name in ['minimum', 'maximum']:
+                if name in ["minimum", "maximum"]:
                     constraint = self.read_cell_cast(constraint)
-                if name == 'enum':
+                if name == "enum":
                     constraint = list(map(self.read_cell_cast, constraint))
-                checks[name] = partial(globals().get(f'check_{name}'), constraint)
+                checks[name] = partial(globals().get(f"check_{name}"), constraint)
         return checks
 
     # Write
@@ -189,12 +189,12 @@ class Field(ControlledMetadata):
         """
         notes = None
         if cell is None:
-            cell = ''
+            cell = ""
         if cell is not None:
             cell = self.__proxy.write_cell_cast(cell)
         if cell is None:
             notes = notes or OrderedDict()
-            notes['type'] = f'type is "{self.type}/{self.format}"'
+            notes["type"] = f'type is "{self.type}/{self.format}"'
         return cell, notes
 
     def write_cell_cast(self, cell):
@@ -214,10 +214,10 @@ class Field(ControlledMetadata):
     def metadata_process(self):
         self.__proxy = None
         if type(self) is Field:
-            pref = self.get('type', 'any')
-            name = f'{pref.capitalize()}Field'
-            module = importlib.import_module('frictionless.fields')
-            self.__proxy = getattr(module, name, getattr(module, 'AnyField'))(self)
+            pref = self.get("type", "any")
+            name = f"{pref.capitalize()}Field"
+            module = importlib.import_module("frictionless.fields")
+            self.__proxy = getattr(module, name, getattr(module, "AnyField"))(self)
         super().metadata_process()
 
     def metadata_validate(self):
@@ -228,7 +228,7 @@ class Field(ControlledMetadata):
 
         # Constraints
         for name in self.constraints.keys():
-            if name not in self.supported_constraints + ['unique']:
+            if name not in self.supported_constraints + ["unique"]:
                 note = f'constraint "{name}" is not supported by type "{self.type}"'
                 self.metadata_errors.append(errors.SchemaError(note=note))
 
@@ -288,7 +288,7 @@ def check_pattern(constraint, cell):
     if cell is None:
         return True
     if not isinstance(constraint, COMPILED_RE):
-        regex = re.compile('^{0}$'.format(constraint))
+        regex = re.compile("^{0}$".format(constraint))
     else:
         regex = constraint
     match = regex.match(cell)

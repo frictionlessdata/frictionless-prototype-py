@@ -33,7 +33,7 @@ class Metadata(dict):
         self.__errors = []
         self.__root = metadata_root or self
         self.__strict = metadata_strict or not self.metadata_Error
-        self.__Error = self.metadata_Error or import_module('frictionless.errors').Error
+        self.__Error = self.metadata_Error or import_module("frictionless.errors").Error
         metadata = self.metadata_extract(descriptor)
         for key, value in metadata.items():
             dict.setdefault(self, key, value)
@@ -62,7 +62,7 @@ class Metadata(dict):
     def metadata_duplicate(self):
         result = {}
         for key, value in self.items():
-            if hasattr(value, 'metadata_duplicate'):
+            if hasattr(value, "metadata_duplicate"):
                 value = value.copy()
             result[key] = value
         return result
@@ -87,7 +87,7 @@ class Metadata(dict):
             if isinstance(descriptor, str):
                 if urlparse(descriptor).scheme in config.REMOTE_SCHEMES:
                     return requests.get(descriptor).json()
-                with io.open(descriptor, encoding='utf-8') as file:
+                with io.open(descriptor, encoding="utf-8") as file:
                     return json.load(file)
             return json.load(descriptor)
         except Exception as exception:
@@ -104,7 +104,7 @@ class Metadata(dict):
     def metadata_save(self, target, ensure_ascii=True):
         try:
             helpers.ensure_dir(target)
-            with io.open(target, mode='w', encoding='utf-8') as file:
+            with io.open(target, mode="w", encoding="utf-8") as file:
                 json.dump(self, file, indent=2, ensure_ascii=ensure_ascii)
         except Exception as exc:
             raise exceptions.FrictionlessException(self.__Error(note=str(exc))) from exc
@@ -126,8 +126,8 @@ class Metadata(dict):
             validator_class = jsonschema.validators.validator_for(self.metadata_profile)
             validator = validator_class(self.metadata_profile)
             for error in validator.iter_errors(self):
-                metadata_path = '/'.join(map(str, error.path))
-                profile_path = '/'.join(map(str, error.schema_path))
+                metadata_path = "/".join(map(str, error.path))
+                profile_path = "/".join(map(str, error.schema_path))
                 note = '"%s" at "%s" in metadata and at "%s" in profile'
                 note = note % (error.message, metadata_path, profile_path)
                 error = self.__Error(note=note)
@@ -188,7 +188,7 @@ class ControlledMetadata(Metadata):
             if key in skip:
                 continue
             if isinstance(value, dict):
-                if not hasattr(value, 'metadata_process'):
+                if not hasattr(value, "metadata_process"):
                     value = ControlledMetadata(
                         value,
                         metadata_root=self.metadata_root,
@@ -197,7 +197,7 @@ class ControlledMetadata(Metadata):
                     dict.__setitem__(self, key, value)
                 value.metadata_process()
             if isinstance(value, list):
-                if not hasattr(value, 'metadata_process'):
+                if not hasattr(value, "metadata_process"):
                     value = ControlledMetadataList(
                         value,
                         metadata_root=self.metadata_root,
@@ -268,7 +268,7 @@ class ControlledMetadata(Metadata):
     def metadata_validate(self):
         super().metadata_validate()
         for key, value in self.items():
-            if hasattr(value, 'metadata_validate'):
+            if hasattr(value, "metadata_validate"):
                 value.metadata_validate()
                 self.metadata_errors.extend(value.metadata_errors)
 
@@ -313,7 +313,7 @@ class ControlledMetadataList(list):
     def metadata_duplicate(self):
         result = []
         for value in self:
-            if hasattr(value, 'metadata_duplicate'):
+            if hasattr(value, "metadata_duplicate"):
                 value = value.copy()
             result.append(value)
         return result
@@ -332,7 +332,7 @@ class ControlledMetadataList(list):
     def metadata_process(self):
         for index, value in list(enumerate(self)):
             if isinstance(value, dict):
-                if not hasattr(value, 'metadata_process'):
+                if not hasattr(value, "metadata_process"):
                     value = ControlledMetadata(
                         value,
                         metadata_root=self.metadata_root,
@@ -341,7 +341,7 @@ class ControlledMetadataList(list):
                     list.__setitem__(self, index, value)
                 value.metadata_process()
             if isinstance(value, list):
-                if not hasattr(value, 'metadata_process'):
+                if not hasattr(value, "metadata_process"):
                     value = ControlledMetadataList(
                         value,
                         metadata_root=self.metadata_root,
@@ -409,7 +409,7 @@ class ControlledMetadataList(list):
 
     def metadata_validate(self):
         for value in self:
-            if hasattr(value, 'metadata_validate'):
+            if hasattr(value, "metadata_validate"):
                 value.metadata_validate()
                 self.metadata_errors.extend(value.metadata_errors)
 

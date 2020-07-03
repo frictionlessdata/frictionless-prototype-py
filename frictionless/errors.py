@@ -493,4 +493,3 @@ class RowConstraintError(RowError):
     tags = ["#body", "#regulation"]
     template = "The row at position {rowPosition} has an error: {note}"
     description = "The value does not conform to the row constraint."
-

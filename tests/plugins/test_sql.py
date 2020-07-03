@@ -47,20 +47,8 @@ def test_table_format_sql_headers_none(database_url):
 @pytest.mark.skip
 def test_table_save_sqlite(database_url):
     source = "data/table.csv"
-    with Table(source, headers=1) as table:
-        assert table.save(database_url, table="test_table_save_sqlite") == 2
-    with Table(
-        database_url, table="test_table_save_sqlite", order_by="id", headers=1
-    ) as table:
-        assert table.read() == [["1", "english"], ["2", "中国人"]]
-        assert table.headers == ["id", "name"]
-
-
-@pytest.mark.skip
-def test_table_save_sqlite(database_url):
-    source = "data/table.csv"
     with Table(source) as table:
-        table.save(database_url, table="test_stream_save_sqlite")
-    with Table(database_url, table="test_table_save_sqlite", order_by="id") as table:
+        table.save(database_url, table="test_table_write_sqlite")
+    with Table(database_url, table="test_table_write_sqlite", order_by="id") as table:
         assert table.read() == [["1", "english"], ["2", "中国人"]]
         assert table.headers == ["id", "name"]

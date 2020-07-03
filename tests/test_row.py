@@ -12,7 +12,7 @@ def test_basic():
     assert row.blank_cells == {}
     assert row.error_cells == {}
     assert row.errors == []
-    assert row == {'field1': 1, 'field2': 2, 'field3': 3}
+    assert row == {"field1": 1, "field2": 2, "field3": 3}
 
 
 # Helpers
@@ -22,7 +22,7 @@ def create_row(cells, *, fields=[], field_positions=[], row_position=1, row_numb
     field_positions = field_positions or list(range(1, len(cells) + 1))
     if not fields:
         for field_position in field_positions:
-            fields.append(Field({'name': 'field%s' % field_position, 'type': 'any'}))
+            fields.append(Field({"name": "field%s" % field_position, "type": "any"}))
     return Row(
         cells,
         fields=fields,

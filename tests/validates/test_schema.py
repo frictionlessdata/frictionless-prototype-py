@@ -5,16 +5,16 @@ from frictionless import validate
 
 
 def test_validate():
-    report = validate('data/schema.json')
+    report = validate("data/schema.json")
     assert report.valid
 
 
 def test_validate_invalid():
-    report = validate({'fields': {}})
+    report = validate({"fields": {}})
     print(report)
-    assert report.flatten(['code', 'note']) == [
+    assert report.flatten(["code", "note"]) == [
         [
-            'schema-error',
+            "schema-error",
             '"{} is not of type \'array\'" at "fields" in metadata and at "properties/fields/type" in profile',
         ],
     ]

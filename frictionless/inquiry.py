@@ -20,4 +20,4 @@ class Inquiry(Metadata):
 
     @property
     def tasks(self):
-        return self['tasks']
+        return self["tasks"]

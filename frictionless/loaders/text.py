@@ -10,10 +10,10 @@ class TextLoader(Loader):
     # Read
 
     def read_byte_stream_create(self):
-        scheme = 'text://'
+        scheme = "text://"
         source = self.file.source
         if source.startswith(scheme):
-            source = source.replace(scheme, '', 1)
+            source = source.replace(scheme, "", 1)
         byte_stream = io.BufferedRandom(io.BytesIO())
         byte_stream.write(source.encode(config.DEFAULT_ENCODING))
         byte_stream.seek(0)
