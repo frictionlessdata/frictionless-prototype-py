@@ -296,7 +296,7 @@ def validate_table(
                 scope=errors.scope,
                 partial=partial,
                 row_count=row_number,
-                source=source,
+                path=source,
                 scheme=table.scheme,
                 format=table.format,
                 encoding=table.encoding,

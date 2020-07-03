@@ -5,51 +5,51 @@ from frictionless import validate, ReportTable, errors
 
 
 def test_validate_report_props():
-    report = validate('data/table.csv')
+    report = validate("data/table.csv")
     assert report.time
     assert report.valid is True
-    assert report.version.startswith('0')
+    assert report.version.startswith("0")
     assert report.table_count == 1
     assert report.error_count == 0
     assert report.table.time
     assert report.table.valid is True
     assert report.table.scope == [
-        'extra-header',
-        'missing-header',
-        'blank-header',
-        'duplicate-header',
-        'non-matching-header',
-        'extra-cell',
-        'missing-cell',
-        'blank-row',
-        'required-error',
-        'type-error',
-        'constraint-error',
-        'checksum-error',
-        'unique-error',
-        'primary-key-error',
-        'foreign-key-error',
+        "extra-header",
+        "missing-header",
+        "blank-header",
+        "duplicate-header",
+        "non-matching-header",
+        "extra-cell",
+        "missing-cell",
+        "blank-row",
+        "required-error",
+        "type-error",
+        "constraint-error",
+        "checksum-error",
+        "unique-error",
+        "primary-key-error",
+        "foreign-key-error",
     ]
     assert report.table.row_count == 2
     assert report.table.error_count == 0
-    assert report.table['source'] == 'data/table.csv'
-    assert report.table['headers'] == ['id', 'name']
-    assert report.table['scheme'] == 'file'
-    assert report.table['format'] == 'csv'
-    assert report.table['encoding'] == 'utf-8'
-    assert report.table['errors'] == []
-    assert report.table['schema'] == {
-        'fields': [
-            {'name': 'id', 'type': 'integer'},
-            {'name': 'name', 'type': 'string'},
+    assert report.table["path"] == "data/table.csv"
+    assert report.table["headers"] == ["id", "name"]
+    assert report.table["scheme"] == "file"
+    assert report.table["format"] == "csv"
+    assert report.table["encoding"] == "utf-8"
+    assert report.table["errors"] == []
+    assert report.table["schema"] == {
+        "fields": [
+            {"name": "id", "type": "integer"},
+            {"name": "name", "type": "string"},
         ],
     }
-    assert report.table['dialect'] == {
-        'delimiter': ',',
-        'doubleQuote': True,
-        'lineTerminator': '\r\n',
-        'quoteChar': '"',
-        'skipInitialSpace': False,
+    assert report.table["dialect"] == {
+        "delimiter": ",",
+        "doubleQuote": True,
+        "lineTerminator": "\r\n",
+        "quoteChar": '"',
+        "skipInitialSpace": False,
     }
 
 
@@ -60,14 +60,14 @@ def test_table_report_valid():
     table = create_report_table(errors=[])
     assert table.valid is True
     assert table.error_count == 0
-    assert table.flatten(['code']) == []
+    assert table.flatten(["code"]) == []
 
 
 def test_table_report_invalid():
-    table = create_report_table(errors=[errors.SourceError(note='note')])
+    table = create_report_table(errors=[errors.SourceError(note="note")])
     assert table.valid is False
     assert table.error_count == 1
-    assert table.flatten(['code']) == [['source-error']]
+    assert table.flatten(["code"]) == [["source-error"]]
 
 
 # Helpers
@@ -75,15 +75,15 @@ def test_table_report_invalid():
 
 def create_report_table(
     *,
-    time='time',
+    time="time",
     scope=[],
     partial=False,
     row_count=0,
-    source='source',
-    scheme='scheme',
-    format='format',
-    encoding='encoding',
-    compression='compression',
+    path="path",
+    scheme="scheme",
+    format="format",
+    encoding="encoding",
+    compression="compression",
     headers=None,
     headers_row=None,
     headers_joiner=None,
@@ -104,7 +104,7 @@ def create_report_table(
         scope=scope,
         partial=partial,
         row_count=row_count,
-        source=source,
+        path=path,
         scheme=scheme,
         format=format,
         encoding=encoding,

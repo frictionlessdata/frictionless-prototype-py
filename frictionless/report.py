@@ -23,42 +23,42 @@ class Report(Metadata):
     metadata_profile = config.REPORT_PROFILE
 
     def __init__(self, descriptor=None, *, time, errors, tables):
-        self['time'] = time
-        self['valid'] = not errors and all(tab['valid'] for tab in tables)
-        self['version'] = config.VERSION
-        self['tableCount'] = len(tables)
-        self['errorCount'] = len(errors) + sum(tab['errorCount'] for tab in tables)
-        self['errors'] = errors
-        self['tables'] = tables
+        self["time"] = time
+        self["valid"] = not errors and all(tab["valid"] for tab in tables)
+        self["version"] = config.VERSION
+        self["tableCount"] = len(tables)
+        self["errorCount"] = len(errors) + sum(tab["errorCount"] for tab in tables)
+        self["errors"] = errors
+        self["tables"] = tables
         super().__init__(descriptor)
 
     @property
     def time(self):
-        return self['time']
+        return self["time"]
 
     @property
     def valid(self):
-        return self['valid']
+        return self["valid"]
 
     @property
     def version(self):
-        return self['version']
+        return self["version"]
 
     @property
     def table_count(self):
-        return self['tableCount']
+        return self["tableCount"]
 
     @property
     def error_count(self):
-        return self['errorCount']
+        return self["errorCount"]
 
     @property
     def errors(self):
-        return self['errors']
+        return self["errors"]
 
     @property
     def tables(self):
-        return self['tables']
+        return self["tables"]
 
     @property
     def table(self):
@@ -100,7 +100,7 @@ class Report(Metadata):
             result.append([context.get(prop) for prop in spec])
         for count, table in enumerate(self.tables, start=1):
             for error in table.errors:
-                context = {'tableNumber': count, 'tablePosition': count}
+                context = {"tableNumber": count, "tablePosition": count}
                 context.update(error)
                 result.append([context.get(prop) for prop in spec])
         return result
@@ -115,7 +115,7 @@ class ReportTable(Metadata):
         scope
         partial
         row_count
-        source
+        path
         scheme
         format
         encoding
@@ -148,7 +148,7 @@ class ReportTable(Metadata):
         scope,
         partial,
         row_count,
-        source,
+        path,
         scheme,
         format,
         encoding,
@@ -168,60 +168,60 @@ class ReportTable(Metadata):
         dialect,
         errors,
     ):
-        self['time'] = time
-        self['valid'] = not errors
-        self['scope'] = scope
-        self['partial'] = partial
-        self['rowCount'] = row_count
-        self['errorCount'] = len(errors)
-        self['source'] = source
-        self['scheme'] = scheme
-        self['format'] = format
-        self['encoding'] = encoding
-        self['compression'] = compression
-        self['headers'] = headers
-        self['headersRow'] = headers_row
-        self['headersJoiner'] = headers_joiner
-        self['pickFields'] = pick_fields
-        self['skipFields'] = skip_fields
-        self['limitFields'] = limit_fields
-        self['offsetFields'] = offset_fields
-        self['pickRows'] = pick_rows
-        self['skipRows'] = skip_rows
-        self['limitRows'] = limit_rows
-        self['offsetRows'] = offset_rows
-        self['schema'] = schema
-        self['dialect'] = dialect
-        self['errors'] = errors
+        self["time"] = time
+        self["valid"] = not errors
+        self["scope"] = scope
+        self["partial"] = partial
+        self["rowCount"] = row_count
+        self["errorCount"] = len(errors)
+        self["path"] = path
+        self["scheme"] = scheme
+        self["format"] = format
+        self["encoding"] = encoding
+        self["compression"] = compression
+        self["headers"] = headers
+        self["headersRow"] = headers_row
+        self["headersJoiner"] = headers_joiner
+        self["pickFields"] = pick_fields
+        self["skipFields"] = skip_fields
+        self["limitFields"] = limit_fields
+        self["offsetFields"] = offset_fields
+        self["pickRows"] = pick_rows
+        self["skipRows"] = skip_rows
+        self["limitRows"] = limit_rows
+        self["offsetRows"] = offset_rows
+        self["schema"] = schema
+        self["dialect"] = dialect
+        self["errors"] = errors
         super().__init__(descriptor)
 
     @property
     def time(self):
-        return self['time']
+        return self["time"]
 
     @property
     def valid(self):
-        return self['valid']
+        return self["valid"]
 
     @property
     def scope(self):
-        return self['scope']
+        return self["scope"]
 
     @property
     def partial(self):
-        return self['partial']
+        return self["partial"]
 
     @property
     def row_count(self):
-        return self['rowCount']
+        return self["rowCount"]
 
     @property
     def error_count(self):
-        return self['errorCount']
+        return self["errorCount"]
 
     @property
     def errors(self):
-        return self['errors']
+        return self["errors"]
 
     @property
     def error(self):

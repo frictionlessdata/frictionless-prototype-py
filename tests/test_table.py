@@ -11,6 +11,7 @@ BASE_URL = "https://raw.githubusercontent.com/frictionlessdata/tabulator-py/mast
 
 def test_table():
     with Table("data/table.csv") as table:
+        assert table.path == "data/table.csv"
         assert table.source == "data/table.csv"
         assert table.scheme == "file"
         assert table.format == "csv"
@@ -296,7 +297,7 @@ def test_table_format_error_non_matching_format():
         table.open()
     error = excinfo.value.error
     assert error.code == "format-error"
-    assert error.note == 'invlid excel file "data/table.csv"'
+    assert error.note == 'invalid excel file "data/table.csv"'
 
 
 # Hashing
