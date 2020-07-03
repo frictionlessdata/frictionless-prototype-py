@@ -212,6 +212,7 @@ def test_check_file_integrity_hash_invalid():
     ]
 
 
+@pytest.mark.skip
 def test_check_file_integrity_hash_not_supported_algorithm():
     source = deepcopy(DESCRIPTOR_SH)
     source['resources'][0].pop('bytes')

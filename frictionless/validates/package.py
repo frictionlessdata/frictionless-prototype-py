@@ -11,16 +11,15 @@ def validate_package(source, base_path=None, exact=False, **options):
     """Validate package
     """
 
-    # Prepare state
+    # Create state
     timer = helpers.Timer()
 
     # Create package
     try:
         package = datapackage.Package(source, base_path=base_path)
     except datapackage.exceptions.DataPackageException as exception:
-        time = timer.get_time()
         error = PackageError(note=str(exception))
-        return Report(time=time, errors=[error], tables=[])
+        return Report(time=timer.time, errors=[error], tables=[])
 
     # Prepare package
     for stage in [1, 2]:
@@ -39,14 +38,13 @@ def validate_package(source, base_path=None, exact=False, **options):
         for error in package.errors:
             errors.append(PackageError(note=str(error)))
         if errors:
-            time = timer.get_time()
-            return Report(time=time, errors=errors, tables=[])
+            return Report(time=timer.time, errors=errors, tables=[])
 
     # Prepare inquiry
-    descriptor = {'tasks': []}
+    descriptor = {"tasks": []}
     for resource in package.resources:
         lookup = helpers.create_lookup(resource, package=package)
-        descriptor['tasks'].append(
+        descriptor["tasks"].append(
             helpers.create_descriptor(
                 **options,
                 source=resource.descriptor,
@@ -61,5 +59,4 @@ def validate_package(source, base_path=None, exact=False, **options):
     report = validate_inquiry(inquiry)
 
     # Return report
-    time = timer.get_time()
-    return Report(time=time, errors=report['errors'], tables=report['tables'])
+    return Report(time=timer.time, errors=report["errors"], tables=report["tables"])

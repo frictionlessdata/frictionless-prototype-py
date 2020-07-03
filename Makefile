@@ -1,7 +1,7 @@
 .PHONY: all list install format lint readme release templates test version
 
 
-PACKAGE := $(shell grep '^PACKAGE =' setup.py | cut -d "'" -f2)
+PACKAGE := $(shell grep '^PACKAGE =' setup.py | cut -d '"' -f2)
 VERSION := $(shell head -n 1 $(PACKAGE)/assets/VERSION)
 LEAD := $(shell head -n 1 LEAD.md)
 

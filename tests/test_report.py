@@ -6,11 +6,32 @@ from frictionless import validate, ReportTable, errors
 
 def test_validate_report_props():
     report = validate("data/table.csv")
+    # Report
+    assert report.version.startswith("0")
     assert report.time
     assert report.valid is True
-    assert report.version.startswith("0")
-    assert report.table_count == 1
-    assert report.error_count == 0
+    assert report.stats == {"errors": 0, "tables": 1}
+    assert report.errors == []
+    # Table
+    assert report.table["path"] == "data/table.csv"
+    assert report.table["scheme"] == "file"
+    assert report.table["format"] == "csv"
+    assert report.table["hashing"] == "md5"
+    assert report.table["encoding"] == "utf-8"
+    assert report.table["dialect"] == {
+        "delimiter": ",",
+        "doubleQuote": True,
+        "lineTerminator": "\r\n",
+        "quoteChar": '"',
+        "skipInitialSpace": False,
+    }
+    assert report.table["headers"] == ["id", "name"]
+    assert report.table["schema"] == {
+        "fields": [
+            {"name": "id", "type": "integer"},
+            {"name": "name", "type": "string"},
+        ],
+    }
     assert report.table.time
     assert report.table.valid is True
     assert report.table.scope == [
@@ -30,27 +51,13 @@ def test_validate_report_props():
         "primary-key-error",
         "foreign-key-error",
     ]
-    assert report.table.row_count == 2
-    assert report.table.error_count == 0
-    assert report.table["path"] == "data/table.csv"
-    assert report.table["headers"] == ["id", "name"]
-    assert report.table["scheme"] == "file"
-    assert report.table["format"] == "csv"
-    assert report.table["encoding"] == "utf-8"
-    assert report.table["errors"] == []
-    assert report.table["schema"] == {
-        "fields": [
-            {"name": "id", "type": "integer"},
-            {"name": "name", "type": "string"},
-        ],
+    assert report.table.stats == {
+        "hash": "6c2c61dd9b0e9c6876139a449ed87933",
+        "bytes": 30,
+        "rows": 2,
+        "errors": 0,
     }
-    assert report.table["dialect"] == {
-        "delimiter": ",",
-        "doubleQuote": True,
-        "lineTerminator": "\r\n",
-        "quoteChar": '"',
-        "skipInitialSpace": False,
-    }
+    assert report.errors == []
 
 
 # ReportTable
@@ -59,14 +66,14 @@ def test_validate_report_props():
 def test_table_report_valid():
     table = create_report_table(errors=[])
     assert table.valid is True
-    assert table.error_count == 0
+    assert table.stats["errors"] == 0
     assert table.flatten(["code"]) == []
 
 
 def test_table_report_invalid():
     table = create_report_table(errors=[errors.SourceError(note="note")])
     assert table.valid is False
-    assert table.error_count == 1
+    assert table.stats["errors"] == 1
     assert table.flatten(["code"]) == [["source-error"]]
 
 
@@ -75,18 +82,15 @@ def test_table_report_invalid():
 
 def create_report_table(
     *,
-    time="time",
-    scope=[],
-    partial=False,
-    row_count=0,
     path="path",
     scheme="scheme",
     format="format",
+    hashing="hashing",
     encoding="encoding",
     compression="compression",
+    compression_path="compression_path",
+    dialect=None,
     headers=None,
-    headers_row=None,
-    headers_joiner=None,
     pick_fields=None,
     skip_fields=None,
     limit_fields=None,
@@ -96,22 +100,22 @@ def create_report_table(
     limit_rows=None,
     offset_rows=None,
     schema=None,
-    dialect=None,
+    time="time",
+    scope=[],
+    partial=False,
+    stats={},
     errors=[]
 ):
     return ReportTable(
-        time=time,
-        scope=scope,
-        partial=partial,
-        row_count=row_count,
         path=path,
         scheme=scheme,
         format=format,
+        hashing=hashing,
         encoding=encoding,
         compression=compression,
+        compression_path=compression_path,
+        dialect=dialect,
         headers=headers,
-        headers_row=headers_row,
-        headers_joiner=headers_joiner,
         pick_fields=pick_fields,
         skip_fields=skip_fields,
         limit_fields=limit_fields,
@@ -121,6 +125,9 @@ def create_report_table(
         limit_rows=limit_rows,
         offset_rows=offset_rows,
         schema=schema,
-        dialect=dialect,
+        time=time,
+        scope=scope,
+        stats=stats,
+        partial=partial,
         errors=errors,
     )

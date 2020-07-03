@@ -75,7 +75,6 @@ class Report(Metadata):
             try:
                 return validate(*args, **kwargs)
             except Exception as exception:
-                raise
                 error = TaskError(note=str(exception))
                 if isinstance(exception, exceptions.FrictionlessException):
                     error = exception.error

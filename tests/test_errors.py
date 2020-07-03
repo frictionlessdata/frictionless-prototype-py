@@ -1,10 +1,9 @@
-from frictionless import errors, exceptions
+from frictionless import errors
 
 
 # From exception
 
 
 def test_error_from_exception():
-    exception = exceptions.SourceError('message')
-    error = errors.Error.from_exception(exception)
-    assert error['code'] == 'source-error'
+    error = errors.SourceError(note="note")
+    assert error["code"] == "source-error"

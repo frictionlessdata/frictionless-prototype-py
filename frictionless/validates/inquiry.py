@@ -13,11 +13,11 @@ def validate_inquiry(source):
     """Validate inquiry
     """
 
-    # Prepare state
+    # Create state
     timer = helpers.Timer()
     inquiry = Inquiry(source)
 
-    # Prepare tasks
+    # Create tasks
     tasks = []
     reports = []
     for task in inquiry.tasks:
@@ -44,10 +44,9 @@ def validate_inquiry(source):
             reports.extend(pool.map(partial(helpers.apply_function, validate), tasks))
 
     # Return report
-    time = timer.get_time()
     errors = []
     tables = []
     for report in reports:
         errors.extend(report["errors"])
         tables.extend(report["tables"])
-    return Report(time=time, errors=errors, tables=tables)
+    return Report(time=timer.time, errors=errors, tables=tables)
