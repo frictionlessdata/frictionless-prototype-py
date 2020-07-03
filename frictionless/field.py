@@ -58,11 +58,11 @@ class Field(Metadata):
         schema=None,
     ):
         self.__schema = schema
-        self.setnotnull("name", name)
-        self.setnotnull("type", type)
-        self.setnotnull("format", format)
-        self.setnotnull("missingValues", missing_values)
-        self.setnotnull("constraints", constraints)
+        self.setinitial("name", name)
+        self.setinitial("type", type)
+        self.setinitial("format", format)
+        self.setinitial("missingValues", missing_values)
+        self.setinitial("constraints", constraints)
         super().__init__(descriptor)
 
     @cached_property

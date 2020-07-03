@@ -105,15 +105,11 @@ class SqlDialect(Dialect):
         order_by=None,
         headers_row=None,
         headers_joiner=None,
-        metadata_root=None
     ):
-        self.setdefined("table", table)
-        self.setdefined("order_by", order_by)
+        self.setinitial("table", table)
+        self.setinitial("order_by", order_by)
         super().__init__(
-            descriptor,
-            headers_row=headers_row,
-            headers_joiner=headers_joiner,
-            metadata_root=metadata_root,
+            descriptor, headers_row=headers_row, headers_joiner=headers_joiner,
         )
 
     @property

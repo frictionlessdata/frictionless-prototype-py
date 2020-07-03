@@ -25,7 +25,7 @@ class Parser:
         self.__loader = None
         self.__data_stream = None
         if self.Dialect is not None:
-            self.__file.dialect = self.Dialect(file.dialect, metadata_root=file)
+            self.__file.dialect = self.Dialect(file.dialect)
         if self.newline is not None:
             self.__file.newline = self.newline
 

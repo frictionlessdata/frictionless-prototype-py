@@ -94,20 +94,11 @@ class OdsDialect(Dialect):
     }
 
     def __init__(
-        self,
-        descriptor=None,
-        *,
-        sheet=None,
-        headers_row=None,
-        headers_joiner=None,
-        metadata_root=None
+        self, descriptor=None, *, sheet=None, headers_row=None, headers_joiner=None,
     ):
-        self.setdefined("sheet", sheet)
+        self.setinitial("sheet", sheet)
         super().__init__(
-            descriptor,
-            headers_row=headers_row,
-            headers_joiner=headers_joiner,
-            metadata_root=metadata_root,
+            descriptor, headers_row=headers_row, headers_joiner=headers_joiner,
         )
 
     @property

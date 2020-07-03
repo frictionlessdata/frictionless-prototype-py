@@ -51,17 +51,17 @@ class File(Metadata):
         newline=None,
         stats=None,
     ):
-        self.setdefined("source", source)
-        self.setdefined("scheme", scheme)
-        self.setdefined("format", format)
-        self.setdefined("hashing", hashing)
-        self.setdefined("encoding", encoding)
-        self.setdefined("compression", compression)
-        self.setdefined("compressionPath", compression_path)
-        self.setdefined("control", control)
-        self.setdefined("dialect", dialect)
-        self.setdefined("newline", newline)
-        self.setdefined("stats", stats)
+        self.setinitial("source", source)
+        self.setinitial("scheme", scheme)
+        self.setinitial("format", format)
+        self.setinitial("hashing", hashing)
+        self.setinitial("encoding", encoding)
+        self.setinitial("compression", compression)
+        self.setinitial("compressionPath", compression_path)
+        self.setinitial("control", control)
+        self.setinitial("dialect", dialect)
+        self.setinitial("newline", newline)
+        self.setinitial("stats", stats)
         super().__init__(descriptor)
         # Detect from source
         detect = helpers.detect_source_scheme_and_format(source)
@@ -153,13 +153,14 @@ class File(Metadata):
     # Metadata
 
     def metadata_process(self):
-        for name, Class in [("control", Control), ("dialect", Dialect)]:
-            value = self.get(name)
-            if value is not None and not isinstance(value, Class):
-                value = Class(
-                    value,
-                    metadata_root=self.metadata_root,
-                    #  metadata_strict=self.metadata_strict,
-                )
-                dict.__setitem__(self, name, value)
-        super().metadata_process(skip=["source"])
+        super().metadata_process()
+
+        # Control
+        control = self.get("control")
+        if not isinstance(control, (type(None), Control)):
+            dict.__setitem__(self, "control", Control(control))
+
+        # Dialect
+        dialect = self.get("dialect")
+        if not isinstance(dialect, (type(None), Dialect)):
+            dict.__setitem__(self, "dialect", Dialect(dialect))

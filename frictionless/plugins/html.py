@@ -78,20 +78,11 @@ class HtmlDialect(Dialect):
     }
 
     def __init__(
-        self,
-        descriptor=None,
-        *,
-        selector=None,
-        headers_row=None,
-        headers_joiner=None,
-        metadata_root=None
+        self, descriptor=None, *, selector=None, headers_row=None, headers_joiner=None,
     ):
-        self.setdefined("selector", selector)
+        self.setinitial("selector", selector)
         super().__init__(
-            descriptor,
-            headers_row=headers_row,
-            headers_joiner=headers_joiner,
-            metadata_root=metadata_root,
+            descriptor, headers_row=headers_row, headers_joiner=headers_joiner,
         )
 
     @property

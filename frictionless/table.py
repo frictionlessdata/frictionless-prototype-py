@@ -715,5 +715,5 @@ class Table:
         yield self.__schema.field_names
         for row in self.row_stream:
             cells = list(row.values())
-            cells, notes = self.__schema.write_cells(cells)
+            cells, notes = self.__schema.write_data(cells)
             yield cells

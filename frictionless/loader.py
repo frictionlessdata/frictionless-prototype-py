@@ -29,7 +29,7 @@ class Loader:
         self.__byte_stream = None
         self.__text_stream = None
         if self.Control is not None:
-            self.__file.control = self.Control(file.control, metadata_root=file)
+            self.__file.control = self.Control(file.control)
 
     def __enter__(self):
         self.open()

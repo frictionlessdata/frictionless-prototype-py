@@ -44,10 +44,10 @@ class Schema(Metadata):
         foreign_keys=None,
         resource=None,
     ):
-        self.setnotnull("fields", fields)
-        self.setnotnull("missingValues", missing_values)
-        self.setnotnull("primaryKey", primary_key)
-        self.setnotnull("foreignKeys", foreign_keys)
+        self.setinitial("fields", fields)
+        self.setinitial("missingValues", missing_values)
+        self.setinitial("primaryKey", primary_key)
+        self.setinitial("foreignKeys", foreign_keys)
         self.__resource = resource
         super().__init__(descriptor)
 

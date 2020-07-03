@@ -56,9 +56,9 @@ class Metadata(helpers.ControlledDict):
     def metadata_errors(self):
         return list(self.metadata_validate())
 
-    def setnotnull(self, key, value):
+    def setinitial(self, key, value):
         if value is not None:
-            self[key] = value
+            dict.__setitem__(self, key, value)
 
     # Attach
 

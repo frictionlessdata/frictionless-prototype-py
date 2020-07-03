@@ -26,12 +26,10 @@ class Dialect(Metadata):
         },
     }
 
-    def __init__(
-        self, descriptor=None, headers_row=None, headers_joiner=None, metadata_root=None
-    ):
-        self.setdefined("headersRow", headers_row)
-        self.setdefined("headersJoiner", headers_joiner)
-        super().__init__(descriptor, metadata_root=metadata_root)
+    def __init__(self, descriptor=None, headers_row=None, headers_joiner=None):
+        self.setinitial("headersRow", headers_row)
+        self.setinitial("headersJoiner", headers_joiner)
+        super().__init__(descriptor)
 
     def __setattr__(self, name, value):
         if name in ["headers_row", "headers_joiner"]:
@@ -115,23 +113,19 @@ class CsvDialect(Dialect):
         case_sensitive_header=None,
         headers_row=None,
         headers_joiner=None,
-        metadata_root=None,
     ):
-        self.setdefined("delimiter", delimiter)
-        self.setdefined("lineTerminator", line_terminator)
-        self.setdefined("quoteChar", quote_char)
-        self.setdefined("doubleQuote", double_quote)
-        self.setdefined("escapeChar", escape_char)
-        self.setdefined("nullSequence", null_sequence)
-        self.setdefined("skipInitialSpace", skip_initial_space)
-        self.setdefined("header", header)
-        self.setdefined("commentChar", comment_char)
-        self.setdefined("caseSensitiveHeader", case_sensitive_header)
+        self.setinitial("delimiter", delimiter)
+        self.setinitial("lineTerminator", line_terminator)
+        self.setinitial("quoteChar", quote_char)
+        self.setinitial("doubleQuote", double_quote)
+        self.setinitial("escapeChar", escape_char)
+        self.setinitial("nullSequence", null_sequence)
+        self.setinitial("skipInitialSpace", skip_initial_space)
+        self.setinitial("header", header)
+        self.setinitial("commentChar", comment_char)
+        self.setinitial("caseSensitiveHeader", case_sensitive_header)
         super().__init__(
-            descriptor,
-            headers_row=headers_row,
-            headers_joiner=headers_joiner,
-            metadata_root=metadata_root,
+            descriptor, headers_row=headers_row, headers_joiner=headers_joiner,
         )
 
     # TODO: Find a better way like to_native/from_native
@@ -245,18 +239,14 @@ class ExcelDialect(Dialect):
         adjust_floating_point_error=None,
         headers_row=None,
         headers_joiner=None,
-        metadata_root=None,
     ):
-        self.setdefined("sheet", sheet)
-        self.setdefined("workbookCache", workbook_cache)
-        self.setdefined("fillMergedCells", fill_merged_cells)
-        self.setdefined("preserveFormatting", preserve_formatting)
-        self.setdefined("adjustFloatingPointError", adjust_floating_point_error)
+        self.setinitial("sheet", sheet)
+        self.setinitial("workbookCache", workbook_cache)
+        self.setinitial("fillMergedCells", fill_merged_cells)
+        self.setinitial("preserveFormatting", preserve_formatting)
+        self.setinitial("adjustFloatingPointError", adjust_floating_point_error)
         super().__init__(
-            descriptor,
-            headers_row=headers_row,
-            headers_joiner=headers_joiner,
-            metadata_root=metadata_root,
+            descriptor, headers_row=headers_row, headers_joiner=headers_joiner,
         )
 
     @property
@@ -288,12 +278,6 @@ class ExcelDialect(Dialect):
         self.setdetault("preserveFormatting", self.preserve_formatting)
         self.setdetault("adjustFloatingPointError", self.adjust_floating_point_error)
 
-    # Metadata
-
-    # TODO: remove
-    def metadata_process(self):
-        super().metadata_process(skip=["workbookCache"])
-
 
 # TODO: Consider headers prop for keyed sources
 class InlineDialect(Dialect):
@@ -320,20 +304,11 @@ class InlineDialect(Dialect):
     }
 
     def __init__(
-        self,
-        descriptor=None,
-        *,
-        keyed=None,
-        headers_row=None,
-        headers_joiner=None,
-        metadata_root=None,
+        self, descriptor=None, *, keyed=None, headers_row=None, headers_joiner=None,
     ):
-        self.setdefined("keyed", keyed)
+        self.setinitial("keyed", keyed)
         super().__init__(
-            descriptor,
-            headers_row=headers_row,
-            headers_joiner=headers_joiner,
-            metadata_root=metadata_root,
+            descriptor, headers_row=headers_row, headers_joiner=headers_joiner,
         )
 
     @property
@@ -379,15 +354,11 @@ class JsonDialect(Dialect):
         property=None,
         headers_row=None,
         headers_joiner=None,
-        metadata_root=None,
     ):
-        self.setdefined("keyed", keyed)
-        self.setdefined("property", property)
+        self.setinitial("keyed", keyed)
+        self.setinitial("property", property)
         super().__init__(
-            descriptor,
-            headers_row=headers_row,
-            headers_joiner=headers_joiner,
-            metadata_root=metadata_root,
+            descriptor, headers_row=headers_row, headers_joiner=headers_joiner,
         )
 
     @property

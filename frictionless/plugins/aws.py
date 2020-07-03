@@ -59,13 +59,9 @@ class S3Control(Control):
         "properties": {"endpointUrl": {"type": "string"}, "detectEncoding": {}},
     }
 
-    def __init__(
-        self, descriptor=None, endpoint_url=None, detect_encoding=None, metadata_root=None
-    ):
-        self.setdefined("endpointUrl", endpoint_url)
-        super().__init__(
-            descriptor, detect_encoding=detect_encoding, metadata_root=metadata_root
-        )
+    def __init__(self, descriptor=None, endpoint_url=None, detect_encoding=None):
+        self.setinitial("endpointUrl", endpoint_url)
+        super().__init__(descriptor, detect_encoding=detect_encoding)
 
     @property
     def endpoint_url(self):

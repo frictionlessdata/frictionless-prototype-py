@@ -22,9 +22,9 @@ class Control(Metadata):
         "properties": {"detectEncoding": {}},
     }
 
-    def __init__(self, descriptor=None, *, detect_encoding=None, metadata_root=None):
-        self.setdefined("detectEncoding", detect_encoding)
-        super().__init__(descriptor, metadata_root=metadata_root)
+    def __init__(self, descriptor=None, *, detect_encoding=None):
+        self.setinitial("detectEncoding", detect_encoding)
+        super().__init__(descriptor)
 
     @property
     def detect_encoding(self):
@@ -88,14 +88,11 @@ class RemoteControl(Control):
         http_preload=None,
         http_timeout=None,
         detect_encoding=None,
-        metadata_root=None
     ):
-        self.setdefined("httpSession", http_session)
-        self.setdefined("httpPreload", http_preload)
-        self.setdefined("httpTimeout", http_timeout)
-        super().__init__(
-            descriptor, detect_encoding=detect_encoding, metadata_root=metadata_root
-        )
+        self.setinitial("httpSession", http_session)
+        self.setinitial("httpPreload", http_preload)
+        self.setinitial("httpTimeout", http_timeout)
+        super().__init__(descriptor, detect_encoding=detect_encoding)
 
     @property
     def http_session(self):
