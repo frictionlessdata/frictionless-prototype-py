@@ -193,6 +193,96 @@ class Timer:
         return round((self.__stop - self.__start).total_seconds(), 3)
 
 
+# Collections
+
+
+class ControlledDict(dict):
+    def __init__(self, source, *, on_change):
+        super().__init__(source)
+        self.__on_change = on_change
+
+    def __setitem__(self, *args, **kwargs):
+        result = super().__setitem__(*args, **kwargs)
+        self.__on_change()
+        return result
+
+    def __delitem__(self, *args, **kwargs):
+        result = super().__delitem__(*args, **kwargs)
+        self.__on_change()
+        return result
+
+    def clear(self, *args, **kwargs):
+        result = super().clear(*args, **kwargs)
+        self.__on_change()
+        return result
+
+    def pop(self, *args, **kwargs):
+        result = super().pop(*args, **kwargs)
+        self.__on_change()
+        return result
+
+    def popitem(self, *args, **kwargs):
+        result = super().popitem(*args, **kwargs)
+        self.__on_change()
+        return result
+
+    def setdefault(self, *args, **kwargs):
+        result = super().setdefault(*args, **kwargs)
+        self.__on_change()
+        return result
+
+    def update(self, *args, **kwargs):
+        result = super().update(*args, **kwargs)
+        self.__on_change()
+        return result
+
+
+class ControlledList(list):
+    def __init__(self, source, *, on_change):
+        super().__init__(source)
+        self.__on_change = on_change
+
+    def __setitem__(self, *args, **kwargs):
+        result = super().__setitem__(*args, **kwargs)
+        self.__on_change()
+        return result
+
+    def __delitem__(self, *args, **kwargs):
+        result = super().__delitem__(*args, **kwargs)
+        self.__on_change()
+        return result
+
+    def append(self, *args, **kwargs):
+        result = super().append(*args, **kwargs)
+        self.__on_change()
+        return result
+
+    def clear(self, *args, **kwargs):
+        result = super().clear(*args, **kwargs)
+        self.__on_change()
+        return result
+
+    def extend(self, *args, **kwargs):
+        result = super().extend(*args, **kwargs)
+        self.__on_change()
+        return result
+
+    def insert(self, *args, **kwargs):
+        result = super().insert(*args, **kwargs)
+        self.__on_change()
+        return result
+
+    def pop(self, *args, **kwargs):
+        result = super().pop(*args, **kwargs)
+        self.__on_change()
+        return result
+
+    def remove(self, *args, **kwargs):
+        result = super().remove(*args, **kwargs)
+        self.__on_change()
+        return result
+
+
 # Backports
 
 
