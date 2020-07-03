@@ -1,13 +1,13 @@
 import stringcase
 from copy import deepcopy
-from .metadata import ControlledMetadata
+from .metadata import Metadata
 from .helpers import cached_property
 from .field import Field
 from . import errors
 from . import config
 
 
-class Schema(ControlledMetadata):
+class Schema(Metadata):
     """Schema representation
 
     # Arguments

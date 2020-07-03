@@ -2,16 +2,16 @@ import re
 import decimal
 import warnings
 import importlib
-import stringcase
+from operator import setitem
 from functools import partial
 from collections import OrderedDict
-from .metadata import ControlledMetadata
+from .metadata import Metadata
 from .helpers import cached_property
 from . import errors
 from . import config
 
 
-class Field(ControlledMetadata):
+class Field(Metadata):
     """Field representation
 
     # Arguments
@@ -22,10 +22,7 @@ class Field(ControlledMetadata):
         format? (str): format
         missing_values? (str[]): missing_values
         constraints? (dict): constraints
-
-        metadata_root? (Metadata): root metadata object
-        metadata_strict? (bool): if True it will fail on the first metadata error
-        metadata_schema? (Schema): parent schema object
+        schema? (Schema): parent schema object
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
@@ -38,6 +35,14 @@ class Field(ControlledMetadata):
         "required": ["name"],
         "properties": {"name": {"type": "string"}},
     }
+    metadata_setters = {
+        "name": "name",
+        "type": "type",
+        "format": "format",
+        "missing_values": "missingValues",
+        "constraints": "constraints",
+        "required": lambda self, value: setitem(self.constraints, "required", value),
+    }
     supported_constraints = []  # type: ignore
 
     def __init__(
@@ -49,29 +54,15 @@ class Field(ControlledMetadata):
         format=None,
         missing_values=None,
         constraints=None,
-        metadata_root=None,
-        metadata_strict=False,
-        metadata_schema=None,
+        schema=None,
     ):
-        self.setdefined("name", name)
-        self.setdefined("type", type)
-        self.setdefined("format", format)
-        self.setdefined("missingValues", missing_values)
-        self.setdefined("constraints", constraints)
-        self.__metadata_schema = metadata_schema
-        super().__init__(
-            descriptor=descriptor,
-            metadata_root=metadata_root,
-            metadata_strict=metadata_strict,
-        )
-
-    def __setattr__(self, name, value):
-        if name in ["name", "type", "format", "missing_values", "constraints"]:
-            self[stringcase.camelcase(name)] = value
-        elif name == "required":
-            self.constraints["required"] = value
-        else:
-            super().__setattr__(name, value)
+        self.__schema = schema
+        self.setnotnull("name", name)
+        self.setnotnull("type", type)
+        self.setnotnull("format", format)
+        self.setnotnull("missingValues", missing_values)
+        self.setnotnull("constraints", constraints)
+        super().__init__(descriptor)
 
     @cached_property
     def name(self):
@@ -95,7 +86,7 @@ class Field(ControlledMetadata):
 
     @cached_property
     def missing_values(self):
-        schema = self.__metadata_schema
+        schema = self.__schema
         default = schema.missing_values if schema else config.DEFAULT_MISSING_VALUES
         missing_values = self.get("missingValues", default)
         return self.metadata_attach("missingValues", missing_values)
@@ -118,7 +109,6 @@ class Field(ControlledMetadata):
 
     # Read
 
-    # TODO: review: this function gives x2 overhead over inner read_cell_cast
     def read_cell(self, cell):
         """Read cell (cast)
 
@@ -212,25 +202,29 @@ class Field(ControlledMetadata):
     # Metadata
 
     def metadata_process(self):
+        super().metadata_process()
+
+        # Proxy
         self.__proxy = None
         if type(self) is Field:
             pref = self.get("type", "any")
             name = f"{pref.capitalize()}Field"
             module = importlib.import_module("frictionless.fields")
             self.__proxy = getattr(module, name, getattr(module, "AnyField"))(self)
-        super().metadata_process()
 
     def metadata_validate(self):
+
+        # Proxy
         if type(self) is Field:
-            self.metadata_errors.clear()
-            return self.metadata_errors.extend(self.__proxy.metadata_errors)
-        super().metadata_validate()
+            yield from self.__proxy.metadata_errors
+            return
 
         # Constraints
+        yield from super().metadata_validate()
         for name in self.constraints.keys():
             if name not in self.supported_constraints + ["unique"]:
                 note = f'constraint "{name}" is not supported by type "{self.type}"'
-                self.metadata_errors.append(errors.SchemaError(note=note))
+                yield errors.SchemaError(note=note)
 
 
 # Internal

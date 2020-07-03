@@ -3,6 +3,7 @@ import json
 import requests
 import jsonschema
 from copy import deepcopy
+from operator import setitem
 from urllib.parse import urlparse
 from importlib import import_module
 from .helpers import cached_property
@@ -11,7 +12,7 @@ from . import helpers
 from . import config
 
 
-class Metadata(dict):
+class Metadata(helpers.ControlledDict):
     """Metadata representation
 
     # Arguments
@@ -25,25 +26,53 @@ class Metadata(dict):
     metadata_Error = None
     metadata_profile = None
     metadata_strict = False
+    metadata_setters = {}
 
     def __init__(self, descriptor=None):
-        self.__errors = []
         self.__Error = self.metadata_Error or import_module("frictionless.errors").Error
         metadata = self.metadata_extract(descriptor)
         for key, value in metadata.items():
             self.setdefault(key, value)
+        self.metadata_process()
+        self.metadata_validate()
+
+    def __setattr__(self, name, value):
+        setter = self.metadata_setters.get(name)
+        if isinstance(setter, str):
+            return setitem(self, setter, value)
+        elif callable(setter):
+            return callable(self, value)
+        return super().__setattr__(name, value)
+
+    def __onchange__(self):
+        super().__onchange__()
+        self.metadata_process()
 
     @cached_property
     def metadata_valid(self):
-        return not len(self.__errors)
+        return not len(self.metadata_errors)
 
     @cached_property
     def metadata_errors(self):
-        return self.__errors
+        return list(self.metadata_validate())
 
     def setnotnull(self, key, value):
         if value is not None:
             self[key] = value
+
+    # Attach
+
+    def metadata_attach(self, name, value):
+        if self.get(name) != value:
+            if isinstance(value, dict):
+                value = deepcopy(value)
+                onchange = lambda: setitem(self, name, dict(value))
+                value = helpers.ControlledDict(value, onchange=onchange)
+            elif isinstance(value, list):
+                value = deepcopy(value)
+                onchange = lambda: setitem(self, name, list(value))
+                value = helpers.ControlledList(value, onchange=onchange)
+        return value
 
     # Extract
 
@@ -63,10 +92,14 @@ class Metadata(dict):
             note = f'canot extract metadata "{descriptor}" because "{exception}"'
             raise exceptions.FrictionlessException(self.__Error(note=note)) from exception
 
+    # Process
+
+    def metadata_process(self):
+        pass
+
     # Validate
 
     def metadata_validate(self):
-        self.metadata_errors.clear()
         if self.metadata_profile:
             validator_class = jsonschema.validators.validator_for(self.metadata_profile)
             validator = validator_class(self.metadata_profile)
@@ -78,7 +111,7 @@ class Metadata(dict):
                 error = self.__Error(note=note)
                 if self.metadata_strict:
                     raise exceptions.FrictionlessException(error)
-                self.metadata_errors.append(error)
+                yield error
 
     # Write
 

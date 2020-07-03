@@ -1,10 +1,10 @@
 import csv
 import stringcase
-from .metadata import ControlledMetadata
+from .metadata import Metadata
 from . import config
 
 
-class Dialect(ControlledMetadata):
+class Dialect(Metadata):
     """Dialect representation
 
     # Arguments

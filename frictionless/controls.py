@@ -1,10 +1,10 @@
 import requests
-from .metadata import ControlledMetadata
+from .metadata import Metadata
 from . import helpers
 from . import config
 
 
-class Control(ControlledMetadata):
+class Control(Metadata):
     """Control representation
 
     # Arguments

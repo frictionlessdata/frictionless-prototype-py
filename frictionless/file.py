@@ -1,14 +1,14 @@
 import os
 import stringcase
 from .helpers import cached_property
-from .metadata import ControlledMetadata
+from .metadata import Metadata
 from .controls import Control
 from .dialects import Dialect
 from . import helpers
 from . import config
 
 
-class File(ControlledMetadata):
+class File(Metadata):
     metadata_profile = {  # type: ignore
         "type": "object",
         "required": ["source"],
