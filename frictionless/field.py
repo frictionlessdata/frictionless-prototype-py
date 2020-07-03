@@ -203,7 +203,6 @@ class Field(Metadata):
     # Metadata
 
     def metadata_process(self):
-        super().metadata_process()
 
         # Proxy
         self.__proxy = None

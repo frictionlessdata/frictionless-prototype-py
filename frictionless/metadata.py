@@ -45,7 +45,7 @@ class Metadata(helpers.ControlledDict):
         return super().__setattr__(name, value)
 
     def __onchange__(self):
-        super().__onchange__()
+        helpers.reset_cached_properties(self)
         self.metadata_process()
 
     @cached_property

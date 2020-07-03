@@ -202,10 +202,7 @@ class ControlledDict(dict):
         self.__onchange = onchange
 
     def __onchange__(self):
-        reset_cached_properties(self)
-        onchange = getattr(self, "_ControlledDict__onchange", None)
-        if onchange:
-            onchange()
+        self.__onchange()
 
     def __setitem__(self, *args, **kwargs):
         result = super().__setitem__(*args, **kwargs)
@@ -244,15 +241,12 @@ class ControlledDict(dict):
 
 
 class ControlledList(list):
-    def __init__(self, value, *, onchange=None):
+    def __init__(self, value, *, onchange):
         super().__init__(value)
         self.__onchange = onchange
 
     def __onchange__(self):
-        reset_cached_properties(self)
-        onchange = getattr(self, "_ControlledList__onchange", None)
-        if onchange:
-            onchange()
+        self.__onchange()
 
     def __setitem__(self, *args, **kwargs):
         result = super().__setitem__(*args, **kwargs)

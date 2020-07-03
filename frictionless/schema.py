@@ -307,7 +307,6 @@ class Schema(Metadata):
     # Metadata
 
     def metadata_process(self):
-        super().metadata_process()
 
         # Fields
         fields = self.get("fields")
