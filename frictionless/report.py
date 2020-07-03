@@ -23,14 +23,20 @@ class Report(Metadata):
     metadata_profile = config.REPORT_PROFILE
 
     def __init__(self, descriptor=None, *, time, errors, tables):
+        self["version"] = config.VERSION
         self["time"] = time
         self["valid"] = not errors and all(tab["valid"] for tab in tables)
-        self["version"] = config.VERSION
-        self["tableCount"] = len(tables)
-        self["errorCount"] = len(errors) + sum(tab["errorCount"] for tab in tables)
+        self["stats"] = {
+            "errors": len(errors) + sum(tab["stats"]["errors"] for tab in tables),
+            "tables": len(tables),
+        }
         self["errors"] = errors
         self["tables"] = tables
         super().__init__(descriptor)
+
+    @property
+    def version(self):
+        return self["version"]
 
     @property
     def time(self):
@@ -41,16 +47,8 @@ class Report(Metadata):
         return self["valid"]
 
     @property
-    def version(self):
-        return self["version"]
-
-    @property
-    def table_count(self):
-        return self["tableCount"]
-
-    @property
-    def error_count(self):
-        return self["errorCount"]
+    def stats(self):
+        return self["stats"]
 
     @property
     def errors(self):
@@ -77,9 +75,11 @@ class Report(Metadata):
             try:
                 return validate(*args, **kwargs)
             except Exception as exception:
-                time = timer.get_time()
+                raise
                 error = TaskError(note=str(exception))
-                return Report(time=time, errors=[error], tables=[])
+                if isinstance(exception, exceptions.FrictionlessException):
+                    error = exception.error
+                return Report(time=timer.time, errors=[error], tables=[])
 
         return wrapper
 
@@ -144,18 +144,17 @@ class ReportTable(Metadata):
         self,
         descriptor=None,
         *,
-        time,
-        scope,
-        partial,
-        row_count,
+        # File
         path,
         scheme,
         format,
+        hashing,
         encoding,
         compression,
+        compression_path,
+        dialect,
+        # Table
         headers,
-        headers_row,
-        headers_joiner,
         pick_fields,
         skip_fields,
         limit_fields,
@@ -164,24 +163,26 @@ class ReportTable(Metadata):
         skip_rows,
         limit_rows,
         offset_rows,
+        # Schema
         schema,
-        dialect,
+        # Validation
+        time,
+        scope,
+        stats,
+        partial,
         errors,
     ):
-        self["time"] = time
-        self["valid"] = not errors
-        self["scope"] = scope
-        self["partial"] = partial
-        self["rowCount"] = row_count
-        self["errorCount"] = len(errors)
+        # File
         self["path"] = path
         self["scheme"] = scheme
         self["format"] = format
+        self["hashing"] = hashing
         self["encoding"] = encoding
         self["compression"] = compression
+        self["compressionPath"] = compression_path
+        self["dialect"] = dialect
+        # Table
         self["headers"] = headers
-        self["headersRow"] = headers_row
-        self["headersJoiner"] = headers_joiner
         self["pickFields"] = pick_fields
         self["skipFields"] = skip_fields
         self["limitFields"] = limit_fields
@@ -190,8 +191,14 @@ class ReportTable(Metadata):
         self["skipRows"] = skip_rows
         self["limitRows"] = limit_rows
         self["offsetRows"] = offset_rows
+        # Schema
         self["schema"] = schema
-        self["dialect"] = dialect
+        # Validation
+        self["time"] = time
+        self["valid"] = not errors
+        self["scope"] = scope
+        self["stats"] = helpers.copy_merge(stats, {"errors": len(errors)})
+        self["partial"] = partial
         self["errors"] = errors
         super().__init__(descriptor)
 
@@ -208,16 +215,12 @@ class ReportTable(Metadata):
         return self["scope"]
 
     @property
+    def stats(self):
+        return self["stats"]
+
+    @property
     def partial(self):
         return self["partial"]
-
-    @property
-    def row_count(self):
-        return self["rowCount"]
-
-    @property
-    def error_count(self):
-        return self["errorCount"]
 
     @property
     def errors(self):

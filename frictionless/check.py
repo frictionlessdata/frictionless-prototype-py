@@ -18,18 +18,13 @@ class Check(Metadata):
         super().__init__(descriptor)
 
     @property
-    def stream(self):
-        return self.__stream
-
-    @property
-    def schema(self):
-        return self.__schema
+    def table(self):
+        return self.__table
 
     # Validation
 
-    def connect(self, *, stream, schema):
-        self.__stream = stream
-        self.__schema = schema
+    def connect(self, table):
+        self.__table = table
 
     def prepare(self):
         pass

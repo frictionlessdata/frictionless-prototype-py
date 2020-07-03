@@ -93,7 +93,6 @@ class File(ControlledMetadata):
 
     @cached_property
     def path(self):
-        # TODO: allow setting path in dict
         return self.source if isinstance(self.source, str) else "memory"
 
     @cached_property

@@ -28,6 +28,12 @@ def stringify_headers(cells):
     return ["" if cell is None else str(cell).strip() for cell in cells]
 
 
+def copy_merge(source, patch):
+    source = source.copy()
+    source.update(patch)
+    return source
+
+
 def filter_cells(cells, field_positions):
     result = []
     for field_position, cell in enumerate(cells, start=1):
@@ -177,11 +183,14 @@ def get_current_memory_usage():
 
 class Timer:
     def __init__(self):
-        self.__initial = datetime.datetime.now()
+        self.__start = datetime.datetime.now()
+        self.__stop = None
 
-    def get_time(self):
-        current = datetime.datetime.now()
-        return round((current - self.__initial).total_seconds(), 3)
+    @property
+    def time(self):
+        if not self.__stop:
+            self.__stop = datetime.datetime.now()
+        return round((self.__stop - self.__start).total_seconds(), 3)
 
 
 # Backports

@@ -5,22 +5,22 @@ from ..check import Check
 
 class BlacklistedValueCheck(Check):
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'requred': ['fieldName', 'blacklist'],
-        'properties': {'fieldName': {'type': 'string'}, 'blacklist': {'type': 'array'}},
+        "type": "object",
+        "requred": ["fieldName", "blacklist"],
+        "properties": {"fieldName": {"type": "string"}, "blacklist": {"type": "array"}},
     }
     possible_Errors = [  # type: ignore
         errors.BlacklistedValueError
     ]
 
     def prepare(self):
-        self.field_name = self['fieldName']
-        self.blacklist = self['blacklist']
+        self.field_name = self["fieldName"]
+        self.blacklist = self["blacklist"]
 
     # Validate
 
     def validate_task(self):
-        if self.field_name not in self.schema.field_names:
+        if self.field_name not in self.table.schema.field_names:
             note = 'blacklisted value check requires field "%s"' % self.field_name
             yield errors.TaskError(note=note)
 
@@ -36,9 +36,9 @@ class BlacklistedValueCheck(Check):
 
 class SequentialValueCheck(Check):
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'requred': ['fieldName'],
-        'properties': {'fieldName': {'type': 'string'}},
+        "type": "object",
+        "requred": ["fieldName"],
+        "properties": {"fieldName": {"type": "string"}},
     }
     possible_Errors = [  # type: ignore
         errors.SequentialValueError
@@ -47,12 +47,12 @@ class SequentialValueCheck(Check):
     def prepare(self):
         self.cursor = None
         self.exited = False
-        self.field_name = self.get('fieldName')
+        self.field_name = self.get("fieldName")
 
     # Validate
 
     def validate_task(self):
-        if self.field_name not in self.schema.field_names:
+        if self.field_name not in self.table.schema.field_names:
             note = 'sequential value check requires field "%s"' % self.field_name
             yield errors.TaskError(note=note)
 
@@ -66,22 +66,22 @@ class SequentialValueCheck(Check):
             except Exception:
                 self.exited = True
                 yield errors.SequentialValueError.from_row(
-                    row, note='the value is not sequential', field_name=self.field_name,
+                    row, note="the value is not sequential", field_name=self.field_name,
                 )
 
 
 class RowConstraintCheck(Check):
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'requred': ['constraint'],
-        'properties': {'constraint': {'type': 'string'}},
+        "type": "object",
+        "requred": ["constraint"],
+        "properties": {"constraint": {"type": "string"}},
     }
     possible_Errors = [  # type: ignore
         errors.RowConstraintError
     ]
 
     def prepare(self):
-        self.constraint = self['constraint']
+        self.constraint = self["constraint"]
 
     # Validate
 

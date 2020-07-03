@@ -509,7 +509,7 @@ class Table:
                         continue
 
                 # Sample
-                sample.append(helpers.filter_cells(cells, field_positions))
+                sample.append(cells)
                 sample_positions.append(row_position)
                 if len(sample) >= self.__infer_volume:
                     break

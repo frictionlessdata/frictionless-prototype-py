@@ -4,15 +4,19 @@
   "$id": "https://github.com/frictionlessdata/frictionless-py/tree/master/frictionless/assets/profiles/report.json",
   "type": "object",
   "required": [
+    "version",
     "time",
     "valid",
-    "version",
-    "tableCount",
-    "errorCount",
+    "stats",
     "errors",
     "tables"
   ],
   "properties": {
+    "version": {
+      "type": "string",
+      "title": "Version",
+      "description": "Frictionless version"
+    },
     "time": {
       "type": "number",
       "title": "Time",
@@ -24,22 +28,14 @@
       "title": "Valid",
       "description": "Whether all the inspected tables valid or not"
     },
-    "version": {
-      "type": "string",
-      "title": "Version",
-      "description": "Frictionless version"
-    },
-    "tableCount": {
-      "type": "integer",
-      "title": "Table count",
-      "description": "Number of tables validated.",
-      "minimum": 0
-    },
-    "errorCount": {
-      "type": "integer",
-      "title": "Error count",
-      "description": "Number of errors found across all the tables.",
-      "minimum": 0
+    "stats": {
+      "type": "object",
+      "title": "Stats",
+      "description": "Validation stats",
+      "properties": {
+        "errors": {"type": "number"},
+        "tables": {"type": "number"}
+      }
     },
     "errors": {
       "type": "array",
@@ -51,6 +47,7 @@
           "code",
           "name",
           "tags",
+          "note",
           "message",
           "description"
         ],
@@ -73,6 +70,11 @@
               "type": "string"
             }
           },
+          "note": {
+            "type": "string",
+            "title": "Note",
+            "description": "The error note."
+          },
           "message": {
             "type": "string",
             "title": "Message",
@@ -82,11 +84,6 @@
             "type": "string",
             "title": "Description",
             "description": "The error description."
-          },
-          "note": {
-            "type": "string",
-            "title": "Note",
-            "description": "The error note."
           }
         }
       }
@@ -98,20 +95,15 @@
       "items": {
         "type": "object",
         "required": [
-          "time",
-          "valid",
-          "scope",
-          "partial",
-          "rowCount",
-          "errorCount",
-          "source",
+          "path",
           "scheme",
           "format",
+          "hashing",
           "encoding",
           "compression",
+          "compressionPath",
+          "dialect",
           "headers",
-          "headersRow",
-          "headersJoiner",
           "pickFields",
           "skipFields",
           "limitFields",
@@ -121,49 +113,17 @@
           "limitRows",
           "offsetRows",
           "schema",
-          "dialect",
+          "time",
+          "valid",
+          "scope",
+          "stats",
+          "partial",
           "errors"
         ],
         "properties": {
-          "time": {
-            "type": "number",
-            "title": "Time",
-            "description": "The time it took to validate this table.",
-            "minimum": 0
-          },
-          "valid": {
-            "type": "boolean",
-            "title": "Valid",
-            "description": "The validation result."
-          },
-          "scope": {
-            "type": "array",
-            "title": "Scope",
-            "description": "List of errors codes the table has been checked for.",
-            "items": {
-              "type": "string"
-            }
-          },
-          "partial": {
-            "type": "boolean",
-            "title": "Partial",
-            "description": "Whether the validation was stopped because of an error limit."
-          },
-          "rowCount": {
-            "type": "integer",
-            "title": "Row count",
-            "description": "Number of rows validated.",
-            "minimum": 0
-          },
-          "errorCount": {
-            "type": "integer",
-            "title": "Error count",
-            "description": "Number of errors found.",
-            "minimum": 0
-          },
-          "source": {
+          "path": {
             "type": "string",
-            "title": "Source",
+            "title": "Path",
             "description": "Path or URI where this table was loaded from."
           },
           "scheme": {
@@ -176,6 +136,11 @@
             "title": "Format",
             "description": "The data format."
           },
+          "hashing": {
+            "type": "string",
+            "title": "Hashing",
+            "description": "The hashing algorithm."
+          },
           "encoding": {
             "type": "string",
             "title": "Encoding",
@@ -186,6 +151,16 @@
             "title": "Compression",
             "description": "The compression of the table."
           },
+          "compressionPath": {
+            "type": ["string", "null"],
+            "title": "Compression path",
+            "description": "The path inside the compressed source."
+          },
+          "dialect": {
+            "type": "object",
+            "title": "Dialect",
+            "description": "The tabular dialect of the table."
+          },
           "headers": {
             "type": ["array", "null"],
             "title": "Headers",
@@ -193,19 +168,6 @@
             "items": {
               "type": "string"
             }
-          },
-          "headersRow": {
-            "type": ["array", "integer", "null"],
-            "title": "Headers Row Number",
-            "description": "Header row number.",
-            "items": {
-              "type": "integer"
-            }
-          },
-          "headersJoiner": {
-            "type": ["string", "null"],
-            "title": "Headers Joiner",
-            "description": "Header joiner."
           },
           "pickFields": {
             "type": ["array", "null"],
@@ -248,14 +210,45 @@
             "description": "Offset of rows."
           },
           "schema": {
-            "type": ["object", "null"],
+            "type": "object",
             "title": "Schema",
             "description": "A Table Schema Object."
           },
-          "dialect": {
-            "type": ["object", "null"],
-            "title": "Dialect",
-            "description": "The tabular dialect of the table."
+          "time": {
+            "type": "number",
+            "title": "Time",
+            "description": "The time it took to validate this table.",
+            "minimum": 0
+          },
+          "valid": {
+            "type": "boolean",
+            "title": "Valid",
+            "description": "The validation result."
+          },
+          "scope": {
+            "type": "array",
+            "title": "Scope",
+            "description": "List of errors codes the table has been checked for.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "partial": {
+            "type": "boolean",
+            "title": "Partial",
+            "description": "Whether the validation was stopped because of an error limit."
+          },
+          "rowCount": {
+            "type": "integer",
+            "title": "Row count",
+            "description": "Number of rows validated.",
+            "minimum": 0
+          },
+          "errorCount": {
+            "type": "integer",
+            "title": "Error count",
+            "description": "Number of errors found.",
+            "minimum": 0
           },
           "errors": {
             "type": "array",

@@ -6,8 +6,8 @@ from ..check import Check
 
 class DuplicateRowCheck(Check):
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'properties': {},
+        "type": "object",
+        "properties": {},
     }
     possible_Errors = [  # type: ignore
         errors.DuplicateRowError
@@ -17,8 +17,8 @@ class DuplicateRowCheck(Check):
         self.memory = {}
 
     def validate_row(self, row):
-        text = ','.join(map(str, row.values()))
-        hash = hashlib.sha256(text.encode('utf-8')).hexdigest()
+        text = ",".join(map(str, row.values()))
+        hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
         match = self.memory.get(hash)
         if match:
             note = 'the same as row at position "%s"' % match
@@ -28,12 +28,12 @@ class DuplicateRowCheck(Check):
 
 class DeviatedValueCheck(Check):
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'requred': ['fieldName'],
-        'properties': {
-            'fieldName': {'type': 'string'},
-            'average': {'type': ['string', 'null']},
-            'interval': {'type': ['number', 'null']},
+        "type": "object",
+        "requred": ["fieldName"],
+        "properties": {
+            "fieldName": {"type": "string"},
+            "average": {"type": ["string", "null"]},
+            "interval": {"type": ["number", "null"]},
         },
     }
     possible_Errors = [  # type: ignore
@@ -44,23 +44,24 @@ class DeviatedValueCheck(Check):
         self.exited = False
         self.cells = []
         self.row_positions = []
-        self.field_name = self['fieldName']
-        self.interval = self.get('interval', 3)
-        self.average = self.get('average', 'mean')
+        self.field_name = self["fieldName"]
+        self.interval = self.get("interval", 3)
+        self.average = self.get("average", "mean")
         self.average_function = AVERAGE_FUNCTIONS.get(self.average)
 
     # Validate
 
     def validate_task(self):
-        if self.field_name not in self.schema.field_names:
+        numeric = ["integer", "number"]
+        if self.field_name not in self.table.schema.field_names:
             note = 'deviated value check requires field "%s" to exist'
             yield errors.TaskError(note=note % self.field_name)
-        elif self.schema.get_field(self.field_name).type not in ['integer', 'number']:
+        elif self.table.schema.get_field(self.field_name).type not in numeric:
             note = 'deviated value check requires field "%s" to be numiric'
             yield errors.TaskError(note=note % self.field_name)
         if not self.average_function:
             note = 'deviated value check supports only average functions "%s"'
-            note = note % ', '.join(AVERAGE_FUNCTIONS.keys())
+            note = note % ", ".join(AVERAGE_FUNCTIONS.keys())
             yield errors.TaskError(note=note)
 
     def validate_row(self, row):
@@ -94,8 +95,8 @@ class DeviatedValueCheck(Check):
 
 class TruncatedValueCheck(Check):
     metadata_profile = {  # type: ignore
-        'type': 'object',
-        'properties': {},
+        "type": "object",
+        "properties": {},
     }
     possible_Errors = [  # type: ignore
         errors.TruncatedValueError
@@ -119,7 +120,7 @@ class TruncatedValueCheck(Check):
 
             # Add error
             if truncated:
-                note = 'value  is probably truncated'
+                note = "value  is probably truncated"
                 yield errors.TruncatedValueError.from_row(
                     row, note=note, field_name=field_name
                 )
@@ -129,9 +130,9 @@ class TruncatedValueCheck(Check):
 
 
 AVERAGE_FUNCTIONS = {
-    'mean': statistics.mean,
-    'median': statistics.median,
-    'mode': statistics.mode,
+    "mean": statistics.mean,
+    "median": statistics.median,
+    "mode": statistics.mode,
 }
 TRUNCATED_STRING_LENGTHS = [
     255,

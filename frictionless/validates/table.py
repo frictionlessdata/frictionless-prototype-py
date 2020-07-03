@@ -1,13 +1,9 @@
-from copy import copy
 from .. import config
 from .. import helpers
 from .. import exceptions
-from ..row import Row
 from ..table import Table
+from ..errors import Error
 from ..system import system
-from ..schema import Schema
-from ..headers import Headers
-from ..errors import Error, SchemaError
 from ..report import Report, ReportTable
 
 
@@ -25,8 +21,7 @@ def validate_table(
     control=None,
     dialect=None,
     # Table
-    headers_row=config.DEFAULT_HEADERS_ROW,
-    headers_joiner=config.DEFAULT_HEADERS_JOINER,
+    headers=config.DEFAULT_HEADERS_ROW,
     pick_fields=None,
     skip_fields=None,
     limit_fields=None,
@@ -98,20 +93,17 @@ def validate_table(
 
     """
 
-    # Prepare state
+    # Create state
     checks = []
-    exited = False
     partial = False
-    row_number = 0
     task_errors = []
+    table_errors = TableErrors(pick_errors, skip_errors, limit_errors)
     timer = helpers.Timer()
-    errors = Errors(
-        pick_errors=pick_errors, skip_errors=skip_errors, limit_errors=limit_errors
-    )
 
-    # Create stream
+    # Create table
     table = Table(
         source,
+        # File
         scheme=scheme,
         format=format,
         hashing=hashing,
@@ -120,190 +112,101 @@ def validate_table(
         compression_path=compression_path,
         control=control,
         dialect=dialect,
-        headers=helpers.translate_headers(headers_row),
-        multiline_headers_joiner=headers_joiner,
-        pick_fields=helpers.translate_pick_fields(pick_fields),
-        skip_fields=helpers.translate_skip_fields(skip_fields),
+        # Table
+        headers=headers,
+        pick_fields=pick_fields,
+        skip_fields=skip_fields,
         limit_fields=limit_fields,
         offset_fields=offset_fields,
-        pick_rows=helpers.translate_pick_rows(pick_rows),
-        skip_rows=helpers.translate_skip_rows(skip_rows),
+        pick_rows=pick_rows,
+        skip_rows=skip_rows,
         limit_rows=limit_rows,
         offset_rows=offset_rows,
-        sample_size=infer_volume,
+        # Schema
+        schema=schema,
+        sync_schema=sync_schema,
+        patch_schema=patch_schema,
+        infer_type=infer_type,
+        infer_names=infer_names,
+        infer_volume=infer_volume,
+        infer_confidence=infer_confidence,
     )
 
-    # Open table
-    try:
-        table.open()
-        if not table.sample:
-            message = "There are no rows available"
-            raise exceptions.SourceError(message)
-    except Exception as exception:
-        errors.add(Error.from_exception(exception), force=True)
-        exited = True
-
-    # Create schema
-    try:
-        schema = Schema(schema)
-    except exceptions.FrictionlessException as exception:
-        errors.add(exception.error, force=True)
-        schema = None
-        exited = True
-
-    # Prepare schema
-    if not exited:
-
-        # Infer schema
-        if not schema.fields:
-            schema.infer(
-                table.sample,
-                type=infer_type,
-                names=infer_names or table.headers,
-                confidence=infer_confidence,
-            )
-
-        # Sync schema
-        if sync_schema:
-            fields = []
-            mapping = {field.get("name"): field for field in schema.fields}
-            for name in table.headers:
-                fields.append(mapping.get(name, {"name": name, "type": "any"}))
-            schema.fields = fields
-
-        # Patch schema
-        if patch_schema:
-            fields = patch_schema.pop("fields", {})
-            schema.update(patch_schema)
-            for field in schema.fields:
-                field.update((fields.get(field.get("name"), {})))
-
-        # Validate schema
-        if schema.metadata_errors:
-            for error in schema.metadata_errors:
-                errors.add(error, force=True)
-            schema = None
-            exited = True
-
-        # Confirm schema
-        if schema and len(schema.field_names) != len(set(schema.field_names)):
-            note = "Schemas with duplicate field names are not supported"
-            error = SchemaError(note=note)
-            errors.add(error, force=True)
-            schema = None
-            exited = True
-
     # Create checks
-    if not exited:
-        items = []
-        items.append("baseline")
-        items.append(("integrity", {"stats": stats, "lookup": lookup}))
-        items.extend(extra_checks or [])
-        create = system.create_check
-        for item in items:
-            p1, p2 = item if isinstance(item, (tuple, list)) else (item, None)
-            check = p1(p2) if isinstance(p1, type) else create(p1, descriptor=p2)
-            check.connect(stream=table, schema=schema)
-            check.prepare()
-            checks.append(check)
-            errors.register(check)
+    items = []
+    items.append("baseline")
+    items.append(("integrity", {"stats": stats, "lookup": lookup}))
+    items.extend(extra_checks or [])
+    create = system.create_check
+    for item in items:
+        p1, p2 = item if isinstance(item, (tuple, list)) else (item, None)
+        check = p1(p2) if isinstance(p1, type) else create(p1, descriptor=p2)
+        checks.append(check)
 
-    # Validate task
-    if not exited:
+    # Open table
+    with table:
+
+        # Prepare checks
+        for check in checks:
+            table_errors.register(check)
+            check.connect(table)
+            check.prepare()
+
+        # Validate task
         for check in checks.copy():
             for error in check.validate_task():
                 task_errors.append(error)
                 if check in checks:
                     checks.remove(check)
 
-    # Validate headers
-    if not exited:
+        # Validate headers
         if table.headers:
-
-            # Get headers
-            headers = Headers(
-                table.headers,
-                fields=schema.fields,
-                field_positions=table.field_positions,
-            )
-
-            # Validate headers
             for check in checks:
-                for error in check.validate_headers(headers):
-                    errors.add(error)
+                for error in check.validate_headers(table.headers):
+                    table_errors.append(error)
 
-    # Validate rows
-    if not exited:
-        fields = schema.fields
-        iterator = table.iter(extended=True)
-        field_positions = table.field_positions
-        if not field_positions:
-            field_positions = list(range(1, len(schema.fields) + 1))
-        while True:
-
-            # Read cells
-            try:
-                row_position, _, cells = next(iterator)
-            except StopIteration:
-                break
-            except Exception as exception:
-                errors.add(Error.from_exception(exception), force=True)
-                exited = True
-                break
-
-            # Create row
-            row_number += 1
-            row = Row(
-                cells,
-                fields=fields,
-                field_positions=field_positions,
-                row_position=row_position,
-                row_number=row_number,
-            )
+        # Iterate rows
+        for row in table.row_stream:
 
             # Validate row
             for check in checks:
                 for error in check.validate_row(row):
-                    errors.add(error)
+                    table_errors.append(error)
 
             # Limit errors
-            if limit_errors and len(errors) >= limit_errors:
+            if limit_errors and len(table_errors) >= limit_errors:
                 partial = True
                 break
 
             # Limit memory
-            if limit_memory and not row_number % 100000:
+            if limit_memory and not table.stats["rows"] % 100000:
                 memory = helpers.get_current_memory_usage()
                 if memory and memory > limit_memory:
                     error = Error(note=f'exceeded memory limit "{limit_memory}MB"')
                     raise exceptions.FrictionlessException(error)
 
-    # Validate table
-    if not exited:
+        # Validate table
         for check in checks:
             for error in check.validate_table():
-                errors.add(error)
+                table_errors.append(error)
 
     # Return report
-    time = timer.get_time()
-    source = table.source if isinstance(table.source, str) else "inline"
     return Report(
-        time=time,
+        time=timer.time,
         errors=task_errors,
         tables=[
             ReportTable(
-                time=time,
-                scope=errors.scope,
-                partial=partial,
-                row_count=row_number,
-                path=source,
+                # File
+                path=table.path,
                 scheme=table.scheme,
                 format=table.format,
+                hashing=table.hashing,
                 encoding=table.encoding,
                 compression=table.compression,
+                compression_path=table.compression_path,
+                dialect=table.dialect,
+                # Table
                 headers=table.headers,
-                headers_row=headers_row,
-                headers_joiner=headers_joiner,
                 pick_fields=pick_fields,
                 skip_fields=skip_fields,
                 limit_fields=limit_fields,
@@ -312,9 +215,14 @@ def validate_table(
                 skip_rows=skip_rows,
                 limit_rows=limit_rows,
                 offset_rows=offset_rows,
-                schema=copy(schema),
-                dialect=table.dialect,
-                errors=errors,
+                # Schema
+                schema=table.schema,
+                # Validation
+                time=timer.time,
+                scope=table_errors.scope,
+                stats=table.stats,
+                partial=partial,
+                errors=table_errors,
             )
         ],
     )
@@ -323,9 +231,8 @@ def validate_table(
 # Internal
 
 
-# TODO: refactor add/force (make more explicit)
-class Errors(list):
-    def __init__(self, *, pick_errors=None, skip_errors=None, limit_errors=None):
+class TableErrors(list):
+    def __init__(self, pick_errors, skip_errors, limit_errors):
         self.__pick_errors = set(pick_errors or [])
         self.__skip_errors = set(skip_errors or [])
         self.__limit_errors = limit_errors
@@ -335,14 +242,14 @@ class Errors(list):
     def scope(self):
         return self.__scope
 
-    def add(self, error, *, force=False):
+    def append(self, error, *, force=False):
         if not force:
             if self.__limit_errors:
                 if len(self) >= self.__limit_errors:
                     return
             if not self.match(error):
                 return
-        self.append(error)
+        super().append(error)
 
     def match(self, error):
         match = True
