@@ -26,29 +26,29 @@ DESCRIPTOR_MAX = {
 }
 
 
-def test_init():
+def test_schema():
     assert Schema(DESCRIPTOR_MIN)
     assert Schema(DESCRIPTOR_MAX)
     assert Schema("data/schema-valid-full.json")
     assert Schema("data/schema-valid-simple.json")
 
 
-def test_cannot_extract_metadata():
+def test_schema_extract_metadata_error():
     with pytest.raises(exceptions.FrictionlessException):
         Schema([])
 
 
-def test_init_invalid_in_strict_mode():
-    with pytest.raises(exceptions.FrictionlessException):
-        Schema("data/schema-invalid-multiple-errors.json", metadata_strict=True)
+def test_schema_metadata_invalid():
+    schema = Schema("data/schema-invalid-multiple-errors.json")
+    assert len(schema.metadata_errors) == 5
 
 
-def test_descriptor():
+def test_schema_descriptor():
     assert Schema(DESCRIPTOR_MIN) == DESCRIPTOR_MIN
     assert Schema(DESCRIPTOR_MAX) == DESCRIPTOR_MAX
 
 
-def test_descriptor_path():
+def test_schema_descriptor_path():
     path = "data/schema-valid-simple.json"
     actual = Schema(path)
     with io.open(path, encoding="utf-8") as file:
@@ -57,14 +57,14 @@ def test_descriptor_path():
 
 
 @pytest.mark.slow
-def test_descriptor_url():
+def test_schema_descriptor_url():
     url = BASE_URL % "data/schema_valid_simple.json"
     actual = Schema(url)
     expect = requests.get(url).json()
     assert actual == expect
 
 
-def test_descriptor_expand():
+def test_schema_descriptor_expand():
     schema = Schema(DESCRIPTOR_MIN)
     schema.expand()
     schema == {
@@ -76,67 +76,67 @@ def test_descriptor_expand():
     }
 
 
-def test_read_cells():
+def test_schema_read_data():
     schema = Schema(DESCRIPTOR_MAX)
     source = ["string", "10.0", "1", "string", "string"]
     target = ["string", Decimal(10.0), 1, "string", "string"]
-    cells, notes = schema.read_cells(source)
+    cells, notes = schema.read_data(source)
     assert cells == target
 
 
-def test_read_cells_null_values():
+def test_schema_read_data_null_values():
     schema = Schema(DESCRIPTOR_MAX)
     source = ["string", "", "-", "string", "null"]
     target = ["string", None, None, "string", None]
-    cells, notes = schema.read_cells(source)
+    cells, notes = schema.read_data(source)
     assert cells == target
 
 
-def test_read_cells_too_short():
+def test_schema_read_data_too_short():
     schema = Schema(DESCRIPTOR_MAX)
     source = ["string", "10.0", "1", "string"]
     target = ["string", Decimal(10.0), 1, "string", None]
-    cells, notes = schema.read_cells(source)
+    cells, notes = schema.read_data(source)
     assert cells == target
 
 
-def test_read_cells_too_long():
+def test_schema_read_data_too_long():
     schema = Schema(DESCRIPTOR_MAX)
     source = ["string", "10.0", "1", "string", "string", "string"]
     target = ["string", Decimal(10.0), 1, "string", "string"]
-    cells, notes = schema.read_cells(source)
+    cells, notes = schema.read_data(source)
     assert cells == target
 
 
-def test_read_cells_wrong_type():
+def test_schema_read_data_wrong_type():
     schema = Schema(DESCRIPTOR_MAX)
     source = ["string", "notdecimal", "10.6", "string", "string"]
     target = ["string", None, None, "string", "string"]
-    cells, notes = schema.read_cells(source)
+    cells, notes = schema.read_data(source)
     assert cells == target
     assert notes[1] == {"type": 'type is "number/default"'}
     assert notes[2] == {"type": 'type is "integer/default"'}
 
 
-def test_missing_values():
+def test_schema_missing_values():
     assert Schema(DESCRIPTOR_MIN).missing_values == [""]
     assert Schema(DESCRIPTOR_MAX).missing_values == ["", "-", "null"]
 
 
-def test_fields():
+def test_schema_fields():
     expect = ["id", "height"]
     actual = [field.name for field in Schema(DESCRIPTOR_MIN).fields]
     assert expect == actual
 
 
-def test_get_field():
+def test_schema_get_field():
     schema = Schema(DESCRIPTOR_MIN)
     assert schema.get_field("id").name == "id"
     assert schema.get_field("height").name == "height"
     assert schema.get_field("undefined") is None
 
 
-def test_update_field():
+def test_schema_update_field():
     schema = Schema(DESCRIPTOR_MIN)
     schema.get_field("id")["type"] = "number"
     schema.get_field("height")["type"] = "number"
@@ -144,43 +144,43 @@ def test_update_field():
     assert schema.get_field("height").type == "number"
 
 
-def test_has_field():
+def test_schema_has_field():
     schema = Schema(DESCRIPTOR_MIN)
     assert schema.has_field("id")
     assert schema.has_field("height")
     assert not schema.has_field("undefined")
 
 
-def test_field_names():
+def test_schema_field_names():
     assert Schema(DESCRIPTOR_MIN).field_names == ["id", "height"]
 
 
-def test_primary_key():
+def test_schema_primary_key():
     assert Schema(DESCRIPTOR_MIN).primary_key == []
     assert Schema(DESCRIPTOR_MAX).primary_key == ["id"]
 
 
-def test_foreign_keys():
+def test_schema_foreign_keys():
     assert Schema(DESCRIPTOR_MIN).foreign_keys == []
     assert Schema(DESCRIPTOR_MAX).foreign_keys == DESCRIPTOR_MAX["foreignKeys"]
 
 
-def test_metadata_save(tmpdir):
+def test_schema_metadata_write(tmpdir):
     path = str(tmpdir.join("schema.json"))
-    Schema(DESCRIPTOR_MIN).metadata_save(path)
+    Schema(DESCRIPTOR_MIN).metadata_write(path)
     with io.open(path, encoding="utf-8") as file:
         descriptor = json.load(file)
     assert descriptor == DESCRIPTOR_MIN
 
 
-def test_add_then_del_field():
+def test_schema_add_then_remove_field():
     schema = Schema()
     schema.add_field({"name": "name"})
-    field = schema.del_field("name")
+    field = schema.remove_field("name")
     assert field.name == "name"
 
 
-def test_primary_foreign_keys_as_array():
+def test_schema_primary_foreign_keys_as_array():
     descriptor = {
         "fields": [{"name": "name"}],
         "primaryKey": ["name"],
@@ -198,7 +198,7 @@ def test_primary_foreign_keys_as_array():
     ]
 
 
-def test_primary_foreign_keys_as_string():
+def test_schema_primary_foreign_keys_as_string():
     descriptor = {
         "fields": [{"name": "name"}],
         "primaryKey": "name",
@@ -253,7 +253,7 @@ def test_schema_metadata_error_message():
 # Infer
 
 
-def test_infer():
+def test_schema_infer():
     sample = [
         ["1", "39", "Paul"],
         ["2", "23", "Jimmy"],
@@ -272,7 +272,7 @@ def test_infer():
     }
 
 
-def test_infer_confidence_less():
+def test_schema_infer_confidence_less():
     sample = [
         ["1", "39", "Paul"],
         ["2", "23", "Jimmy"],
@@ -292,7 +292,7 @@ def test_infer_confidence_less():
     }
 
 
-def test_infer_confidence_full():
+def test_schema_infer_confidence_full():
     sample = [
         ["1", "39", "Paul"],
         ["2", "23", "Jimmy"],
@@ -345,7 +345,7 @@ def test_schema_add_remove_field_issue_218():
         ]
     }
     test_schema = Schema(descriptor)
-    test_schema.del_field("test_1")
+    test_schema.remove_field("test_1")
     test_schema.add_field({"name": "test_4", "type": "string", "format": "default"})
 
 

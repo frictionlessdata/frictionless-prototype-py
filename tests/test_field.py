@@ -33,21 +33,21 @@ def test_field_defaults():
     assert field.required is False
 
 
-def test_read_cell():
+def test_field_read_cell():
     field = Field(DESCRIPTOR)
     assert field.read_cell("1") == (1, None)
     assert field.read_cell("string") == (None, {"type": 'type is "integer/default"'},)
     assert field.read_cell("-") == (None, {"required": 'constraint "required" is "True"'})
 
 
-def test_read_cell_string_missing_values():
+def test_field_read_cell_string_missing_values():
     field = Field({"name": "name", "type": "string", "missingValues": ["", "NA", "N/A"]})
     assert field.read_cell("") == (None, None)
     assert field.read_cell("NA") == (None, None)
     assert field.read_cell("N/A") == (None, None)
 
 
-def test_read_cell_number_missingValues():
+def test_field_read_cell_number_missingValues():
     field = Field({"name": "name", "type": "number", "missingValues": ["", "NA", "N/A"]})
     assert field.read_cell("") == (None, None)
     assert field.read_cell("NA") == (None, None)
@@ -147,7 +147,7 @@ def test_field_constraint_field_type(constraints, type, valid):
     assert field.metadata_valid == valid
 
 
-def test_read_cell_required():
+def test_field_read_cell_required():
     field = Field(
         {
             "name": "name",
@@ -169,7 +169,7 @@ def test_read_cell_required():
     assert read(None) == (None, {"required": 'constraint "required" is "True"'})
 
 
-def test_read_cell_minLength():
+def test_field_read_cell_minLength():
     field = Field({"name": "name", "type": "string", "constraints": {"minLength": 2}})
     read = field.read_cell
     assert read("abc") == ("abc", None)
@@ -179,7 +179,7 @@ def test_read_cell_minLength():
     assert read("") == (None, None)
 
 
-def test_read_cell_maxLength():
+def test_field_read_cell_maxLength():
     field = Field({"name": "name", "type": "string", "constraints": {"maxLength": 2}})
     read = field.read_cell
     assert read("abc") == ("abc", {"maxLength": 'constraint "maxLength" is "2"'})
@@ -189,7 +189,7 @@ def test_read_cell_maxLength():
     assert read("") == (None, None)
 
 
-def test_read_cell_minimum():
+def test_field_read_cell_minimum():
     field = Field({"name": "name", "type": "integer", "constraints": {"minimum": 2}})
     read = field.read_cell
     assert read("3") == (3, None)
@@ -202,7 +202,7 @@ def test_read_cell_minimum():
     assert read("") == (None, None)
 
 
-def test_read_cell_maximum():
+def test_field_read_cell_maximum():
     field = Field({"name": "name", "type": "integer", "constraints": {"maximum": 2}})
     read = field.read_cell
     assert read("3") == (3, {"maximum": 'constraint "maximum" is "2"'})
@@ -215,7 +215,7 @@ def test_read_cell_maximum():
     assert read("") == (None, None)
 
 
-def test_read_cell_pattern():
+def test_field_read_cell_pattern():
     field = Field({"name": "name", "type": "string", "constraints": {"pattern": "a|b"}})
     read = field.read_cell
     assert read("a") == ("a", None)
@@ -225,7 +225,7 @@ def test_read_cell_pattern():
     assert read("") == (None, None)
 
 
-def test_read_cell_enum():
+def test_field_read_cell_enum():
     field = Field(
         {"name": "name", "type": "integer", "constraints": {"enum": ["1", "2", "3"]}}
     )
@@ -238,7 +238,7 @@ def test_read_cell_enum():
     assert read("") == (None, None)
 
 
-def test_read_cell_multiple_constraints():
+def test_field_read_cell_multiple_constraints():
     field = Field(
         {
             "name": "name",

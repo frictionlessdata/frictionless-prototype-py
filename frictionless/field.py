@@ -30,6 +30,7 @@ class Field(Metadata):
     """
 
     metadata_Error = errors.SchemaError  # type: ignore
+    metadata_relaxed = True
     metadata_profile = {  # type: ignore
         "type": "object",
         "required": ["name"],

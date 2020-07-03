@@ -25,14 +25,14 @@ class Metadata(helpers.ControlledDict):
 
     metadata_Error = None
     metadata_profile = None
-    metadata_strict = False
+    metadata_relaxed = False
     metadata_setters = {}
 
     def __init__(self, descriptor=None):
         self.__Error = self.metadata_Error or import_module("frictionless.errors").Error
         metadata = self.metadata_extract(descriptor)
         for key, value in metadata.items():
-            self.setdefault(key, value)
+            dict.setdefault(self, key, value)
         self.metadata_process()
         self.metadata_validate()
 
@@ -109,7 +109,7 @@ class Metadata(helpers.ControlledDict):
                 note = '"%s" at "%s" in metadata and at "%s" in profile'
                 note = note % (error.message, metadata_path, profile_path)
                 error = self.__Error(note=note)
-                if self.metadata_strict:
+                if not self.metadata_relaxed:
                     raise exceptions.FrictionlessException(error)
                 yield error
 

@@ -14,7 +14,6 @@ class Error(Metadata):
         FrictionlessException: raise any error that occurs during the process
 
     """
-
     code = "error"
     name = "Error"
     tags = []  # type: ignore
