@@ -310,7 +310,7 @@ class Schema(Metadata):
 
         # Fields
         fields = self.get("fields")
-        if fields is not None:
+        if isinstance(fields, list):
             for index, field in enumerate(fields):
                 if not isinstance(field, Field):
                     if not isinstance(field, dict):

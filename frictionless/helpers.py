@@ -3,6 +3,7 @@ import os
 import chardet
 import datetime
 import stringcase
+from inspect import signature
 from urllib.parse import urlparse, parse_qs
 from _thread import RLock  # type: ignore
 from . import config
@@ -197,12 +198,17 @@ class Timer:
 
 
 class ControlledDict(dict):
-    def __init__(self, value, *, onchange=None):
+    def __init__(self, value, *, onchange):
         super().__init__(value)
         self.__onchange = onchange
+        self.__passself = bool(signature(onchange).parameters)
 
-    def __onchange__(self):
-        self.__onchange()
+    def __onchange__(self, *args, **kwargs):
+        try:
+            # TODO: make Metadata fuly serializable to remove this hack
+            self.__onchange(self) if self.__passself else self.__onchange()
+        except Exception:
+            pass
 
     def __setitem__(self, *args, **kwargs):
         result = super().__setitem__(*args, **kwargs)
@@ -244,9 +250,14 @@ class ControlledList(list):
     def __init__(self, value, *, onchange):
         super().__init__(value)
         self.__onchange = onchange
+        self.__passself = bool(signature(onchange).parameters)
 
-    def __onchange__(self):
-        self.__onchange()
+    def __onchange__(self, *args, **kwargs):
+        try:
+            # TODO: make Metadata fuly serializable to remove this hack
+            self.__onchange(self) if self.__passself else self.__onchange()
+        except Exception:
+            pass
 
     def __setitem__(self, *args, **kwargs):
         result = super().__setitem__(*args, **kwargs)

@@ -11,7 +11,6 @@ def test_validate():
 
 def test_validate_invalid():
     report = validate({"fields": {}})
-    print(report)
     assert report.flatten(["code", "note"]) == [
         [
             "schema-error",

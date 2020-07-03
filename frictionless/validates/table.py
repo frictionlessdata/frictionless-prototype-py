@@ -191,6 +191,7 @@ def validate_table(
                 table_errors.append(error)
 
     # Return report
+    # TODO: copy metadata here or in ReportTable
     return Report(
         time=timer.time,
         errors=task_errors,

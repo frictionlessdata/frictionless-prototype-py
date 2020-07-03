@@ -4,6 +4,7 @@ import requests
 import jsonschema
 from copy import deepcopy
 from operator import setitem
+from functools import partial
 from urllib.parse import urlparse
 from importlib import import_module
 from .helpers import cached_property
@@ -12,6 +13,7 @@ from . import helpers
 from . import config
 
 
+# TODO: make metadata fully serializable
 class Metadata(helpers.ControlledDict):
     """Metadata representation
 
@@ -64,13 +66,11 @@ class Metadata(helpers.ControlledDict):
 
     def metadata_attach(self, name, value):
         if self.get(name) != value:
+            value = deepcopy(value)
+            onchange = partial(metadata_attach, self, name)
             if isinstance(value, dict):
-                value = deepcopy(value)
-                onchange = lambda: setitem(self, name, dict(value))
                 value = helpers.ControlledDict(value, onchange=onchange)
             elif isinstance(value, list):
-                value = deepcopy(value)
-                onchange = lambda: setitem(self, name, list(value))
                 value = helpers.ControlledList(value, onchange=onchange)
         return value
 
@@ -122,3 +122,11 @@ class Metadata(helpers.ControlledDict):
                 json.dump(self, file, indent=2, ensure_ascii=ensure_ascii)
         except Exception as exc:
             raise exceptions.FrictionlessException(self.__Error(note=str(exc))) from exc
+
+
+# Internal
+
+
+def metadata_attach(self, name, value):
+    copy = dict if isinstance(value, dict) else list
+    setitem(self, name, copy(value))
