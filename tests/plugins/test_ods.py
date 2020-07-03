@@ -15,7 +15,7 @@ def test_table_ods():
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
-@pytest.mark.remote
+@pytest.mark.slow
 def test_table_ods_remote():
     source = BASE_URL % "data/table.ods"
     with Table(source) as table:
