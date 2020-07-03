@@ -205,6 +205,14 @@ class Table:
         self.__infer_volume = infer_volume
         self.__infer_confidence = infer_confidence
 
+        # Detect filtering
+        self.__field_filtering = (
+            pick_fields is not None
+            or skip_fields is not None
+            or limit_fields is not None
+            or offset_fields is not None
+        )
+
         # Create file
         self.__file = File(
             source=source,
@@ -475,7 +483,7 @@ class Table:
         iterator = enumerate(self.__parser.data_stream, start=start)
         for row_position, cells in iterator:
             if self.__read_data_stream_pick_skip_row(row_position, cells):
-                cells = helpers.filter_cells(cells, self.__field_positions)
+                cells = self.__read_data_stream_filter_data(cells, self.__field_positions)
                 yield row_position, cells
 
     def __read_data_stream_infer(self):
@@ -509,7 +517,7 @@ class Table:
                         continue
 
                 # Sample
-                sample.append(cells)
+                sample.append(self.__read_data_stream_filter_data(cells, field_positions))
                 sample_positions.append(row_position)
                 if len(sample) >= self.__infer_volume:
                     break
@@ -631,6 +639,15 @@ class Table:
                 elif isinstance(item, typing.Pattern) and item.match(cell):
                     match = not match
         return match
+
+    def __read_data_stream_filter_data(self, cells, field_positions):
+        if self.__field_filtering:
+            result = []
+            for field_position, cell in enumerate(cells, start=1):
+                if field_position in field_positions:
+                    result.append(cell)
+            return result
+        return cells
 
     def __read_data_stream_raise_closed(self):
         if not self.__data_stream:
