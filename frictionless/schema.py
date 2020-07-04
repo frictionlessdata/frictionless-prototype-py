@@ -79,7 +79,7 @@ class Schema(Metadata):
                 fk["reference"]["fields"] = [fk["reference"]["fields"]]
         return self.metadata_attach("foreignKeys", foreign_keys)
 
-    # Create
+    # Import/Export
 
     @staticmethod
     def from_sample(

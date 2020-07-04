@@ -65,7 +65,7 @@ class Report(Metadata):
             raise exceptions.FrictionlessException(error)
         return self.tables[0]
 
-    # Create
+    # Import/Export
 
     @staticmethod
     def from_validate(validate):

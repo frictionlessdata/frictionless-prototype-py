@@ -149,3 +149,8 @@ class Row(OrderedDict):
     @cached_property
     def valid(self):
         return not self.__errors
+
+    # Import/Export
+
+    def to_dict(self):
+        return self.copy()

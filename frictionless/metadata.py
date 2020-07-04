@@ -13,7 +13,6 @@ from . import helpers
 from . import config
 
 
-# TODO: make metadata fully serializable
 class Metadata(helpers.ControlledDict):
     """Metadata representation
 
@@ -61,6 +60,11 @@ class Metadata(helpers.ControlledDict):
     def setinitial(self, key, value):
         if value is not None:
             dict.__setitem__(self, key, value)
+
+    # Import/Export
+
+    def to_dict(self):
+        return self.copy()
 
     # Attach
 

@@ -38,26 +38,6 @@ class Error(Metadata):
     def message(self):
         return self["message"]
 
-    # Create
-
-    # TODO: remove after tabulator migration
-    @staticmethod
-    def from_exception(exception):
-        Error = SourceError
-        note = str(exception)
-        if isinstance(exception, exceptions.SourceError):
-            Error = SourceError
-        elif isinstance(exception, exceptions.SchemeError):
-            Error = SchemeError
-        elif isinstance(exception, exceptions.FormatError):
-            Error = FormatError
-        elif isinstance(exception, exceptions.EncodingError):
-            Error = EncodingError
-        elif isinstance(exception, exceptions.CompressionError):
-            Error = CompressionError
-        return Error(note=note)
-        super().metadata_process()
-
 
 class HeaderError(Error):
     """Header error representation

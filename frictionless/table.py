@@ -410,7 +410,7 @@ class Table:
         """
         return self.__row_stream
 
-    # Open
+    # Open/Close
 
     def open(self):
         """Opens the stream for reading.

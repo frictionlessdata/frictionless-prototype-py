@@ -124,3 +124,8 @@ class Headers(list):
     @cached_property
     def valid(self):
         return not self.__errors
+
+    # Import/Export
+
+    def to_list(self):
+        return self.copy()

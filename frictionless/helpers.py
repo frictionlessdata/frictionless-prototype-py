@@ -3,6 +3,7 @@ import os
 import chardet
 import datetime
 import stringcase
+from copy import deepcopy
 from inspect import signature
 from urllib.parse import urlparse, parse_qs
 from _thread import RLock  # type: ignore
@@ -201,14 +202,17 @@ class ControlledDict(dict):
     def __init__(self, value, *, onchange):
         super().__init__(value)
         self.__onchange = onchange
-        self.__passself = bool(signature(onchange).parameters)
 
     def __onchange__(self, *args, **kwargs):
-        try:
-            # TODO: make Metadata fuly serializable to remove this hack
-            self.__onchange(self) if self.__passself else self.__onchange()
-        except Exception:
-            pass
+        onchange = getattr(self, "_ControlledDict__onchange", None)
+        if onchange:
+            onchange(self) if signature(onchange).parameters else onchange()
+
+    def __copy__(self, *args, **kwargs):
+        return self.__deepcopy__()
+
+    def __deepcopy__(self, *args, **kwargs):
+        return {key: deepcopy(value, *args, **kwargs) for key, value in self.items()}
 
     def __setitem__(self, *args, **kwargs):
         result = super().__setitem__(*args, **kwargs)
@@ -224,6 +228,9 @@ class ControlledDict(dict):
         result = super().clear(*args, **kwargs)
         self.__onchange__()
         return result
+
+    def copy(self, *args, **kwargs):
+        return self.__copy__(*args, **kwargs)
 
     def pop(self, *args, **kwargs):
         result = super().pop(*args, **kwargs)
@@ -250,14 +257,17 @@ class ControlledList(list):
     def __init__(self, value, *, onchange):
         super().__init__(value)
         self.__onchange = onchange
-        self.__passself = bool(signature(onchange).parameters)
 
     def __onchange__(self, *args, **kwargs):
-        try:
-            # TODO: make Metadata fuly serializable to remove this hack
-            self.__onchange(self) if self.__passself else self.__onchange()
-        except Exception:
-            pass
+        onchange = getattr(self, "_ControlledList__onchange", None)
+        if onchange:
+            onchange(self) if signature(onchange).parameters else onchange()
+
+    def __copy__(self, *args, **kwargs):
+        return self.__deepcopy__()
+
+    def __deepcopy__(self, *args, **kwargs):
+        return [deepcopy(value, *args, **kwargs) for value in self]
 
     def __setitem__(self, *args, **kwargs):
         result = super().__setitem__(*args, **kwargs)
@@ -278,6 +288,9 @@ class ControlledList(list):
         result = super().clear(*args, **kwargs)
         self.__onchange__()
         return result
+
+    def copy(self, *args, **kwargs):
+        return self.__copy__(*args, **kwargs)
 
     def extend(self, *args, **kwargs):
         result = super().extend(*args, **kwargs)

@@ -52,7 +52,7 @@ class Loader:
             self.__text_stream = self.read_text_stream()
         return self.__text_stream
 
-    # Open
+    # Open/Close
 
     def open(self):
         self.close()
