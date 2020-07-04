@@ -34,8 +34,8 @@ class InlineParser(Parser):
         # Keyed
         elif isinstance(cells, dict):
             dialect["keyed"] = True
-            headers = list(cells.keys())
-            if not isinstance(cells, OrderedDict):
+            headers = dialect.keys or list(cells.keys())
+            if not dialect.keys and not isinstance(cells, OrderedDict):
                 headers = sorted(headers)
             yield headers
             for cells in chain([cells], data):

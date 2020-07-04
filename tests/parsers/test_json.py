@@ -9,16 +9,24 @@ BASE_URL = "https://raw.githubusercontent.com/okfn/tabulator-py/master/%s"
 
 
 def test_table_json():
-    with Table("data/table-lists.json") as table:
+    with Table("data/table.json") as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
 def test_table_json_keyed():
-    with Table("data/table-dicts.json") as table:
+    with Table("data/table.keyed.json") as table:
         assert table.dialect.keyed is True
         assert table.headers == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
+
+
+def test_table_json_keyed_with_keys_provided():
+    dialect = dialects.JsonDialect(keys=["name", "id"])
+    with Table("data/table.keyed.json", dialect=dialect) as table:
+        assert table.dialect.keyed is True
+        assert table.headers == ["name", "id"]
+        assert table.read_data() == [["english", 1], ["中国人", 2]]
 
 
 def test_table_json_from_text():

@@ -20,7 +20,8 @@ class JsonParser(Parser):
         if dialect.property is not None:
             path = "%s.item" % self.file.dialect.property
         source = ijson.items(self.loader.byte_stream, path)
-        with system.create_parser(File(source=source)) as parser:
+        file = File(source=source, dialect=dialects.InlineDialect(keys=dialect.keys))
+        with system.create_parser(file) as parser:
             yield next(parser.data_stream)
             if parser.file.dialect.keyed:
                 dialect["keyed"] = True
@@ -52,7 +53,8 @@ class JsonlParser(Parser):
     def read_data_stream_create(self, dialect=None):
         dialect = self.file.dialect
         source = iter(jsonlines.Reader(self.loader.text_stream))
-        with system.create_parser(File(source=source)) as parser:
+        file = File(source=source, dialect=dialects.InlineDialect(keys=dialect.keys))
+        with system.create_parser(file) as parser:
             yield next(parser.data_stream)
             if parser.file.dialect.keyed:
                 dialect["keyed"] = True

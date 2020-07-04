@@ -259,14 +259,12 @@ class ExcelDialect(Dialect):
         self.setdetault("adjustFloatingPointError", self.adjust_floating_point_error)
 
 
-# TODO: Consider headers prop for keyed sources
 class InlineDialect(Dialect):
     """Inline dialect representation
 
     # Arguments
         descriptor? (str|dict): descriptor
-        keyed? (bool): keyes
-        forced? (bool): forced
+        keyed? (bool): keyed
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
@@ -277,14 +275,20 @@ class InlineDialect(Dialect):
         "type": "object",
         "additionalProperties": False,
         "properties": {
+            "keys": {"type": "array"},
             "keyed": {"type": "boolean"},
             "headers": {"type": ["object", "array", "number", "null"]},
         },
     }
 
-    def __init__(self, descriptor=None, *, keyed=None, headers=None):
+    def __init__(self, descriptor=None, *, keys=None, keyed=None, headers=None):
+        self.setinitial("keys", keys)
         self.setinitial("keyed", keyed)
         super().__init__(descriptor, headers=headers)
+
+    @property
+    def keys(self):
+        return self.get("keys")
 
     @property
     def keyed(self):
@@ -296,13 +300,12 @@ class InlineDialect(Dialect):
         self.setdetault("keyed", self.keyed)
 
 
-# TODO: Consider headers prop for keyed sources
 class JsonDialect(Dialect):
     """Json dialect representation
 
     # Arguments
         descriptor? (str|dict): descriptor
-        keyed? (bool): keyes
+        keyed? (bool): keyed
         property? (str): property
 
     # Raises
@@ -314,6 +317,7 @@ class JsonDialect(Dialect):
         "type": "object",
         "additionalProperties": False,
         "properties": {
+            "keys": {"type": "array"},
             "keyed": {"type": "boolean"},
             "property": {"type": "string"},
             "headers": {"type": ["object", "array", "number", "null"]},
@@ -321,11 +325,16 @@ class JsonDialect(Dialect):
     }
 
     def __init__(
-        self, descriptor=None, *, keyed=None, property=None, headers=None,
+        self, descriptor=None, *, keys=None, keyed=None, property=None, headers=None,
     ):
+        self.setinitial("keys", keys)
         self.setinitial("keyed", keyed)
         self.setinitial("property", property)
         super().__init__(descriptor, headers=headers)
+
+    @property
+    def keys(self):
+        return self.get("keys")
 
     @property
     def keyed(self):
