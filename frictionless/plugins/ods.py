@@ -26,8 +26,8 @@ class OdsParser(Parser):
     # Read
 
     def read_data_stream_create(self):
-        dialect = self.file.dialect
         ezodf = import_module("ezodf")
+        dialect = self.file.dialect
 
         # Get book
         book = ezodf.opendoc(io.BytesIO(self.loader.byte_stream.read()))
@@ -39,9 +39,9 @@ class OdsParser(Parser):
             else:
                 sheet = book.sheets[dialect.sheet - 1]
         except (KeyError, IndexError):
-            note = 'OpenOffice document "%s" doesn\'t have a sheet "%s"'
+            note = 'OpenOffice document "%s" does not have a sheet "%s"'
             note = note % (self.file.source, dialect.sheet)
-            raise exceptions.FrictionlessException(errors.SourceError(note=note))
+            raise exceptions.FrictionlessException(errors.FormatError(note=note))
 
         # Type cells
         def type_value(cell):

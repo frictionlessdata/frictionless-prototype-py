@@ -30,12 +30,14 @@ def test_table_ods_sheet_by_index():
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
-@pytest.mark.skip
 def test_table_ods_sheet_by_index_not_existent():
     dialect = OdsDialect(sheet=3)
+    table = Table("data/table.ods", dialect=dialect)
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        Table("data/table.ods", dialect=dialect).open()
-    assert 'sheet "3"' in str(excinfo.value)
+        table.open()
+    error = excinfo.value.error
+    assert error.code == "format-error"
+    assert error.note == 'OpenOffice document "data/table.ods" does not have a sheet "3"'
 
 
 def test_table_ods_sheet_by_name():
@@ -45,12 +47,16 @@ def test_table_ods_sheet_by_name():
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
-@pytest.mark.skip
-def test_table_ods_sheet_by_index_not_existent_2():
+def test_table_ods_sheet_by_name_not_existent():
     dialect = OdsDialect(sheet="bad")
+    table = Table("data/table.ods", dialect=dialect)
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        Table("data/table.ods", dialct=dialect.sheet).open()
-    assert 'sheet "bad"' in str(excinfo.value)
+        table.open()
+    error = excinfo.value.error
+    assert error.code == "format-error"
+    assert (
+        error.note == 'OpenOffice document "data/table.ods" does not have a sheet "bad"'
+    )
 
 
 def test_table_ods_with_boolean():
