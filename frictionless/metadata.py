@@ -117,9 +117,9 @@ class Metadata(helpers.ControlledDict):
                 yield self.__Error(note=note)
         yield from []
 
-    # Write
+    # Save
 
-    def metadata_write(self, target, ensure_ascii=True):
+    def metadata_save(self, target, ensure_ascii=True):
         try:
             helpers.ensure_dir(target)
             with io.open(target, mode="w", encoding="utf-8") as file:

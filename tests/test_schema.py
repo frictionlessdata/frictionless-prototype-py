@@ -165,9 +165,9 @@ def test_schema_foreign_keys():
     assert Schema(DESCRIPTOR_MAX).foreign_keys == DESCRIPTOR_MAX["foreignKeys"]
 
 
-def test_schema_metadata_write(tmpdir):
+def test_schema_metadata_save(tmpdir):
     path = str(tmpdir.join("schema.json"))
-    Schema(DESCRIPTOR_MIN).metadata_write(path)
+    Schema(DESCRIPTOR_MIN).metadata_save(path)
     with io.open(path, encoding="utf-8") as file:
         descriptor = json.load(file)
     assert descriptor == DESCRIPTOR_MIN
