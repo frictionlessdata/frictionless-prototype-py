@@ -27,11 +27,13 @@ def test_table_format_sql_order_by_desc(database_url):
         assert table.read_data() == [[2, "中国人"], [1, "english"]]
 
 
-@pytest.mark.skip
 def test_table_format_sql_table_is_required_error(database_url):
+    table = Table(database_url)
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        Table(database_url).open()
-    assert "table" in str(excinfo.value)
+        table.open()
+    error = excinfo.value.error
+    assert error.code == "dialect-error"
+    assert error.note.count("'table' is a required property")
 
 
 def test_table_format_sql_headers_none(database_url):

@@ -28,7 +28,4 @@ def test_table_gsheet_bad_url():
         table.open()
     error = excinfo.value.error
     assert error.code == "scheme-error"
-    assert (
-        error.note
-        == "404 Client Error: Not Found for url: https://docs.google.com/spreadsheets/d//export?format=csv&id="
-    )
+    assert error.note.count("404 Client Error: Not Found for url")
