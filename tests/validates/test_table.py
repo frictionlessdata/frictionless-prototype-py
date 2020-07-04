@@ -81,7 +81,7 @@ def test_validate_blank_cell_not_required():
 def test_validate_no_data():
     report = validate("data/empty.csv")
     assert report.flatten(["rowPosition", "fieldPosition", "code", "note"]) == [
-        [None, None, "source-error", "There are no rows available"],
+        [None, None, "source-error", "There are no data available"],
     ]
 
 
@@ -89,7 +89,7 @@ def test_validate_no_data():
 def test_validate_no_rows():
     report = validate("data/without-rows.csv")
     assert report.flatten(["rowPosition", "fieldPosition", "code", "note"]) == [
-        [None, None, "source-error", "There are no rows available"],
+        [None, None, "source-error", "There are no data available"],
     ]
 
 

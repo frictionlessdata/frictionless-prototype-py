@@ -83,16 +83,22 @@ def test_table_xlsx_merged_cells_fill():
 
 def test_table_xlsx_adjust_floating_point_error():
     source = "data/special/adjust_floating_point_error.xlsx"
-    dialect = dialects.ExcelDialect(preserve_formatting=True)
-    with Table(source, dialect=dialect, skip_fields=["<blank>"]) as table:
-        assert table.read_data()[1][2] == 274.65999999999997
     dialect = dialects.ExcelDialect(
         fill_merged_cells=False,
         preserve_formatting=True,
         adjust_floating_point_error=True,
     )
-    with Table(source, dialect=dialect, skip_fields=["<blank>"]) as table:
-        assert table.read_data()[1][2] == 274.66
+    with pytest.warns(UserWarning):
+        with Table(source, dialect=dialect, skip_fields=["<blank>"]) as table:
+            assert table.read_data()[1][2] == 274.66
+
+
+def test_table_xlsx_adjust_floating_point_error_default():
+    source = "data/special/adjust_floating_point_error.xlsx"
+    dialect = dialects.ExcelDialect(preserve_formatting=True)
+    with pytest.warns(UserWarning):
+        with Table(source, dialect=dialect, skip_fields=["<blank>"]) as table:
+            assert table.read_data()[1][2] == 274.65999999999997
 
 
 def test_table_xlsx_preserve_formatting():

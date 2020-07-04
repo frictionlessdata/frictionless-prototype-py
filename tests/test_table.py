@@ -1210,6 +1210,12 @@ def test_table_skip_blank_at_the_end_issue_bco_dmo_33():
         assert table.read_data() == [["1", "2"], []]
 
 
+def test_table_wrong_encoding_detection_issue_265():
+    with Table("data/special/accent.csv") as table:
+        #  Underlaying "chardet" can't detect correct utf-8 here
+        assert table.encoding == "iso8859-1"
+
+
 def test_table_not_existent_local_file_with_no_format_issue_287():
     table = Table("bad")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
@@ -1237,10 +1243,12 @@ def test_table_chardet_raises_remote_issue_305():
         assert len(table.read_data()) == 343
 
 
-def test_table_wrong_encoding_detection_issue_265():
-    with Table("data/special/accent.csv") as table:
-        #  Underlaying "chardet" can't detect correct utf-8 here
-        assert table.encoding == "iso8859-1"
+def test_table_skip_rows_non_string_cell_issue_320():
+    source = "data/special/issue320.xlsx"
+    dialect = dialects.ExcelDialect(fill_merged_cells=True)
+    with pytest.warns(UserWarning):
+        with Table(source, dialect=dialect, headers=[10, 11, 12]) as table:
+            assert table.headers[7] == "Current Population Analysed % of total county Pop"
 
 
 def test_table_skip_rows_non_string_cell_issue_322():
@@ -1248,10 +1256,3 @@ def test_table_skip_rows_non_string_cell_issue_322():
     with Table(source, skip_rows="1") as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [[2, "spanish"]]
-
-
-def test_table_skip_rows_non_string_cell_issue_320():
-    source = "data/special/issue320.xlsx"
-    dialect = dialects.ExcelDialect(fill_merged_cells=True)
-    with Table(source, dialect=dialect, headers=[10, 11, 12]) as table:
-        assert table.headers[7] == "Current Population Analysed % of total county Pop"
