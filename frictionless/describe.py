@@ -4,12 +4,12 @@ from . import config
 
 
 # TODO: support source_type (table/resource/package)
-# TODO: support infer_type
+# TODO: support detect_type
 def describe(
     source,
     *,
     source_type=None,
-    headers_row=config.DEFAULT_HEADERS_ROW,
+    headers=config.DEFAULT_HEADERS_ROW,
     expand=False,
     missing_values=None,
     infer_type=None,
@@ -29,7 +29,7 @@ def describe(
         infer_confidence
 
     """
-    with Table(source, headers=headers_row, infer_volume=infer_volume) as table:
+    with Table(source, headers=headers, infer_volume=infer_volume) as table:
         schema = Schema.from_sample(
             table.sample,
             names=infer_names or table.headers,

@@ -1,5 +1,4 @@
 import os
-import stringcase
 from .helpers import cached_property
 from .metadata import Metadata
 from .controls import Control
@@ -74,22 +73,6 @@ class File(Metadata):
             detect = helpers.detect_source_scheme_and_format(source)
         self.__detected_scheme = detect[0] or config.DEFAULT_SCHEME
         self.__detected_format = detect[1] or config.DEFAULT_FORMAT
-
-    def __setattr__(self, name, value):
-        if name in [
-            "scheme",
-            "format",
-            "hashing",
-            "encoding",
-            "compression",
-            "compressionPath",
-            "control",
-            "dialect",
-            "newline",
-            "stats",
-        ]:
-            self[stringcase.camelcase(name)] = value
-        super().__setattr__(name, value)
 
     @cached_property
     def path(self):

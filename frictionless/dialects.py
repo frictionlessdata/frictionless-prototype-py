@@ -1,5 +1,4 @@
 import csv
-import stringcase
 from .metadata import Metadata
 from . import config
 
@@ -9,8 +8,7 @@ class Dialect(Metadata):
 
     # Arguments
         descriptor? (str|dict): descriptor
-        headers_row? (int|int[]): headers_row
-        headers_joiner? (str): headers_joiner
+        headers? (int|list): headers
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
@@ -18,43 +16,33 @@ class Dialect(Metadata):
     """
 
     # TODO: add not additionalProperties?
+    # TODO: make headers validation stricter
     metadata_profile = {  # type: ignore
         "type": "object",
-        "properties": {
-            "headersRow": {"type": ["number", "array", "null"]},
-            "headersJoiner": {"type": "string"},
-        },
+        "properties": {"headers": {"type": ["object", "array", "number", "null"]}},
     }
 
-    def __init__(self, descriptor=None, headers_row=None, headers_joiner=None):
-        self.setinitial("headersRow", headers_row)
-        self.setinitial("headersJoiner", headers_joiner)
+    def __init__(self, descriptor=None, headers=None):
+        self.setinitial("headers", headers)
         super().__init__(descriptor)
 
-    def __setattr__(self, name, value):
-        if name in ["headers_row", "headers_joiner"]:
-            self[stringcase.camelcase(name)] = value
-        else:
-            super().__setattr__(name, value)
-
     @property
-    def headers_row(self):
-        headers_row = self.get("headersRow", config.DEFAULT_HEADERS_ROW)
-        if isinstance(headers_row, int):
-            headers_row = [headers_row]
-        if headers_row is not None:
-            self.metadata_attach("headersRow", headers_row)
-        return headers_row
-
-    @property
-    def headers_joiner(self):
-        return self.get("headersJoiner", config.DEFAULT_HEADERS_JOINER)
+    def headers(self):
+        row = config.DEFAULT_HEADERS_ROW
+        join = config.DEFAULT_HEADERS_JOIN
+        headers = self.get("headers", row)
+        if not headers:
+            headers = {"rows": [], "join": join}
+        elif isinstance(headers, int):
+            headers = {"rows": [headers], "join": join}
+        elif isinstance(headers, list):
+            headers = {"rows": headers, "join": join}
+        return self.metadata_attach("headers", headers)
 
     # Expand
 
     def expand(self):
-        self.setdetault("headersRow", self.headers_row)
-        self.setdetault("headersJoiner", self.headers_joiner)
+        self.setdetault("headers", self.headers)
 
 
 class CsvDialect(Dialect):
@@ -92,8 +80,7 @@ class CsvDialect(Dialect):
             "header": {"type": "boolean"},
             "commentChar": {"type": "string"},
             "caseSensitiveHeader": {"type": "boolean"},
-            "headersRow": {"type": ["number", "array", "null"]},
-            "headersJoiner": {"type": "string"},
+            "headers": {"type": ["object", "array", "number", "null"]},
         },
     }
 
@@ -111,8 +98,7 @@ class CsvDialect(Dialect):
         header=None,
         comment_char=None,
         case_sensitive_header=None,
-        headers_row=None,
-        headers_joiner=None,
+        headers=None,
     ):
         self.setinitial("delimiter", delimiter)
         self.setinitial("lineTerminator", line_terminator)
@@ -124,9 +110,7 @@ class CsvDialect(Dialect):
         self.setinitial("header", header)
         self.setinitial("commentChar", comment_char)
         self.setinitial("caseSensitiveHeader", case_sensitive_header)
-        super().__init__(
-            descriptor, headers_row=headers_row, headers_joiner=headers_joiner,
-        )
+        super().__init__(descriptor, headers=headers)
 
     # TODO: Find a better way like to_native/from_native
     def __getattr__(self, name):
@@ -223,8 +207,7 @@ class ExcelDialect(Dialect):
             "fillMergedCells": {"type": "boolean"},
             "preserveFormatting": {"type": "boolean"},
             "adjustFloatingPointError": {"type": "boolean"},
-            "headersRow": {"type": ["number", "array", "null"]},
-            "headersJoiner": {"type": "string"},
+            "headers": {"type": ["object", "array", "number", "null"]},
         },
     }
 
@@ -237,17 +220,14 @@ class ExcelDialect(Dialect):
         fill_merged_cells=None,
         preserve_formatting=None,
         adjust_floating_point_error=None,
-        headers_row=None,
-        headers_joiner=None,
+        headers=None,
     ):
         self.setinitial("sheet", sheet)
         self.setinitial("workbookCache", workbook_cache)
         self.setinitial("fillMergedCells", fill_merged_cells)
         self.setinitial("preserveFormatting", preserve_formatting)
         self.setinitial("adjustFloatingPointError", adjust_floating_point_error)
-        super().__init__(
-            descriptor, headers_row=headers_row, headers_joiner=headers_joiner,
-        )
+        super().__init__(descriptor, headers=headers)
 
     @property
     def sheet(self):
@@ -298,18 +278,13 @@ class InlineDialect(Dialect):
         "additionalProperties": False,
         "properties": {
             "keyed": {"type": "boolean"},
-            "headersRow": {"type": ["number", "array", "null"]},
-            "headersJoiner": {"type": "string"},
+            "headers": {"type": ["object", "array", "number", "null"]},
         },
     }
 
-    def __init__(
-        self, descriptor=None, *, keyed=None, headers_row=None, headers_joiner=None,
-    ):
+    def __init__(self, descriptor=None, *, keyed=None, headers=None):
         self.setinitial("keyed", keyed)
-        super().__init__(
-            descriptor, headers_row=headers_row, headers_joiner=headers_joiner,
-        )
+        super().__init__(descriptor, headers=headers)
 
     @property
     def keyed(self):
@@ -341,25 +316,16 @@ class JsonDialect(Dialect):
         "properties": {
             "keyed": {"type": "boolean"},
             "property": {"type": "string"},
-            "headersRow": {"type": ["number", "array", "null"]},
-            "headersJoiner": {"type": "string"},
+            "headers": {"type": ["object", "array", "number", "null"]},
         },
     }
 
     def __init__(
-        self,
-        descriptor=None,
-        *,
-        keyed=None,
-        property=None,
-        headers_row=None,
-        headers_joiner=None,
+        self, descriptor=None, *, keyed=None, property=None, headers=None,
     ):
         self.setinitial("keyed", keyed)
         self.setinitial("property", property)
-        super().__init__(
-            descriptor, headers_row=headers_row, headers_joiner=headers_joiner,
-        )
+        super().__init__(descriptor, headers=headers)
 
     @property
     def keyed(self):

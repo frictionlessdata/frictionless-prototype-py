@@ -162,13 +162,7 @@ class Table:
         # Update dialect
         if headers != config.DEFAULT_HEADERS_ROW:
             dialect = (dialect or {}).copy()
-            if isinstance(headers, (type(None), int)):
-                dialect["headersRow"] = headers
-            elif isinstance(headers[0], int):
-                dialect["headersRow"] = headers
-            elif isinstance(headers[1], str):
-                dialect["headersRow"] = headers[0]
-                dialect["headersJoiner"] = headers[1]
+            dialect["headers"] = headers
 
         # Update filters
         pick_fields = helpers.compile_regex(pick_fields)
@@ -421,7 +415,7 @@ class Table:
         """
         self.close()
         try:
-            self.__file.stats = {"hash": "", "bytes": 0, "rows": 0}
+            self.__file["stats"] = {"hash": "", "bytes": 0, "rows": 0}
             self.__parser = system.create_parser(self.__file)
             self.__parser.open()
             self.__data_stream = self.__read_data_stream()
@@ -500,7 +494,7 @@ class Table:
         row_number = 0
         headers_data = []
         headers_ready = False
-        headers_numbers = dialect.headers_row or [config.DEFAULT_HEADERS_ROW]
+        headers_numbers = dialect.headers["rows"] or [config.DEFAULT_HEADERS_ROW]
         for row_position, cells in enumerate(self.__parser.data_stream, start=1):
             if self.__read_data_stream_pick_skip_row(row_position, cells):
                 row_number += 1
@@ -567,7 +561,7 @@ class Table:
         dialect = self.__file.dialect
 
         # No headers
-        if not dialect.headers_row:
+        if not dialect.headers["rows"]:
             return None, list(range(1, len(headers_data[0]) + 1))
 
         # Get headers
@@ -581,7 +575,7 @@ class Table:
                 if len(headers) <= index:
                     headers.append(cell)
                     continue
-                headers[index] = dialect.headers_joiner.join([headers[index], cell])
+                headers[index] = dialect.headers["join"].join([headers[index], cell])
 
         # Filter headers
         filter_headers = []
@@ -678,6 +672,7 @@ class Table:
 
     # Write
 
+    # TODO: allow None target and return result for inline/pandas/etc?
     def write(
         self,
         target,

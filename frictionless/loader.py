@@ -29,7 +29,7 @@ class Loader:
         self.__byte_stream = None
         self.__text_stream = None
         if self.Control is not None:
-            self.__file.control = self.Control(file.control)
+            self.__file["control"] = self.Control(file.control)
 
     def __enter__(self):
         self.open()
@@ -167,7 +167,7 @@ class Loader:
         elif encoding == "utf-16-le":
             if sample.startswith(codecs.BOM_UTF16_LE):
                 encoding = "utf-16"
-        self.file.encoding = encoding
+        self.file["encoding"] = encoding
 
     def read_text_stream_decode(self, byte_stream):
         return io.TextIOWrapper(

@@ -214,8 +214,9 @@ def test_validate_headers_list_of_numbers():
     assert report.valid
 
 
-def test_validate_headers_list_of_numbers_and_headers_joiner():
-    report = validate("data/matrix.csv", headers=[[2, 3, 4], "."])
+def test_validate_headers_list_of_numbers_and_headers_join():
+    headers = {"rows": [2, 3, 4], "join": "."}
+    report = validate("data/matrix.csv", headers=headers)
     assert report.table["headers"] == ["11.21.31", "12.22.32", "13.23.33", "14.24.34"]
     assert report.valid
 

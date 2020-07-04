@@ -25,9 +25,9 @@ class Parser:
         self.__loader = None
         self.__data_stream = None
         if self.Dialect is not None:
-            self.__file.dialect = self.Dialect(file.dialect)
+            self.__file["dialect"] = self.Dialect(file.dialect)
         if self.newline is not None:
-            self.__file.newline = self.newline
+            self.__file["newline"] = self.newline
 
     def __enter__(self):
         self.open()

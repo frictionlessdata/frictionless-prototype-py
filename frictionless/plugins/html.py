@@ -72,18 +72,13 @@ class HtmlDialect(Dialect):
         "additionalProperties": False,
         "properties": {
             "selector": {"type": "string"},
-            "headersRow": {"type": ["number", "null"]},
-            "headersJoiner": {"type": "string"},
+            "headers": {"type": ["object", "array", "number", "null"]},
         },
     }
 
-    def __init__(
-        self, descriptor=None, *, selector=None, headers_row=None, headers_joiner=None,
-    ):
+    def __init__(self, descriptor=None, *, selector=None, headers=None):
         self.setinitial("selector", selector)
-        super().__init__(
-            descriptor, headers_row=headers_row, headers_joiner=headers_joiner,
-        )
+        super().__init__(descriptor, headers=headers)
 
     @property
     def selector(self):

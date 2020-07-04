@@ -92,25 +92,16 @@ class SqlDialect(Dialect):
         "properties": {
             "table": {"type": "string"},
             "order_by": {"type": "string"},
-            "headersRow": {"type": ["number", "array", "null"]},
-            "headersJoiner": {"type": "string"},
+            "headers": {"type": ["object", "array", "number", "null"]},
         },
     }
 
     def __init__(
-        self,
-        descriptor=None,
-        *,
-        table=None,
-        order_by=None,
-        headers_row=None,
-        headers_joiner=None,
+        self, descriptor=None, *, table=None, order_by=None, headers=None,
     ):
         self.setinitial("table", table)
         self.setinitial("order_by", order_by)
-        super().__init__(
-            descriptor, headers_row=headers_row, headers_joiner=headers_joiner,
-        )
+        super().__init__(descriptor, headers=headers)
 
     @property
     def table(self):

@@ -88,18 +88,13 @@ class OdsDialect(Dialect):
         "additionalProperties": False,
         "properties": {
             "sheet": {"type": ["number", "string"]},
-            "headersRow": {"type": ["number", "array", "null"]},
-            "headersJoiner": {"type": "string"},
+            "headers": {"type": ["object", "array", "number", "null"]},
         },
     }
 
-    def __init__(
-        self, descriptor=None, *, sheet=None, headers_row=None, headers_joiner=None,
-    ):
+    def __init__(self, descriptor=None, *, sheet=None, headers=None):
         self.setinitial("sheet", sheet)
-        super().__init__(
-            descriptor, headers_row=headers_row, headers_joiner=headers_joiner,
-        )
+        super().__init__(descriptor, headers=headers)
 
     @property
     def sheet(self):
