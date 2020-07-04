@@ -13,6 +13,9 @@ class InlineParser(Parser):
     # Read
 
     def read_data_stream_create(self):
+        dialect = self.file.dialect
+
+        # Iter
         data = self.file.source
         if not hasattr(data, "__iter__"):
             data = data()
@@ -30,6 +33,7 @@ class InlineParser(Parser):
 
         # Keyed
         elif isinstance(cells, dict):
+            dialect["keyed"] = True
             headers = list(cells.keys())
             if not isinstance(cells, OrderedDict):
                 headers = sorted(headers)

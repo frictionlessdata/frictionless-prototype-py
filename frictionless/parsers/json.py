@@ -16,10 +16,14 @@ class JsonParser(Parser):
 
     def read_data_stream_create(self, dialect=None):
         path = "item"
-        if self.file.dialect.property is not None:
+        dialect = self.file.dialect
+        if dialect.property is not None:
             path = "%s.item" % self.file.dialect.property
         source = ijson.items(self.loader.byte_stream, path)
         with system.create_parser(File(source=source)) as parser:
+            yield next(parser.data_stream)
+            if parser.file.dialect.keyed:
+                dialect["keyed"] = True
             yield from parser.data_stream
 
     # Write
@@ -46,8 +50,12 @@ class JsonlParser(Parser):
     # Read
 
     def read_data_stream_create(self, dialect=None):
+        dialect = self.file.dialect
         source = iter(jsonlines.Reader(self.loader.text_stream))
         with system.create_parser(File(source=source)) as parser:
+            yield next(parser.data_stream)
+            if parser.file.dialect.keyed:
+                dialect["keyed"] = True
             yield from parser.data_stream
 
     # Write
