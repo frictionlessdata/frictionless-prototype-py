@@ -949,19 +949,9 @@ def test_validate_missing_local_file_raises_scheme_error_issue_315():
     ]
 
 
-@pytest.mark.skip
-def test_validate_inline_no_format_issue_349():
-    with open("data/table.jsonl", "rb") as source:
-        report = validate(source)
-        assert report.flatten(["code", "note"]) == [
-            ["format-error", 'Format "None" is not supported'],
-        ]
-
-
-@pytest.mark.skip
 def test_validate_inline_not_a_binary_issue_349():
     with open("data/table.csv") as source:
         report = validate(source)
-        assert report.flatten(["rowPosition", "fieldPosition", "code", "note"]) == [
-            [None, None, "source-error", "Only byte streams are supported."],
+        assert report.flatten(["code", "note"]) == [
+            ["scheme-error", "only byte streams are supported"],
         ]

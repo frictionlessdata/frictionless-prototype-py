@@ -35,6 +35,7 @@ def test_validate_report_props():
     assert report.table.time
     assert report.table.valid is True
     assert report.table.scope == [
+        "schema-error",
         "extra-header",
         "missing-header",
         "blank-header",

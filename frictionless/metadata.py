@@ -35,7 +35,9 @@ class Metadata(helpers.ControlledDict):
         for key, value in metadata.items():
             dict.setdefault(self, key, value)
         self.metadata_process()
-        self.metadata_validate()
+        if not self.metadata_relaxed:
+            for error in self.metadata_errors:
+                raise exceptions.FrictionlessException(error)
 
     def __setattr__(self, name, value):
         setter = self.metadata_setters.get(name)
@@ -112,10 +114,8 @@ class Metadata(helpers.ControlledDict):
                 profile_path = "/".join(map(str, error.schema_path))
                 note = '"%s" at "%s" in metadata and at "%s" in profile'
                 note = note % (error.message, metadata_path, profile_path)
-                error = self.__Error(note=note)
-                if not self.metadata_relaxed:
-                    raise exceptions.FrictionlessException(error)
-                yield error
+                yield self.__Error(note=note)
+        yield from []
 
     # Write
 

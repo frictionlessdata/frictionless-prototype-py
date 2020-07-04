@@ -1,6 +1,7 @@
 import requests
 from .metadata import Metadata
 from . import helpers
+from . import errors
 from . import config
 
 
@@ -16,7 +17,7 @@ class Control(Metadata):
 
     """
 
-    # TODO: add not additionalProperties?
+    metadata_Error = errors.ControlError
     metadata_profile = {  # type: ignore
         "type": "object",
         "properties": {"detectEncoding": {}},

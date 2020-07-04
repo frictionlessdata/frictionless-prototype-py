@@ -496,14 +496,12 @@ def test_table_control_http_preload():
         assert table.control == {"httpPreload": True}
 
 
-# TODO: rebase on control error
-@pytest.mark.skip
 def test_table_control_bad_property():
     table = Table("data/table.csv", control={"bad": True})
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
     error = excinfo.value.error
-    assert error.code == "error"
+    assert error.code == "control-error"
     assert error.note.count("bad")
 
 
@@ -531,14 +529,12 @@ def test_table_dialect_json_property():
         assert table.read_data() == [["value1", "value2"]]
 
 
-# TODO: rebase on dialect error
-@pytest.mark.skip
 def test_table_dialect_bad_property():
     table = Table("data/table.csv", dialect={"bad": True})
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
     error = excinfo.value.error
-    assert error.code == "error"
+    assert error.code == "dialect-error"
     assert error.note.count("bad")
 
 

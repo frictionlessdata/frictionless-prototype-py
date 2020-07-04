@@ -289,6 +289,22 @@ class CompressionError(Error):
     description = "Data reading error because of a decompression problem."
 
 
+class ControlError(Error):
+    code = "control-error"
+    name = "Control Error"
+    tags = ["#table", "#schema"]
+    template = "Control object is not valid: {note}"
+    description = "Provided control is not valid."
+
+
+class DialectError(Error):
+    code = "dialect-error"
+    name = "Dialect Error"
+    tags = ["#table", "#schema"]
+    template = "Dialect object is not valid: {note}"
+    description = "Provided dialect is not valid."
+
+
 class SchemaError(Error):
     code = "schema-error"
     name = "Schema Error"

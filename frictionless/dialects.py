@@ -1,5 +1,6 @@
 import csv
 from .metadata import Metadata
+from . import errors
 from . import config
 
 
@@ -15,8 +16,7 @@ class Dialect(Metadata):
 
     """
 
-    # TODO: add not additionalProperties?
-    # TODO: make headers validation stricter
+    metadata_Error = errors.DialectError
     metadata_profile = {  # type: ignore
         "type": "object",
         "properties": {"headers": {"type": ["object", "array", "number", "null"]}},

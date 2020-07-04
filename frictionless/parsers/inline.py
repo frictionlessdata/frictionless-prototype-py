@@ -14,7 +14,6 @@ class InlineParser(Parser):
 
     def read_data_stream_create(self):
         dialect = self.file.dialect
-        error = errors.SourceError(note="data item has to be tuple, list or dict")
 
         # Iter
         data = self.file.source
