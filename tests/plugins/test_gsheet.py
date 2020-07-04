@@ -21,9 +21,14 @@ def test_table_gsheet_with_gid():
         assert table.read_data() == [["2", "中国人"], ["3", "german"]]
 
 
-@pytest.mark.skip
 @pytest.mark.slow
 def test_table_gsheet_bad_url():
     table = Table("https://docs.google.com/spreadsheets/d/bad")
-    with pytest.raises(exceptions.FrictionlessException):
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
+    error = excinfo.value.error
+    assert error.code == "scheme-error"
+    assert (
+        error.note
+        == "404 Client Error: Not Found for url: https://docs.google.com/spreadsheets/d//export?format=csv&id="
+    )
