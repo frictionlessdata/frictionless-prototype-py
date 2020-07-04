@@ -20,6 +20,7 @@ class Report(Metadata):
 
     """
 
+    metadata_strict = True
     metadata_profile = config.REPORT_PROFILE
 
     def __init__(self, descriptor=None, *, time, errors, tables):
@@ -138,6 +139,9 @@ class ReportTable(Metadata):
         FrictionlessException: raise any error that occurs during the process
 
     """
+
+    metadata_strict = True
+    metadata_profile = config.REPORT_PROFILE["properties"]["tables"]["items"]
 
     def __init__(
         self,

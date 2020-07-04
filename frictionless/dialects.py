@@ -16,6 +16,7 @@ class Dialect(Metadata):
 
     """
 
+    metadata_strict = True
     metadata_Error = errors.DialectError
     metadata_profile = {  # type: ignore
         "type": "object",

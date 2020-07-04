@@ -12,6 +12,7 @@ class Check(Metadata):
 
     """
 
+    metadata_strict = True
     possible_Errors = []  # type: ignore
 
     def __init__(self, descriptor=None):

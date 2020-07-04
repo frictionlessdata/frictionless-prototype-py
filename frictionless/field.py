@@ -30,12 +30,7 @@ class Field(Metadata):
     """
 
     metadata_Error = errors.SchemaError  # type: ignore
-    metadata_relaxed = True
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "required": ["name"],
-        "properties": {"name": {"type": "string"}},
-    }
+    metadata_profile = config.SCHEMA_PROFILE["properties"]["fields"]["items"]
     metadata_setters = {
         "name": "name",
         "type": "type",

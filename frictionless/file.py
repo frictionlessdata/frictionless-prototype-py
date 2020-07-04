@@ -8,6 +8,7 @@ from . import config
 
 
 class File(Metadata):
+    metadata_strict = True
     metadata_profile = {  # type: ignore
         "type": "object",
         "required": ["source"],

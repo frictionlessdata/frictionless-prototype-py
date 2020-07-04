@@ -26,7 +26,7 @@ class Metadata(helpers.ControlledDict):
 
     metadata_Error = None
     metadata_profile = None
-    metadata_relaxed = False
+    metadata_strict = False
     metadata_setters = {}
 
     def __init__(self, descriptor=None):
@@ -34,10 +34,7 @@ class Metadata(helpers.ControlledDict):
         metadata = self.metadata_extract(descriptor)
         for key, value in metadata.items():
             dict.setdefault(self, key, value)
-        self.metadata_process()
-        if not self.metadata_relaxed:
-            for error in self.metadata_errors:
-                raise exceptions.FrictionlessException(error)
+        self.__onchange__()
 
     def __setattr__(self, name, value):
         setter = self.metadata_setters.get(name)
@@ -48,8 +45,12 @@ class Metadata(helpers.ControlledDict):
         return super().__setattr__(name, value)
 
     def __onchange__(self):
-        helpers.reset_cached_properties(self)
-        self.metadata_process()
+        if hasattr(self, "_Metadata__Error"):
+            helpers.reset_cached_properties(self)
+            self.metadata_process()
+            if self.metadata_strict:
+                for error in self.metadata_errors:
+                    raise exceptions.FrictionlessException(error)
 
     @cached_property
     def metadata_valid(self):

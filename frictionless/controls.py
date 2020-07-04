@@ -17,6 +17,7 @@ class Control(Metadata):
 
     """
 
+    metadata_strict = True
     metadata_Error = errors.ControlError
     metadata_profile = {  # type: ignore
         "type": "object",

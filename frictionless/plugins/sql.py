@@ -2,7 +2,6 @@ from importlib import import_module
 from ..dialects import Dialect
 from ..plugin import Plugin
 from ..parser import Parser
-from .. import exceptions
 
 
 # Plugin
@@ -27,14 +26,6 @@ class SqlParser(Parser):
     def read_data_stream_create(self):
         sa = import_module("sqlalchemy")
         dialect = self.file.dialect
-
-        # Ensure table
-        if not dialect.table:
-            raise exceptions.FrictionlessException(
-                'Format "sql" requires "table" option.'
-            )
-
-        # Stream data
         engine = sa.create_engine(self.file.source)
         engine.update_execution_options(stream_results=True)
         table = sa.sql.table(dialect.table)
