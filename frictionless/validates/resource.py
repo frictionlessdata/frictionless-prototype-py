@@ -43,8 +43,8 @@ def validate_resource(source, base_path=None, exact=False, lookup=None, **option
     source = resource.source
     if resource.multipart:
         source = resource.raw_iter(stream=True)
-    headers = 1
     dialect = resource.descriptor.get("dialect", {})
+    headers = dialect.get("headers", 1)
     if dialect.get("header") is False:
         headers = None
     if lookup is None:
