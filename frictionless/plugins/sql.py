@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, sql, MetaData, Table, Column, String
+from importlib import import_module
 from ..dialects import Dialect
 from ..plugin import Plugin
 from ..parser import Parser
@@ -25,6 +25,7 @@ class SqlParser(Parser):
     # Read
 
     def read_data_stream_create(self):
+        sa = import_module("sqlalchemy")
         dialect = self.file.dialect
 
         # Ensure table
@@ -34,11 +35,11 @@ class SqlParser(Parser):
             )
 
         # Stream data
-        engine = create_engine(self.file.source)
+        engine = sa.create_engine(self.file.source)
         engine.update_execution_options(stream_results=True)
-        table = sql.table(dialect.table)
-        order = sql.text(dialect.order_by) if dialect.order_by else None
-        query = sql.select(["*"]).select_from(table).order_by(order)
+        table = sa.sql.table(dialect.table)
+        order = sa.sql.text(dialect.order_by) if dialect.order_by else None
+        query = sa.sql.select(["*"]).select_from(table).order_by(order)
         data = iter(engine.execute(query))
         item = next(data)
         yield list(item.keys())
@@ -49,14 +50,15 @@ class SqlParser(Parser):
     # Write
 
     def write(self, source, target, headers, encoding=None):
-        engine = create_engine(target)
+        sa = import_module("sqlalchemy")
+        engine = sa.create_engine(target)
         count = 0
         buffer = []
         buffer_size = 1000
         with engine.begin() as conn:
-            meta = MetaData()
-            columns = [Column(header, String()) for header in headers]
-            table = Table(self.__table, meta, *columns)
+            meta = sa.MetaData()
+            columns = [sa.Column(header, sa.String()) for header in headers]
+            table = sa.Table(self.__table, meta, *columns)
             meta.create_all(conn)
             for row in source:
                 count += 1

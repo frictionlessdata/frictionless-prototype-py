@@ -1,7 +1,7 @@
 import os
 import io
-import boto3
 import requests.utils
+from importlib import import_module
 from urllib.parse import urlparse
 from ..controls import Control
 from ..plugin import Plugin
@@ -27,7 +27,9 @@ class S3Loader(Loader):
     # Read
 
     def read_byte_stream_create(self):
-        client = boto3.client("s3", endpoint_url=self.file.control.endpoint_url)
+        boto3 = import_module("boto3")
+        control = self.file.control
+        client = boto3.client("s3", endpoint_url=control.endpoint_url)
         source = requests.utils.requote_uri(self.file.source)
         parts = urlparse(source, allow_fragments=False)
         response = client.get_object(Bucket=parts.netloc, Key=parts.path[1:])

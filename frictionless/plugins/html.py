@@ -1,4 +1,4 @@
-from pyquery import PyQuery as pq
+from importlib import import_module
 from ..dialects import Dialect
 from ..plugin import Plugin
 from ..parser import Parser
@@ -23,6 +23,7 @@ class HtmlParser(Parser):
     # Read
 
     def read_data_stream_create(self):
+        pq = import_module("pyquery").PyQuery
         dialect = self.file.dialect
 
         # Get Page content

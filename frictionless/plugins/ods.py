@@ -1,5 +1,5 @@
 import io
-import ezodf
+from importlib import import_module
 from datetime import datetime
 from ..dialects import Dialect
 from ..plugin import Plugin
@@ -27,6 +27,7 @@ class OdsParser(Parser):
 
     def read_data_stream_create(self):
         dialect = self.file.dialect
+        ezodf = import_module("ezodf")
 
         # Get book
         book = ezodf.opendoc(io.BytesIO(self.loader.byte_stream.read()))

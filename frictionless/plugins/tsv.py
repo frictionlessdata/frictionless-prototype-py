@@ -1,4 +1,4 @@
-import tsv
+from importlib import import_module
 from ..parser import Parser
 from ..plugin import Plugin
 from ..dialects import Dialect
@@ -23,6 +23,7 @@ class TsvParser(Parser):
     # Read
 
     def read_data_stream_create(self):
+        tsv = import_module("tsv")
         data = tsv.un(self.loader.text_stream)
         yield from data
 
