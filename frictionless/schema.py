@@ -218,6 +218,7 @@ class Schema(Metadata):
         # Prepare names
         if not names:
             if not sample:
+                self.fields = []
                 return
             names = [f"field{number}" for number in range(1, len(sample[0]) + 1)]
 

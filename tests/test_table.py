@@ -162,7 +162,7 @@ def test_table_source_error_data():
         table.open()
     error = excinfo.value.error
     assert error.code == "source-error"
-    assert error.note == "data item has to be tuple, list or dict"
+    assert error.note == "all data items must be lists"
 
 
 # Scheme

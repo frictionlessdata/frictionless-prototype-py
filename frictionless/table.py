@@ -221,7 +221,8 @@ class Table:
         )
 
     def __enter__(self):
-        self.open()
+        if self.closed:
+            self.open()
         return self
 
     def __exit__(self, type, value, traceback):
@@ -441,6 +442,10 @@ class Table:
         if self.__parser:
             self.__parser.close()
             self.__parser = None
+
+    @property
+    def closed(self):
+        return self.__parser is None
 
     # Read
 

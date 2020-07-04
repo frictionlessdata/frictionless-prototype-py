@@ -1,8 +1,8 @@
 from .. import config
+from .. import errors
 from .. import helpers
 from .. import exceptions
 from ..table import Table
-from ..errors import Error
 from ..system import system
 from ..report import Report, ReportTable
 
@@ -61,8 +61,7 @@ def validate_table(
         dialect? (dict)
         control? (dict)
 
-        headers_row? (int | int[])
-        headers_joiner? (str)
+        headers? (int | int[])
         pick_fields? ((int | str)[])
         skip_fields? ((int | str)[])
         limit_fields? (int)
@@ -100,6 +99,17 @@ def validate_table(
     table_errors = TableErrors(pick_errors, skip_errors, limit_errors)
     timer = helpers.Timer()
 
+    # Create checks
+    items = []
+    items.append("baseline")
+    items.append(("integrity", {"stats": stats, "lookup": lookup}))
+    items.extend(extra_checks or [])
+    create = system.create_check
+    for item in items:
+        p1, p2 = item if isinstance(item, (tuple, list)) else (item, None)
+        check = p1(p2) if isinstance(p1, type) else create(p1, descriptor=p2)
+        checks.append(check)
+
     # Create table
     table = Table(
         source,
@@ -132,63 +142,67 @@ def validate_table(
         infer_confidence=infer_confidence,
     )
 
-    # Create checks
-    items = []
-    items.append("baseline")
-    items.append(("integrity", {"stats": stats, "lookup": lookup}))
-    items.extend(extra_checks or [])
-    create = system.create_check
-    for item in items:
-        p1, p2 = item if isinstance(item, (tuple, list)) else (item, None)
-        check = p1(p2) if isinstance(p1, type) else create(p1, descriptor=p2)
-        checks.append(check)
-
     # Open table
-    with table:
+    try:
+        table.open()
+    except exceptions.FrictionlessException as exception:
+        table_errors.append(exception.error, force=True)
 
-        # Prepare checks
-        for check in checks:
-            table_errors.register(check)
-            check.connect(table)
-            check.prepare()
+    # Enter table
+    if not table_errors:
+        with table:
 
-        # Validate task
-        for check in checks.copy():
-            for error in check.validate_task():
-                task_errors.append(error)
-                if check in checks:
-                    checks.remove(check)
-
-        # Validate headers
-        if table.headers:
+            # Prepare checks
             for check in checks:
-                for error in check.validate_headers(table.headers):
+                table_errors.register(check)
+                check.connect(table)
+                check.prepare()
+
+            # Validate task
+            for check in checks.copy():
+                for error in check.validate_task():
+                    task_errors.append(error)
+                    if check in checks:
+                        checks.remove(check)
+
+            # Validate schema
+            for check in checks:
+                for error in check.validate_schema(table.schema):
                     table_errors.append(error)
 
-        # Iterate rows
-        for row in table.row_stream:
+            # Validate headers
+            if table.headers:
+                for check in checks:
+                    for error in check.validate_headers(table.headers):
+                        table_errors.append(error)
 
-            # Validate row
-            for check in checks:
-                for error in check.validate_row(row):
-                    table_errors.append(error)
+            # Validate rows
+            for row in table.row_stream:
 
-            # Limit errors
-            if limit_errors and len(table_errors) >= limit_errors:
-                partial = True
-                break
+                # Validate row
+                for check in checks:
+                    for error in check.validate_row(row):
+                        table_errors.append(error)
 
-            # Limit memory
-            if limit_memory and not table.stats["rows"] % 100000:
-                memory = helpers.get_current_memory_usage()
-                if memory and memory > limit_memory:
-                    error = Error(note=f'exceeded memory limit "{limit_memory}MB"')
-                    raise exceptions.FrictionlessException(error)
+                # Limit errors
+                if limit_errors and len(table_errors) >= limit_errors:
+                    partial = True
+                    break
 
-        # Validate table
-        for check in checks:
-            for error in check.validate_table():
-                table_errors.append(error)
+                # Limit memory
+                if limit_memory and not table.stats["rows"] % 100000:
+                    memory = helpers.get_current_memory_usage()
+                    if memory and memory > limit_memory:
+                        note = f'exceeded memory limit "{limit_memory}MB"'
+                        task_errors.append(errors.TaskError(note=note))
+                        partial = True
+                        break
+
+            # Validate table
+            if not partial:
+                for check in checks:
+                    for error in check.validate_table():
+                        table_errors.append(error)
 
     # Return report
     return Report(

@@ -32,6 +32,9 @@ class Check(Metadata):
     def validate_task(self):
         yield from []
 
+    def validate_schema(self, schema):
+        yield from []
+
     def validate_headers(self, headers):
         yield from []
 

@@ -14,6 +14,7 @@ class InlineParser(Parser):
 
     def read_data_stream_create(self):
         dialect = self.file.dialect
+        error = errors.SourceError(note="data item has to be tuple, list or dict")
 
         # Iter
         data = self.file.source
@@ -26,25 +27,28 @@ class InlineParser(Parser):
             cells = next(data)
         except StopIteration:
             yield from []
-
-        # Lined
-        if isinstance(cells, (tuple, list)):
-            yield from chain([cells], data)
+            return
 
         # Keyed
-        elif isinstance(cells, dict):
+        if isinstance(cells, dict):
             dialect["keyed"] = True
             headers = dialect.keys or list(cells.keys())
             if not dialect.keys and not isinstance(cells, OrderedDict):
                 headers = sorted(headers)
             yield headers
             for cells in chain([cells], data):
+                if not isinstance(cells, dict):
+                    error = errors.SourceError(note="all keyed data items must be dicts")
+                    raise exceptions.FrictionlessException(error)
                 yield [cells.get(header) for header in headers]
+            return
 
-        # Error
-        else:
-            note = "data item has to be tuple, list or dict"
-            raise exceptions.FrictionlessException(errors.SourceError(note=note))
+        # General
+        for cells in chain([cells], data):
+            if not isinstance(cells, list):
+                error = errors.SourceError(note="all data items must be lists")
+                raise exceptions.FrictionlessException(error)
+            yield cells
 
     # Write
 

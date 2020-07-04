@@ -9,6 +9,8 @@ class BaselineCheck(Check):
         "additionalProperties": False,
     }
     possible_Errors = [  # type: ignore
+        # table
+        errors.SchemaError,
         # head
         errors.ExtraHeaderError,
         errors.MissingHeaderError,
@@ -23,6 +25,11 @@ class BaselineCheck(Check):
         errors.TypeError,
         errors.ConstraintError,
     ]
+
+    def validate_schema(self, schema):
+        yield from schema.metadata_errors if self.table.sample else [
+            errors.SchemaError(note="there is no data available")
+        ]
 
     def validate_headers(self, headers):
         yield from headers.errors

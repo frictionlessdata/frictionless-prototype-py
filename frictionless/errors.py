@@ -195,13 +195,13 @@ class CellError(RowError):
         raise exceptions.FrictionlessException(error)
 
 
-# Metadata
+# General
 
 
 class PackageError(Error):
     code = "package-error"
     name = "Package Error"
-    tags = ["#metadata"]
+    tags = ["#general"]
     template = "The data package has an error: {note}"
     description = "A validation cannot be processed."
 
@@ -209,23 +209,15 @@ class PackageError(Error):
 class ResourceError(Error):
     code = "resource-error"
     name = "Resource Error"
-    tags = ["#metadata"]
+    tags = ["#general"]
     template = "The data resource has an error: {note}"
     description = "A validation cannot be processed."
-
-
-class SchemaError(Error):
-    code = "schema-error"
-    name = "Schema Error"
-    tags = ["#metadata"]
-    template = "The data source could not be successfully described by the invalid Table Schema: {note}"
-    description = "Provided schema is not valid."
 
 
 class ReportError(Error):
     code = "report-error"
     name = "Report Error"
-    tags = ["#metadata"]
+    tags = ["#general"]
     template = "The validation report has an error: {note}"
     description = "A validation cannot be presented."
 
@@ -233,7 +225,7 @@ class ReportError(Error):
 class TaskError(Error):
     code = "task-error"
     name = "Task Error"
-    tags = ["#metadata"]
+    tags = ["#general"]
     template = "The validation task has an error: {note}"
     description = "General task-level error."
 
@@ -241,7 +233,7 @@ class TaskError(Error):
 class CheckError(Error):
     code = "check-error"
     name = "Check Error"
-    tags = ["#metadata"]
+    tags = ["#general"]
     template = "The validation check has an error: {note}"
     description = "A validation check cannot be created"
 
@@ -295,6 +287,14 @@ class CompressionError(Error):
     tags = ["#table"]
     template = "The data source could not be successfully decompressed: {note}"
     description = "Data reading error because of a decompression problem."
+
+
+class SchemaError(Error):
+    code = "schema-error"
+    name = "Schema Error"
+    tags = ["#table", "#schema"]
+    template = "The data source could not be successfully described by the invalid Table Schema: {note}"
+    description = "Provided schema is not valid."
 
 
 class ChecksumError(Error):

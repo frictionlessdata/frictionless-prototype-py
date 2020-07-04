@@ -32,7 +32,8 @@ class Loader:
             self.__file["control"] = self.Control(file.control)
 
     def __enter__(self):
-        self.open()
+        if self.closed:
+            self.open()
         return self
 
     def __exit__(self, type, value, traceback):
@@ -67,6 +68,10 @@ class Loader:
         if self.__byte_stream:
             self.__byte_stream.close()
         self.__byte_stream = None
+
+    @property
+    def closed(self):
+        return self.__byte_stream is None
 
     # Read
 

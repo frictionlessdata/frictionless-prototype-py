@@ -77,37 +77,30 @@ def test_validate_blank_cell_not_required():
     assert report.valid
 
 
-@pytest.mark.skip
 def test_validate_no_data():
     report = validate("data/empty.csv")
-    assert report.flatten(["rowPosition", "fieldPosition", "code", "note"]) == [
-        [None, None, "source-error", "There are no data available"],
+    assert report.flatten(["code", "note"]) == [
+        ["schema-error", "there is no data available"],
     ]
 
 
-@pytest.mark.skip
 def test_validate_no_rows():
     report = validate("data/without-rows.csv")
-    assert report.flatten(["rowPosition", "fieldPosition", "code", "note"]) == [
-        [None, None, "source-error", "There are no data available"],
+    assert report.flatten(["code", "note"]) == [
+        ["schema-error", "there is no data available"],
     ]
 
 
-@pytest.mark.skip
 def test_validate_task_error():
     report = validate("data/table.csv", limit_rows="bad")
-    assert report.flatten(["code", "note"]) == [
-        [
-            "task-error",
-            "\"'bad' is not of type 'number', 'null'\" at \"tables/0/limitRows\" in metadata and at \"properties/tables/items/properties/limitRows/type\" in profile",
-        ],
+    assert report.flatten(["code"]) == [
+        ["task-error"],
     ]
 
 
 # File
 
 
-@pytest.mark.skip
 def test_validate_source_invalid():
     # Reducing sample size to get raise on iter, not on open
     report = validate([["h"], [1], "bad"], infer_volume=1)
@@ -126,11 +119,10 @@ def test_validate_scheme():
     assert report.valid
 
 
-@pytest.mark.skip
 def test_validate_scheme_invalid():
     report = validate("bad://data/table.csv")
-    assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
-        [None, None, "scheme-error"],
+    assert report.flatten(["code", "note"]) == [
+        ["scheme-error", 'cannot create loader "bad". Try installing "frictionless-bad"'],
     ]
 
 
@@ -139,11 +131,10 @@ def test_validate_format():
     assert report.valid
 
 
-@pytest.mark.skip
 def test_validate_format_invalid():
     report = validate("data/table.bad")
-    assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
-        [None, None, "format-error"],
+    assert report.flatten(["code", "note"]) == [
+        ["format-error", 'cannot create parser "bad". Try installing "frictionless-bad"'],
     ]
 
 
@@ -154,8 +145,11 @@ def test_validate_encoding():
 
 def test_validate_encoding_invalid():
     report = validate("data/latin1.csv", encoding="utf-8")
-    assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
-        [None, None, "encoding-error"],
+    assert report.flatten(["code", "note"]) == [
+        [
+            "encoding-error",
+            "'utf-8' codec can't decode byte 0xa9 in position 20: invalid start byte",
+        ],
     ]
 
 
@@ -169,11 +163,10 @@ def test_validate_compression_explicit():
     assert report.valid
 
 
-@pytest.mark.skip
 def test_validate_compression_invalid():
     report = validate("data/table.csv.zip", compression="bad")
-    assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
-        [None, None, "compression-error"],
+    assert report.flatten(["code", "note"]) == [
+        ["compression-error", 'compression "bad" is not supported'],
     ]
 
 
@@ -311,7 +304,6 @@ def test_validate_skip_rows_blank():
     assert report.table.valid
 
 
-@pytest.mark.skip
 def test_validate_pick_rows_and_fields():
     report = validate("data/matrix.csv", pick_rows=[1, 3, "31"], pick_fields=[2, "f3"])
     assert report.table["headers"] == ["f2", "f3"]
@@ -319,7 +311,6 @@ def test_validate_pick_rows_and_fields():
     assert report.table.valid
 
 
-@pytest.mark.skip
 def test_validate_skip_rows_and_fields():
     report = validate("data/matrix.csv", skip_rows=[2, "41"], skip_fields=[1, "f4"])
     assert report.table["headers"] == ["f2", "f3"]
@@ -370,13 +361,15 @@ def test_validate_structure_errors_with_limit_rows():
 # Schema
 
 
-@pytest.mark.skip
 def test_validate_schema_invalid():
     source = [["name", "age"], ["Alex", "33"]]
     schema = {"fields": [{"name": "name"}, {"name": "age", "type": "bad"}]}
     report = validate(source, schema=schema)
-    assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
-        [None, None, "schema-error"],
+    assert report.flatten(["code", "note"]) == [
+        [
+            "schema-error",
+            "\"{'name': 'age', 'type': 'bad'} is not valid under any of the given schemas\" at \"fields/1\" in metadata and at \"properties/fields/items/anyOf\" in profile",
+        ],
     ]
 
 
@@ -817,7 +810,6 @@ def test_validate_structure_errors_with_limit_errors():
     ]
 
 
-@pytest.mark.skip
 @pytest.mark.slow
 def test_validate_limit_memory():
     source = lambda: ([integer] for integer in range(1, 100000000))
@@ -869,11 +861,10 @@ def test_validate_extra_checks_with_arguments():
     ]
 
 
-@pytest.mark.skip
 def test_validate_extra_checks_bad_name():
     report = validate("data/table.csv", extra_checks=["bad"])
     assert report.flatten(["code", "note"]) == [
-        ["task-error", 'Cannot create check "bad". Try installing "frictionless-bad"'],
+        ["check-error", 'cannot create check "bad". Try installing "frictionless-bad"'],
     ]
 
 
@@ -913,13 +904,15 @@ def test_validate_wide_table_with_order_fields_issue_277():
     ]
 
 
-@pytest.mark.skip
 def test_validate_invalid_table_schema_issue_304():
     source = [["name", "age"], ["Alex", "33"]]
     schema = {"fields": [{"name": "name"}, {"name": "age", "type": "bad"}]}
     report = validate(source, schema=schema)
-    assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
-        [None, None, "schema-error"],
+    assert report.flatten(["code", "note"]) == [
+        [
+            "schema-error",
+            "\"{'name': 'age', 'type': 'bad'} is not valid under any of the given schemas\" at \"fields/1\" in metadata and at \"properties/fields/items/anyOf\" in profile",
+        ],
     ]
 
 
@@ -949,20 +942,19 @@ def test_validate_order_fields_issue_313():
     assert report.valid
 
 
-@pytest.mark.skip
 def test_validate_missing_local_file_raises_scheme_error_issue_315():
     report = validate("bad-path.csv")
-    assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
-        [None, None, "scheme-error"],
+    assert report.flatten(["code", "note"]) == [
+        ["scheme-error", "[Errno 2] No such file or directory: 'bad-path.csv'"],
     ]
 
 
 @pytest.mark.skip
 def test_validate_inline_no_format_issue_349():
-    with open("data/table.csv", "rb") as source:
+    with open("data/table.jsonl", "rb") as source:
         report = validate(source)
-        assert report.flatten(["rowPosition", "fieldPosition", "code", "note"]) == [
-            [None, None, "format-error", 'Format "None" is not supported'],
+        assert report.flatten(["code", "note"]) == [
+            ["format-error", 'Format "None" is not supported'],
         ]
 
 

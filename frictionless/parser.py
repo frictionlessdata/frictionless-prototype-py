@@ -30,7 +30,8 @@ class Parser:
             self.__file["newline"] = self.newline
 
     def __enter__(self):
-        self.open()
+        if self.closed:
+            self.open()
         return self
 
     def __exit__(self, type, value, traceback):
@@ -63,6 +64,10 @@ class Parser:
     def close(self):
         if self.__loader:
             self.__loader.close()
+
+    @property
+    def closed(self):
+        return self.__loader is None
 
     # Read
 
