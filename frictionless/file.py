@@ -142,9 +142,11 @@ class File(Metadata):
         # Control
         control = self.get("control")
         if not isinstance(control, (type(None), Control)):
-            dict.__setitem__(self, "control", Control(control))
+            control = Control(control)
+            dict.__setitem__(self, "control", control)
 
         # Dialect
         dialect = self.get("dialect")
         if not isinstance(dialect, (type(None), Dialect)):
-            dict.__setitem__(self, "dialect", Dialect(dialect))
+            dialect = Dialect(dialect)
+            dict.__setitem__(self, "dialect", dialect)

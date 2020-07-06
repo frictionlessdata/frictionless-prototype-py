@@ -64,18 +64,6 @@ def test_schema_descriptor_url():
     assert actual == expect
 
 
-def test_schema_descriptor_expand():
-    schema = Schema(DESCRIPTOR_MIN)
-    schema.expand()
-    schema == {
-        "fields": [
-            {"name": "id", "type": "string", "format": "default"},
-            {"name": "height", "type": "integer", "format": "default"},
-        ],
-        "missingValues": [""],
-    }
-
-
 def test_schema_read_data():
     schema = Schema(DESCRIPTOR_MAX)
     source = ["string", "10.0", "1", "string", "string"]
@@ -165,14 +153,6 @@ def test_schema_foreign_keys():
     assert Schema(DESCRIPTOR_MAX).foreign_keys == DESCRIPTOR_MAX["foreignKeys"]
 
 
-def test_schema_metadata_save(tmpdir):
-    path = str(tmpdir.join("schema.json"))
-    Schema(DESCRIPTOR_MIN).metadata_save(path)
-    with io.open(path, encoding="utf-8") as file:
-        descriptor = json.load(file)
-    assert descriptor == DESCRIPTOR_MIN
-
-
 def test_schema_add_then_remove_field():
     schema = Schema()
     schema.add_field({"name": "name"})
@@ -250,6 +230,21 @@ def test_schema_metadata_error_message():
     assert 'at "properties/fields/items/anyOf" in profile' in note
 
 
+# Expand
+
+
+def test_schema_descriptor_expand():
+    schema = Schema(DESCRIPTOR_MIN)
+    schema.expand()
+    schema == {
+        "fields": [
+            {"name": "id", "type": "string", "format": "default"},
+            {"name": "height", "type": "integer", "format": "default"},
+        ],
+        "missingValues": [""],
+    }
+
+
 # Infer
 
 
@@ -319,6 +314,17 @@ def test_schema_infer_no_names():
     assert schema == {
         "fields": [{"name": "field1", "type": "integer"}],
     }
+
+
+# Save
+
+
+def test_schema_metadata_save(tmpdir):
+    path = str(tmpdir.join("schema.json"))
+    Schema(DESCRIPTOR_MIN).metadata_save(path)
+    with io.open(path, encoding="utf-8") as file:
+        descriptor = json.load(file)
+    assert descriptor == DESCRIPTOR_MIN
 
 
 # Issues

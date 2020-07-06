@@ -17,7 +17,6 @@ class Schema(Metadata):
         missing_values? (str[]): missing_values
         primary_key? (str[]): primary_key
         foreign_keys? (dict[]): foreign_keys
-        resource? (Resource): parent resource
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
@@ -41,13 +40,11 @@ class Schema(Metadata):
         missing_values=None,
         primary_key=None,
         foreign_keys=None,
-        resource=None,
     ):
         self.setinitial("fields", fields)
         self.setinitial("missingValues", missing_values)
         self.setinitial("primaryKey", primary_key)
         self.setinitial("foreignKeys", foreign_keys)
-        self.__resource = resource
         super().__init__(descriptor)
 
     @cached_property

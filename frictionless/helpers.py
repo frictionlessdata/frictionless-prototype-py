@@ -54,6 +54,12 @@ def compile_regex(items):
         return result
 
 
+def detect_basepath(descriptor):
+    if isinstance(descriptor, str):
+        return os.path.dirname(descriptor)
+    return os.getcwd()
+
+
 def ensure_dir(path):
     dirpath = os.path.dirname(path)
     if dirpath and not os.path.exists(dirpath):

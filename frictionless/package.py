@@ -1,5 +1,5 @@
 from .metadata import Metadata
 
 
-class Resource(Metadata):
+class Package(Metadata):
     pass

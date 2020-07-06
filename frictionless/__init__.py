@@ -5,8 +5,10 @@ from .file import File
 from .headers import Headers
 from .inquiry import Inquiry
 from .metadata import Metadata
+from .package import Package
 from .plugin import Plugin
 from .report import Report, ReportTable
+from .resource import Resource
 from .row import Row
 from .schema import Schema
 from .server import Server

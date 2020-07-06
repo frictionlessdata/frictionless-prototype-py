@@ -91,7 +91,9 @@ class Metadata(helpers.ControlledDict):
                 return deepcopy(descriptor) if duplicate else descriptor
             if isinstance(descriptor, str):
                 if urlparse(descriptor).scheme in config.REMOTE_SCHEMES:
-                    return requests.get(descriptor).json()
+                    response = requests.get(descriptor)
+                    response.raise_for_status()
+                    return response.json()
                 with io.open(descriptor, encoding="utf-8") as file:
                     return json.load(file)
             return json.load(descriptor)

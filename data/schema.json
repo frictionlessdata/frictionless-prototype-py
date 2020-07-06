@@ -2,31 +2,11 @@
     "fields": [
         {
             "name": "id",
-            "title": "ID",
-            "type": "integer",
-            "description": "The id.",
-            "constraints": {
-                "required": true
-            }
+            "type": "integer"
         },
         {
             "name": "name",
-            "title": "Name",
-            "type": "string",
-            "description": "The name.",
-            "constraints": {
-                "required": true
-            }
-        },
-        {
-            "name": "age",
-            "title": "Age",
-            "type": "integer",
-            "description": "The age.",
-            "constraints": {
-                "required": true
-            }
+            "type": "string"
         }
-    ],
-    "primaryKey": "id"
+    ]
 }
