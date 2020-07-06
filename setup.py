@@ -25,7 +25,7 @@ TESTS_REQUIRE = [
     "pylama",
     "pytest",
     "pytest-cov",
-    "httpretty",
+    "responses",
     "coveralls",
     "ipython",
     "moto",
