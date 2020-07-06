@@ -1,6 +1,5 @@
 import pytest
 import sqlite3
-from functools import partial
 from pytest_cov.embed import cleanup_on_sigterm
 
 
