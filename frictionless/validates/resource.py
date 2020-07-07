@@ -43,10 +43,6 @@ def validate_resource(source, base_path=None, exact=False, lookup=None, **option
     source = resource.source
     if resource.multipart:
         source = resource.raw_iter(stream=True)
-    dialect = resource.descriptor.get("dialect", {})
-    headers = dialect.get("headers", 1)
-    if dialect.get("header") is False:
-        headers = None
     if lookup is None:
         lookup = helpers.create_lookup(resource)
     stats = None
@@ -70,8 +66,7 @@ def validate_resource(source, base_path=None, exact=False, lookup=None, **option
         encoding=resource.descriptor.get("encoding"),
         compression=resource.descriptor.get("compression"),
         compression_path=resource.descriptor.get("compressionPath"),
-        dialect=dialect,
-        headers=headers,
+        dialect=resource.descriptor.get("dialect"),
         schema=resource.descriptor.get("schema"),
         stats=stats,
         lookup=lookup,

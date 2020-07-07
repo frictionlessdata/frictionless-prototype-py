@@ -225,7 +225,6 @@ def test_resource_dialect():
     ]
 
 
-@pytest.mark.skip
 def test_resource_dialect_header_false():
     dialect = {"header": False}
     descriptor = {

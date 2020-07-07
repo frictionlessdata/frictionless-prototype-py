@@ -133,6 +133,7 @@ class Resource(Metadata):
             schema = Schema(os.path.join(self.basepath, schema))
         return schema
 
+    # TODO: ability to fork table for pick/skip/etc?
     @cached_property
     def table(self):
         return self.__table

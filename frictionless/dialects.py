@@ -131,6 +131,13 @@ class CsvDialect(Dialect):
         return super().__getattr__(name)
 
     @property
+    def headers(self):
+        if self.header is False:
+            join = config.DEFAULT_HEADERS_JOIN
+            return {"rows": [], "join": join}
+        return super().headers
+
+    @property
     def delimiter(self):
         return self.get("delimiter", ",")
 
