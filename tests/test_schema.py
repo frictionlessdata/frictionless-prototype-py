@@ -319,9 +319,9 @@ def test_schema_infer_no_names():
 # Save
 
 
-def test_schema_metadata_save(tmpdir):
+def test_schema_save(tmpdir):
     path = str(tmpdir.join("schema.json"))
-    Schema(DESCRIPTOR_MIN).metadata_save(path)
+    Schema(DESCRIPTOR_MIN).save(path)
     with io.open(path, encoding="utf-8") as file:
         descriptor = json.load(file)
     assert descriptor == DESCRIPTOR_MIN

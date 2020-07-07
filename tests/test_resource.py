@@ -1,4 +1,6 @@
+import io
 import os
+import json
 import pytest
 from frictionless import Resource, exceptions
 
@@ -486,6 +488,18 @@ def test_resource_expand_with_schema():
 # Infer
 
 # Save
+
+
+def test_resource_save(tmpdir):
+    path = str(tmpdir.join("resource.json"))
+    resource = Resource("data/resource.json")
+    resource.save(path)
+    with io.open(path, encoding="utf-8") as file:
+        descriptor = json.load(file)
+    assert descriptor == {
+        "name": "name",
+        "path": "table.csv",
+    }
 
 
 # Multipart

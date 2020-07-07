@@ -13,6 +13,7 @@ class Inquiry(Metadata):
 
     """
 
+    metadata_strict = True
     metadata_profile = config.INQUIRY_PROFILE
 
     def __init__(self, descriptor):
@@ -21,3 +22,8 @@ class Inquiry(Metadata):
     @property
     def tasks(self):
         return self["tasks"]
+
+    # Save
+
+    def save(self, target):
+        self.metadata_save(target)

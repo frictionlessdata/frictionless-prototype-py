@@ -120,11 +120,11 @@ class Metadata(helpers.ControlledDict):
 
     # Save
 
-    def metadata_save(self, target, ensure_ascii=True):
+    def metadata_save(self, target):
         try:
             helpers.ensure_dir(target)
             with io.open(target, mode="w", encoding="utf-8") as file:
-                json.dump(self, file, indent=2, ensure_ascii=ensure_ascii)
+                json.dump(self, file, indent=2, ensure_ascii=False)
         except Exception as exc:
             raise exceptions.FrictionlessException(self.__Error(note=str(exc))) from exc
 

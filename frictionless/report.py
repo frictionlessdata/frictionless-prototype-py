@@ -105,6 +105,11 @@ class Report(Metadata):
                 result.append([context.get(prop) for prop in spec])
         return result
 
+    # Save
+
+    def save(self, target):
+        self.metadata_save(target)
+
 
 class ReportTable(Metadata):
     """Report table representation.
@@ -252,3 +257,8 @@ class ReportTable(Metadata):
             context.update(error)
             result.append([context.get(prop) for prop in spec])
         return result
+
+    # Save
+
+    def save(self, target):
+        self.metadata_save(target)

@@ -255,6 +255,10 @@ class Resource(Metadata):
 
     # Save
 
+    # TODO: save metadata + data to zip
+    def save(self, target):
+        self.metadata_save(target)
+
     # Metadata
 
     def metadata_process(self):

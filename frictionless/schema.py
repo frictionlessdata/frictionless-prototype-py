@@ -300,6 +300,11 @@ class Schema(Metadata):
             result_notes.append(notes)
         return result_cells, result_notes
 
+    # Save
+
+    def save(self, target):
+        self.metadata_save(target)
+
     # Metadata
 
     def metadata_process(self):
