@@ -23,6 +23,7 @@ class Resource(Metadata):
         descriptor=None,
         *,
         path=None,
+        data=None,
         scheme=None,
         format=None,
         hashing=None,
@@ -34,6 +35,7 @@ class Resource(Metadata):
         basepath=None,
     ):
         self.setinitial("path", path)
+        self.setinitial("data", data)
         self.setinitial("format", format)
         self.setinitial("hashing", hashing)
         self.setinitial("encoding", encoding)
@@ -113,7 +115,7 @@ class Resource(Metadata):
     def dialect(self):
         dialect = self.get("dialect")
         if dialect is None:
-            dialect = self.metadata_attach("dialect", {})
+            dialect = self.metadata_attach("dialect", Dialect())
         elif isinstance(dialect, str):
             if not helpers.is_safe_path(dialect):
                 note = f'dialect path "{dialect}" is not safe'
@@ -125,7 +127,7 @@ class Resource(Metadata):
     def schema(self):
         schema = self.get("schema")
         if schema is None:
-            schema = self.metadata_attach("schema", {})
+            schema = self.metadata_attach("schema", Schema())
         elif isinstance(schema, str):
             if not helpers.is_safe_path(schema):
                 note = f'schema path "{schema}" is not safe'
@@ -133,10 +135,31 @@ class Resource(Metadata):
             schema = Schema(os.path.join(self.basepath, schema))
         return schema
 
-    # TODO: ability to fork table for pick/skip/etc?
     @cached_property
     def table(self):
-        return self.__table
+        return Table(
+            self.source,
+            scheme=self.scheme,
+            format=self.format,
+            hashing=self.hashing,
+            encoding=self.encoding,
+            compression=self.compression,
+            compression_path=self.compression_path,
+            dialect=self.dialect,
+            schema=self.schema,
+        )
+
+    @cached_property
+    def __file(self):
+        return File(
+            source=self.source,
+            scheme=self.scheme,
+            format=self.format,
+            hashing=self.hashing,
+            encoding=self.encoding,
+            compression=self.compression,
+            compression_path=self.compression_path,
+        )
 
     # Expand
 
@@ -167,7 +190,7 @@ class Resource(Metadata):
         return data
 
     def read_data_stream(self):
-        with self.__table as table:
+        with self.table as table:
             for cells in table.data_stream:
                 yield cells
 
@@ -176,20 +199,20 @@ class Resource(Metadata):
         return rows
 
     def read_row_stream(self):
-        with self.__table as table:
+        with self.table as table:
             for row in table.row_stream:
                 yield row
 
     def read_headers(self):
-        with self.__table as table:
+        with self.table as table:
             return table.headers
 
     def read_sample(self):
-        with self.__table as table:
+        with self.table as table:
             return table.sample
 
     def read_stats(self):
-        with self.__table as table:
+        with self.table as table:
             for cells in table:
                 pass
             return table.stats
@@ -211,27 +234,3 @@ class Resource(Metadata):
         if not isinstance(schema, (str, type(None), Schema)):
             schema = Schema(schema)
             dict.__setitem__(self, "schema", schema)
-
-        # File
-        self.__file = File(
-            source=self.source,
-            scheme=self.scheme,
-            format=self.format,
-            hashing=self.hashing,
-            encoding=self.encoding,
-            compression=self.compression,
-            compression_path=self.compression_path,
-        )
-
-        # Table
-        self.__table = Table(
-            self.source,
-            scheme=self.scheme,
-            format=self.format,
-            hashing=self.hashing,
-            encoding=self.encoding,
-            compression=self.compression,
-            compression_path=self.compression_path,
-            dialect=self.dialect,
-            schema=self.schema,
-        )

@@ -139,16 +139,18 @@ def test_resource_source_path_error_bad_path():
 
 
 def test_resource_source_path_error_bad_path_not_safe_absolute():
+    resource = Resource(path=os.path.abspath("data/table.csv"))
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        Resource(path=os.path.abspath("data/table.csv"))
+        resource.read_rows()
     error = excinfo.value.error
     assert error.code == "resource-error"
     assert error.note.count("data/table.csv")
 
 
 def test_resource_source_path_error_bad_path_not_safe_traversing():
+    resource = Resource(path="data/../data/table.csv")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        Resource(path="data/../data/table.csv")
+        resource.read_rows()
     error = excinfo.value.error
     assert error.code == "resource-error"
     assert error.note.count("data/table.csv")
@@ -272,8 +274,9 @@ def test_resource_dialect_from_path_remote():
 
 def test_resource_dialect_from_path_error_path_not_safe():
     dialect = os.path.abspath("data/dialect.json")
+    resource = Resource({"name": "name", "path": "path", "dialect": dialect})
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        Resource({"name": "name", "path": "path", "dialect": dialect})
+        resource.read_rows()
     error = excinfo.value.error
     assert error.code == "resource-error"
     assert error.note.count("dialect.json")
@@ -370,8 +373,9 @@ def test_resource_schema_from_path_remote():
 
 
 def test_resource_schema_from_path_error_bad_path():
+    resource = Resource({"name": "name", "path": "path", "schema": "data/bad.json"})
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        Resource({"name": "name", "path": "path", "schema": "data/bad.json"})
+        resource.read_rows()
     error = excinfo.value.error
     assert error.code == "schema-error"
     assert error.note.count("bad.json")
@@ -379,8 +383,9 @@ def test_resource_schema_from_path_error_bad_path():
 
 def test_resource_schema_from_path_error_path_not_safe():
     schema = os.path.abspath("data/schema.json")
+    resource = Resource({"name": "name", "path": "path", "schema": schema})
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        Resource({"name": "name", "path": "path", "schema": schema})
+        resource.read_rows()
     error = excinfo.value.error
     assert error.code == "resource-error"
     assert error.note.count("schema.json")
@@ -389,9 +394,45 @@ def test_resource_schema_from_path_error_path_not_safe():
 # Table
 
 
-@pytest.mark.skip
 def test_resource_table():
-    pass
+    resource = Resource(path="data/table.csv")
+    with resource.table as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_rows() == [
+            {"id": 1, "name": "english"},
+            {"id": 2, "name": "中国人"},
+        ]
+
+
+def test_resource_table_source_data():
+    data = [["id", "name"], ["1", "english"], ["2", "中国人"]]
+    resource = Resource(data=data)
+    with resource.table as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_rows() == [
+            {"id": 1, "name": "english"},
+            {"id": 2, "name": "中国人"},
+        ]
+
+
+@pytest.mark.slow
+def test_resource_table_source_remote():
+    resource = Resource(path=BASE_URL % "data/table.csv")
+    with resource.table as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_rows() == [
+            {"id": 1, "name": "english"},
+            {"id": 2, "name": "中国人"},
+        ]
+
+
+def test_resource_table_source_non_tabular():
+    resource = Resource(path="data/text.txt")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        resource.table.open()
+    error = excinfo.value.error
+    assert error.code == "format-error"
+    assert error.note == 'cannot create parser "txt". Try installing "frictionless-txt"'
 
 
 # Expand
