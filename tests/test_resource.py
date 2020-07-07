@@ -199,11 +199,6 @@ def test_resource_source_no_path_and_no_data():
     assert resource.read_rows() == []
 
 
-def test_resource_source_non_tabular():
-    resource = Resource(path="data/text.txt")
-    assert resource.read_bytes() == b"text\n"
-
-
 # Dialect
 
 
@@ -463,6 +458,15 @@ def test_resource_expand_tabular_dialect():
 
 
 # Infer
+
+
+# Non-tabular
+
+
+def test_resource_source_non_tabular():
+    resource = Resource(path="data/text.txt")
+    # TODO: test all the props
+    assert resource.read_bytes() == b"text\n"
 
 
 # Multipart
