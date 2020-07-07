@@ -505,130 +505,84 @@ def test_resource_save(tmpdir):
 # Multipart
 
 
-@pytest.mark.skip
-def test_descriptor_table_tabular_multipart_local():
+def test_resource_source_multipart():
     descriptor = {
-        "name": "name",
-        "profile": "tabular-data-resource",
         "path": ["chunk1.csv", "chunk2.csv"],
-        "schema": "resource_schema.json",
+        "schema": "resource-schema.json",
     }
-    resource = Resource(descriptor, base_path="data")
-    assert resource.table.read(keyed=True) == [
+    resource = Resource(descriptor, basepath="data")
+    assert resource.inline is False
+    assert resource.multipart is True
+    assert resource.tabular is True
+    assert resource.read_rows() == [
         {"id": 1, "name": "english"},
         {"id": 2, "name": "中国人"},
     ]
 
 
-@pytest.mark.skip
-def test_descriptor_table_tabular_multipart_remote(patch_get):
+@pytest.mark.slow
+def test_resource_source_multipart_remote():
     descriptor = {
         "name": "name",
-        "profile": "tabular-data-resource",
-        "path": [
-            "http://example.com/chunk1.csv",
-            "http://example.com/chunk2.csv",
-            "http://example.com/chunk3.csv",
-        ],
+        "path": ["chunk2.csv", "chunk3.csv"],
+        "dialect": {"header": False},
         "schema": "resource_schema.json",
     }
-    # Mocks
-    patch_get("http://example.com/chunk1.csv", body="id,name\n")
-    patch_get("http://example.com/chunk2.csv", body="1,english")
-    patch_get("http://example.com/chunk3.csv", body="2,中国人\n")
-    # Tests
-    resource = Resource(descriptor, base_path="data")
-    assert resource.table.read(keyed=True) == [
-        {"id": 1, "name": "english"},
+    resource = Resource(descriptor, basepath=BASE_URL % "data")
+    assert resource.inline is False
+    assert resource.multipart is True
+    assert resource.tabular is True
+    assert resource.read_rows() == [
         {"id": 2, "name": "中国人"},
+        {"id": 3, "name": "german"},
     ]
 
 
-@pytest.mark.skip
-def test_source_multipart_local():
+@pytest.mark.slow
+def test_resource_source_multipart_remote_both_path_and_basepath():
     descriptor = {
         "name": "name",
-        "path": ["chunk1.csv", "chunk2.csv"],
+        "path": ["chunk2.csv", BASE_URL % "data/chunk3.csv"],
+        "dialect": {"header": False},
+        "schema": "resource_schema.json",
     }
-    resource = Resource(descriptor, base_path="data")
-    assert resource.source == ["data/chunk1.csv", "data/chunk2.csv"]
-    assert resource.local is True
+    resource = Resource(descriptor, basepath=BASE_URL % "data")
+    assert resource.inline is False
     assert resource.multipart is True
-
-
-@pytest.mark.skip
-def test_source_multipart_local_bad_no_base_path():
-    descriptor = {
-        "name": "name",
-        "path": ["chunk1.csv", "chunk2.csv"],
-    }
-    with pytest.raises(exceptions.DataPackageException):
-        Resource(descriptor, base_path="")
-
-
-@pytest.mark.skip
-def test_source_multipart_local_bad_not_safe_absolute():
-    descriptor = {
-        "name": "name",
-        "path": ["/fixtures/chunk1.csv", "chunk2.csv"],
-    }
-    with pytest.raises(exceptions.DataPackageException):
-        Resource(descriptor, base_path="data")
-
-
-@pytest.mark.skip
-def test_source_multipart_local_bad_not_safe_traversing():
-    descriptor = {
-        "name": "name",
-        "path": ["chunk1.csv", "../fixtures/chunk2.csv"],
-    }
-    with pytest.raises(exceptions.DataPackageException):
-        Resource(descriptor, base_path="data")
-
-
-@pytest.mark.skip
-def test_source_multipart_remote():
-    descriptor = {
-        "name": "name",
-        "path": ["http://example.com/chunk1.csv", "http://example.com/chunk2.csv"],
-    }
-    resource = Resource(descriptor)
-    assert resource.source == [
-        "http://example.com/chunk1.csv",
-        "http://example.com/chunk2.csv",
+    assert resource.tabular is True
+    assert resource.read_rows() == [
+        {"id": 2, "name": "中国人"},
+        {"id": 3, "name": "german"},
     ]
-    assert resource.remote is True
-    assert resource.multipart is True
 
 
-@pytest.mark.skip
-def test_source_multipart_remote_path_relative_and_base_path_remote():
-    descriptor = {
-        "name": "name",
-        "path": ["chunk1.csv", "chunk2.csv"],
-    }
-    resource = Resource(descriptor, base_path="http://example.com")
-    assert resource.source == [
-        "http://example.com/chunk1.csv",
-        "http://example.com/chunk2.csv",
-    ]
-    assert resource.remote is True
-    assert resource.multipart is True
+def test_resource_source_multipart_error_bad_path():
+    resource = Resource({"name": "name", "path": ["chunk1.csv", "chunk2.csv"]})
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        resource.read_rows()
+    error = excinfo.value.error
+    assert error.code == "source-error"
+    assert error.note == "[Errno 2] No such file or directory: 'chunk1.csv'"
 
 
-@pytest.mark.skip
-def test_source_multipart_remote_path_remote_and_base_path_remote():
-    descriptor = {
-        "name": "name",
-        "path": ["chunk1.csv", "http://example2.com/chunk2.csv"],
-    }
-    resource = Resource(descriptor, base_path="http://example1.com")
-    assert resource.source == [
-        "http://example1.com/chunk1.csv",
-        "http://example2.com/chunk2.csv",
-    ]
-    assert resource.remote is True
-    assert resource.multipart is True
+def test_resource_source_multipart_error_bad_path_not_safe_absolute():
+    bad_path = os.path.abspath("data/chunk1.csv")
+    resource = Resource({"name": "name", "path": [bad_path, "data/chunk2.csv"]})
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        resource.read_rows()
+    error = excinfo.value.error
+    assert error.code == "resource-error"
+    assert error.note.count("not safe")
+
+
+def test_resource_source_multipart_error_bad_path_not_safe_traversing():
+    bad_path = os.path.abspath("data/../chunk2.csv")
+    resource = Resource({"name": "name", "path": ["data/chunk1.csv", bad_path]})
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        resource.read_rows()
+    error = excinfo.value.error
+    assert error.code == "resource-error"
+    assert error.note.count("not safe")
 
 
 @pytest.mark.skip

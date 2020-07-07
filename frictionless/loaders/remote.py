@@ -26,7 +26,7 @@ class RemoteLoader(Loader):
 # Internal
 
 
-class RemoteByteStream(object):
+class RemoteByteStream:
     def __init__(self, source, *, session, timeout):
         self.__source = source
         self.__session = session

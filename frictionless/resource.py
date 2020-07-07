@@ -72,16 +72,31 @@ class Resource(Metadata):
         data = self.get("data")
         return self.metadata_attach("data", data)
 
+    # TODO: rewrite this method
     @cached_property
     def source(self):
         path = self.path
-        if path and not helpers.is_safe_path(path):
-            note = f'path "{path}" is not safe'
-            raise exceptions.FrictionlessException(errors.ResourceError(note=note))
-        if path and not helpers.is_remote_path(path):
-            path = os.path.join(self.basepath, path)
-        source = self.data if self.inline else path
-        return source or []
+        if self.inline:
+            return self.data
+        if not path:
+            return []
+        for path_item in path if isinstance(path, list) else [path]:
+            if not helpers.is_safe_path(path_item):
+                note = f'path "{path_item}" is not safe'
+                raise exceptions.FrictionlessException(errors.ResourceError(note=note))
+        if self.multipart:
+            drop_headers = False
+            if path[0].endswith(".csv"):
+                dialect = dialects.CsvDialect(self.get("dialect"))
+                if dialect.headers["rows"]:
+                    drop_headers = True
+            for index, path_item in enumerate(path):
+                if not helpers.is_remote_path(path_item):
+                    path[index] = os.path.join(self.basepath, path_item)
+            return MultipartSource(path, drop_headers=drop_headers)
+        if not helpers.is_remote_path(path):
+            return os.path.join(self.basepath, path)
+        return path
 
     @cached_property
     def basepath(self):
@@ -108,8 +123,7 @@ class Resource(Metadata):
 
     @cached_property
     def multipart(self):
-        # TODO: implement
-        return False
+        return bool(self.path and isinstance(self.path, list) and len(self.path) >= 2)
 
     @cached_property
     def scheme(self):
@@ -140,6 +154,7 @@ class Resource(Metadata):
     def dialect(self):
         dialect = self.get("dialect")
         if dialect is None:
+            # TODO: metadata_attach re-create it as a ControlledDict
             dialect = self.metadata_attach("dialect", Dialect())
         elif isinstance(dialect, str):
             if not helpers.is_safe_path(dialect):
@@ -152,6 +167,7 @@ class Resource(Metadata):
     def schema(self):
         schema = self.get("schema")
         if schema is None:
+            # TODO: metadata_attach re-create it as a ControlledDict
             schema = self.metadata_attach("schema", Schema())
         elif isinstance(schema, str):
             if not helpers.is_safe_path(schema):
@@ -247,6 +263,7 @@ class Resource(Metadata):
                 pass
             return self.table.stats
         except Exception:
+            # TODO: make loader.ByteStreamWithStatsHandling iterable?
             bytes = True
             byte_stream = self.read_byte_stream()
             while bytes:
@@ -282,10 +299,10 @@ class Resource(Metadata):
 
 
 class MultipartSource:
-    def __init__(self, source, remote=False):
+    def __init__(self, source, *, drop_headers):
         self.__source = source
-        self.__remote = remote
-        self.__rows = self.__iter_rows()
+        self.__drop_headers = drop_headers
+        self.__line_stream = self.read_line_stream()
 
     def __enter__(self):
         return self
@@ -320,27 +337,29 @@ class MultipartSource:
 
     def seek(self, offset):
         assert offset == 0
-        self.__rows = self.__iter_rows()
+        self.__line_stream = self.read_line_stream()
 
     def read(self, size):
         res = b""
         while True:
             try:
-                res += next(self.__rows)
+                res += next(self.__line_stream)
             except StopIteration:
                 break
             if len(res) > size:
                 break
         return res
 
-    def __iter_rows(self):
+    def read_line_stream(self):
         streams = []
-        if self.__remote:
+        if helpers.is_remote_path(self.__source[0]):
             streams = [urlopen(chunk) for chunk in self.__source]
         else:
             streams = [io.open(chunk, "rb") for chunk in self.__source]
-        for stream in streams:
-            for row in stream:
-                if not row.endswith(b"\n"):
-                    row += b"\n"
-                yield row
+        for stream_number, stream in enumerate(streams, start=1):
+            for line_number, line in enumerate(stream, start=1):
+                if not line.endswith(b"\n"):
+                    line += b"\n"
+                if self.__drop_headers and stream_number > 1 and line_number == 1:
+                    continue
+                yield line
