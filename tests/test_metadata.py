@@ -10,5 +10,5 @@ def test_descriptor():
 
 
 def test_descriptor_from_path():
-    metadata = Metadata("data/schema.json")
+    metadata = Metadata("data/schema-valid.json")
     assert metadata["primaryKey"] == "id"

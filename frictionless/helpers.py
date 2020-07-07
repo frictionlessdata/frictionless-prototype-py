@@ -55,15 +55,22 @@ def compile_regex(items):
 
 
 def detect_basepath(descriptor):
+    basepath = ""
     if isinstance(descriptor, str):
-        return os.path.dirname(descriptor)
-    return os.getcwd()
+        basepath = os.path.dirname(descriptor)
+        if not is_remote_path(basepath):
+            basepath = os.path.relpath(basepath, start=os.getcwd())
+    return basepath
 
 
 def ensure_dir(path):
     dirpath = os.path.dirname(path)
     if dirpath and not os.path.exists(dirpath):
         os.makedirs(dirpath)
+
+
+def is_remote_path(path):
+    return urlparse(path).scheme in config.REMOTE_SCHEMES
 
 
 def is_safe_path(path):

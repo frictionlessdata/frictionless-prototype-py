@@ -1,3 +1,4 @@
+import io
 import os
 from .helpers import cached_property
 from .metadata import Metadata
@@ -46,12 +47,42 @@ class Resource(Metadata):
         super().__init__(descriptor)
 
     @cached_property
+    def basepath(self):
+        return self.__basepath
+
+    @cached_property
     def path(self):
         return self.get("path")
 
     @cached_property
-    def basepath(self):
-        return self.__basepath
+    def data(self):
+        data = self.get("data")
+        return self.metadata_attach("data", data)
+
+    @cached_property
+    def source(self):
+        path = self.path
+        if path and not helpers.is_safe_path(path):
+            note = f'path "{path}" is not safe'
+            raise exceptions.FrictionlessException(errors.ResourceError(note=note))
+        if path and not helpers.is_remote_path(path):
+            path = os.path.join(self.basepath, path)
+        source = self.data if self.inline else path
+        return source or []
+
+    @cached_property
+    def inline(self):
+        return "data" in self
+
+    @cached_property
+    def tabular(self):
+        # TODO: implement
+        return True
+
+    @cached_property
+    def multipart(self):
+        # TODO: implement
+        return False
 
     @cached_property
     def scheme(self):
@@ -61,6 +92,7 @@ class Resource(Metadata):
     def format(self):
         return self.get("format")
 
+    # TODO: infer from provided hash
     @cached_property
     def hashing(self):
         return self.get("hashing")
@@ -101,6 +133,10 @@ class Resource(Metadata):
             schema = Schema(os.path.join(self.basepath, schema))
         return schema
 
+    @cached_property
+    def table(self):
+        return self.__table
+
     # Expand
 
     def expand():
@@ -119,12 +155,14 @@ class Resource(Metadata):
         return bytes
 
     def read_byte_stream(self):
+        if self.inline:
+            return io.BytesIO(b"")
         loader = system.create_loader(self.__file)
         loader.open()
         return loader.byte_stream
 
     def read_data(self):
-        data = list(self.read_data_stream)
+        data = list(self.read_data_stream())
         return data
 
     def read_data_stream(self):
@@ -133,13 +171,27 @@ class Resource(Metadata):
                 yield cells
 
     def read_rows(self):
-        rows = list(self.read_row_stream)
+        rows = list(self.read_row_stream())
         return rows
 
     def read_row_stream(self):
         with self.__table as table:
             for row in table.row_stream:
                 yield row
+
+    def read_headers(self):
+        with self.__table as table:
+            return table.headers
+
+    def read_sample(self):
+        with self.__table as table:
+            return table.sample
+
+    def read_stats(self):
+        with self.__table as table:
+            for cells in table:
+                pass
+            return table.stats
 
     # Save
 
@@ -161,7 +213,7 @@ class Resource(Metadata):
 
         # File
         self.__file = File(
-            source=self.path,
+            source=self.source,
             scheme=self.scheme,
             format=self.format,
             hashing=self.hashing,
@@ -172,7 +224,7 @@ class Resource(Metadata):
 
         # Table
         self.__table = Table(
-            self.path,
+            self.source,
             scheme=self.scheme,
             format=self.format,
             hashing=self.hashing,

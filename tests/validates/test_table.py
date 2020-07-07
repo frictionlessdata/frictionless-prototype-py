@@ -392,7 +392,7 @@ def test_validate_schema_extra_headers_and_cells():
 
 def test_validate_schema_multiple_errors():
     source = "data/schema-errors.csv"
-    schema = "data/schema.json"
+    schema = "data/schema-valid.json"
     report = validate(source, schema=schema, pick_errors=["#schema"], limit_errors=3)
     assert report.table.partial
     assert report.table.flatten(["rowPosition", "fieldPosition", "code"]) == [

@@ -1,8 +1,5 @@
 import os
-import json
 import pytest
-from copy import deepcopy
-from mock import Mock, ANY
 from frictionless import Resource, exceptions
 
 
@@ -12,20 +9,48 @@ from frictionless import Resource, exceptions
 BASE_URL = "https://raw.githubusercontent.com/frictionlessdata/datapackage-py/master/%s"
 
 
+def test_resource():
+    resource = Resource(path="data/table.csv")
+    assert resource.basepath == ""
+    assert resource.path == "data/table.csv"
+    assert resource.source == "data/table.csv"
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
+
+
+def test_resource_basepath():
+    resource = Resource(path="table.csv", basepath="data")
+    assert resource.basepath == "data"
+    assert resource.path == "table.csv"
+    assert resource.source == "data/table.csv"
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
+
+
 def test_resource_from_dict():
-    resource = Resource({"name": "name", "path": "path"})
+    resource = Resource({"name": "name", "path": "data/table.csv"})
     assert resource == {
         "name": "name",
-        "path": "path",
+        "path": "data/table.csv",
     }
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
 
 
 def test_resource_from_path():
     resource = Resource("data/resource.json")
-    assert resource == {
-        "name": "name",
-        "path": "path",
-    }
+    assert resource == {"name": "name", "path": "table.csv"}
+    assert resource.basepath == "data"
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
 
 
 def test_resource_from_path_error_bad_path():
@@ -37,16 +62,18 @@ def test_resource_from_path_error_bad_path():
 
 
 @pytest.mark.slow
-def test_resource_from_url():
+def test_resource_from_path_remote():
     resource = Resource(BASE_URL % "data/resource.json")
-    assert resource == {
-        "name": "name",
-        "path": "path",
-    }
+    assert resource.source == BASE_URL % "data/table.csv"
+    assert resource.path == "table.csv"
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
 
 
 @pytest.mark.slow
-def test_resource_from_url_error_bad_path():
+def test_resource_from_path_remote_error_bad_path():
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         Resource(BASE_URL % "data/bad.json")
     error = excinfo.value.error
@@ -54,57 +81,202 @@ def test_resource_from_url_error_bad_path():
     assert error.note.count("bad.json")
 
 
-def test_resource_dereferencing():
+def test_resource_source_path():
+    path = "data/table.csv"
+    resource = Resource({"path": path})
+    assert resource.basepath == ""
+    assert resource.path == path
+    assert resource.data is None
+    assert resource.source == path
+    assert resource.inline is False
+    assert resource.tabular is True
+    assert resource.multipart is False
+    assert (
+        resource.read_bytes()
+        == b"id,name\n1,english\n2,\xe4\xb8\xad\xe5\x9b\xbd\xe4\xba\xba\n"
+    )
+    assert resource.read_data() == [["1", "english"], ["2", "中国人"]]
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
+    assert resource.read_headers() == ["id", "name"]
+    assert resource.read_sample() == [["1", "english"], ["2", "中国人"]]
+    assert resource.read_stats() == {
+        "hash": "6c2c61dd9b0e9c6876139a449ed87933",
+        "bytes": 30,
+        "rows": 2,
+    }
+
+
+@pytest.mark.slow
+def test_resource_source_path_and_basepath_remote():
+    resource = Resource(path="table.csv", basepath=BASE_URL % "data")
+    assert resource.source == BASE_URL % "data/table.csv"
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
+
+
+@pytest.mark.slow
+def test_resource_source_path_remote_and_basepath_remote():
+    resource = Resource(path=BASE_URL % "data/table.csv", basepath=BASE_URL % "data")
+    assert resource.source == BASE_URL % "data/table.csv"
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
+
+
+def test_resource_source_path_error_bad_path():
+    resource = Resource({"name": "name", "path": "table.csv"})
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        resource.read_rows()
+    error = excinfo.value.error
+    assert error.code == "scheme-error"
+    assert error.note == "[Errno 2] No such file or directory: 'table.csv'"
+
+
+def test_resource_source_path_error_bad_path_not_safe_absolute():
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        Resource(path=os.path.abspath("data/table.csv"))
+    error = excinfo.value.error
+    assert error.code == "resource-error"
+    assert error.note.count("data/table.csv")
+
+
+def test_resource_source_path_error_bad_path_not_safe_traversing():
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        Resource(path="data/../data/table.csv")
+    error = excinfo.value.error
+    assert error.code == "resource-error"
+    assert error.note.count("data/table.csv")
+
+
+def test_resource_source_data():
+    data = [["id", "name"], ["1", "english"], ["2", "中国人"]]
+    resource = Resource({"data": data})
+    assert resource.basepath == ""
+    assert resource.path is None
+    assert resource.data == data
+    assert resource.source == data
+    assert resource.inline is True
+    assert resource.tabular is True
+    assert resource.multipart is False
+    assert resource.read_bytes() == b""
+    assert resource.read_data() == data[1:]
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
+    assert resource.read_headers() == ["id", "name"]
+    assert resource.read_sample() == data[1:]
+    assert resource.read_stats() == {
+        "hash": "",
+        "bytes": 0,
+        "rows": 2,
+    }
+
+
+def test_resource_source_path_and_data():
+    data = [["id", "name"], ["1", "english"], ["2", "中国人"]]
+    resource = Resource({"data": data, "path": "path"})
+    assert resource.path == "path"
+    assert resource.data == data
+    assert resource.source == data
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
+
+
+def test_resource_source_no_path_and_no_data():
+    resource = Resource({})
+    assert resource.path is None
+    assert resource.data is None
+    assert resource.source == []
+    assert resource.read_rows() == []
+
+
+def test_resource_source_non_tabular():
+    resource = Resource(path="data/text.txt")
+    assert resource.read_bytes() == b"text\n"
+
+
+# Dialect
+
+
+def test_resource_dialect():
+    dialect = {
+        "delimiter": "|",
+        "quoteChar": "#",
+        "escapeChar": "-",
+        "doubleQuote": False,
+        "skipInitialSpace": False,
+    }
+    descriptor = {
+        "name": "name",
+        "profile": "tabular-data-resource",
+        "path": "dialect.csv",
+        "schema": "resource-schema.json",
+        "dialect": dialect,
+    }
+    resource = Resource(descriptor, basepath="data")
+    assert resource.dialect == dialect
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": " |##"},
+    ]
+
+
+@pytest.mark.skip
+def test_resource_dialect_header_false():
+    dialect = {"header": False}
+    descriptor = {
+        "name": "name",
+        "profile": "tabular-data-resource",
+        "path": "without-headers.csv",
+        "dialect": dialect,
+        "schema": "resource-schema.json",
+    }
+    resource = Resource(descriptor, basepath="data")
+    assert resource.dialect == dialect
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+        {"id": 3, "name": "german"},
+    ]
+
+
+def test_resource_dialect_from_path():
     resource = Resource("data/resource-with-dereferencing.json")
     assert resource == {
         "name": "name",
-        "path": "path",
+        "path": "table.csv",
         "dialect": "dialect.json",
         "schema": "schema.json",
     }
     assert resource.dialect == {
         "delimiter": ";",
     }
-    assert resource.schema == {
-        "fields": [{"name": "id", "type": "integer"}, {"name": "name", "type": "string"}]
-    }
-
-
-def test_resource_dereferencing_basepath():
-    descriptor = {"name": "name", "path": "path", "schema": "schema.json"}
-    resource = Resource(descriptor, basepath="data")
-    assert resource == descriptor
-    assert resource.schema == {
-        "fields": [{"name": "id", "type": "integer"}, {"name": "name", "type": "string"}]
-    }
 
 
 @pytest.mark.slow
-def test_resource_dereferencing_remote():
+def test_resource_dialect_from_path_remote():
     resource = Resource(BASE_URL % "data/resource-with-dereferencing.json")
     assert resource == {
         "name": "name",
-        "path": "path",
+        "path": "table.csv",
         "dialect": "dialect.json",
         "schema": "schema-simple.json",
     }
     assert resource.dialect == {
         "delimiter": ";",
     }
-    assert resource.schema == {
-        "fields": [{"name": "id", "type": "integer"}, {"name": "name", "type": "string"}]
-    }
 
 
-def test_resource_dereferencing_error_bad_path():
-    with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        Resource({"name": "name", "path": "path", "schema": "data/bad.json"})
-    error = excinfo.value.error
-    assert error.code == "schema-error"
-    assert error.note.count("bad.json")
-
-
-def test_resource_dereferencing_error_dialect_not_safe():
+def test_resource_dialect_from_path_error_path_not_safe():
     dialect = os.path.abspath("data/dialect.json")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         Resource({"name": "name", "path": "path", "dialect": dialect})
@@ -113,7 +285,105 @@ def test_resource_dereferencing_error_dialect_not_safe():
     assert error.note.count("dialect.json")
 
 
-def test_resource_dereferencing_error_schema_not_safe():
+# Schema
+
+
+def test_resource_schema():
+    descriptor = {
+        "name": "name",
+        "profile": "tabular-data-resource",
+        "path": "table.csv",
+        "schema": "resource-schema.json",
+    }
+    resource = Resource(descriptor, basepath="data")
+    assert resource.schema == {
+        "fields": [{"name": "id", "type": "integer"}, {"name": "name", "type": "string"}]
+    }
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
+
+
+def test_resource_schema_source_data():
+    descriptor = {
+        "name": "name",
+        "profile": "tabular-data-resource",
+        "data": [["id", "name"], ["1", "english"], ["2", "中国人"]],
+        "schema": "resource-schema.json",
+    }
+    resource = Resource(descriptor, basepath="data")
+    assert resource.schema == {
+        "fields": [{"name": "id", "type": "integer"}, {"name": "name", "type": "string"}]
+    }
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
+
+
+def test_resource_schema_source_remote():
+    descriptor = {
+        "name": "name",
+        "profile": "tabular-data-resource",
+        "path": "table.csv",
+        "schema": "resource_schema.json",
+    }
+    resource = Resource(descriptor, basepath=BASE_URL % "data")
+    assert resource.schema == {
+        "fields": [{"name": "id", "type": "integer"}, {"name": "name", "type": "string"}]
+    }
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
+
+
+def test_resource_schema_from_path():
+    resource = Resource("data/resource-with-dereferencing.json")
+    assert resource == {
+        "name": "name",
+        "path": "table.csv",
+        "dialect": "dialect.json",
+        "schema": "schema.json",
+    }
+    assert resource.schema == {
+        "fields": [{"name": "id", "type": "integer"}, {"name": "name", "type": "string"}]
+    }
+
+
+def test_resource_schema_from_path_with_basepath():
+    descriptor = {"name": "name", "path": "table.csv", "schema": "schema.json"}
+    resource = Resource(descriptor, basepath="data")
+    assert resource == descriptor
+    assert resource.schema == {
+        "fields": [{"name": "id", "type": "integer"}, {"name": "name", "type": "string"}]
+    }
+
+
+@pytest.mark.slow
+def test_resource_schema_from_path_remote():
+    resource = Resource(BASE_URL % "data/resource-with-dereferencing.json")
+    assert resource == {
+        "name": "name",
+        "path": "table.csv",
+        "dialect": "dialect.json",
+        "schema": "schema-simple.json",
+    }
+    assert resource.schema == {
+        "fields": [{"name": "id", "type": "integer"}, {"name": "name", "type": "string"}]
+    }
+
+
+def test_resource_schema_from_path_error_bad_path():
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        Resource({"name": "name", "path": "path", "schema": "data/bad.json"})
+    error = excinfo.value.error
+    assert error.code == "schema-error"
+    assert error.note.count("bad.json")
+
+
+def test_resource_schema_from_path_error_path_not_safe():
     schema = os.path.abspath("data/schema.json")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         Resource({"name": "name", "path": "path", "schema": schema})
@@ -122,200 +392,19 @@ def test_resource_dereferencing_error_schema_not_safe():
     assert error.note.count("schema.json")
 
 
-def test_source_inline():
-    descriptor = {
-        "name": "name",
-        "data": "data",
-        "path": ["path"],
-    }
-    resource = Resource(descriptor)
-    assert resource.source == "data"
-    assert resource.inline == True
+# Table
 
 
-def test_source_local():
-    descriptor = {
-        "name": "name",
-        "path": ["table.csv"],
-    }
-    resource = Resource(descriptor, base_path="data")
-    assert resource.source == "data/table.csv"
-    assert resource.local == True
-
-
-def test_source_local_bad_no_base_path():
-    descriptor = {
-        "name": "name",
-        "path": ["table.csv"],
-    }
-    with pytest.raises(exceptions.DataPackageException):
-        resource = Resource(descriptor, base_path="")
-
-
-def test_source_local_bad_not_safe_absolute():
-    descriptor = {
-        "name": "name",
-        "path": ["/fixtures/table.csv"],
-    }
-    with pytest.raises(exceptions.DataPackageException):
-        resource = Resource(descriptor, base_path="data")
-
-
-def test_source_local_bad_not_safe_traversing():
-    descriptor = {
-        "name": "name",
-        "path": ["../fixtures/table.csv"],
-    }
-    with pytest.raises(exceptions.DataPackageException):
-        resource = Resource(descriptor, base_path="data")
-
-
-def test_source_remote():
-    descriptor = {
-        "name": "name",
-        "path": ["http://example.com/table.csv"],
-    }
-    resource = Resource(descriptor)
-    assert resource.source == "http://example.com/table.csv"
-    assert resource.remote == True
-
-
-def test_source_remote_path_relative_and_base_path_remote():
-    descriptor = {
-        "name": "name",
-        "path": ["table.csv"],
-    }
-    resource = Resource(descriptor, base_path="http://example.com/")
-    assert resource.source == "http://example.com/table.csv"
-    assert resource.remote == True
-
-
-def test_source_remote_path_remote_and_base_path_remote():
-    descriptor = {
-        "name": "name",
-        "path": ["http://example1.com/table.csv"],
-    }
-    resource = Resource(descriptor, base_path="http://example2.com/")
-    assert resource.source == "http://example1.com/table.csv"
-    assert resource.remote == True
-
-
-def test_source_multipart_local():
-    descriptor = {
-        "name": "name",
-        "path": ["chunk1.csv", "chunk2.csv"],
-    }
-    resource = Resource(descriptor, base_path="data")
-    assert resource.source == ["data/chunk1.csv", "data/chunk2.csv"]
-    assert resource.local == True
-    assert resource.multipart == True
-
-
-def test_source_multipart_local_bad_no_base_path():
-    descriptor = {
-        "name": "name",
-        "path": ["chunk1.csv", "chunk2.csv"],
-    }
-    with pytest.raises(exceptions.DataPackageException):
-        resource = Resource(descriptor, base_path="")
-
-
-def test_source_multipart_local_bad_not_safe_absolute():
-    descriptor = {
-        "name": "name",
-        "path": ["/fixtures/chunk1.csv", "chunk2.csv"],
-    }
-    with pytest.raises(exceptions.DataPackageException):
-        resource = Resource(descriptor, base_path="data")
-
-
-def test_source_multipart_local_bad_not_safe_traversing():
-    descriptor = {
-        "name": "name",
-        "path": ["chunk1.csv", "../fixtures/chunk2.csv"],
-    }
-    with pytest.raises(exceptions.DataPackageException):
-        resource = Resource(descriptor, base_path="data")
-
-
-def test_source_multipart_remote():
-    descriptor = {
-        "name": "name",
-        "path": ["http://example.com/chunk1.csv", "http://example.com/chunk2.csv"],
-    }
-    resource = Resource(descriptor)
-    assert resource.source == [
-        "http://example.com/chunk1.csv",
-        "http://example.com/chunk2.csv",
-    ]
-    assert resource.remote == True
-    assert resource.multipart == True
-
-
-def test_source_multipart_remote_path_relative_and_base_path_remote():
-    descriptor = {
-        "name": "name",
-        "path": ["chunk1.csv", "chunk2.csv"],
-    }
-    resource = Resource(descriptor, base_path="http://example.com")
-    assert resource.source == [
-        "http://example.com/chunk1.csv",
-        "http://example.com/chunk2.csv",
-    ]
-    assert resource.remote == True
-    assert resource.multipart == True
-
-
-def test_source_multipart_remote_path_remote_and_base_path_remote():
-    descriptor = {
-        "name": "name",
-        "path": ["chunk1.csv", "http://example2.com/chunk2.csv"],
-    }
-    resource = Resource(descriptor, base_path="http://example1.com")
-    assert resource.source == [
-        "http://example1.com/chunk1.csv",
-        "http://example2.com/chunk2.csv",
-    ]
-    assert resource.remote == True
-    assert resource.multipart == True
-
-
-def test_source_relative_parent_path_with_unsafe_option_issue_171():
-    descriptor = {"path": "data/../data/table.csv"}
-    # unsafe=false (default)
-    with pytest.raises(exceptions.DataPackageException) as excinfo:
-        resource = Resource(descriptor)
-    assert "is not safe" in str(excinfo.value)
-    # unsafe=true
-    resource = Resource(descriptor, unsafe=True)
-    assert resource.read() == [["1", "english"], ["2", "中国人"]]
-
-
-def test_source_multipart_local_infer():
-    descriptor = {"path": ["data/chunk1.csv", "data/chunk2.csv"]}
-    resource = Resource(descriptor)
-    resource.infer()
-    assert resource.descriptor == {
-        "name": "chunk1",
-        "profile": "tabular-data-resource",
-        "path": ["data/chunk1.csv", "data/chunk2.csv"],
-        "format": "csv",
-        "mediatype": "text/csv",
-        "encoding": "utf-8",
-        "schema": {
-            "fields": [
-                {"name": "id", "type": "integer", "format": "default"},
-                {"name": "name", "type": "string", "format": "default"},
-            ],
-            "missingValues": [""],
-        },
-    }
+@pytest.mark.skip
+def test_resource_table():
+    pass
 
 
 # Expand
 
 
-def test_descriptor_expand():
+@pytest.mark.skip
+def test_resource_expand():
     descriptor = {
         "name": "name",
         "data": "data",
@@ -328,12 +417,13 @@ def test_descriptor_expand():
     }
 
 
-def test_descriptor_expand_tabular_schema():
+@pytest.mark.skip
+def test_resource_expand_tabular_schema():
     descriptor = {
         "name": "name",
         "data": "data",
         "profile": "tabular-data-resource",
-        "schema": {"fields": [{"name": "name"}],},
+        "schema": {"fields": [{"name": "name"}]},
     }
     resource = Resource(descriptor)
     assert resource.descriptor == {
@@ -347,12 +437,13 @@ def test_descriptor_expand_tabular_schema():
     }
 
 
-def test_descriptor_expand_tabular_dialect():
+@pytest.mark.skip
+def test_resource_expand_tabular_dialect():
     descriptor = {
         "name": "name",
         "data": "data",
         "profile": "tabular-data-resource",
-        "dialect": {"delimiter": "custom",},
+        "dialect": {"delimiter": "custom"},
     }
     resource = Resource(descriptor)
     assert resource.descriptor == {
@@ -371,63 +462,13 @@ def test_descriptor_expand_tabular_dialect():
     }
 
 
-# Resource.table
+# Infer
 
 
-def test_descriptor_table():
-    descriptor = {
-        "name": "name",
-        "data": "data",
-    }
-    resource = Resource(descriptor)
-    assert resource.table is None
+# Multipart
 
 
-def test_descriptor_table_tabular_inline():
-    descriptor = {
-        "name": "name",
-        "profile": "tabular-data-resource",
-        "data": [["id", "name"], ["1", "english"], ["2", "中国人"],],
-        "schema": "resource_schema.json",
-    }
-    resource = Resource(descriptor, base_path="data")
-    assert resource.table.read(keyed=True) == [
-        {"id": 1, "name": "english"},
-        {"id": 2, "name": "中国人"},
-    ]
-
-
-def test_descriptor_table_tabular_local():
-    descriptor = {
-        "name": "name",
-        "profile": "tabular-data-resource",
-        "path": ["resource_data.csv"],
-        "schema": "resource_schema.json",
-    }
-    resource = Resource(descriptor, base_path="data")
-    assert resource.table.read(keyed=True) == [
-        {"id": 1, "name": "english"},
-        {"id": 2, "name": "中国人"},
-    ]
-
-
-def test_descriptor_table_tabular_remote(patch_get):
-    descriptor = {
-        "name": "name",
-        "profile": "tabular-data-resource",
-        "path": ["http://example.com/resource_data.csv"],
-        "schema": "resource_schema.json",
-    }
-    # Mocks
-    patch_get("http://example.com/resource_data.csv", body="id,name\n1,english\n2,中国人")
-    # Tests
-    resource = Resource(descriptor, base_path="data")
-    assert resource.table.read(keyed=True) == [
-        {"id": 1, "name": "english"},
-        {"id": 2, "name": "中国人"},
-    ]
-
-
+@pytest.mark.skip
 def test_descriptor_table_tabular_multipart_local():
     descriptor = {
         "name": "name",
@@ -442,6 +483,7 @@ def test_descriptor_table_tabular_multipart_local():
     ]
 
 
+@pytest.mark.skip
 def test_descriptor_table_tabular_multipart_remote(patch_get):
     descriptor = {
         "name": "name",
@@ -465,272 +507,131 @@ def test_descriptor_table_tabular_multipart_remote(patch_get):
     ]
 
 
-def test_descriptor_table_tabular_skip_rows():
+@pytest.mark.skip
+def test_source_multipart_local():
     descriptor = {
         "name": "name",
-        "profile": "tabular-data-resource",
-        "path": ["resource_data.csv"],
-        "schema": "resource_schema.json",
-        "skipRows": [2],
+        "path": ["chunk1.csv", "chunk2.csv"],
     }
     resource = Resource(descriptor, base_path="data")
-    assert resource.table.read(keyed=True) == [
-        {"id": 2, "name": "中国人"},
-    ]
+    assert resource.source == ["data/chunk1.csv", "data/chunk2.csv"]
+    assert resource.local is True
+    assert resource.multipart is True
 
 
-def test_resource_options_skip_rows():
+@pytest.mark.skip
+def test_source_multipart_local_bad_no_base_path():
     descriptor = {
         "name": "name",
-        "profile": "tabular-data-resource",
-        "path": ["resource_data.csv"],
-        "schema": "resource_schema.json",
+        "path": ["chunk1.csv", "chunk2.csv"],
     }
-    resource = Resource(descriptor, base_path="data", skip_rows=[2])
-    assert resource.table.read(keyed=True) == [
-        {"id": 2, "name": "中国人"},
-    ]
+    with pytest.raises(exceptions.DataPackageException):
+        Resource(descriptor, base_path="")
 
 
-def test_resource_options_skip_rows_in_descriptor():
+@pytest.mark.skip
+def test_source_multipart_local_bad_not_safe_absolute():
     descriptor = {
         "name": "name",
-        "profile": "tabular-data-resource",
-        "path": "resource_data.csv",
-        "schema": "resource_schema.json",
-        "skipRows": [2],
+        "path": ["/fixtures/chunk1.csv", "chunk2.csv"],
     }
-    resource = Resource(descriptor, base_path="data")
-    assert resource.table.read(keyed=True) == [
-        {"id": 2, "name": "中国人"},
-    ]
+    with pytest.raises(exceptions.DataPackageException):
+        Resource(descriptor, base_path="data")
 
 
-def test_descriptor_table_tabular_dialect_custom():
+@pytest.mark.skip
+def test_source_multipart_local_bad_not_safe_traversing():
     descriptor = {
         "name": "name",
+        "path": ["chunk1.csv", "../fixtures/chunk2.csv"],
+    }
+    with pytest.raises(exceptions.DataPackageException):
+        Resource(descriptor, base_path="data")
+
+
+@pytest.mark.skip
+def test_source_multipart_remote():
+    descriptor = {
+        "name": "name",
+        "path": ["http://example.com/chunk1.csv", "http://example.com/chunk2.csv"],
+    }
+    resource = Resource(descriptor)
+    assert resource.source == [
+        "http://example.com/chunk1.csv",
+        "http://example.com/chunk2.csv",
+    ]
+    assert resource.remote is True
+    assert resource.multipart is True
+
+
+@pytest.mark.skip
+def test_source_multipart_remote_path_relative_and_base_path_remote():
+    descriptor = {
+        "name": "name",
+        "path": ["chunk1.csv", "chunk2.csv"],
+    }
+    resource = Resource(descriptor, base_path="http://example.com")
+    assert resource.source == [
+        "http://example.com/chunk1.csv",
+        "http://example.com/chunk2.csv",
+    ]
+    assert resource.remote is True
+    assert resource.multipart is True
+
+
+@pytest.mark.skip
+def test_source_multipart_remote_path_remote_and_base_path_remote():
+    descriptor = {
+        "name": "name",
+        "path": ["chunk1.csv", "http://example2.com/chunk2.csv"],
+    }
+    resource = Resource(descriptor, base_path="http://example1.com")
+    assert resource.source == [
+        "http://example1.com/chunk1.csv",
+        "http://example2.com/chunk2.csv",
+    ]
+    assert resource.remote is True
+    assert resource.multipart is True
+
+
+@pytest.mark.skip
+def test_source_multipart_local_infer():
+    descriptor = {"path": ["data/chunk1.csv", "data/chunk2.csv"]}
+    resource = Resource(descriptor)
+    resource.infer()
+    assert resource.descriptor == {
+        "name": "chunk1",
         "profile": "tabular-data-resource",
-        "path": ["dialect.csv"],
-        "schema": "resource_schema.json",
-        "dialect": {
-            "delimiter": "|",
-            "quoteChar": "#",
-            "escapeChar": "-",
-            "doubleQuote": False,
-            "skipInitialSpace": False,
+        "path": ["data/chunk1.csv", "data/chunk2.csv"],
+        "format": "csv",
+        "mediatype": "text/csv",
+        "encoding": "utf-8",
+        "schema": {
+            "fields": [
+                {"name": "id", "type": "integer", "format": "default"},
+                {"name": "name", "type": "string", "format": "default"},
+            ],
+            "missingValues": [""],
         },
     }
-    resource = Resource(descriptor, base_path="data")
-    assert resource.table.read(keyed=True) == [
-        {"id": 1, "name": "english"},
-        {"id": 2, "name": " |##"},
-    ]
-
-
-def test_descriptor_table_tabular_dialect_header_false():
-    descriptor = {
-        "name": "name",
-        "profile": "tabular-data-resource",
-        "path": ["chunk2.csv"],
-        "schema": "resource_schema.json",
-        "dialect": {"header": False},
-    }
-    resource = Resource(descriptor, base_path="data")
-    assert resource.table.read(keyed=True) == [
-        {"id": 2, "name": "中国人"},
-    ]
-
-
-# Resource table options
-def test_resource_table_options(patch_get):
-    descriptor = {
-        "name": "name",
-        "profile": "tabular-data-resource",
-        "path": ["http://example.com/resource_data.csv"],
-        "schema": "resource_schema.json",
-    }
-    # Mocks
-    patch_get(
-        "http://example.com/resource_data.csv", body="\n\nid,name\n1,english\n2,中国人"
-    )
-    # Tests
-    resource = Resource(descriptor, base_path="data", headers=3)
-    assert resource.table.read(keyed=True) == [
-        {"id": 1, "name": "english"},
-        {"id": 2, "name": "中国人"},
-    ]
-
-
-# Resource.raw_iter/read
-
-
-def test_raw_iter():
-    resource = Resource({"path": "data/foo.txt"})
-    with resource.raw_iter() as filelike:
-        assert list(filelike) == [b"foo\n"]
-
-
-def test_raw_read():
-    resource = Resource({"path": "data/foo.txt"})
-    assert resource.raw_read() == b"foo\n"
-
-
-# Storage
-
-
-def test_load_data_from_storage():
-    SCHEMA = {
-        "fields": [{"format": "default", "name": "id", "type": "integer"}],
-        "missingValues": [""],
-    }
-    storage = Mock(
-        buckets=["data"],
-        describe=lambda bucket: {"fields": [{"name": "id", "type": "integer"}]},
-        iter=lambda bucket: [[1], [2], [3]],
-        spec=Storage,
-    )
-    resource = Resource({"path": "data"}, storage=storage)
-    resource.infer(confidence=0.8)
-    assert resource.descriptor == {
-        "name": "data",
-        "path": "data",
-        "profile": "tabular-data-resource",
-        "schema": SCHEMA,
-    }
-    assert resource.headers == ["id"]
-    assert resource.read() == [[1], [2], [3]]
-
-
-def test_save_data_to_storage():
-    SCHEMA = {
-        "fields": [{"format": "default", "name": "id", "type": "integer"}],
-        "missingValues": [""],
-    }
-    storage = Mock(spec=Storage)
-    resource = Resource({"data": [["id"], [1], [2], [3]]})
-    resource.save("data", storage=storage)
-    storage.create.assert_called_with("data", SCHEMA, force=True)
-    storage.write.assert_called_with("data", ANY)
-
-
-# TODO: use a self-removing directory
-def test_save_data_to_json():
-    resource = Resource({"data": [["id"], [1], [2], [3]]})
-    resource.save("tmp/data.json")
-    with open("tmp/data.json", "r") as test_file:
-        assert json.loads(test_file.read()) == {
-            "data": [["id"], [1], [2], [3]],
-            "profile": "data-resource",
-        }
-
-
-# TODO: use a self-removing directory
-def test_save_data_to_json_base_path():
-    resource = Resource({"data": [["id"], [1], [2], [3]]}, base_path="tmp")
-    resource.save("data.json", to_base_path=True)
-    with open("tmp/data.json", "r") as test_file:
-        assert json.loads(test_file.read()) == {
-            "data": [["id"], [1], [2], [3]],
-            "profile": "data-resource",
-        }
-
-
-# Integrity
-
-DESCRIPTOR = {
-    "name": "data.csv",
-    "path": "data/data.csv",
-    "bytes": 63,
-    "hash": "sha256:328adab247692a1a405e83c2625d52e366389eabf8a1824931187877e8644774",
-}
-
-
-def test_read_integrity():
-    descriptor = deepcopy(DESCRIPTOR)
-    resource = Resource(descriptor)
-    resource.read(integrity=True)
-    assert True
-
-
-def test_read_integrity_error():
-    descriptor = deepcopy(DESCRIPTOR)
-    descriptor["bytes"] += 1
-    descriptor["hash"] += "a"
-    resource = Resource(descriptor)
-    with pytest.raises(exceptions.IntegrityError) as excinfo:
-        resource.read(integrity=True)
-    assert str(DESCRIPTOR["bytes"]) in str(excinfo.value)
-    assert DESCRIPTOR["hash"].replace("sha256:", "") in str(excinfo.value)
-
-
-def test_read_integrity_size():
-    descriptor = deepcopy(DESCRIPTOR)
-    descriptor["hash"] = None
-    resource = Resource(descriptor)
-    resource.read(integrity=True)
-    assert True
-
-
-def test_read_integrity_size_error():
-    descriptor = deepcopy(DESCRIPTOR)
-    descriptor["bytes"] += 1
-    descriptor["hash"] = None
-    resource = Resource(descriptor)
-    with pytest.raises(exceptions.IntegrityError) as excinfo:
-        resource.read(integrity=True)
-    assert str(DESCRIPTOR["bytes"]) in str(excinfo.value)
-
-
-def test_read_integrity_hash():
-    descriptor = deepcopy(DESCRIPTOR)
-    descriptor["bytes"] = None
-    resource = Resource(descriptor)
-    resource.read(integrity=True)
-    assert True
-
-
-def test_read_integrity_hash_error():
-    descriptor = deepcopy(DESCRIPTOR)
-    descriptor["bytes"] = None
-    descriptor["hash"] += "a"
-    resource = Resource(descriptor)
-    with pytest.raises(exceptions.IntegrityError) as excinfo:
-        resource.read(integrity=True)
-    assert DESCRIPTOR["hash"].replace("sha256:", "") in str(excinfo.value)
-
-
-def test_check_integrity():
-    descriptor = deepcopy(DESCRIPTOR)
-    resource = Resource(descriptor)
-    assert resource.check_integrity()
-
-
-def test_check_integrity_error():
-    descriptor = deepcopy(DESCRIPTOR)
-    descriptor["bytes"] += 1
-    descriptor["hash"] += "a"
-    resource = Resource(descriptor)
-    with pytest.raises(exceptions.IntegrityError) as excinfo:
-        resource.check_integrity()
-    assert str(DESCRIPTOR["bytes"]) in str(excinfo.value)
-    assert DESCRIPTOR["hash"].replace("sha256:", "") in str(excinfo.value)
-
-
-# Deprecated
-
-
-def test_data():
-    resource = Resource({"path": "data/cities.tsv"})
-    assert resource.data[0:3] == [
-        {"Area": "1807.92", "Name": "Acrelândia", "Population": "12538", "State": "AC"},
-        {"Area": "186.53", "Name": "Boca da Mata", "Population": "25776", "State": "AL"},
-        {"Area": "242.62", "Name": "Capela", "Population": "17077", "State": "AL"},
-    ]
 
 
 # Issues
 
 
+@pytest.mark.skip
+def test_source_relative_parent_path_with_unsafe_option_issue_171():
+    descriptor = {"path": "data/../data/table.csv"}
+    # unsafe=false (default)
+    with pytest.raises(exceptions.DataPackageException) as excinfo:
+        resource = Resource(descriptor)
+    assert "is not safe" in str(excinfo.value)
+    # unsafe=true
+    resource = Resource(descriptor, unsafe=True)
+    assert resource.read() == [["1", "english"], ["2", "中国人"]]
+
+
+@pytest.mark.skip
 def test_preserve_resource_format_from_descriptor_on_infer_issue_188():
     resource = Resource({"path": "data/data.csvformat", "format": "csv"})
     assert resource.infer() == {

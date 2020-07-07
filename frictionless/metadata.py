@@ -5,12 +5,10 @@ import jsonschema
 from copy import deepcopy
 from operator import setitem
 from functools import partial
-from urllib.parse import urlparse
 from importlib import import_module
 from .helpers import cached_property
 from . import exceptions
 from . import helpers
-from . import config
 
 
 class Metadata(helpers.ControlledDict):
@@ -90,7 +88,7 @@ class Metadata(helpers.ControlledDict):
             if isinstance(descriptor, dict):
                 return deepcopy(descriptor) if duplicate else descriptor
             if isinstance(descriptor, str):
-                if urlparse(descriptor).scheme in config.REMOTE_SCHEMES:
+                if helpers.is_remote_path(descriptor):
                     response = requests.get(descriptor)
                     response.raise_for_status()
                     return response.json()
