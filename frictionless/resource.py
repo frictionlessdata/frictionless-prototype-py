@@ -19,6 +19,18 @@ class Resource(Metadata):
     # TODO: make profile a property
     metadata_Error = errors.ResourceError
     metadata_profile = config.RESOURCE_PROFILE
+    metadata_setters = {
+        "path": "path",
+        "data": "data",
+        "scheme": "scheme",
+        "format": "format",
+        "hashing": "hashing",
+        "encoding": "encoding",
+        "compression": "compression",
+        "compression_path": "compressionPath",
+        "dialect": "dialect",
+        "schema": "schema",
+    }
 
     def __init__(
         self,
@@ -38,6 +50,7 @@ class Resource(Metadata):
     ):
         self.setinitial("path", path)
         self.setinitial("data", data)
+        self.setinitial("scheme", scheme)
         self.setinitial("format", format)
         self.setinitial("hashing", hashing)
         self.setinitial("encoding", encoding)
@@ -84,7 +97,13 @@ class Resource(Metadata):
 
     @cached_property
     def tabular(self):
-        # TODO: implement
+        try:
+            self.table.open()
+        except Exception as exception:
+            if exception.error.code == "format-error":
+                return False
+        except Exception:
+            pass
         return True
 
     @cached_property
@@ -165,6 +184,7 @@ class Resource(Metadata):
             encoding=self.encoding,
             compression=self.compression,
             compression_path=self.compression_path,
+            stats={"hash": "", "bytes": 0, "rows": 0},
         )
 
     # Expand
@@ -222,10 +242,16 @@ class Resource(Metadata):
             return table.sample
 
     def read_stats(self):
-        with self.table as table:
-            for cells in table:
+        try:
+            for cells in self.read_data_stream():
                 pass
-            return table.stats
+            return self.table.stats
+        except Exception:
+            bytes = True
+            byte_stream = self.read_byte_stream()
+            while bytes:
+                bytes = byte_stream.read1(io.DEFAULT_BUFFER_SIZE)
+            return self.__file.stats
 
     # Save
 

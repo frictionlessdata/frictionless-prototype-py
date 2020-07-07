@@ -426,15 +426,6 @@ def test_resource_table_source_remote():
         ]
 
 
-def test_resource_table_source_non_tabular():
-    resource = Resource(path="data/text.txt")
-    with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        resource.table.open()
-    error = excinfo.value.error
-    assert error.code == "format-error"
-    assert error.note == 'cannot create parser "txt". Try installing "frictionless-txt"'
-
-
 # Expand
 
 
@@ -652,9 +643,58 @@ def test_source_multipart_local_infer():
 
 
 def test_resource_source_non_tabular():
-    resource = Resource(path="data/text.txt")
-    # TODO: test all the props
+    path = "data/text.txt"
+    resource = Resource(path=path)
+    assert resource.basepath == ""
+    assert resource.path == path
+    assert resource.data is None
+    assert resource.source == path
+    assert resource.inline is False
+    assert resource.tabular is False
+    assert resource.multipart is False
     assert resource.read_bytes() == b"text\n"
+    assert resource.read_stats() == {
+        "hash": "e1cbb0c3879af8347246f12c559a86b5",
+        "bytes": 5,
+        "rows": 0,
+    }
+
+
+@pytest.mark.slow
+def test_resource_source_non_tabular_remote():
+    path = BASE_URL % "data/foo.txt"
+    resource = Resource(path=path)
+    assert resource.basepath == ""
+    assert resource.path == path
+    assert resource.data is None
+    assert resource.source == path
+    assert resource.inline is False
+    assert resource.tabular is False
+    assert resource.multipart is False
+    assert resource.read_bytes() == b"foo\n"
+    assert resource.read_stats() == {
+        "hash": "d3b07384d113edec49eaa6238ad5ff00",
+        "bytes": 4,
+        "rows": 0,
+    }
+
+
+def test_resource_source_non_tabular_error_bad_path():
+    resource = Resource(path="data/bad.txt")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        resource.read_bytes()
+    error = excinfo.value.error
+    assert error.code == "scheme-error"
+    assert error.note.count("data/bad.txt")
+
+
+def test_resource_source_non_tabular_table():
+    resource = Resource(path="data/text.txt")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        resource.table.open()
+    error = excinfo.value.error
+    assert error.code == "format-error"
+    assert error.note == 'cannot create parser "txt". Try installing "frictionless-txt"'
 
 
 # Issues
