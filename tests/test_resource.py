@@ -438,75 +438,63 @@ def test_resource_table_source_non_tabular():
 # Expand
 
 
-@pytest.mark.skip
 def test_resource_expand():
-    descriptor = {
+    resource = Resource({"name": "name", "path": "data/table.csv"})
+    resource.expand()
+    assert resource == {
         "name": "name",
-        "data": "data",
-    }
-    resource = Resource(descriptor)
-    assert resource.descriptor == {
-        "name": "name",
-        "data": "data",
+        "path": "data/table.csv",
         "profile": "data-resource",
     }
 
 
-@pytest.mark.skip
-def test_resource_expand_tabular_schema():
-    descriptor = {
+def test_resource_expand_with_dialect():
+    dialect = {"delimiter": "custom"}
+    resource = Resource({"name": "name", "path": "data/table.csv", "dialect": dialect})
+    resource.expand()
+    assert resource == {
         "name": "name",
-        "data": "data",
-        "profile": "tabular-data-resource",
-        "schema": {"fields": [{"name": "name"}]},
-    }
-    resource = Resource(descriptor)
-    assert resource.descriptor == {
-        "name": "name",
-        "data": "data",
-        "profile": "tabular-data-resource",
-        "schema": {
-            "fields": [{"name": "name", "type": "string", "format": "default"}],
-            "missingValues": [""],
+        "path": "data/table.csv",
+        "profile": "data-resource",
+        "dialect": {
+            "headers": {"join": " ", "rows": [1]},
+            "delimiter": "custom",
+            "lineTerminator": "\r\n",
+            "doubleQuote": True,
+            "quoteChar": '"',
+            "skipInitialSpace": True,
+            "caseSensitiveHeader": False,
+            "header": True,
         },
     }
 
 
-@pytest.mark.skip
-def test_resource_expand_tabular_dialect():
-    descriptor = {
-        "name": "name",
-        "data": "data",
-        "profile": "tabular-data-resource",
-        "dialect": {"delimiter": "custom"},
+def test_resource_expand_with_schema():
+    schema = {
+        "fields": [
+            {"name": "id", "type": "integer"},
+            {"name": "name", "type": "string"},
+        ],
     }
-    resource = Resource(descriptor)
-    assert resource.descriptor == {
+    resource = Resource({"name": "name", "path": "data/table.csv", "schema": schema})
+    resource.expand()
+    assert resource == {
         "name": "name",
-        "data": "data",
-        "profile": "tabular-data-resource",
-        "dialect": {
-            "delimiter": "custom",
-            "doubleQuote": True,
-            "lineTerminator": "\r\n",
-            "quoteChar": '"',
-            "skipInitialSpace": True,
-            "header": True,
-            "caseSensitiveHeader": False,
+        "path": "data/table.csv",
+        "profile": "data-resource",
+        "schema": {
+            "fields": [
+                {"name": "id", "type": "integer", "format": "default"},
+                {"name": "name", "type": "string", "format": "default"},
+            ],
+            "missingValues": [""],
         },
     }
 
 
 # Infer
 
-
-# Non-tabular
-
-
-def test_resource_source_non_tabular():
-    resource = Resource(path="data/text.txt")
-    # TODO: test all the props
-    assert resource.read_bytes() == b"text\n"
+# Save
 
 
 # Multipart
@@ -658,6 +646,15 @@ def test_source_multipart_local_infer():
             "missingValues": [""],
         },
     }
+
+
+# Non-tabular
+
+
+def test_resource_source_non_tabular():
+    resource = Resource(path="data/text.txt")
+    # TODO: test all the props
+    assert resource.read_bytes() == b"text\n"
 
 
 # Issues

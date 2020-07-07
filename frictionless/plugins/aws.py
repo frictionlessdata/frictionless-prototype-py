@@ -77,7 +77,7 @@ class S3Control(Control):
     # Expand
 
     def expand(self):
-        self.setdetault("endpointUrl", self.endpoint_url)
+        self.setdefault("endpointUrl", self.endpoint_url)
 
 
 # Internal

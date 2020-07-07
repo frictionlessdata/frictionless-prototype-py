@@ -89,4 +89,4 @@ class HtmlDialect(Dialect):
 
     def expand(self):
         super().expand()
-        self.setdetault("selector", self.selector)
+        self.setdefault("selector", self.selector)

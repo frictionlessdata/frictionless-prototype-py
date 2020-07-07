@@ -1,5 +1,6 @@
 import io
 import os
+from urllib.request import urlopen
 from .helpers import cached_property
 from .metadata import Metadata
 from .dialects import Dialect
@@ -8,6 +9,7 @@ from .system import system
 from .table import Table
 from .file import File
 from . import exceptions
+from . import dialects
 from . import helpers
 from . import errors
 from . import config
@@ -49,10 +51,6 @@ class Resource(Metadata):
         super().__init__(descriptor)
 
     @cached_property
-    def basepath(self):
-        return self.__basepath
-
-    @cached_property
     def path(self):
         return self.get("path")
 
@@ -71,6 +69,14 @@ class Resource(Metadata):
             path = os.path.join(self.basepath, path)
         source = self.data if self.inline else path
         return source or []
+
+    @cached_property
+    def basepath(self):
+        return self.__basepath
+
+    @cached_property
+    def profile(self):
+        return self.get("profile")
 
     @cached_property
     def inline(self):
@@ -163,8 +169,12 @@ class Resource(Metadata):
 
     # Expand
 
-    def expand():
-        pass
+    def expand(self):
+        self.setdefault("profile", config.DEFAULT_RESOURCE_PROFILE)
+        if "dialect" in self:
+            self.dialect.expand()
+        if "schema" in self:
+            self.schema.expand()
 
     # Infer
 
@@ -226,7 +236,9 @@ class Resource(Metadata):
         # Dialect
         dialect = self.get("dialect")
         if not isinstance(dialect, (str, type(None), Dialect)):
-            dialect = Dialect(dialect)
+            # TODO: rebase on proper system.create_dialect
+            Class = dialects.CsvDialect if "delimiter" in dialect else Dialect
+            dialect = Class(dialect)
             dict.__setitem__(self, "dialect", dialect)
 
         # Schema
@@ -234,3 +246,71 @@ class Resource(Metadata):
         if not isinstance(schema, (str, type(None), Schema)):
             schema = Schema(schema)
             dict.__setitem__(self, "schema", schema)
+
+
+# Internal
+
+
+class MultipartSource:
+    def __init__(self, source, remote=False):
+        self.__source = source
+        self.__remote = remote
+        self.__rows = self.__iter_rows()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        pass
+
+    def __iter__(self):
+        return self.__rows
+
+    @property
+    def closed(self):
+        return False
+
+    def readable(self):
+        return True
+
+    def seekable(self):
+        return True
+
+    def writable(self):
+        return False
+
+    def close(self):
+        pass
+
+    def flush(self):
+        pass
+
+    def read1(self, size):
+        return self.read(size)
+
+    def seek(self, offset):
+        assert offset == 0
+        self.__rows = self.__iter_rows()
+
+    def read(self, size):
+        res = b""
+        while True:
+            try:
+                res += next(self.__rows)
+            except StopIteration:
+                break
+            if len(res) > size:
+                break
+        return res
+
+    def __iter_rows(self):
+        streams = []
+        if self.__remote:
+            streams = [urlopen(chunk) for chunk in self.__source]
+        else:
+            streams = [io.open(chunk, "rb") for chunk in self.__source]
+        for stream in streams:
+            for row in stream:
+                if not row.endswith(b"\n"):
+                    row += b"\n"
+                yield row

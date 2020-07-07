@@ -105,4 +105,4 @@ class OdsDialect(Dialect):
 
     def expand(self):
         super().expand()
-        self.setdetault("sheet", self.sheet)
+        self.setdefault("sheet", self.sheet)

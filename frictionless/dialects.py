@@ -43,7 +43,7 @@ class Dialect(Metadata):
     # Expand
 
     def expand(self):
-        self.setdetault("headers", self.headers)
+        self.setdefault("headers", self.headers)
 
 
 class CsvDialect(Dialect):
@@ -181,13 +181,13 @@ class CsvDialect(Dialect):
 
     def expand(self):
         super().expand()
-        self.setdetault("delimiter", self.delimiter)
-        self.setdetault("lineTerminator", self.line_terminator)
-        self.setdetault("quoteChar", self.quote_char)
-        self.setdetault("doubleQuote", self.double_quote)
-        self.setdetault("skipInitialSpace", self.skip_initial_space)
-        self.setdetault("header", self.header)
-        self.setdetault("caseSensitiveHeader", self.case_sensitive_header)
+        self.setdefault("delimiter", self.delimiter)
+        self.setdefault("lineTerminator", self.line_terminator)
+        self.setdefault("quoteChar", self.quote_char)
+        self.setdefault("doubleQuote", self.double_quote)
+        self.setdefault("skipInitialSpace", self.skip_initial_space)
+        self.setdefault("header", self.header)
+        self.setdefault("caseSensitiveHeader", self.case_sensitive_header)
 
 
 class ExcelDialect(Dialect):
@@ -261,10 +261,10 @@ class ExcelDialect(Dialect):
 
     def expand(self):
         super().expand()
-        self.setdetault("sheet", self.sheet)
-        self.setdetault("fillMergedCells", self.fill_merged_cells)
-        self.setdetault("preserveFormatting", self.preserve_formatting)
-        self.setdetault("adjustFloatingPointError", self.adjust_floating_point_error)
+        self.setdefault("sheet", self.sheet)
+        self.setdefault("fillMergedCells", self.fill_merged_cells)
+        self.setdefault("preserveFormatting", self.preserve_formatting)
+        self.setdefault("adjustFloatingPointError", self.adjust_floating_point_error)
 
 
 class InlineDialect(Dialect):
@@ -305,7 +305,7 @@ class InlineDialect(Dialect):
     # Expand
 
     def expand(self):
-        self.setdetault("keyed", self.keyed)
+        self.setdefault("keyed", self.keyed)
 
 
 class JsonDialect(Dialect):
@@ -356,4 +356,4 @@ class JsonDialect(Dialect):
 
     def expand(self):
         super().expand()
-        self.setdetault("keyed", self.keyed)
+        self.setdefault("keyed", self.keyed)

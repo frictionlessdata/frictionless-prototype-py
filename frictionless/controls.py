@@ -116,8 +116,8 @@ class RemoteControl(Control):
 
     def expand(self):
         super().expand()
-        self.setdetault("httpPreload", self.http_preload)
-        self.setdetault("httpTimeout", self.http_timeout)
+        self.setdefault("httpPreload", self.http_preload)
+        self.setdefault("httpTimeout", self.http_timeout)
 
 
 class StreamControl(Control):
