@@ -6,7 +6,7 @@ from .table import validate_table
 
 
 @Report.from_validate
-def validate_resource(source, base_path=None, exact=False, lookup=None, **options):
+def validate_resource(source, base_path=None, noinfer=False, lookup=None, **options):
     """Validate resource
     """
 
@@ -24,7 +24,7 @@ def validate_resource(source, base_path=None, exact=False, lookup=None, **option
     for stage in [1, 2]:
         errors = []
         if stage == 1:
-            if not exact:
+            if not noinfer:
                 continue
         if stage == 2:
             try:

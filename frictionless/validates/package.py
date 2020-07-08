@@ -7,7 +7,7 @@ from .inquiry import validate_inquiry
 
 
 @Report.from_validate
-def validate_package(source, base_path=None, exact=False, **options):
+def validate_package(source, base_path=None, noinfer=False, **options):
     """Validate package
     """
 
@@ -25,7 +25,7 @@ def validate_package(source, base_path=None, exact=False, **options):
     for stage in [1, 2]:
         errors = []
         if stage == 1:
-            if not exact:
+            if not noinfer:
                 continue
         if stage == 2:
             try:
@@ -49,7 +49,7 @@ def validate_package(source, base_path=None, exact=False, **options):
                 **options,
                 source=resource.descriptor,
                 base_path=package.base_path,
-                exact=exact,
+                noinfer=noinfer,
                 lookup=lookup,
             )
         )
