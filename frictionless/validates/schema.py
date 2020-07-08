@@ -1,7 +1,6 @@
 from .. import helpers
 from ..report import Report
 from ..schema import Schema
-from ..errors import SchemaError
 from .. import exceptions
 
 
@@ -17,13 +16,7 @@ def validate_schema(source):
     try:
         schema = Schema(source)
     except exceptions.FrictionlessException as exception:
-        error = SchemaError(note=str(exception))
-        return Report(time=timer.time, errors=[error], tables=[])
-
-    # Validate schema
-    errors = []
-    for error in schema.metadata_errors:
-        errors.append(error)
+        return Report(time=timer.time, errors=[exception.error], tables=[])
 
     # Return report
-    return Report(time=timer.time, errors=errors, tables=[])
+    return Report(time=timer.time, errors=schema.metadata_errors, tables=[])

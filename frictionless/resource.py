@@ -49,6 +49,7 @@ class Resource(Metadata):
         schema=None,
         basepath=None,
     ):
+        # Set attributes
         self.setinitial("name", name)
         self.setinitial("path", path)
         self.setinitial("data", data)
@@ -60,10 +61,13 @@ class Resource(Metadata):
         self.setinitial("compressionPath", compression_path)
         self.setinitial("dialect", dialect)
         self.setinitial("schema", schema)
-        self.__basepath = basepath
-        if basepath is None:
-            self.__basepath = helpers.detect_basepath(descriptor)
+        self.__basepath = basepath or helpers.detect_basepath(descriptor)
         super().__init__(descriptor)
+
+        # Set hashing
+        hashing, hash = helpers.parse_resource_hash(self.get("hash"))
+        if hashing != config.DEFAULT_HASHING:
+            self["hashing"] = hashing
 
     @cached_property
     def name(self):
@@ -157,6 +161,17 @@ class Resource(Metadata):
         return self.get("compressionPath")
 
     @cached_property
+    def stats(self):
+        stats = {}
+        for name in ["hash", "bytes", "rows"]:
+            value = self.get(name)
+            if value is not None:
+                if name == "hash":
+                    value = helpers.parse_resource_hash(value)[1]
+                stats[name] = value
+        return stats
+
+    @cached_property
     def dialect(self):
         dialect = self.get("dialect")
         if dialect is None:
@@ -248,11 +263,10 @@ class Resource(Metadata):
 
         # Update hashing
         if patch["hashing"] != config.DEFAULT_HASHING:
-            patch["hash"] = ":".join(patch["hashing"], patch["hash"])
+            patch["hash"] = ":".join([patch["hashing"], patch["hash"]])
 
         # Apply/expand
         self.update(patch)
-        self.expand()
 
     # Read
 

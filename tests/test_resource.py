@@ -549,12 +549,12 @@ def test_resource_infer():
     resource.infer()
     assert resource.metadata_valid
     assert resource == {
-        "name": "table",
         "path": "data/table.csv",
         "hash": "6c2c61dd9b0e9c6876139a449ed87933",
         "bytes": 30,
         "rows": 2,
         "profile": "tabular-data-resource",
+        "name": "table",
         "scheme": "file",
         "format": "csv",
         "hashing": "md5",
@@ -566,16 +566,12 @@ def test_resource_infer():
             "doubleQuote": True,
             "quoteChar": '"',
             "skipInitialSpace": False,
-            "headers": {"rows": [1], "join": " "},
-            "header": True,
-            "caseSensitiveHeader": False,
         },
         "schema": {
             "fields": [
-                {"name": "id", "type": "integer", "format": "default"},
-                {"name": "name", "type": "string", "format": "default"},
-            ],
-            "missingValues": [""],
+                {"name": "id", "type": "integer"},
+                {"name": "name", "type": "string"},
+            ]
         },
     }
 

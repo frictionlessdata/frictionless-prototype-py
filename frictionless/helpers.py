@@ -64,7 +64,7 @@ def detect_basepath(descriptor):
     basepath = ""
     if isinstance(descriptor, str):
         basepath = os.path.dirname(descriptor)
-        if not is_remote_path(basepath):
+        if basepath and not is_remote_path(basepath):
             basepath = os.path.relpath(basepath, start=os.getcwd())
     return basepath
 
@@ -93,18 +93,13 @@ def is_safe_path(path):
     return not any(unsafeness_conditions)
 
 
-def parse_hashing_algorithm(hash):
+def parse_resource_hash(hash):
     if not hash:
-        return "md5"
+        return (config.DEFAULT_HASHING, "")
     parts = hash.split(":", maxsplit=1)
-    return parts[0] if len(parts) > 1 else "md5"
-
-
-def parse_hashing_digest(hash):
-    if not hash:
-        return ""
-    parts = hash.split(":", maxsplit=1)
-    return parts[1] if len(parts) > 1 else hash
+    if len(parts) == 1:
+        return (config.DEFAULT_HASHING, parts[0])
+    return parts
 
 
 def reset_cached_properties(obj):
