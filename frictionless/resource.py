@@ -16,9 +16,7 @@ from . import config
 
 
 class Resource(Metadata):
-    # TODO: make profile a property
     metadata_Error = errors.ResourceError
-    metadata_profile = config.RESOURCE_PROFILE
     metadata_setters = {
         "path": "path",
         "data": "data",
@@ -304,6 +302,12 @@ class Resource(Metadata):
         self.metadata_save(target)
 
     # Metadata
+
+    @property
+    def metadata_profile(self):
+        if self.profile == "tabular-data-resource":
+            return config.TABULAR_RESOURCE_PROFILE
+        return config.RESOURCE_PROFILE
 
     def metadata_process(self):
 
