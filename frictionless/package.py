@@ -1,4 +1,3 @@
-from copy import deepcopy
 from .metadata import Metadata
 from .helpers import cached_property
 from .resource import Resource
@@ -167,9 +166,11 @@ class Package(Metadata):
 
     # Infer
 
-    # TODO: implement
+    # TODO: support infer from files
     def infer(self):
-        pass
+        self.setdefault("profile", config.DEFAULT_PACKAGE_PROFILE)
+        for resource in self.resources:
+            resource.infer()
 
     # Save
 

@@ -1,13 +1,13 @@
 import os
-import six
 import glob
 import json
 import mock
 import zipfile
 import pytest
 import tempfile
+import httpretty
 from copy import deepcopy
-from tableschema import Storage
+from datapackage import infer
 from frictionless import Package, exceptions
 
 
@@ -118,7 +118,7 @@ def test_package_from_invalid_descriptor_type():
     assert error.note.count("51")
 
 
-@pytest.mark.skip(reason="Wait for specs-v1.rc2 resource.data/path")
+@pytest.mark.skip
 def test_it_works_with_local_paths(datapackage_zip):
     package = Package(datapackage_zip.name)
     assert package.descriptor["name"] == "proverbs"
@@ -126,7 +126,7 @@ def test_it_works_with_local_paths(datapackage_zip):
     assert package.resources[0].data == b"foo\n"
 
 
-@pytest.mark.skip(reason="Wait for specs-v1.rc2 resource.data/path")
+@pytest.mark.skip
 def test_it_works_with_file_objects(datapackage_zip):
     package = Package(datapackage_zip)
     assert package.descriptor["name"] == "proverbs"
@@ -134,7 +134,7 @@ def test_it_works_with_file_objects(datapackage_zip):
     assert package.resources[0].data == b"foo\n"
 
 
-@pytest.mark.skip(reason="Wait for specs-v1.rc2 resource.data/path")
+@pytest.mark.skip
 def test_it_works_with_remote_files(datapackage_zip):
     httpretty.enable()
     datapackage_zip.seek(0)
@@ -149,7 +149,7 @@ def test_it_works_with_remote_files(datapackage_zip):
     httpretty.disable()
 
 
-@pytest.mark.skip(reason="Wait for specs-v1.rc2 resource.data/path")
+@pytest.mark.skip
 def test_it_removes_temporary_directories(datapackage_zip):
     tempdirs_glob = os.path.join(tempfile.gettempdir(), "*-datapackage")
     original_tempdirs = glob.glob(tempdirs_glob)
@@ -159,7 +159,7 @@ def test_it_removes_temporary_directories(datapackage_zip):
     assert glob.glob(tempdirs_glob) == original_tempdirs
 
 
-@pytest.mark.skip(reason="Wait for specs-v1.rc2 resource.data/path")
+@pytest.mark.skip
 def test_local_data_path(datapackage_zip):
     package = Package(datapackage_zip)
     assert package.resources[0].local_data_path is not None
@@ -505,7 +505,7 @@ def test_works_with_resources_with_relative_paths(tmpfile):
 def test_should_raise_validation_error_if_datapackage_is_invalid(tmpfile):
     descriptor = {}
     schema = {
-        "properties": {"name": {},},
+        "properties": {"name": {}},
         "required": ["name"],
     }
     package = Package(descriptor, schema)
@@ -611,7 +611,7 @@ def test_single_self_field_foreign_key():
     resource = Package(descriptor).get_resource("main")
     keyed_rows = resource.read(keyed=True, relations=True)
     assert keyed_rows == [
-        {"id": "1", "name": "Alex", "surname": "Martin", "parent_id": None,},
+        {"id": "1", "name": "Alex", "surname": "Martin", "parent_id": None},
         {
             "id": "2",
             "name": "John",
@@ -721,7 +721,7 @@ def test_package_save_slugify_fk_resource_name_issue_181():
             {
                 "name": "my-langs",
                 "data": [["en"], ["ch"]],
-                "schema": {"fields": [{"name": "lang"},]},
+                "schema": {"fields": [{"name": "lang"}]},
             },
             {
                 "name": "my-notes",
@@ -742,7 +742,8 @@ def test_package_save_slugify_fk_resource_name_issue_181():
             },
         ]
     }
-    storage = Mock(buckets=["my_langs", "my_notes"], spec=Storage)
+    storage = None
+    #  storage = Mock(buckets=["my_langs", "my_notes"], spec=Storage)
     package = Package(descriptor)
     package.save(storage=storage)
     assert storage.create.call_args[0][0] == ["my_langs", "my_notes"]
@@ -756,7 +757,7 @@ def test_package_save_slugify_fk_resource_name_issue_181():
 
 @pytest.fixture
 def datapackage_zip(tmpfile):
-    descriptor = {"name": "proverbs", "resources": [{"name": "name", "path": "foo.txt"},]}
+    descriptor = {"name": "proverbs", "resources": [{"name": "name", "path": "foo.txt"}]}
     package = Package(descriptor, default_base_path="data")
     package.save(tmpfile)
     return tmpfile

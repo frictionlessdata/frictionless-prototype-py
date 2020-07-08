@@ -54,13 +54,12 @@ INSTALL_REQUIRES = [
     "statistics>=1.0",
     "simpleeval>=0.9",
     "stringcase>=1.2",
-    "datapackage>=1.14",
     "unicodecsv>=0.14",
+    "jsonlines>=1.2",
     "openpyxl>=3.0",
+    "ijson>=3.0",
     "xlrd>=1.2",
     "xlwt>=1.2",
-    "ijson>=3.0",
-    "jsonlines>=1.2",
 ]
 README = read("README.md")
 VERSION = read(PACKAGE, "assets", "VERSION")

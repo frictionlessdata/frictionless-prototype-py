@@ -81,6 +81,7 @@ class Metadata(helpers.ControlledDict):
 
     # Extract
 
+    # TODO: support yaml?
     def metadata_extract(self, descriptor, *, duplicate=False):
         try:
             if descriptor is None:

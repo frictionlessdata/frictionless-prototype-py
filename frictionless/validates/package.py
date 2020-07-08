@@ -1,13 +1,13 @@
-import datapackage
 from .. import helpers
 from ..report import Report
+from ..package import Package
 from ..inquiry import Inquiry
-from ..errors import PackageError
 from .inquiry import validate_inquiry
+from .. import exceptions
 
 
 @Report.from_validate
-def validate_package(source, base_path=None, noinfer=False, **options):
+def validate_package(source, basepath=None, noinfer=False, **options):
     """Validate package
     """
 
@@ -16,29 +16,15 @@ def validate_package(source, base_path=None, noinfer=False, **options):
 
     # Create package
     try:
-        package = datapackage.Package(source, base_path=base_path)
-    except datapackage.exceptions.DataPackageException as exception:
-        error = PackageError(note=str(exception))
-        return Report(time=timer.time, errors=[error], tables=[])
+        package = Package(source, basepath=basepath)
+    except exceptions.FrictionlessException as exception:
+        return Report(time=timer.time, errors=[exception.error], tables=[])
 
     # Prepare package
-    for stage in [1, 2]:
-        errors = []
-        if stage == 1:
-            if not noinfer:
-                continue
-        if stage == 2:
-            try:
-                package.infer()
-            except Exception as exception:
-                errors.append(PackageError(note=str(exception)))
-            for resource in list(package.resources):
-                if not resource.tabular:
-                    package.remove_resource(resource.name)
-        for error in package.errors:
-            errors.append(PackageError(note=str(error)))
-        if errors:
-            return Report(time=timer.time, errors=errors, tables=[])
+    if not noinfer:
+        package.infer()
+    if package.metadata_errors:
+        return Report(time=timer.time, errors=package.metadata_errors, tables=[])
 
     # Prepare inquiry
     descriptor = {"tasks": []}
@@ -47,8 +33,8 @@ def validate_package(source, base_path=None, noinfer=False, **options):
         descriptor["tasks"].append(
             helpers.create_descriptor(
                 **options,
-                source=resource.descriptor,
-                base_path=package.base_path,
+                source=resource,
+                basepath=resource.basepath,
                 noinfer=noinfer,
                 lookup=lookup,
             )

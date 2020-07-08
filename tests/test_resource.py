@@ -15,7 +15,7 @@ def test_resource():
     resource = Resource("data/resource.json")
     assert resource.name == "name"
     assert resource.path == "table.csv"
-    assert resource.source == "table.csv"
+    assert resource.source == "data/table.csv"
     assert resource.basepath == "data"
     assert resource.profile == "data-resource"
     assert resource.read_rows() == [
@@ -616,7 +616,7 @@ def test_resource_save(tmpdir):
 
 @pytest.mark.skip
 def test_package_compression_implicit_gz():
-    package = Package("data/datapackage-compression/datapackage.json")
+    package = Resource("data/datapackage-compression/datapackage.json")
     assert package.get_resource("implicit-gz").read(keyed=True) == [
         {"id": 1, "name": "english"},
         {"id": 2, "name": "中国人"},
@@ -625,7 +625,7 @@ def test_package_compression_implicit_gz():
 
 @pytest.mark.skip
 def test_package_compression_implicit_zip():
-    package = Package("data/datapackage-compression/datapackage.json")
+    package = Resource("data/datapackage-compression/datapackage.json")
     assert package.get_resource("implicit-zip").read(keyed=True) == [
         {"id": 1, "name": "english"},
         {"id": 2, "name": "中国人"},
@@ -634,7 +634,7 @@ def test_package_compression_implicit_zip():
 
 @pytest.mark.skip
 def test_package_compression_explicit_gz():
-    package = Package("data/datapackage-compression/datapackage.json")
+    package = Resource("data/datapackage-compression/datapackage.json")
     assert package.get_resource("explicit-gz").read(keyed=True) == [
         {"id": 1, "name": "english"},
         {"id": 2, "name": "中国人"},
@@ -643,7 +643,7 @@ def test_package_compression_explicit_gz():
 
 @pytest.mark.skip
 def test_package_compression_explicit_zip():
-    package = Package("data/datapackage-compression/datapackage.json")
+    package = Resource("data/datapackage-compression/datapackage.json")
     assert package.get_resource("explicit-zip").read(keyed=True) == [
         {"id": 1, "name": "english"},
         {"id": 2, "name": "中国人"},

@@ -235,6 +235,7 @@ class Resource(Metadata):
 
     # Infer
 
+    # TODO: support infer from file?
     def infer(self):
         patch = self.read_stats()
 

@@ -169,6 +169,8 @@ def detect_source_scheme_and_format(source):
     return (scheme, format)
 
 
+# TODO: move to Resource/Package?
+# TODO: rebase on the new resource/package
 def create_lookup(resource, *, package=None):
     lookup = {}
     for fk in resource.schema.foreign_keys:
