@@ -20,6 +20,7 @@ class Resource(Metadata):
     metadata_setters = {
         "path": "path",
         "data": "data",
+        "profile": "profile",
         "scheme": "scheme",
         "format": "format",
         "hashing": "hashing",
@@ -101,10 +102,6 @@ class Resource(Metadata):
         return self.__basepath
 
     @cached_property
-    def profile(self):
-        return self.get("profile", config.DEFAULT_RESOURCE_PROFILE)
-
-    @cached_property
     def inline(self):
         return "data" in self
 
@@ -122,6 +119,10 @@ class Resource(Metadata):
     @cached_property
     def multipart(self):
         return bool(self.path and isinstance(self.path, list) and len(self.path) >= 2)
+
+    @cached_property
+    def profile(self):
+        return self.get("profile", config.DEFAULT_RESOURCE_PROFILE)
 
     @cached_property
     def scheme(self):
