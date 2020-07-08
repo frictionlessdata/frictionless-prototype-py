@@ -54,6 +54,12 @@ def compile_regex(items):
         return result
 
 
+def detect_name(path):
+    file = os.path.basename(path)
+    name = os.path.splitext(file)[0]
+    return name
+
+
 def detect_basepath(descriptor):
     basepath = ""
     if isinstance(descriptor, str):

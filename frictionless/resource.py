@@ -18,6 +18,7 @@ from . import config
 class Resource(Metadata):
     metadata_Error = errors.ResourceError
     metadata_setters = {
+        "name": "name",
         "path": "path",
         "data": "data",
         "profile": "profile",
@@ -35,6 +36,7 @@ class Resource(Metadata):
         self,
         descriptor=None,
         *,
+        name=None,
         path=None,
         data=None,
         scheme=None,
@@ -47,6 +49,7 @@ class Resource(Metadata):
         schema=None,
         basepath=None,
     ):
+        self.setinitial("name", name)
         self.setinitial("path", path)
         self.setinitial("data", data)
         self.setinitial("scheme", scheme)
@@ -61,6 +64,10 @@ class Resource(Metadata):
         if basepath is None:
             self.__basepath = helpers.detect_basepath(descriptor)
         super().__init__(descriptor)
+
+    @cached_property
+    def name(self):
+        return self.get("name")
 
     @cached_property
     def path(self):
@@ -220,6 +227,7 @@ class Resource(Metadata):
         # Tabular
         if patch["rows"]:
             patch["profile"] = "tabular-data-resource"
+            patch["name"] = self.get("name", helpers.detect_name(self.table.path))
             patch["scheme"] = self.table.scheme
             patch["format"] = self.table.format
             patch["hashing"] = self.table.hashing
@@ -227,17 +235,20 @@ class Resource(Metadata):
             patch["compression"] = self.table.compression
             patch["dialect"] = self.table.dialect
             patch["schema"] = self.table.schema
-            if self.table.hashing != config.DEFAULT_HASHING:
-                patch["hash"] = ":".join(patch["hashing"], patch["hash"])
 
         # General
         else:
             patch["profile"] = "data-resource"
+            patch["name"] = self.get("name", helpers.detect_name(self.__file.path))
             patch["scheme"] = self.__file.scheme
             patch["format"] = self.__file.format
             patch["hashing"] = self.__file.hashing
             patch["encoding"] = self.__file.encoding
             patch["compression"] = self.__file.compression
+
+        # Update hashing
+        if patch["hashing"] != config.DEFAULT_HASHING:
+            patch["hash"] = ":".join(patch["hashing"], patch["hash"])
 
         # Apply/expand
         self.update(patch)

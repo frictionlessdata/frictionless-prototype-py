@@ -547,7 +547,9 @@ def test_resource_expand_with_schema():
 def test_resource_infer():
     resource = Resource(path="data/table.csv")
     resource.infer()
+    assert resource.metadata_valid
     assert resource == {
+        "name": "table",
         "path": "data/table.csv",
         "hash": "6c2c61dd9b0e9c6876139a449ed87933",
         "bytes": 30,
@@ -581,7 +583,9 @@ def test_resource_infer():
 def test_resource_infer_source_non_tabular():
     resource = Resource(path="data/text.txt")
     resource.infer()
+    assert resource.metadata_valid
     assert resource == {
+        "name": "text",
         "path": "data/text.txt",
         "hash": "e1cbb0c3879af8347246f12c559a86b5",
         "bytes": 5,
