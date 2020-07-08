@@ -104,7 +104,7 @@ class Resource(Metadata):
 
     @cached_property
     def profile(self):
-        return self.get("profile")
+        return self.get("profile", config.DEFAULT_RESOURCE_PROFILE)
 
     @cached_property
     def inline(self):
@@ -190,6 +190,7 @@ class Resource(Metadata):
             schema=self.schema,
         )
 
+    # TODO: review the file/table situation
     @cached_property
     def __file(self):
         return File(
@@ -214,8 +215,34 @@ class Resource(Metadata):
 
     # Infer
 
-    def infer():
-        pass
+    def infer(self):
+        patch = self.read_stats()
+
+        # Tabular
+        if patch["rows"]:
+            patch["profile"] = "tabular-data-resource"
+            patch["scheme"] = self.table.scheme
+            patch["format"] = self.table.format
+            patch["hashing"] = self.table.hashing
+            patch["encoding"] = self.table.encoding
+            patch["compression"] = self.table.compression
+            patch["dialect"] = self.table.dialect
+            patch["schema"] = self.table.schema
+            if self.table.hashing != config.DEFAULT_HASHING:
+                patch["hash"] = ":".join(patch["hashing"], patch["hash"])
+
+        # General
+        else:
+            patch["profile"] = "data-resource"
+            patch["scheme"] = self.__file.scheme
+            patch["format"] = self.__file.format
+            patch["hashing"] = self.__file.hashing
+            patch["encoding"] = self.__file.encoding
+            patch["compression"] = self.__file.compression
+
+        # Apply/expand
+        self.update(patch)
+        self.expand()
 
     # Read
 

@@ -16,6 +16,7 @@ def test_resource():
     assert resource.basepath == ""
     assert resource.path == "data/table.csv"
     assert resource.source == "data/table.csv"
+    assert resource.profile == "data-resource"
     assert resource.read_rows() == [
         {"id": 1, "name": "english"},
         {"id": 2, "name": "中国人"},
@@ -81,6 +82,52 @@ def test_resource_from_path_remote_error_bad_path():
     error = excinfo.value.error
     assert error.code == "resource-error"
     assert error.note.count("bad.json")
+
+
+def test_resource_source_non_tabular():
+    path = "data/text.txt"
+    resource = Resource(path=path)
+    assert resource.basepath == ""
+    assert resource.path == path
+    assert resource.data is None
+    assert resource.source == path
+    assert resource.inline is False
+    assert resource.tabular is False
+    assert resource.multipart is False
+    assert resource.read_bytes() == b"text\n"
+    assert resource.read_stats() == {
+        "hash": "e1cbb0c3879af8347246f12c559a86b5",
+        "bytes": 5,
+        "rows": 0,
+    }
+
+
+@pytest.mark.slow
+def test_resource_source_non_tabular_remote():
+    path = BASE_URL % "data/foo.txt"
+    resource = Resource(path=path)
+    assert resource.basepath == ""
+    assert resource.path == path
+    assert resource.data is None
+    assert resource.source == path
+    assert resource.inline is False
+    assert resource.tabular is False
+    assert resource.multipart is False
+    assert resource.read_bytes() == b"foo\n"
+    assert resource.read_stats() == {
+        "hash": "d3b07384d113edec49eaa6238ad5ff00",
+        "bytes": 4,
+        "rows": 0,
+    }
+
+
+def test_resource_source_non_tabular_error_bad_path():
+    resource = Resource(path="data/bad.txt")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        resource.read_bytes()
+    error = excinfo.value.error
+    assert error.code == "scheme-error"
+    assert error.note.count("data/bad.txt")
 
 
 def test_resource_source_path():
@@ -428,6 +475,15 @@ def test_resource_table_source_remote():
         ]
 
 
+def test_resource_table_source_non_tabular():
+    resource = Resource(path="data/text.txt")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        resource.table.open()
+    error = excinfo.value.error
+    assert error.code == "format-error"
+    assert error.note == 'cannot create parser "txt". Try installing "frictionless-txt"'
+
+
 # Expand
 
 
@@ -486,6 +542,58 @@ def test_resource_expand_with_schema():
 
 
 # Infer
+
+
+def test_resource_infer():
+    resource = Resource(path="data/table.csv")
+    resource.infer()
+    assert resource == {
+        "path": "data/table.csv",
+        "hash": "6c2c61dd9b0e9c6876139a449ed87933",
+        "bytes": 30,
+        "rows": 2,
+        "profile": "tabular-data-resource",
+        "scheme": "file",
+        "format": "csv",
+        "hashing": "md5",
+        "encoding": "utf-8",
+        "compression": "no",
+        "dialect": {
+            "delimiter": ",",
+            "lineTerminator": "\r\n",
+            "doubleQuote": True,
+            "quoteChar": '"',
+            "skipInitialSpace": False,
+            "headers": {"rows": [1], "join": " "},
+            "header": True,
+            "caseSensitiveHeader": False,
+        },
+        "schema": {
+            "fields": [
+                {"name": "id", "type": "integer", "format": "default"},
+                {"name": "name", "type": "string", "format": "default"},
+            ],
+            "missingValues": [""],
+        },
+    }
+
+
+def test_resource_infer_source_non_tabular():
+    resource = Resource(path="data/text.txt")
+    resource.infer()
+    assert resource == {
+        "path": "data/text.txt",
+        "hash": "e1cbb0c3879af8347246f12c559a86b5",
+        "bytes": 5,
+        "rows": 0,
+        "profile": "data-resource",
+        "scheme": "file",
+        "format": "txt",
+        "hashing": "md5",
+        "encoding": "utf-8",
+        "compression": "no",
+    }
+
 
 # Save
 
@@ -605,64 +713,6 @@ def test_source_multipart_local_infer():
             "missingValues": [""],
         },
     }
-
-
-# Non-tabular
-
-
-def test_resource_source_non_tabular():
-    path = "data/text.txt"
-    resource = Resource(path=path)
-    assert resource.basepath == ""
-    assert resource.path == path
-    assert resource.data is None
-    assert resource.source == path
-    assert resource.inline is False
-    assert resource.tabular is False
-    assert resource.multipart is False
-    assert resource.read_bytes() == b"text\n"
-    assert resource.read_stats() == {
-        "hash": "e1cbb0c3879af8347246f12c559a86b5",
-        "bytes": 5,
-        "rows": 0,
-    }
-
-
-@pytest.mark.slow
-def test_resource_source_non_tabular_remote():
-    path = BASE_URL % "data/foo.txt"
-    resource = Resource(path=path)
-    assert resource.basepath == ""
-    assert resource.path == path
-    assert resource.data is None
-    assert resource.source == path
-    assert resource.inline is False
-    assert resource.tabular is False
-    assert resource.multipart is False
-    assert resource.read_bytes() == b"foo\n"
-    assert resource.read_stats() == {
-        "hash": "d3b07384d113edec49eaa6238ad5ff00",
-        "bytes": 4,
-        "rows": 0,
-    }
-
-
-def test_resource_source_non_tabular_error_bad_path():
-    resource = Resource(path="data/bad.txt")
-    with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        resource.read_bytes()
-    error = excinfo.value.error
-    assert error.code == "scheme-error"
-    assert error.note.count("data/bad.txt")
-
-
-def test_resource_source_non_tabular_table():
-    resource = Resource(path="data/text.txt")
-    with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        resource.table.open()
-    error = excinfo.value.error
-    assert error.code == "format-error"
-    assert error.note == 'cannot create parser "txt". Try installing "frictionless-txt"'
 
 
 # Issues
