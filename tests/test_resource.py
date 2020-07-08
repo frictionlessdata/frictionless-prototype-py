@@ -12,22 +12,12 @@ BASE_URL = "https://raw.githubusercontent.com/frictionlessdata/datapackage-py/ma
 
 
 def test_resource():
-    resource = Resource(path="data/table.csv")
-    assert resource.basepath == ""
-    assert resource.path == "data/table.csv"
-    assert resource.source == "data/table.csv"
-    assert resource.profile == "data-resource"
-    assert resource.read_rows() == [
-        {"id": 1, "name": "english"},
-        {"id": 2, "name": "中国人"},
-    ]
-
-
-def test_resource_basepath():
-    resource = Resource(path="table.csv", basepath="data")
-    assert resource.basepath == "data"
+    resource = Resource("data/resource.json")
+    assert resource.name == "name"
     assert resource.path == "table.csv"
-    assert resource.source == "data/table.csv"
+    assert resource.source == "table.csv"
+    assert resource.basepath == "data"
+    assert resource.profile == "data-resource"
     assert resource.read_rows() == [
         {"id": 1, "name": "english"},
         {"id": 2, "name": "中国人"},
@@ -87,10 +77,10 @@ def test_resource_from_path_remote_error_bad_path():
 def test_resource_source_non_tabular():
     path = "data/text.txt"
     resource = Resource(path=path)
-    assert resource.basepath == ""
     assert resource.path == path
     assert resource.data is None
     assert resource.source == path
+    assert resource.basepath == ""
     assert resource.inline is False
     assert resource.tabular is False
     assert resource.multipart is False
@@ -106,10 +96,10 @@ def test_resource_source_non_tabular():
 def test_resource_source_non_tabular_remote():
     path = BASE_URL % "data/foo.txt"
     resource = Resource(path=path)
-    assert resource.basepath == ""
     assert resource.path == path
     assert resource.data is None
     assert resource.source == path
+    assert resource.basepath == ""
     assert resource.inline is False
     assert resource.tabular is False
     assert resource.multipart is False
@@ -133,10 +123,10 @@ def test_resource_source_non_tabular_error_bad_path():
 def test_resource_source_path():
     path = "data/table.csv"
     resource = Resource({"path": path})
-    assert resource.basepath == ""
     assert resource.path == path
     assert resource.data is None
     assert resource.source == path
+    assert resource.basepath == ""
     assert resource.inline is False
     assert resource.tabular is True
     assert resource.multipart is False
@@ -156,6 +146,17 @@ def test_resource_source_path():
         "bytes": 30,
         "rows": 2,
     }
+
+
+def test_resource_source_path_and_basepath():
+    resource = Resource(path="table.csv", basepath="data")
+    assert resource.path == "table.csv"
+    assert resource.source == "data/table.csv"
+    assert resource.basepath == "data"
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
 
 
 @pytest.mark.slow
@@ -208,10 +209,10 @@ def test_resource_source_path_error_bad_path_not_safe_traversing():
 def test_resource_source_data():
     data = [["id", "name"], ["1", "english"], ["2", "中国人"]]
     resource = Resource({"data": data})
-    assert resource.basepath == ""
     assert resource.path is None
     assert resource.data == data
     assert resource.source == data
+    assert resource.basepath == ""
     assert resource.inline is True
     assert resource.tabular is True
     assert resource.multipart is False
@@ -608,6 +609,45 @@ def test_resource_save(tmpdir):
         "name": "name",
         "path": "table.csv",
     }
+
+
+# Compression
+
+
+@pytest.mark.skip
+def test_package_compression_implicit_gz():
+    package = Package("data/datapackage-compression/datapackage.json")
+    assert package.get_resource("implicit-gz").read(keyed=True) == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
+
+
+@pytest.mark.skip
+def test_package_compression_implicit_zip():
+    package = Package("data/datapackage-compression/datapackage.json")
+    assert package.get_resource("implicit-zip").read(keyed=True) == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
+
+
+@pytest.mark.skip
+def test_package_compression_explicit_gz():
+    package = Package("data/datapackage-compression/datapackage.json")
+    assert package.get_resource("explicit-gz").read(keyed=True) == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
+
+
+@pytest.mark.skip
+def test_package_compression_explicit_zip():
+    package = Package("data/datapackage-compression/datapackage.json")
+    assert package.get_resource("explicit-zip").read(keyed=True) == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
 
 
 # Multipart

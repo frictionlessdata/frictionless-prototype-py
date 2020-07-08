@@ -21,7 +21,6 @@ class Resource(Metadata):
         "name": "name",
         "path": "path",
         "data": "data",
-        "profile": "profile",
         "scheme": "scheme",
         "format": "format",
         "hashing": "hashing",
@@ -30,6 +29,7 @@ class Resource(Metadata):
         "compression_path": "compressionPath",
         "dialect": "dialect",
         "schema": "schema",
+        "profile": "profile",
     }
 
     def __init__(
@@ -47,6 +47,7 @@ class Resource(Metadata):
         compression_path=None,
         dialect=None,
         schema=None,
+        profile=None,
         basepath=None,
     ):
         # Set attributes
@@ -61,6 +62,7 @@ class Resource(Metadata):
         self.setinitial("compressionPath", compression_path)
         self.setinitial("dialect", dialect)
         self.setinitial("schema", schema)
+        self.setinitial("profile", profile)
         self.__basepath = basepath or helpers.detect_basepath(descriptor)
         super().__init__(descriptor)
 
@@ -71,8 +73,9 @@ class Resource(Metadata):
 
     @cached_property
     def name(self):
-        return self.get("name")
+        return self.get("name", "resource")
 
+    # TODO: should it be memory for inline?
     @cached_property
     def path(self):
         return self.get("path")
@@ -130,10 +133,6 @@ class Resource(Metadata):
     @cached_property
     def multipart(self):
         return bool(self.path and isinstance(self.path, list) and len(self.path) >= 2)
-
-    @cached_property
-    def profile(self):
-        return self.get("profile", config.DEFAULT_RESOURCE_PROFILE)
 
     @cached_property
     def scheme(self):
@@ -229,9 +228,9 @@ class Resource(Metadata):
 
     def expand(self):
         self.setdefault("profile", config.DEFAULT_RESOURCE_PROFILE)
-        if "dialect" in self:
+        if isinstance(self.get("dialect"), Dialect):
             self.dialect.expand()
-        if "schema" in self:
+        if isinstance(self.get("schema"), Schema):
             self.schema.expand()
 
     # Infer
@@ -323,13 +322,17 @@ class Resource(Metadata):
 
     # Save
 
-    # TODO: save metadata + data to zip
+    # TODO: zip metadata + data
     def save(self, target):
         self.metadata_save(target)
 
     # Metadata
 
-    @property
+    @cached_property
+    def profile(self):
+        return self.get("profile", config.DEFAULT_RESOURCE_PROFILE)
+
+    @cached_property
     def metadata_profile(self):
         if self.profile == "tabular-data-resource":
             return config.TABULAR_RESOURCE_PROFILE

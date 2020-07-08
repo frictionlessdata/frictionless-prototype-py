@@ -91,10 +91,14 @@ class Metadata(helpers.ControlledDict):
                 if helpers.is_remote_path(descriptor):
                     response = requests.get(descriptor)
                     response.raise_for_status()
-                    return response.json()
+                    metadata = response.json()
+                    assert isinstance(metadata, dict)
+                    return metadata
                 with io.open(descriptor, encoding="utf-8") as file:
-                    return json.load(file)
-            return json.load(descriptor)
+                    metadata = json.load(file)
+                    assert isinstance(metadata, dict)
+                    return metadata
+            raise TypeError("descriptor type is not supported")
         except Exception as exception:
             note = f'canot extract metadata "{descriptor}" because "{exception}"'
             raise exceptions.FrictionlessException(self.__Error(note=note)) from exception
