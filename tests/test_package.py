@@ -6,7 +6,6 @@ import zipfile
 import pytest
 import tempfile
 import httpretty
-from copy import deepcopy
 from frictionless import Package, exceptions
 
 
@@ -119,7 +118,7 @@ def test_package_from_invalid_descriptor_type():
 
 @pytest.mark.skip
 def test_it_works_with_local_paths():
-    package = Package(datapackage_zip.name)
+    package = Package("data/package.zip")
     assert package.descriptor["name"] == "proverbs"
     assert len(package.resources) == 1
     assert package.resources[0].data == b"foo\n"
@@ -127,7 +126,7 @@ def test_it_works_with_local_paths():
 
 @pytest.mark.skip
 def test_it_works_with_file_objects():
-    package = Package(datapackage_zip)
+    package = Package("data/package.zip")
     assert package.descriptor["name"] == "proverbs"
     assert len(package.resources) == 1
     assert package.resources[0].data == b"foo\n"
@@ -136,11 +135,11 @@ def test_it_works_with_file_objects():
 @pytest.mark.skip
 def test_it_works_with_remote_files():
     httpretty.enable()
-    datapackage_zip.seek(0)
+    #  datapackage_zip.seek(0)
     url = "http://someplace.com/datapackage.zip"
-    httpretty.register_uri(
-        httpretty.GET, url, body=datapackage_zip.read(), content_type="application/zip"
-    )
+    #  httpretty.register_uri(
+    #  httpretty.GET, url, body=datapackage_zip.read(), content_type="application/zip"
+    #  )
     package = Package(url)
     assert package.descriptor["name"] == "proverbs"
     assert len(package.resources) == 1
@@ -152,15 +151,15 @@ def test_it_works_with_remote_files():
 def test_it_removes_temporary_directories():
     tempdirs_glob = os.path.join(tempfile.gettempdir(), "*-datapackage")
     original_tempdirs = glob.glob(tempdirs_glob)
-    package = Package(datapackage_zip)
-    package.save(datapackage_zip)
+    package = Package("data/package.zip")
+    package.save("data/package.zip")
     del package
     assert glob.glob(tempdirs_glob) == original_tempdirs
 
 
 @pytest.mark.skip
 def test_local_data_path():
-    package = Package(datapackage_zip)
+    package = Package("data/package.zip")
     assert package.resources[0].local_data_path is not None
     with open("data/foo.txt") as data_file:
         with open(package.resources[0].local_data_path) as local_data_file:

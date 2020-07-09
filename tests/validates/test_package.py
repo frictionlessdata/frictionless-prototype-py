@@ -87,13 +87,12 @@ def test_validate_invalid_descriptor_path():
     ]
 
 
-@pytest.mark.skip
 def test_validate_invalid_package():
     report = validate({"resources": [{"path": "data/table.csv", "schema": "bad"}]})
     assert report.flatten(["code", "note"]) == [
         [
-            "package-error",
-            '"\'bad\' is not of type \'object\'" at "resources/0/schema" in metadata and at "properties/resources/items/properties/schema/type" in profile',
+            "schema-error",
+            'canot extract metadata "bad" because "[Errno 2] No such file or directory: \'bad\'"',
         ]
     ]
 
@@ -327,7 +326,6 @@ def test_validate_package_invalid_json_issue_192():
     ]
 
 
-@pytest.mark.skip
 def test_composite_primary_key_unique_issue_215():
     source = {
         "resources": [
@@ -345,7 +343,6 @@ def test_composite_primary_key_unique_issue_215():
     assert report.valid
 
 
-@pytest.mark.skip
 def test_composite_primary_key_not_unique_issue_215():
     descriptor = {
         "resources": [
@@ -377,7 +374,6 @@ def test_validate_package_number_test_issue_232():
     assert not report.valid
 
 
-@pytest.mark.skip
 def test_validate_package_with_schema_issue_348():
     descriptor = {
         "resources": [
