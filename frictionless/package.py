@@ -42,6 +42,7 @@ class Package(Metadata):
         resources=None,
         profile=None,
         basepath=None,
+        trusted=None,
     ):
         self.setinitial("name", name)
         self.setinitial("title", title)
@@ -49,6 +50,7 @@ class Package(Metadata):
         self.setinitial("resources", resources)
         self.setinitial("profile", profile)
         self.__basepath = basepath or helpers.detect_basepath(descriptor)
+        self.__trusted = trusted
         super().__init__(descriptor)
 
     @cached_property
@@ -211,7 +213,12 @@ class Package(Metadata):
                 if not isinstance(resource, Resource):
                     if not isinstance(resource, dict):
                         resource = {"name": f"resource{index+1}"}
-                    resource = Resource(resource, basepath=self.basepath, package=self)
+                    resource = Resource(
+                        resource,
+                        basepath=self.__basepath,
+                        trusted=self.__trusted,
+                        package=self,
+                    )
                     list.__setitem__(resources, index, resource)
             if not isinstance(resources, helpers.ControlledList):
                 resources = helpers.ControlledList(

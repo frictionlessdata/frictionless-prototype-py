@@ -618,46 +618,7 @@ def test_resource_save(tmpdir):
     }
 
 
-# TODO: add more tests
-
-
-# Compression
-
-
-@pytest.mark.skip
-def test_package_compression_implicit_gz():
-    package = Resource("data/datapackage-compression/datapackage.json")
-    assert package.get_resource("implicit-gz").read(keyed=True) == [
-        {"id": 1, "name": "english"},
-        {"id": 2, "name": "中国人"},
-    ]
-
-
-@pytest.mark.skip
-def test_package_compression_implicit_zip():
-    package = Resource("data/datapackage-compression/datapackage.json")
-    assert package.get_resource("implicit-zip").read(keyed=True) == [
-        {"id": 1, "name": "english"},
-        {"id": 2, "name": "中国人"},
-    ]
-
-
-@pytest.mark.skip
-def test_package_compression_explicit_gz():
-    package = Resource("data/datapackage-compression/datapackage.json")
-    assert package.get_resource("explicit-gz").read(keyed=True) == [
-        {"id": 1, "name": "english"},
-        {"id": 2, "name": "中国人"},
-    ]
-
-
-@pytest.mark.skip
-def test_package_compression_explicit_zip():
-    package = Resource("data/datapackage-compression/datapackage.json")
-    assert package.get_resource("explicit-zip").read(keyed=True) == [
-        {"id": 1, "name": "english"},
-        {"id": 2, "name": "中国人"},
-    ]
+# TODO: add more save tests
 
 
 # Multipart
@@ -743,29 +704,40 @@ def test_resource_source_multipart_error_bad_path_not_safe_traversing():
     assert error.note.count("not safe")
 
 
-@pytest.mark.skip
-def test_source_multipart_local_infer():
+def test_resource_source_multipart_infer():
     descriptor = {"path": ["data/chunk1.csv", "data/chunk2.csv"]}
     resource = Resource(descriptor)
     resource.infer()
-    assert resource.descriptor == {
-        "name": "chunk1",
-        "profile": "tabular-data-resource",
+    assert resource == {
         "path": ["data/chunk1.csv", "data/chunk2.csv"],
+        "profile": "tabular-data-resource",
+        "name": "memory",
+        "scheme": "stream",
         "format": "csv",
-        "mediatype": "text/csv",
+        "hashing": "md5",
         "encoding": "utf-8",
+        "compression": "no",
+        "dialect": {
+            "delimiter": ",",
+            "lineTerminator": "\r\n",
+            "doubleQuote": True,
+            "quoteChar": '"',
+            "skipInitialSpace": False,
+        },
         "schema": {
             "fields": [
-                {"name": "id", "type": "integer", "format": "default"},
-                {"name": "name", "type": "string", "format": "default"},
-            ],
-            "missingValues": [""],
+                {"name": "id", "type": "integer"},
+                {"name": "name", "type": "string"},
+            ]
         },
+        "hash": "6c2c61dd9b0e9c6876139a449ed87933",
+        "bytes": 30,
+        "rows": 2,
     }
 
 
 # Integrity
+
 
 INTEGRITY_DESCRIPTOR = {
     "path": "data/nested.csv",
@@ -821,33 +793,48 @@ def test_resource_integrity_read_lookup():
 # Issues
 
 
-@pytest.mark.skip
-def test_source_relative_parent_path_with_unsafe_option_issue_171():
-    descriptor = {"path": "data/../data/table.csv"}
-    # unsafe=false (default)
-    with pytest.raises(exceptions.DataPackageException) as excinfo:
-        resource = Resource(descriptor)
-    assert "is not safe" in str(excinfo.value)
-    # unsafe=true
-    resource = Resource(descriptor, unsafe=True)
-    assert resource.read() == [["1", "english"], ["2", "中国人"]]
+def test_resource_relative_parent_path_with_trusted_option_issue_171():
+    # trusted=false (default)
+    resource = Resource(path="data/../data/table.csv")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        resource.read_rows()
+    error = excinfo.value.error
+    assert error.code == "resource-error"
+    assert error.note.count("data/table.csv")
+    # trusted=true
+    resource = Resource(path="data/../data/table.csv", trusted=True)
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
 
 
-@pytest.mark.skip
-def test_preserve_resource_format_from_descriptor_on_infer_issue_188():
-    resource = Resource({"path": "data/data.csvformat", "format": "csv"})
-    assert resource.infer() == {
-        "encoding": "utf-8",
+def test_resource_preserve_format_from_descriptor_on_infer_issue_188():
+    resource = Resource({"path": "data/table.csvformat", "format": "csv"})
+    resource.infer()
+    assert resource == {
+        "path": "data/table.csvformat",
         "format": "csv",
-        "mediatype": "text/csv",
-        "name": "data",
-        "path": "data/data.csvformat",
         "profile": "tabular-data-resource",
+        "name": "table",
+        "scheme": "file",
+        "hashing": "md5",
+        "encoding": "utf-8",
+        "compression": "no",
+        "dialect": {
+            "delimiter": ",",
+            "lineTerminator": "\r\n",
+            "doubleQuote": True,
+            "quoteChar": '"',
+            "skipInitialSpace": False,
+        },
         "schema": {
             "fields": [
-                {"format": "default", "name": "city", "type": "string"},
-                {"format": "default", "name": "population", "type": "integer"},
-            ],
-            "missingValues": [""],
+                {"name": "city", "type": "string"},
+                {"name": "population", "type": "integer"},
+            ]
         },
+        "hash": "f71969080b27963b937ca28cdd5f63b9",
+        "bytes": 58,
+        "rows": 3,
     }

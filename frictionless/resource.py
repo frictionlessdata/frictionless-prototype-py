@@ -50,6 +50,7 @@ class Resource(Metadata):
         schema=None,
         profile=None,
         basepath=None,
+        trusted=False,
         package=None,
     ):
         # Set attributes
@@ -66,6 +67,7 @@ class Resource(Metadata):
         self.setinitial("schema", schema)
         self.setinitial("profile", profile)
         self.__basepath = basepath or helpers.detect_basepath(descriptor)
+        self.__trusted = trusted
         self.__package = package
         super().__init__(descriptor)
 
@@ -97,7 +99,7 @@ class Resource(Metadata):
         if not path:
             return []
         for path_item in path if isinstance(path, list) else [path]:
-            if not helpers.is_safe_path(path_item):
+            if not self.__trusted and not helpers.is_safe_path(path_item):
                 note = f'path "{path_item}" is not safe'
                 raise exceptions.FrictionlessException(errors.ResourceError(note=note))
         if self.multipart:
@@ -182,7 +184,7 @@ class Resource(Metadata):
             # TODO: metadata_attach re-create it as a ControlledDict
             dialect = self.metadata_attach("dialect", Dialect())
         elif isinstance(dialect, str):
-            if not helpers.is_safe_path(dialect):
+            if not self.__trusted and not helpers.is_safe_path(dialect):
                 note = f'dialect path "{dialect}" is not safe'
                 raise exceptions.FrictionlessException(errors.ResourceError(note=note))
             dialect = Dialect(os.path.join(self.basepath, dialect))
@@ -195,7 +197,7 @@ class Resource(Metadata):
             # TODO: metadata_attach re-create it as a ControlledDict
             schema = self.metadata_attach("schema", Schema())
         elif isinstance(schema, str):
-            if not helpers.is_safe_path(schema):
+            if not self.__trusted and not helpers.is_safe_path(schema):
                 note = f'schema path "{schema}" is not safe'
                 raise exceptions.FrictionlessException(errors.ResourceError(note=note))
             schema = Schema(os.path.join(self.basepath, schema))
