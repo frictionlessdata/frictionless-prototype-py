@@ -17,6 +17,7 @@ from . import config
 
 class Resource(Metadata):
     metadata_Error = errors.ResourceError
+    metadata_duplicate = True
     metadata_setters = {
         "name": "name",
         "path": "path",
@@ -49,6 +50,7 @@ class Resource(Metadata):
         schema=None,
         profile=None,
         basepath=None,
+        package=None,
     ):
         # Set attributes
         self.setinitial("name", name)
@@ -64,6 +66,7 @@ class Resource(Metadata):
         self.setinitial("schema", schema)
         self.setinitial("profile", profile)
         self.__basepath = basepath or helpers.detect_basepath(descriptor)
+        self.__package = package
         super().__init__(descriptor)
 
         # Set hashing
@@ -301,9 +304,15 @@ class Resource(Metadata):
         rows = list(self.read_row_stream())
         return rows
 
+    # TODO: move integrity to Table?
     def read_row_stream(self):
+        lookup = self.read_lookup()
+        check = system.create_check("integrity", descriptor={"lookup": lookup})
         with self.table as table:
+            check.connect(table)
+            check.prepare()
             for row in table.row_stream:
+                row.errors.extend(check.validate_row(row))
                 yield row
 
     def read_headers(self):
@@ -326,6 +335,31 @@ class Resource(Metadata):
             while bytes:
                 bytes = byte_stream.read1(io.DEFAULT_BUFFER_SIZE)
             return self.__file.stats
+
+    def read_lookup(self):
+        lookup = {}
+        # TODO: remove
+        if not self.schema:
+            return lookup
+        for fk in self.schema.foreign_keys:
+            source_name = fk["reference"]["resource"]
+            source_key = tuple(fk["reference"]["fields"])
+            source_res = self.__package.get_resource(source_name) if source_name else self
+            if source_name != "" and not self.__package:
+                continue
+            lookup.setdefault(source_name, {})
+            if source_key in lookup[source_name]:
+                continue
+            lookup[source_name][source_key] = set()
+            if not source_res:
+                continue
+            with source_res.table as table:
+                for row in table.row_stream:
+                    cells = tuple(row.get(field_name) for field_name in source_key)
+                    if set(cells) == {None}:
+                        continue
+                    lookup[source_name][source_key].add(cells)
+        return lookup
 
     # Save
 

@@ -169,35 +169,6 @@ def detect_source_scheme_and_format(source):
     return (scheme, format)
 
 
-# TODO: move to Resource/Package?
-# TODO: rebase on the new resource/package
-def create_lookup(resource, *, package=None):
-    lookup = {}
-    for fk in resource.schema.foreign_keys:
-        source_name = fk["reference"]["resource"]
-        source_key = tuple(fk["reference"]["fields"])
-        source_res = package.get_resource(source_name) if source_name else resource
-        if source_name != "" and not package:
-            continue
-        lookup.setdefault(source_name, {})
-        if source_key in lookup[source_name]:
-            continue
-        lookup[source_name][source_key] = set()
-        if not source_res:
-            continue
-        try:
-            # Current version of tableschema/datapackage raises cast errors
-            # In the future this code should use not raising iterator
-            for keyed_row in source_res.iter(keyed=True):
-                cells = tuple(keyed_row[field_name] for field_name in source_key)
-                if set(cells) == {None}:
-                    continue
-                lookup[source_name][source_key].add(cells)
-        except Exception:
-            pass
-    return lookup
-
-
 def get_current_memory_usage():
     # Current memory usage of the current process in MB
     # This will only work on systems with a /proc file system (like Linux)
@@ -228,6 +199,7 @@ class Timer:
 # Collections
 
 
+# TODO: ability to set onchange no in constructor
 class ControlledDict(dict):
     def __init__(self, value, *, onchange):
         super().__init__(value)
@@ -283,6 +255,7 @@ class ControlledDict(dict):
         return result
 
 
+# TODO: ability to set onchange no in constructor
 class ControlledList(list):
     def __init__(self, value, *, onchange):
         super().__init__(value)

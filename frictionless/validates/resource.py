@@ -27,7 +27,7 @@ def validate_resource(source, basepath=None, noinfer=False, lookup=None, **optio
 
     # Prepare table
     if lookup is None:
-        lookup = helpers.create_lookup(resource)
+        lookup = resource.read_lookup()
 
     # Validate table
     report = validate_table(

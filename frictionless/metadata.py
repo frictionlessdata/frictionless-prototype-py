@@ -25,6 +25,7 @@ class Metadata(helpers.ControlledDict):
     metadata_Error = None
     metadata_profile = None
     metadata_strict = False
+    metadata_duplicate = False
     metadata_setters = {}
 
     def __init__(self, descriptor=None):
@@ -82,12 +83,12 @@ class Metadata(helpers.ControlledDict):
     # Extract
 
     # TODO: support yaml?
-    def metadata_extract(self, descriptor, *, duplicate=False):
+    def metadata_extract(self, descriptor):
         try:
             if descriptor is None:
                 return {}
             if isinstance(descriptor, dict):
-                return deepcopy(descriptor) if duplicate else descriptor
+                return deepcopy(descriptor) if self.metadata_duplicate else descriptor
             if isinstance(descriptor, str):
                 if helpers.is_remote_path(descriptor):
                     response = requests.get(descriptor)

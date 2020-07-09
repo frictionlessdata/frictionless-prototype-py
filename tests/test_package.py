@@ -7,7 +7,6 @@ import pytest
 import tempfile
 import httpretty
 from copy import deepcopy
-from datapackage import infer
 from frictionless import Package, exceptions
 
 
@@ -119,7 +118,7 @@ def test_package_from_invalid_descriptor_type():
 
 
 @pytest.mark.skip
-def test_it_works_with_local_paths(datapackage_zip):
+def test_it_works_with_local_paths():
     package = Package(datapackage_zip.name)
     assert package.descriptor["name"] == "proverbs"
     assert len(package.resources) == 1
@@ -127,7 +126,7 @@ def test_it_works_with_local_paths(datapackage_zip):
 
 
 @pytest.mark.skip
-def test_it_works_with_file_objects(datapackage_zip):
+def test_it_works_with_file_objects():
     package = Package(datapackage_zip)
     assert package.descriptor["name"] == "proverbs"
     assert len(package.resources) == 1
@@ -135,7 +134,7 @@ def test_it_works_with_file_objects(datapackage_zip):
 
 
 @pytest.mark.skip
-def test_it_works_with_remote_files(datapackage_zip):
+def test_it_works_with_remote_files():
     httpretty.enable()
     datapackage_zip.seek(0)
     url = "http://someplace.com/datapackage.zip"
@@ -150,7 +149,7 @@ def test_it_works_with_remote_files(datapackage_zip):
 
 
 @pytest.mark.skip
-def test_it_removes_temporary_directories(datapackage_zip):
+def test_it_removes_temporary_directories():
     tempdirs_glob = os.path.join(tempfile.gettempdir(), "*-datapackage")
     original_tempdirs = glob.glob(tempdirs_glob)
     package = Package(datapackage_zip)
@@ -160,7 +159,7 @@ def test_it_removes_temporary_directories(datapackage_zip):
 
 
 @pytest.mark.skip
-def test_local_data_path(datapackage_zip):
+def test_local_data_path():
     package = Package(datapackage_zip)
     assert package.resources[0].local_data_path is not None
     with open("data/foo.txt") as data_file:
@@ -215,13 +214,13 @@ def test_package_resources():
     ]
 
 
-def test_pakcage_resources_inline():
+def test_package_resources_inline():
     data = [["id", "name"], ["1", "english"], ["2", "中国人"]]
     package = Package({"resources": [{"name": "name", "data": data}]})
     resource = package.get_resource("name")
     assert len(package.resources) == 1
     assert resource.path is None
-    assert resource.data is data
+    assert resource.data == data
     assert resource.source == data
     assert resource.read_rows() == [
         {"id": 1, "name": "english"},
@@ -602,7 +601,7 @@ def test_should_raise_if_zipfile_raised_LargeZipFile(zipfile_mock, tmpfile):
 
 # Integrity
 
-FK_DESCRIPTOR = {
+INTEGRITY_DESCRIPTOR = {
     "resources": [
         {
             "name": "main",
@@ -640,186 +639,104 @@ FK_DESCRIPTOR = {
 }
 
 
-@pytest.mark.skip
-def test_single_field_foreign_key():
-    resource = Package(FK_DESCRIPTOR).get_resource("main")
-    rows = resource.read(relations=True)
+def test_package_integrity():
+    package = Package(INTEGRITY_DESCRIPTOR)
+    resource = package.get_resource("main")
+    rows = resource.read_rows()
+    assert rows[0].valid
+    assert rows[1].valid
+    assert rows[2].valid
     assert rows == [
-        ["1", {"firstname": "Alex", "surname": "Martin"}, "Martin", None],
-        ["2", {"firstname": "John", "surname": "Dockins"}, "Dockins", "1"],
-        ["3", {"firstname": "Walter", "surname": "White"}, "White", "2"],
-    ]
-
-
-@pytest.mark.skip
-def test_single_field_foreign_key_invalid():
-    descriptor = deepcopy(FK_DESCRIPTOR)
-    descriptor["resources"][1]["data"][2][0] = "Max"
-    resource = Package(descriptor).get_resource("main")
-    with pytest.raises(exceptions.RelationError) as excinfo1:
-        resource.read(relations=True)
-    with pytest.raises(exceptions.RelationError) as excinfo2:
-        resource.check_relations()
-    assert "Foreign key" in str(excinfo1.value)
-    assert "Foreign key" in str(excinfo2.value)
-
-
-@pytest.mark.skip
-def test_single_self_field_foreign_key():
-    descriptor = deepcopy(FK_DESCRIPTOR)
-    descriptor["resources"][0]["schema"]["foreignKeys"][0]["fields"] = "parent_id"
-    descriptor["resources"][0]["schema"]["foreignKeys"][0]["reference"]["resource"] = ""
-    descriptor["resources"][0]["schema"]["foreignKeys"][0]["reference"]["fields"] = "id"
-    resource = Package(descriptor).get_resource("main")
-    keyed_rows = resource.read(keyed=True, relations=True)
-    assert keyed_rows == [
         {"id": "1", "name": "Alex", "surname": "Martin", "parent_id": None},
-        {
-            "id": "2",
-            "name": "John",
-            "surname": "Dockins",
-            "parent_id": {
-                "id": "1",
-                "name": "Alex",
-                "surname": "Martin",
-                "parent_id": None,
-            },
-        },
-        {
-            "id": "3",
-            "name": "Walter",
-            "surname": "White",
-            "parent_id": {
-                "id": "2",
-                "name": "John",
-                "surname": "Dockins",
-                "parent_id": "1",
-            },
-        },
+        {"id": "2", "name": "John", "surname": "Dockins", "parent_id": "1"},
+        {"id": "3", "name": "Walter", "surname": "White", "parent_id": "2"},
     ]
 
 
-@pytest.mark.skip
-def test_single_self_field_foreign_key_invalid():
-    descriptor = deepcopy(FK_DESCRIPTOR)
-    descriptor["resources"][0]["schema"]["foreignKeys"][0]["fields"] = "parent_id"
-    descriptor["resources"][0]["schema"]["foreignKeys"][0]["reference"]["resource"] = ""
-    descriptor["resources"][0]["schema"]["foreignKeys"][0]["reference"]["fields"] = "id"
-    descriptor["resources"][0]["data"][2][0] = "0"
-    resource = Package(descriptor).get_resource("main")
-    with pytest.raises(exceptions.RelationError) as excinfo1:
-        resource.read(relations=True)
-    with pytest.raises(exceptions.RelationError) as excinfo2:
-        resource.check_relations()
-    assert "Foreign key" in str(excinfo1.value)
-    assert "Foreign key" in str(excinfo2.value)
-
-
-@pytest.mark.skip
-def test_multi_field_foreign_key():
-    descriptor = deepcopy(FK_DESCRIPTOR)
-    descriptor["resources"][0]["schema"]["foreignKeys"][0]["fields"] = ["name", "surname"]
-    descriptor["resources"][0]["schema"]["foreignKeys"][0]["reference"]["fields"] = [
-        "firstname",
-        "surname",
-    ]
-    resource = Package(descriptor).get_resource("main")
-    keyed_rows = resource.read(keyed=True, relations=True)
-    assert keyed_rows == [
-        {
-            "id": "1",
-            "name": {"firstname": "Alex", "surname": "Martin"},
-            "surname": {"firstname": "Alex", "surname": "Martin"},
-            "parent_id": None,
-        },
-        {
-            "id": "2",
-            "name": {"firstname": "John", "surname": "Dockins"},
-            "surname": {"firstname": "John", "surname": "Dockins"},
-            "parent_id": "1",
-        },
-        {
-            "id": "3",
-            "name": {"firstname": "Walter", "surname": "White"},
-            "surname": {"firstname": "Walter", "surname": "White"},
-            "parent_id": "2",
-        },
+def test_package_integrity_foreign_key_invalid():
+    package = Package(INTEGRITY_DESCRIPTOR)
+    package.resources[1].data[3][0] = "bad"
+    resource = package.get_resource("main")
+    rows = resource.read_rows()
+    assert rows[0].valid
+    assert rows[1].valid
+    assert rows[2].errors[0].code == "foreign-key-error"
+    assert rows == [
+        {"id": "1", "name": "Alex", "surname": "Martin", "parent_id": None},
+        {"id": "2", "name": "John", "surname": "Dockins", "parent_id": "1"},
+        {"id": "3", "name": "Walter", "surname": "White", "parent_id": "2"},
     ]
 
 
-@pytest.mark.skip
-def test_multi_field_foreign_key_invalid():
-    descriptor = deepcopy(FK_DESCRIPTOR)
-    descriptor["resources"][0]["schema"]["foreignKeys"][0]["fields"] = ["name", "surname"]
-    descriptor["resources"][0]["schema"]["foreignKeys"][0]["reference"]["fields"] = [
-        "firstname",
-        "surname",
+def test_package_integrity_foreign_key_self_reference():
+    package = Package(INTEGRITY_DESCRIPTOR)
+    package.resources[0].schema.foreign_keys = [
+        {"fields": "parent_id", "reference": {"resource": "", "fields": "id"}}
     ]
-    descriptor["resources"][1]["data"][2][0] = "Max"
-    resource = Package(descriptor).get_resource("main")
-    with pytest.raises(exceptions.RelationError) as excinfo1:
-        resource.read(relations=True)
-    with pytest.raises(exceptions.RelationError) as excinfo2:
-        resource.check_relations()
-    assert "Foreign key" in str(excinfo1.value)
-    assert "Foreign key" in str(excinfo2.value)
+    resource = package.get_resource("main")
+    rows = resource.read_rows()
+    assert rows[0].valid
+    assert rows[1].valid
+    assert rows[2].valid
+
+
+def test_package_integrity_foreign_key_self_reference_invalid():
+    package = Package(INTEGRITY_DESCRIPTOR)
+    package.resources[0].data[2][0] = "0"
+    package.resources[0].schema.foreign_keys = [
+        {"fields": "parent_id", "reference": {"resource": "", "fields": "id"}}
+    ]
+    resource = package.get_resource("main")
+    rows = resource.read_rows()
+    assert rows[0].valid
+    assert rows[1].valid
+    assert rows[2].errors[0].code == "foreign-key-error"
+
+
+def test_package_integrity_foreign_key_multifield():
+    package = Package(INTEGRITY_DESCRIPTOR)
+    package.resources[0].schema.foreign_keys = [
+        {
+            "fields": ["name", "surname"],
+            "reference": {"resource": "people", "fields": ["firstname", "surname"]},
+        }
+    ]
+    resource = package.get_resource("main")
+    rows = resource.read_rows()
+    assert rows[0].valid
+    assert rows[1].valid
+    assert rows[2].valid
+
+
+def test_package_integrity_foreign_key_multifield_invalid():
+    package = Package(INTEGRITY_DESCRIPTOR)
+    package.resources[0].schema.foreign_keys = [
+        {
+            "fields": ["name", "surname"],
+            "reference": {"resource": "people", "fields": ["firstname", "surname"]},
+        }
+    ]
+    package.resources[1].data[3][0] = "bad"
+    resource = package.get_resource("main")
+    rows = resource.read_rows()
+    assert rows[0].valid
+    assert rows[1].valid
+    assert rows[2].errors[0].code == "foreign-key-error"
+
+
+def test_package_integrity_read_lookup():
+    package = Package(INTEGRITY_DESCRIPTOR)
+    resource = package.get_resource("main")
+    lookup = resource.read_lookup()
+    assert lookup == {"people": {("firstname",): {("Walter",), ("Alex",), ("John",)}}}
 
 
 # Issues
 
 
-@pytest.mark.skip
 def test_package_dialect_no_header_issue_167():
-    package = Package("data/package_dialect_no_header.json")
-    keyed_rows = package.get_resource("people").read(keyed=True)
-    assert keyed_rows[0]["score"] == 1
-    assert keyed_rows[1]["score"] == 1
-
-
-@pytest.mark.skip
-def test_package_save_slugify_fk_resource_name_issue_181():
-    descriptor = {
-        "resources": [
-            {
-                "name": "my-langs",
-                "data": [["en"], ["ch"]],
-                "schema": {"fields": [{"name": "lang"}]},
-            },
-            {
-                "name": "my-notes",
-                "data": [["1", "en", "note1"], [2, "ch", "note2"]],
-                "schema": {
-                    "fields": [
-                        {"name": "id", "type": "integer"},
-                        {"name": "lang"},
-                        {"name": "note"},
-                    ],
-                    "foreignKeys": [
-                        {
-                            "fields": "lang",
-                            "reference": {"resource": "my-langs", "fields": "lang"},
-                        }
-                    ],
-                },
-            },
-        ]
-    }
-    storage = None
-    #  storage = Mock(buckets=["my_langs", "my_notes"], spec=Storage)
-    package = Package(descriptor)
-    package.save(storage=storage)
-    assert storage.create.call_args[0][0] == ["my_langs", "my_notes"]
-    assert storage.create.call_args[0][1][1]["foreignKeys"] == [
-        {"fields": "lang", "reference": {"resource": "my_langs", "fields": "lang"}}
-    ]
-
-
-# Fixtures
-
-
-@pytest.fixture
-def datapackage_zip(tmpfile):
-    descriptor = {"name": "proverbs", "resources": [{"name": "name", "path": "foo.txt"}]}
-    package = Package(descriptor, default_base_path="data")
-    package.save(tmpfile)
-    return tmpfile
+    package = Package("data/package-dialect-no-header.json")
+    resource = package.get_resource("people")
+    rows = resource.read_rows()
+    assert rows[0]["score"] == 1
+    assert rows[1]["score"] == 1

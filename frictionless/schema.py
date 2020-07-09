@@ -25,6 +25,7 @@ class Schema(Metadata):
 
     metadata_Error = errors.SchemaError  # type: ignore
     metadata_profile = config.SCHEMA_PROFILE
+    metadata_duplicate = True
     metadata_setters = {
         "fields": "fields",
         "missing_values": "missingValues",

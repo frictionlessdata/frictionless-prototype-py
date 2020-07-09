@@ -31,6 +31,7 @@ class Field(Metadata):
 
     metadata_Error = errors.SchemaError  # type: ignore
     metadata_profile = config.SCHEMA_PROFILE["properties"]["fields"]["items"]
+    metadata_duplicate = True
     metadata_setters = {
         "name": "name",
         "type": "type",
@@ -52,12 +53,12 @@ class Field(Metadata):
         constraints=None,
         schema=None,
     ):
-        self.__schema = schema
         self.setinitial("name", name)
         self.setinitial("type", type)
         self.setinitial("format", format)
         self.setinitial("missingValues", missing_values)
         self.setinitial("constraints", constraints)
+        self.__schema = schema
         super().__init__(descriptor)
 
     @cached_property

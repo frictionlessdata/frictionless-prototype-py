@@ -23,6 +23,7 @@ class Package(Metadata):
     """
 
     metadata_Error = errors.PackageError  # type: ignore
+    metadata_duplicate = True
     metadata_setters = {
         "name": "name",
         "title": "title",
@@ -212,7 +213,7 @@ class Package(Metadata):
                 if not isinstance(resource, Resource):
                     if not isinstance(resource, dict):
                         resource = {"name": f"resource{index+1}"}
-                    resource = Resource(resource, basepath=self.basepath)
+                    resource = Resource(resource, basepath=self.basepath, package=self)
                     list.__setitem__(resources, index, resource)
             if not isinstance(resources, helpers.ControlledList):
                 resources = helpers.ControlledList(

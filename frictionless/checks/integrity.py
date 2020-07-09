@@ -2,6 +2,7 @@ from .. import errors
 from ..check import Check
 
 
+# TODO: merge to baseline?
 class IntegrityCheck(Check):
     metadata_profile = {  # type: ignore
         "type": "object",
@@ -46,6 +47,7 @@ class IntegrityCheck(Check):
 
     # Validate
 
+    # TODO: move to Table?
     def validate_row(self, row):
 
         # Unique Error

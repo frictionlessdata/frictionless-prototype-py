@@ -618,6 +618,9 @@ def test_resource_save(tmpdir):
     }
 
 
+# TODO: add more tests
+
+
 # Compression
 
 
@@ -760,6 +763,59 @@ def test_source_multipart_local_infer():
             "missingValues": [""],
         },
     }
+
+
+# Integrity
+
+INTEGRITY_DESCRIPTOR = {
+    "path": "data/nested.csv",
+    "schema": {
+        "fields": [
+            {"name": "id", "type": "integer"},
+            {"name": "cat", "type": "integer"},
+            {"name": "name", "type": "string"},
+        ],
+        "foreignKeys": [{"fields": "cat", "reference": {"resource": "", "fields": "id"}}],
+    },
+}
+
+
+def test_resource_integrity():
+    resource = Resource(INTEGRITY_DESCRIPTOR)
+    rows = resource.read_rows()
+    assert rows[0].valid
+    assert rows[1].valid
+    assert rows[2].valid
+    assert rows[3].valid
+    assert rows == [
+        {"id": 1, "cat": None, "name": "England"},
+        {"id": 2, "cat": None, "name": "France"},
+        {"id": 3, "cat": 1, "name": "London"},
+        {"id": 4, "cat": 2, "name": "Paris"},
+    ]
+
+
+def test_resource_integrity_invalid():
+    resource = Resource(INTEGRITY_DESCRIPTOR, path="data/nested-invalid.csv")
+    rows = resource.read_rows()
+    assert rows[0].valid
+    assert rows[1].valid
+    assert rows[2].valid
+    assert rows[3].valid
+    assert rows[4].errors[0].code == "foreign-key-error"
+    assert rows == [
+        {"id": 1, "cat": None, "name": "England"},
+        {"id": 2, "cat": None, "name": "France"},
+        {"id": 3, "cat": 1, "name": "London"},
+        {"id": 4, "cat": 2, "name": "Paris"},
+        {"id": 5, "cat": 6, "name": "Rome"},
+    ]
+
+
+def test_resource_integrity_read_lookup():
+    resource = Resource(INTEGRITY_DESCRIPTOR)
+    lookup = resource.read_lookup()
+    assert lookup == {"": {("id",): {(1,), (2,), (3,), (4,)}}}
 
 
 # Issues
