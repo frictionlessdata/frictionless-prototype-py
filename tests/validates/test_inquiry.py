@@ -80,14 +80,12 @@ def test_validate_multiple_invalid_with_schema():
     ]
 
 
-@pytest.mark.skip
 @pytest.mark.slow
 def test_validate_with_one_package():
     report = validate({"tasks": [{"source": "data/package/datapackage.json"}]})
     assert report.valid
 
 
-@pytest.mark.skip
 @pytest.mark.slow
 def test_validate_with_multiple_packages():
     report = validate(
@@ -102,5 +100,4 @@ def test_validate_with_multiple_packages():
         [3, 3, None, "blank-row"],
         [3, 3, None, "primary-key-error"],
         [4, 4, None, "blank-row"],
-        [4, 5, None, "foreign-key-error"],
     ]
