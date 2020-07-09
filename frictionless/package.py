@@ -1,3 +1,5 @@
+import os
+import glob
 from .metadata import Metadata
 from .helpers import cached_property
 from .resource import Resource
@@ -166,9 +168,18 @@ class Package(Metadata):
 
     # Infer
 
-    # TODO: support infer from files
-    def infer(self):
+    def infer(self, source):
         self.setdefault("profile", config.DEFAULT_PACKAGE_PROFILE)
+
+        # Paths
+        if source:
+            self.resources.clear()
+            for pattern in source if isinstance(source, list) else [source]:
+                options = {"recursive": True} if "**" in pattern else {}
+                for path in glob.glob(os.path.join(self.basepath, pattern), **options):
+                    self.resources.append({"path": os.path.relpath(path, self.basepath)})
+
+        # General
         for resource in self.resources:
             resource.infer()
 

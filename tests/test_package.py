@@ -346,41 +346,98 @@ def test_package_expand_resource_dialect():
 # Infer
 
 
-@pytest.mark.skip
-def test_infer():
-    descriptor = infer("datapackage/*.csv", base_path="data")
-    assert descriptor == {
-        "profile": "tabular-data-package",
+def test_package_infer():
+    package = Package()
+    package.infer("data/infer/*.csv")
+    assert package == {
+        "profile": "data-package",
         "resources": [
             {
-                "encoding": "utf-8",
-                "format": "csv",
-                "mediatype": "text/csv",
-                "name": "data",
-                "path": "datapackage/data.csv",
+                "path": "data/infer/data.csv",
+                "hash": "c028f525f314c49ea48ed09e82292ed2",
+                "bytes": 114,
+                "rows": 2,
                 "profile": "tabular-data-resource",
+                "name": "data",
+                "scheme": "file",
+                "format": "csv",
+                "hashing": "md5",
+                "encoding": "utf-8",
+                "compression": "no",
+                "dialect": {
+                    "delimiter": ",",
+                    "lineTerminator": "\r\n",
+                    "doubleQuote": True,
+                    "quoteChar": '"',
+                    "skipInitialSpace": False,
+                },
                 "schema": {
                     "fields": [
-                        {"format": "default", "name": "id", "type": "integer"},
-                        {"format": "default", "name": "city", "type": "string"},
-                    ],
-                    "missingValues": [""],
+                        {"name": "id", "type": "string"},
+                        {"name": "name", "type": "string"},
+                        {"name": "description", "type": "string"},
+                        {"name": "amount", "type": "number"},
+                    ]
                 },
-            }
+            },
+            {
+                "path": "data/infer/data2.csv",
+                "hash": "cb4a683d8eecb72c9ac9beea91fd592e",
+                "bytes": 60,
+                "rows": 3,
+                "profile": "tabular-data-resource",
+                "name": "data2",
+                "scheme": "file",
+                "format": "csv",
+                "hashing": "md5",
+                "encoding": "utf-8",
+                "compression": "no",
+                "dialect": {
+                    "delimiter": ",",
+                    "lineTerminator": "\r\n",
+                    "doubleQuote": True,
+                    "quoteChar": '"',
+                    "skipInitialSpace": False,
+                },
+                "schema": {
+                    "fields": [
+                        {"name": "parent", "type": "string"},
+                        {"name": "comment", "type": "string"},
+                    ]
+                },
+            },
         ],
     }
 
 
-@pytest.mark.skip
-def test_infer_non_utf8_file():
-    descriptor = infer("data/data_with_accents.csv")
-    assert descriptor["resources"][0]["encoding"] == "iso-8859-1"
+def test_package_infer_with_basepath():
+    package = Package(basepath="data/infer")
+    package.infer("*.csv")
+    assert len(package.resources) == 2
+    assert package.resources[0].path == "data.csv"
+    assert package.resources[1].path == "data2.csv"
 
 
-@pytest.mark.skip
-def test_infer_empty_file():
-    descriptor = infer("data/empty.csv")
-    assert descriptor["resources"][0].get("encoding") is None
+def test_package_infer_multiple_paths():
+    package = Package(basepath="data/infer")
+    package.infer(["data.csv", "data2.csv"])
+    assert len(package.resources) == 2
+    assert package.resources[0].path == "data.csv"
+    assert package.resources[1].path == "data2.csv"
+
+
+def test_package_infer_non_utf8_file():
+    package = Package()
+    package.infer("data/table-with-accents.csv")
+    assert len(package.resources) == 1
+    assert package.resources[0].encoding == "iso8859-1"
+
+
+def test_package_infer_empty_file():
+    package = Package()
+    package.infer("data/empty.csv")
+    assert len(package.resources) == 1
+    assert package.resources[0].stats["bytes"] == 0
 
 
 # Save
