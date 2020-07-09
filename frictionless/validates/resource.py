@@ -21,7 +21,7 @@ def validate_resource(source, basepath=None, noinfer=False, lookup=None, **optio
 
     # Prepare resource
     if not noinfer:
-        resource.infer()
+        resource.infer(only_sample=True)
     if resource.metadata_errors:
         return Report(time=timer.time, errors=resource.metadata_errors, tables=[])
 

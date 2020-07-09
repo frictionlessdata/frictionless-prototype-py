@@ -131,6 +131,8 @@ class Resource(Metadata):
                 return False
         except Exception:
             pass
+        finally:
+            self.table.close()
         return True
 
     @cached_property
@@ -238,27 +240,26 @@ class Resource(Metadata):
 
     # Infer
 
-    def infer(self, path=None):
+    # TODO: optimize this logic/don't re-open
+    def infer(self, path=None, *, only_sample=False):
+        patch = {}
 
         # From path
         if path:
             self.path = path
 
-        # Stats
-        stats = self.read_stats()
-        patch = stats.copy()
-
         # Tabular
-        if patch["rows"]:
-            patch["profile"] = "tabular-data-resource"
-            patch["name"] = self.get("name", helpers.detect_name(self.table.path))
-            patch["scheme"] = self.table.scheme
-            patch["format"] = self.table.format
-            patch["hashing"] = self.table.hashing
-            patch["encoding"] = self.table.encoding
-            patch["compression"] = self.table.compression
-            patch["dialect"] = self.table.dialect
-            patch["schema"] = self.table.schema
+        if self.tabular:
+            with self.table:
+                patch["profile"] = "tabular-data-resource"
+                patch["name"] = self.get("name", helpers.detect_name(self.table.path))
+                patch["scheme"] = self.table.scheme
+                patch["format"] = self.table.format
+                patch["hashing"] = self.table.hashing
+                patch["encoding"] = self.table.encoding
+                patch["compression"] = self.table.compression
+                patch["dialect"] = self.table.dialect
+                patch["schema"] = self.table.schema
 
         # General
         else:
@@ -270,9 +271,12 @@ class Resource(Metadata):
             patch["encoding"] = self.__file.encoding
             patch["compression"] = self.__file.compression
 
-        # Hashing
-        if patch["hashing"] != config.DEFAULT_HASHING:
-            patch["hash"] = ":".join([patch["hashing"], patch["hash"]])
+        # Stats
+        if not only_sample:
+            stats = self.read_stats()
+            patch.update(stats)
+            if patch["hashing"] != config.DEFAULT_HASHING:
+                patch["hash"] = ":".join([patch["hashing"], patch["hash"]])
 
         # Apply/expand
         self.update(patch)

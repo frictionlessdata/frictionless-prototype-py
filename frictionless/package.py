@@ -169,7 +169,7 @@ class Package(Metadata):
 
     # Infer
 
-    def infer(self, *patterns):
+    def infer(self, *patterns, only_sample=False):
         self.setdefault("profile", config.DEFAULT_PACKAGE_PROFILE)
 
         # From patterns
@@ -182,7 +182,7 @@ class Package(Metadata):
 
         # General
         for resource in self.resources:
-            resource.infer()
+            resource.infer(only_sample=only_sample)
 
     # Save
 
@@ -198,8 +198,6 @@ class Package(Metadata):
 
     @cached_property
     def metadata_profile(self):
-        if self.profile == "tabular-data-package":
-            return config.TABULAR_PACKAGE_PROFILE
         if self.profile == "fiscal-data-package":
             return config.FISCAL_PACKAGE_PROFILE
         return config.PACKAGE_PROFILE

@@ -22,23 +22,26 @@ def validate_package(source, basepath=None, noinfer=False, **options):
 
     # Prepare package
     if not noinfer:
-        package.infer()
+        package.infer(only_sample=True)
+
     if package.metadata_errors:
         return Report(time=timer.time, errors=package.metadata_errors, tables=[])
 
     # Prepare inquiry
     descriptor = {"tasks": []}
     for resource in package.resources:
-        lookup = helpers.create_lookup(resource, package=package)
-        descriptor["tasks"].append(
-            helpers.create_descriptor(
-                **options,
-                source=resource,
-                basepath=resource.basepath,
-                noinfer=noinfer,
-                lookup=lookup,
+        if resource.profile == "tabular-data-resource":
+            lookup = resource.read_lookup()
+            descriptor["tasks"].append(
+                helpers.create_descriptor(
+                    **options,
+                    # TODO: review why copy (problem with cached table)
+                    source=resource.copy(),
+                    basepath=resource.basepath,
+                    noinfer=noinfer,
+                    lookup=lookup,
+                )
             )
-        )
 
     # Validate inquiry
     inquiry = Inquiry(descriptor)

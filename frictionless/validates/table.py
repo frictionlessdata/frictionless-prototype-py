@@ -39,6 +39,7 @@ def validate_table(
     infer_volume=config.DEFAULT_INFER_VOLUME,
     infer_confidence=config.DEFAULT_INFER_CONFIDENCE,
     # Validation
+    # TODO: rename to checksum (confusion with stats)?
     stats=None,
     lookup=None,
     pick_errors=None,

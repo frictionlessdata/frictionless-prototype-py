@@ -20,7 +20,6 @@ def test_validate_invalid_source():
     ]
 
 
-@pytest.mark.skip
 def test_validate_invalid_resource():
     report = validate({"path": "data/table.csv", "schema": "bad"})
     assert report.flatten(["code", "note"]) == [
@@ -55,7 +54,6 @@ def test_validate_invalid_table():
     ]
 
 
-@pytest.mark.skip
 def test_validate_multipart_resource():
     report = validate({"path": ["data/chunk1.csv", "data/chunk2.csv"]})
     assert report.valid
@@ -103,7 +101,6 @@ def test_validate_foreign_key_error_invalid():
     ]
 
 
-@pytest.mark.skip
 def test_validate_foreign_key_error_self_referencing():
     source = {
         "path": "data/nested.csv",
@@ -122,7 +119,6 @@ def test_validate_foreign_key_error_self_referencing():
     assert report.valid
 
 
-@pytest.mark.skip
 def test_validate_foreign_key_error_self_referencing_invalid():
     source = {
         "path": "data/nested-invalid.csv",

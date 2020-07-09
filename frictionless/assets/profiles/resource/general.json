@@ -93,7 +93,7 @@
       "propertyOrder": 40,
       "title": "Schema",
       "description": "A schema for this resource.",
-      "type": "object"
+      "type": ["string", "object"]
     },
     "title": {
       "propertyOrder": 50,

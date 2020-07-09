@@ -99,7 +99,7 @@
       "propertyOrder": 40,
       "title": "Table Schema",
       "description": "A Table Schema for this resource, compliant with the [Table Schema](/tableschema/) specification.",
-      "type": "object",
+      "type": ["string", "object"],
       "required": [
         "fields"
       ],
@@ -1786,11 +1786,7 @@
       "propertyOrder": 50,
       "title": "CSV Dialect",
       "description": "The CSV dialect descriptor.",
-      "type": "object",
-      "required": [
-        "delimiter",
-        "doubleQuote"
-      ],
+      "type": ["string", "object"],
       "properties": {
         "delimiter": {
           "title": "Delimiter",

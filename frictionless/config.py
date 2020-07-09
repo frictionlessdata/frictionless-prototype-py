@@ -22,7 +22,6 @@ SCHEMA_PROFILE = json.loads(read_asset("profiles", "schema.json"))
 RESOURCE_PROFILE = json.loads(read_asset("profiles", "resource", "general.json"))
 TABULAR_RESOURCE_PROFILE = json.loads(read_asset("profiles", "resource", "tabular.json"))
 PACKAGE_PROFILE = json.loads(read_asset("profiles", "package", "general.json"))
-TABULAR_PACKAGE_PROFILE = json.loads(read_asset("profiles", "package", "tabular.json"))
 FISCAL_PACKAGE_PROFILE = json.loads(read_asset("profiles", "package", "fiscal.json"))
 REMOTE_SCHEMES = ["http", "https", "ftp", "ftps"]
 COMPRESSION_FORMATS = ["zip", "gz"]

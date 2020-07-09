@@ -13,7 +13,6 @@ def test_validate():
     assert report.valid
 
 
-@pytest.mark.skip
 @pytest.mark.slow
 def test_validate_from_dict():
     with open("data/package/datapackage.json") as file:
@@ -21,7 +20,6 @@ def test_validate_from_dict():
         assert report.valid
 
 
-@pytest.mark.skip
 @pytest.mark.slow
 def test_validate_from_dict_invalid():
     with open("data/invalid/datapackage.json") as file:
@@ -32,19 +30,15 @@ def test_validate_from_dict_invalid():
             [1, 3, None, "blank-row"],
             [1, 3, None, "primary-key-error"],
             [2, 4, None, "blank-row"],
-            # This error should be removed with better lookup table extraction
-            [2, 5, None, "foreign-key-error"],
         ]
 
 
-@pytest.mark.skip
 @pytest.mark.slow
 def test_validate_from_path():
     report = validate("data/package/datapackage.json")
     assert report.valid
 
 
-@pytest.mark.skip
 @pytest.mark.slow
 def test_validate_from_path_invalid():
     report = validate("data/invalid/datapackage.json")
@@ -52,8 +46,6 @@ def test_validate_from_path_invalid():
         [1, 3, None, "blank-row"],
         [1, 3, None, "primary-key-error"],
         [2, 4, None, "blank-row"],
-        # This error should be removed with better lookup table extraction
-        [2, 5, None, "foreign-key-error"],
     ]
 
 
@@ -77,7 +69,6 @@ def test_validate_from_zip_invalid():
     ]
 
 
-@pytest.mark.skip
 @pytest.mark.slow
 def test_validate_with_non_tabular():
     report = validate(
@@ -96,6 +87,7 @@ def test_validate_invalid_descriptor_path():
     ]
 
 
+@pytest.mark.skip
 def test_validate_invalid_package():
     report = validate({"resources": [{"path": "data/table.csv", "schema": "bad"}]})
     assert report.flatten(["code", "note"]) == [
@@ -130,7 +122,6 @@ def test_validate_invalid_table():
     ]
 
 
-@pytest.mark.skip
 @pytest.mark.slow
 def test_validate_pathlib_source():
     report = validate(pathlib.Path("data/package/datapackage.json"))
@@ -143,7 +134,6 @@ def test_validate_package_infer():
     assert report.valid
 
 
-@pytest.mark.skip
 def test_validate_package_dialect_header_false():
     descriptor = {
         "resources": [
@@ -153,7 +143,7 @@ def test_validate_package_dialect_header_false():
                 "schema": {
                     "fields": [{"name": "name"}, {"name": "age", "type": "integer"}]
                 },
-                "dialect": {"header": False},
+                "dialect": {"headers": None},
             }
         ]
     }
@@ -181,7 +171,6 @@ def test_validate_integrity():
     assert report.valid
 
 
-@pytest.mark.skip
 def test_validate_integrity_invalid():
     source = deepcopy(DESCRIPTOR_SH)
     source["resources"][0]["bytes"] += 1
@@ -200,7 +189,6 @@ def test_validate_integrity_size():
     assert report.valid
 
 
-@pytest.mark.skip
 def test_validate_integrity_size_invalid():
     source = deepcopy(DESCRIPTOR_SH)
     source["resources"][0]["bytes"] += 1
@@ -218,7 +206,6 @@ def test_validate_integrity_hash():
     assert report.valid
 
 
-@pytest.mark.skip
 def test_check_file_integrity_hash_invalid():
     source = deepcopy(DESCRIPTOR_SH)
     source["resources"][0].pop("bytes")
@@ -229,14 +216,13 @@ def test_check_file_integrity_hash_invalid():
     ]
 
 
-@pytest.mark.skip
 def test_check_file_integrity_hash_not_supported_algorithm():
     source = deepcopy(DESCRIPTOR_SH)
     source["resources"][0].pop("bytes")
     source["resources"][0]["hash"] = source["resources"][0]["hash"].replace("sha", "bad")
     report = validate(source)
     assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
-        [None, None, "source-error"],
+        [None, None, "hashing-error"],
     ]
 
 
@@ -274,7 +260,6 @@ DESCRIPTOR_FK = {
 }
 
 
-@pytest.mark.skip
 @pytest.mark.slow
 def test_validate_foreign_key_error():
     descriptor = deepcopy(DESCRIPTOR_FK)
@@ -282,7 +267,6 @@ def test_validate_foreign_key_error():
     assert report.valid
 
 
-@pytest.mark.skip
 @pytest.mark.slow
 def test_validate_foreign_key_not_defined():
     descriptor = deepcopy(DESCRIPTOR_FK)
@@ -291,7 +275,6 @@ def test_validate_foreign_key_not_defined():
     assert report.valid
 
 
-@pytest.mark.skip
 @pytest.mark.slow
 def test_validate_foreign_key_self_referenced_resource_violation():
     descriptor = deepcopy(DESCRIPTOR_FK)
@@ -302,7 +285,6 @@ def test_validate_foreign_key_self_referenced_resource_violation():
     ]
 
 
-@pytest.mark.skip
 @pytest.mark.slow
 def test_validate_foreign_key_internal_resource_violation():
     descriptor = deepcopy(DESCRIPTOR_FK)
@@ -313,7 +295,6 @@ def test_validate_foreign_key_internal_resource_violation():
     ]
 
 
-@pytest.mark.skip
 @pytest.mark.slow
 def test_validate_foreign_key_internal_resource_violation_non_existent():
     descriptor = deepcopy(DESCRIPTOR_FK)
