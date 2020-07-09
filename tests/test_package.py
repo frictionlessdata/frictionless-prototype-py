@@ -349,6 +349,7 @@ def test_package_expand_resource_dialect():
 def test_package_infer():
     package = Package()
     package.infer("data/infer/*.csv")
+    assert package.metadata_valid
     assert package == {
         "profile": "data-package",
         "resources": [
@@ -413,6 +414,7 @@ def test_package_infer():
 def test_package_infer_with_basepath():
     package = Package(basepath="data/infer")
     package.infer("*.csv")
+    assert package.metadata_valid
     assert len(package.resources) == 2
     assert package.resources[0].path == "data.csv"
     assert package.resources[1].path == "data2.csv"
@@ -420,7 +422,8 @@ def test_package_infer_with_basepath():
 
 def test_package_infer_multiple_paths():
     package = Package(basepath="data/infer")
-    package.infer(["data.csv", "data2.csv"])
+    package.infer("data.csv", "data2.csv")
+    assert package.metadata_valid
     assert len(package.resources) == 2
     assert package.resources[0].path == "data.csv"
     assert package.resources[1].path == "data2.csv"
@@ -429,6 +432,7 @@ def test_package_infer_multiple_paths():
 def test_package_infer_non_utf8_file():
     package = Package()
     package.infer("data/table-with-accents.csv")
+    assert package.metadata_valid
     assert len(package.resources) == 1
     assert package.resources[0].encoding == "iso8859-1"
 
@@ -436,6 +440,7 @@ def test_package_infer_non_utf8_file():
 def test_package_infer_empty_file():
     package = Package()
     package.infer("data/empty.csv")
+    assert package.metadata_valid
     assert len(package.resources) == 1
     assert package.resources[0].stats["bytes"] == 0
 

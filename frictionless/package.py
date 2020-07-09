@@ -168,13 +168,13 @@ class Package(Metadata):
 
     # Infer
 
-    def infer(self, source):
+    def infer(self, *patterns):
         self.setdefault("profile", config.DEFAULT_PACKAGE_PROFILE)
 
-        # Paths
-        if source:
+        # From patterns
+        if patterns:
             self.resources.clear()
-            for pattern in source if isinstance(source, list) else [source]:
+            for pattern in patterns:
                 options = {"recursive": True} if "**" in pattern else {}
                 for path in glob.glob(os.path.join(self.basepath, pattern), **options):
                     self.resources.append({"path": os.path.relpath(path, self.basepath)})

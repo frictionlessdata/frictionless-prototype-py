@@ -596,6 +596,13 @@ def test_resource_infer_source_non_tabular():
     }
 
 
+def test_resource_infer_from_path():
+    resource = Resource()
+    resource.infer("data/table.csv")
+    assert resource.metadata_valid
+    assert resource.path == "data/table.csv"
+
+
 # Save
 
 

@@ -235,9 +235,15 @@ class Resource(Metadata):
 
     # Infer
 
-    # TODO: support infer from file?
-    def infer(self):
-        patch = self.read_stats()
+    def infer(self, path=None):
+
+        # From path
+        if path:
+            self.path = path
+
+        # Stats
+        stats = self.read_stats()
+        patch = stats.copy()
 
         # Tabular
         if patch["rows"]:
@@ -261,7 +267,7 @@ class Resource(Metadata):
             patch["encoding"] = self.__file.encoding
             patch["compression"] = self.__file.compression
 
-        # Update hashing
+        # Hashing
         if patch["hashing"] != config.DEFAULT_HASHING:
             patch["hash"] = ":".join([patch["hashing"], patch["hash"]])
 
