@@ -121,7 +121,7 @@ def test_table_row_stream_blank_cells():
 
 def test_table_empty():
     with Table("data/empty.csv") as table:
-        assert table.headers is None
+        assert table.headers is False
         assert table.schema == {}
         assert table.read_data() == []
 
@@ -137,7 +137,7 @@ def test_table_without_rows():
 
 def test_table_without_headers():
     with Table("data/without-headers.csv", headers=False) as table:
-        assert table.headers is None
+        assert table.headers is False
         assert table.read_data() == [["1", "english"], ["2", "中国人"], ["3", "german"]]
         assert table.schema == {
             "fields": [
@@ -584,7 +584,7 @@ def test_table_headers_inline_keyed():
 def test_table_headers_inline_keyed_headers_is_none():
     source = [{"id": "1", "name": "english"}, {"id": "2", "name": "中国人"}]
     with Table(source, headers=False) as table:
-        assert table.headers is None
+        assert table.headers is False
         assert table.read_data() == [["id", "name"], ["1", "english"], ["2", "中国人"]]
 
 

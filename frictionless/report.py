@@ -160,9 +160,11 @@ class ReportTable(Metadata):
         encoding,
         compression,
         compression_path,
-        dialect,
         # Table
+        dialect,
         headers,
+        schema,
+        # Discovery
         pick_fields,
         skip_fields,
         limit_fields,
@@ -171,8 +173,6 @@ class ReportTable(Metadata):
         skip_rows,
         limit_rows,
         offset_rows,
-        # Schema
-        schema,
         # Validation
         time,
         scope,
@@ -188,19 +188,19 @@ class ReportTable(Metadata):
         self["encoding"] = encoding
         self["compression"] = compression
         self["compressionPath"] = compression_path
-        self["dialect"] = dialect
         # Table
+        self["dialect"] = dialect
         self["headers"] = headers
-        self["pickFields"] = pick_fields
-        self["skipFields"] = skip_fields
-        self["limitFields"] = limit_fields
-        self["offsetFields"] = offset_fields
-        self["pickRows"] = pick_rows
-        self["skipRows"] = skip_rows
-        self["limitRows"] = limit_rows
-        self["offsetRows"] = offset_rows
-        # Schema
         self["schema"] = schema
+        # Discovery
+        self.setinitial("pickFields", pick_fields)
+        self.setinitial("skipFields", skip_fields)
+        self.setinitial("limitFields", limit_fields)
+        self.setinitial("offsetFields", offset_fields)
+        self.setinitial("pickRows", pick_rows)
+        self.setinitial("skipRows", skip_rows)
+        self.setinitial("limitRows", limit_rows)
+        self.setinitial("offsetRows", offset_rows)
         # Validation
         self["time"] = time
         self["valid"] = not errors

@@ -134,9 +134,17 @@ class Table:
         compression=None,
         compression_path=None,
         control=None,
-        dialect=None,
         # Table
+        dialect=None,
         headers=config.DEFAULT_HEADERS_ROW,
+        schema=None,
+        sync_schema=False,
+        patch_schema=False,
+        infer_type=None,
+        infer_names=None,
+        infer_volume=config.DEFAULT_INFER_VOLUME,
+        infer_confidence=config.DEFAULT_INFER_CONFIDENCE,
+        # Discovery
         pick_fields=None,
         skip_fields=None,
         limit_fields=None,
@@ -145,14 +153,6 @@ class Table:
         skip_rows=None,
         limit_rows=None,
         offset_rows=None,
-        # Schema
-        schema=None,
-        sync_schema=False,
-        patch_schema=False,
-        infer_type=None,
-        infer_names=None,
-        infer_volume=config.DEFAULT_INFER_VOLUME,
-        infer_confidence=config.DEFAULT_INFER_CONFIDENCE,
     ):
 
         # Update source
@@ -480,7 +480,7 @@ class Table:
 
         # Prepare state
         sample = []
-        headers = None
+        headers = False
         field_positions = []
         sample_positions = []
         schema = Schema(self.__init_schema)
@@ -502,7 +502,7 @@ class Table:
                         infer = self.__read_data_stream_infer_headers
                         headers, field_positions = infer(headers_data)
                         headers_ready = True
-                    if not headers_ready or headers is not None:
+                    if not headers_ready or headers is not False:
                         continue
 
                 # Sample
@@ -548,8 +548,8 @@ class Table:
         self.__sample_positions = sample_positions
         self.__headers = (
             Headers(headers, fields=schema.fields, field_positions=field_positions)
-            if headers is not None
-            else None
+            if headers is not False
+            else False
         )
 
     def __read_data_stream_infer_headers(self, headers_data):
@@ -557,7 +557,7 @@ class Table:
 
         # No headers
         if not dialect.headers["rows"]:
-            return None, list(range(1, len(headers_data[0]) + 1))
+            return False, list(range(1, len(headers_data[0]) + 1))
 
         # Get headers
         headers = []

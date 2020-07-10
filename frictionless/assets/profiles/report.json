@@ -104,14 +104,6 @@
           "compressionPath",
           "dialect",
           "headers",
-          "pickFields",
-          "skipFields",
-          "limitFields",
-          "offsetFields",
-          "pickRows",
-          "skipRows",
-          "limitRows",
-          "offsetRows",
           "schema",
           "time",
           "valid",
@@ -157,57 +149,17 @@
             "description": "The path inside the compressed source."
           },
           "dialect": {
-            "type": "object",
+            "type": ["object", "null"],
             "title": "Dialect",
             "description": "The tabular dialect of the table."
           },
           "headers": {
-            "type": ["array", "null"],
+            "type": ["array", "boolean", "null"],
             "title": "Headers",
             "description": "List of table's headers.",
             "items": {
               "type": "string"
             }
-          },
-          "pickFields": {
-            "type": ["array", "null"],
-            "title": "Pick Fields",
-            "description": "The list of picked fields."
-          },
-          "skipFields": {
-            "type": ["array", "null"],
-            "title": "Skip Fields",
-            "description": "The list of skiped fields."
-          },
-          "limitFields": {
-            "type": ["number", "null"],
-            "title": "Field Limit",
-            "description": "Maxumum amount of fields."
-          },
-          "offsetFields": {
-            "type": ["number", "null"],
-            "title": "Field Offset",
-            "description": "Offset of fields."
-          },
-          "pickRows": {
-            "type": ["array", "null"],
-            "title": "Pick Rows",
-            "description": "The list of picked rows."
-          },
-          "skipRows": {
-            "type": ["array", "null"],
-            "title": "Skip Rows",
-            "description": "The list of skiped rows."
-          },
-          "limitRows": {
-            "type": ["number", "null"],
-            "title": "Row Limit",
-            "description": "Maxumum amount of rows."
-          },
-          "offsetRows": {
-            "type": ["number", "null"],
-            "title": "Row Offset",
-            "description": "Offset of rows."
           },
           "schema": {
             "type": ["object", "null"],
@@ -219,6 +171,46 @@
             "title": "Time",
             "description": "The time it took to validate this table.",
             "minimum": 0
+          },
+          "pickFields": {
+            "type": "array",
+            "title": "Pick Fields",
+            "description": "The list of picked fields."
+          },
+          "skipFields": {
+            "type": "array",
+            "title": "Skip Fields",
+            "description": "The list of skiped fields."
+          },
+          "limitFields": {
+            "type": "number",
+            "title": "Field Limit",
+            "description": "Maxumum amount of fields."
+          },
+          "offsetFields": {
+            "type": "number",
+            "title": "Field Offset",
+            "description": "Offset of fields."
+          },
+          "pickRows": {
+            "type": "array",
+            "title": "Pick Rows",
+            "description": "The list of picked rows."
+          },
+          "skipRows": {
+            "type": "array",
+            "title": "Skip Rows",
+            "description": "The list of skiped rows."
+          },
+          "limitRows": {
+            "type": "number",
+            "title": "Row Limit",
+            "description": "Maxumum amount of rows."
+          },
+          "offsetRows": {
+            "type": "number",
+            "title": "Row Offset",
+            "description": "Offset of rows."
           },
           "valid": {
             "type": "boolean",

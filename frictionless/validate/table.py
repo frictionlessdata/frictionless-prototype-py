@@ -19,9 +19,17 @@ def validate_table(
     compression=None,
     compression_path=None,
     control=None,
-    dialect=None,
     # Table
+    dialect=None,
     headers=config.DEFAULT_HEADERS_ROW,
+    schema=None,
+    sync_schema=False,
+    patch_schema=False,
+    infer_type=None,
+    infer_names=None,
+    infer_volume=config.DEFAULT_INFER_VOLUME,
+    infer_confidence=config.DEFAULT_INFER_CONFIDENCE,
+    # Discovery
     pick_fields=None,
     skip_fields=None,
     limit_fields=None,
@@ -30,23 +38,14 @@ def validate_table(
     skip_rows=None,
     limit_rows=None,
     offset_rows=None,
-    # Schema
-    schema=None,
-    sync_schema=False,
-    patch_schema=False,
-    infer_type=None,
-    infer_names=None,
-    infer_volume=config.DEFAULT_INFER_VOLUME,
-    infer_confidence=config.DEFAULT_INFER_CONFIDENCE,
     # Validation
-    # TODO: rename to checksum (confusion with stats)?
     stats=None,
     lookup=None,
+    extra_checks=None,
     pick_errors=None,
     skip_errors=None,
     limit_errors=None,
     limit_memory=config.DEFAULT_LIMIT_MEMORY,
-    extra_checks=None,
 ):
     """Validate table
 
@@ -122,9 +121,17 @@ def validate_table(
         compression=compression,
         compression_path=compression_path,
         control=control,
-        dialect=dialect,
         # Table
+        dialect=dialect,
         headers=headers,
+        schema=schema,
+        sync_schema=sync_schema,
+        patch_schema=patch_schema,
+        infer_type=infer_type,
+        infer_names=infer_names,
+        infer_volume=infer_volume,
+        infer_confidence=infer_confidence,
+        # Discovery
         pick_fields=pick_fields,
         skip_fields=skip_fields,
         limit_fields=limit_fields,
@@ -133,14 +140,6 @@ def validate_table(
         skip_rows=skip_rows,
         limit_rows=limit_rows,
         offset_rows=offset_rows,
-        # Schema
-        schema=schema,
-        sync_schema=sync_schema,
-        patch_schema=patch_schema,
-        infer_type=infer_type,
-        infer_names=infer_names,
-        infer_volume=infer_volume,
-        infer_confidence=infer_confidence,
     )
 
     # Open table
@@ -219,9 +218,11 @@ def validate_table(
                 encoding=table.encoding,
                 compression=table.compression,
                 compression_path=table.compression_path,
-                dialect=table.dialect,
                 # Table
+                dialect=table.dialect,
                 headers=table.headers,
+                schema=table.schema,
+                # Discovery
                 pick_fields=pick_fields,
                 skip_fields=skip_fields,
                 limit_fields=limit_fields,
@@ -230,8 +231,6 @@ def validate_table(
                 skip_rows=skip_rows,
                 limit_rows=limit_rows,
                 offset_rows=offset_rows,
-                # Schema
-                schema=table.schema,
                 # Validation
                 time=timer.time,
                 scope=table_errors.scope,

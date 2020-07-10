@@ -183,13 +183,13 @@ def test_validate_headers_none():
     report = validate("data/without-headers.csv", headers=False)
     assert report.valid
     assert report.table.stats["rows"] == 3
-    assert report.table["headers"] is None
+    assert report.table["headers"] is False
 
 
 def test_validate_headers_none_extra_cell():
     report = validate("data/without-headers-extra.csv", headers=False)
     assert report.table.stats["rows"] == 3
-    assert report.table["headers"] is None
+    assert report.table["headers"] is False
     assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
         [3, 3, "extra-cell"],
     ]
@@ -542,7 +542,7 @@ def test_validate_infer_names():
     report = validate(
         "data/without-headers.csv", headers=False, infer_names=["id", "name"]
     )
-    assert report.table["headers"] is None
+    assert report.table["headers"] is False
     assert report.table.stats["rows"] == 3
     assert report.table["schema"]["fields"][0]["name"] == "id"
     assert report.table["schema"]["fields"][1]["name"] == "name"
