@@ -1,14 +1,8 @@
 import os
 import glob
-import atexit
-import shutil
-import zipfile
-import tempfile
 from .helpers import cached_property
 from .metadata import Metadata
 from .resource import Resource
-from .system import system
-from .file import File
 from . import helpers
 from . import errors
 from . import config
@@ -53,18 +47,7 @@ class Package(Metadata):
 
         # Handle zip
         if helpers.is_zip_descriptor(descriptor):
-            file = File(source=descriptor, compression="no")
-            with system.create_loader(file) as loader:
-                byte_stream = loader.byte_stream
-                if loader.network:
-                    byte_stream = tempfile.TemporaryFile()
-                    shutil.copyfileobj(loader.byte_stream, byte_stream)
-                    byte_stream.seek(0)
-                with zipfile.ZipFile(byte_stream, "r") as zip:
-                    tempdir = tempfile.mkdtemp()
-                    zip.extractall(tempdir)
-                    atexit.register(shutil.rmtree, tempdir)
-                    descriptor = os.path.join(tempdir, "datapackage.json")
+            descriptor = helpers.unzip_descriptor(descriptor, "datapackage.json")
 
         # Set attributes
         self.setinitial("name", name)

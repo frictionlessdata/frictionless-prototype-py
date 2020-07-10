@@ -53,6 +53,11 @@ class Resource(Metadata):
         trusted=False,
         package=None,
     ):
+
+        # Handle zip
+        if helpers.is_zip_descriptor(descriptor):
+            descriptor = helpers.unzip_descriptor(descriptor, "dataresource.json")
+
         # Set attributes
         self.setinitial("name", name)
         self.setinitial("path", path)

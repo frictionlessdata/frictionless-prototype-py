@@ -65,6 +65,15 @@ def test_resource_from_path_remote():
     ]
 
 
+def test_resource_from_zip():
+    resource = Resource("data/resource.zip")
+    assert resource.path == "table.csv"
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
+
+
 @pytest.mark.slow
 def test_resource_from_path_remote_error_bad_path():
     with pytest.raises(exceptions.FrictionlessException) as excinfo:

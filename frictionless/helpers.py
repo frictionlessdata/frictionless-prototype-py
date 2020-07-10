@@ -1,10 +1,15 @@
 import re
 import os
+import atexit
+import shutil
+import zipfile
 import chardet
+import tempfile
 import datetime
 import stringcase
 from copy import deepcopy
 from inspect import signature
+from importlib import import_module
 from urllib.parse import urlparse, parse_qs
 from _thread import RLock  # type: ignore
 from . import config
@@ -98,6 +103,23 @@ def is_zip_descriptor(descriptor):
         parsed = urlparse(descriptor)
         format = os.path.splitext(parsed.path or parsed.netloc)[1][1:].lower()
         return format == "zip"
+
+
+def unzip_descriptor(descriptor, compression_path):
+    frictionless = import_module("frictionless")
+    file = frictionless.File(source=descriptor, compression="no")
+    with frictionless.system.create_loader(file) as loader:
+        byte_stream = loader.byte_stream
+        if loader.network:
+            byte_stream = tempfile.TemporaryFile()
+            shutil.copyfileobj(loader.byte_stream, byte_stream)
+            byte_stream.seek(0)
+        with zipfile.ZipFile(byte_stream, "r") as zip:
+            tempdir = tempfile.mkdtemp()
+            zip.extractall(tempdir)
+            atexit.register(shutil.rmtree, tempdir)
+            descriptor = os.path.join(tempdir, compression_path)
+    return descriptor
 
 
 def parse_resource_hash(hash):

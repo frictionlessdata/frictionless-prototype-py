@@ -1,11 +1,8 @@
 import os
-import glob
 import json
 import mock
 import zipfile
 import pytest
-import tempfile
-import httpretty
 from frictionless import Package, exceptions
 
 
