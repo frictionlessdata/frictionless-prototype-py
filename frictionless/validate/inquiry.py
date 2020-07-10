@@ -1,9 +1,9 @@
 from functools import partial
 from multiprocessing import Pool
-from ..validate import validate
 from ..inquiry import Inquiry
 from ..report import Report
 from ..errors import Error
+from .main import validate
 from .. import helpers
 from .. import exceptions
 

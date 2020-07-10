@@ -1,6 +1,6 @@
-from .schema import Schema
-from .table import Table
-from . import config
+from ..schema import Schema
+from ..table import Table
+from .. import config
 
 
 # TODO: support source_type (table/resource/package)

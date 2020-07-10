@@ -1,11 +1,12 @@
 from pathlib import Path
-from .report import Report
-from . import validates
-from . import helpers
+from importlib import import_module
+from ..report import Report
+from .. import helpers
 
 
 @Report.from_validate
 def validate(source, source_type=None, **options):
+    module = import_module("frictionless.validate")
 
     # Normalize source
     if isinstance(source, Path):
@@ -16,5 +17,5 @@ def validate(source, source_type=None, **options):
         source_type = helpers.detect_source_type(source)
 
     # Validate source
-    validate = getattr(validates, "validate_%s" % source_type)
+    validate = getattr(module, "validate_%s" % source_type)
     return validate(source, **options)
