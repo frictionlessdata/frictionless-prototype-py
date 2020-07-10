@@ -49,23 +49,19 @@ def test_validate_from_path_invalid():
     ]
 
 
-@pytest.mark.skip
 @pytest.mark.slow
 def test_validate_from_zip():
     report = validate("data/package.zip", source_type="package")
     assert report.valid
 
 
-@pytest.mark.skip
 @pytest.mark.slow
 def test_validate_from_zip_invalid():
-    report = validate("data/invalid.zip", source_type="package")
+    report = validate("data/package-invalid.zip", source_type="package")
     assert report.flatten(["tablePosition", "rowPosition", "fieldPosition", "code"]) == [
         [1, 3, None, "blank-row"],
         [1, 3, None, "primary-key-error"],
         [2, 4, None, "blank-row"],
-        # This error should be removed with better lookup table extraction
-        [2, 5, None, "foreign-key-error"],
     ]
 
 
