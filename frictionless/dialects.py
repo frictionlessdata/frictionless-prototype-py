@@ -39,8 +39,6 @@ class Dialect(Metadata):
 
     @property
     def header_rows(self):
-        if not self.header:
-            return []
         return self.get("headerRows", config.DEFAULT_HEADER_ROWS)
 
     @property
@@ -50,19 +48,9 @@ class Dialect(Metadata):
     # Expand
 
     def expand(self):
+        self.setdefault("header", self.header)
         self.setdefault("headerRows", self.header_rows)
         self.setdefault("headerJoin", self.header_join)
-        self.setdefault("header", self.header)
-
-    # Metadata
-
-    def metadata_validate(self):
-        yield from super().metadata_validate()
-
-        # Header
-        if self.get("header") is False and self.get("headerRows"):
-            note = "headerRows must be empty if header is False"
-            yield errors.DialectError(note=note)
 
 
 class CsvDialect(Dialect):
