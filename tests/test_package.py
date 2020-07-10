@@ -116,88 +116,37 @@ def test_package_from_invalid_descriptor_type():
     assert error.note.count("51")
 
 
-@pytest.mark.skip
-def test_it_works_with_local_paths():
+def test_package_from_zip():
     package = Package("data/package.zip")
-    assert package.descriptor["name"] == "proverbs"
-    assert len(package.resources) == 1
-    assert package.resources[0].data == b"foo\n"
+    assert package.name == "testing"
+    assert len(package.resources) == 2
+    assert package.get_resource("data2").read_rows() == [
+        {"parent": "A3001", "comment": "comment1"},
+        {"parent": "A3001", "comment": "comment2"},
+        {"parent": "A5032", "comment": "comment3"},
+    ]
 
 
-@pytest.mark.skip
-def test_it_works_with_file_objects():
-    package = Package("data/package.zip")
-    assert package.descriptor["name"] == "proverbs"
-    assert len(package.resources) == 1
-    assert package.resources[0].data == b"foo\n"
+def test_package_from_zip_remote():
+    package = Package(BASE_URL % "data/package.zip")
+    assert package.name == "testing"
+    assert len(package.resources) == 2
+    assert package.get_resource("data2").read_rows() == [
+        {"parent": "A3001", "comment": "comment1"},
+        {"parent": "A3001", "comment": "comment2"},
+        {"parent": "A5032", "comment": "comment3"},
+    ]
 
 
-@pytest.mark.skip
-def test_it_works_with_remote_files():
-    httpretty.enable()
-    #  datapackage_zip.seek(0)
-    url = "http://someplace.com/datapackage.zip"
-    #  httpretty.register_uri(
-    #  httpretty.GET, url, body=datapackage_zip.read(), content_type="application/zip"
-    #  )
-    package = Package(url)
-    assert package.descriptor["name"] == "proverbs"
-    assert len(package.resources) == 1
-    assert package.resources[0].data == b"foo\n"
-    httpretty.disable()
-
-
-@pytest.mark.skip
-def test_it_removes_temporary_directories():
-    tempdirs_glob = os.path.join(tempfile.gettempdir(), "*-datapackage")
-    original_tempdirs = glob.glob(tempdirs_glob)
-    package = Package("data/package.zip")
-    package.save("data/package.zip")
-    del package
-    assert glob.glob(tempdirs_glob) == original_tempdirs
-
-
-@pytest.mark.skip
-def test_local_data_path():
-    package = Package("data/package.zip")
-    assert package.resources[0].local_data_path is not None
-    with open("data/foo.txt") as data_file:
-        with open(package.resources[0].local_data_path) as local_data_file:
-            assert local_data_file.read() == data_file.read()
-
-
-@pytest.mark.skip
-def test_it_can_load_from_zip_files_inner_folders(tmpfile):
-    descriptor = {
-        "profile": "data-package",
-    }
-    with zipfile.ZipFile(tmpfile.name, "w") as z:
-        z.writestr("foo/datapackage.json", json.dumps(descriptor))
-    package = Package(tmpfile.name, {})
-    assert package.descriptor == descriptor
-
-
-@pytest.mark.skip
-def test_it_breaks_if_theres_no_datapackage_json(tmpfile):
-    with zipfile.ZipFile(tmpfile.name, "w") as z:
-        z.writestr("data.txt", "foobar")
-    with pytest.raises(exceptions.DataPackageException):
-        Package(tmpfile.name, {})
-
-
-@pytest.mark.skip
-def test_it_breaks_if_theres_more_than_one_datapackage_json(tmpfile):
-    descriptor_foo = {
-        "name": "foo",
-    }
-    descriptor_bar = {
-        "name": "bar",
-    }
-    with zipfile.ZipFile(tmpfile.name, "w") as z:
-        z.writestr("foo/datapackage.json", json.dumps(descriptor_foo))
-        z.writestr("bar/datapackage.json", json.dumps(descriptor_bar))
-    with pytest.raises(exceptions.DataPackageException):
-        Package(tmpfile.name, {})
+def test_package_from_zip_no_descriptor(tmpdir):
+    descriptor = str(tmpdir.join("package.zip"))
+    with zipfile.ZipFile(descriptor, "w") as zip:
+        zip.writestr("data.txt", "foobar")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        Package(descriptor)
+    error = excinfo.value.error
+    assert error.code == "package-error"
+    assert error.note.count("datapackage.json")
 
 
 # Resources

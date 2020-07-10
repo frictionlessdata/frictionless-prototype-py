@@ -93,6 +93,13 @@ def is_safe_path(path):
     return not any(unsafeness_conditions)
 
 
+def is_zip_descriptor(descriptor):
+    if isinstance(descriptor, str):
+        parsed = urlparse(descriptor)
+        format = os.path.splitext(parsed.path or parsed.netloc)[1][1:].lower()
+        return format == "zip"
+
+
 def parse_resource_hash(hash):
     if not hash:
         return (config.DEFAULT_HASHING, "")
