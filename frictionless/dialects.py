@@ -21,32 +21,38 @@ class Dialect(Metadata):
     metadata_profile = {  # type: ignore
         "type": "object",
         "properties": {
-            "headers": {
-                "type": "object",
-                "requried": ["rows"],
-                "properties": {
-                    "rows": {"type": "array", "items": {"type": "number"}},
-                    "join": {"type": "string"},
-                },
-            }
+            "header": {"type": "boolean"},
+            "headerRows": {"type": "array", "items": {"type": "number"}},
+            "headerJoin": {"type": "string"},
         },
     }
 
-    def __init__(self, descriptor=None, headers=None):
-        self.setinitial("headers", headers)
+    def __init__(self, descriptor=None, header=None, header_rows=None, header_join=None):
+        self.setinitial("header", header)
+        self.setinitial("headerRows", header_rows)
+        self.setinitial("headerJoin", header_join)
         super().__init__(descriptor)
 
     @property
-    def headers(self):
-        headers = self.get("headers", {})
-        headers.setdefault("rows", config.DEFAULT_HEADERS_ROWS)
-        headers.setdefault("join", config.DEFAULT_HEADERS_JOIN)
-        return self.metadata_attach("headers", headers)
+    def header(self):
+        return self.get("header", config.DEFAULT_HEADER)
+
+    @property
+    def header_rows(self):
+        if not self.header:
+            return []
+        return self.get("headerRows", config.DEFAULT_HEADER_ROWS)
+
+    @property
+    def header_join(self):
+        return self.get("headerJoin", config.DEFAULT_HEADER_JOIN)
 
     # Expand
 
     def expand(self):
-        self.setdefault("headers", self.headers)
+        self.setdefault("header", self.header)
+        self.setdefault("headerRows", self.header_rows)
+        self.setdefault("headerJoin", self.header_join)
 
 
 class CsvDialect(Dialect):
@@ -61,7 +67,6 @@ class CsvDialect(Dialect):
         escape_char? (str): escape_char
         null_sequence? (str): null_sequence
         skip_initial_space? (bool): skip_initial_space
-        header? (bool): header
         comment_char? (str): comment_char
         case_sensitive_header? (bool): case_sensitive_header
 
@@ -81,17 +86,11 @@ class CsvDialect(Dialect):
             "escapeChar": {"type": "string"},
             "nullSequence": {"type": "string"},
             "skipInitialSpace": {"type": "boolean"},
-            "header": {"type": "boolean"},
             "commentChar": {"type": "string"},
             "caseSensitiveHeader": {"type": "boolean"},
-            "headers": {
-                "type": "object",
-                "requried": ["rows"],
-                "properties": {
-                    "rows": {"type": "array", "items": {"type": "number"}},
-                    "join": {"type": "string"},
-                },
-            },
+            "header": {"type": "boolean"},
+            "headerRows": {"type": "array", "items": {"type": "number"}},
+            "headerJoin": {"type": "string"},
         },
     }
 
@@ -106,10 +105,11 @@ class CsvDialect(Dialect):
         escape_char=None,
         null_sequence=None,
         skip_initial_space=None,
-        header=None,
         comment_char=None,
         case_sensitive_header=None,
-        headers=None,
+        header=None,
+        header_rows=None,
+        header_join=None,
     ):
         self.setinitial("delimiter", delimiter)
         self.setinitial("lineTerminator", line_terminator)
@@ -118,10 +118,14 @@ class CsvDialect(Dialect):
         self.setinitial("escapeChar", escape_char)
         self.setinitial("nullSequence", null_sequence)
         self.setinitial("skipInitialSpace", skip_initial_space)
-        self.setinitial("header", header)
         self.setinitial("commentChar", comment_char)
         self.setinitial("caseSensitiveHeader", case_sensitive_header)
-        super().__init__(descriptor, headers=headers)
+        super().__init__(
+            descriptor=descriptor,
+            header=header,
+            header_rows=header_rows,
+            header_join=header_join,
+        )
 
     # TODO: Find a better way like to_native/from_native
     def __getattr__(self, name):
@@ -138,14 +142,7 @@ class CsvDialect(Dialect):
             return csv.QUOTE_NONE if self.quote_char == "" else csv.QUOTE_MINIMAL
         elif name == "skipinitialspace":
             return self.skip_initial_space
-        return super().__getattr__(name)
-
-    @property
-    def headers(self):
-        if self.header is False:
-            join = config.DEFAULT_HEADERS_JOIN
-            return {"rows": [], "join": join}
-        return super().headers
+        raise AttributeError(name)
 
     @property
     def delimiter(self):
@@ -176,10 +173,6 @@ class CsvDialect(Dialect):
         return self.get("skipInitialSpace", True)
 
     @property
-    def header(self):
-        return self.get("header", True)
-
-    @property
     def comment_char(self):
         return self.get("commentChar")
 
@@ -196,7 +189,6 @@ class CsvDialect(Dialect):
         self.setdefault("quoteChar", self.quote_char)
         self.setdefault("doubleQuote", self.double_quote)
         self.setdefault("skipInitialSpace", self.skip_initial_space)
-        self.setdefault("header", self.header)
         self.setdefault("caseSensitiveHeader", self.case_sensitive_header)
 
 
@@ -225,14 +217,9 @@ class ExcelDialect(Dialect):
             "fillMergedCells": {"type": "boolean"},
             "preserveFormatting": {"type": "boolean"},
             "adjustFloatingPointError": {"type": "boolean"},
-            "headers": {
-                "type": "object",
-                "requried": ["rows"],
-                "properties": {
-                    "rows": {"type": "array", "items": {"type": "number"}},
-                    "join": {"type": "string"},
-                },
-            },
+            "header": {"type": "boolean"},
+            "headerRows": {"type": "array", "items": {"type": "number"}},
+            "headerJoin": {"type": "string"},
         },
     }
 
@@ -245,14 +232,21 @@ class ExcelDialect(Dialect):
         fill_merged_cells=None,
         preserve_formatting=None,
         adjust_floating_point_error=None,
-        headers=None,
+        header=None,
+        header_rows=None,
+        header_join=None,
     ):
         self.setinitial("sheet", sheet)
         self.setinitial("workbookCache", workbook_cache)
         self.setinitial("fillMergedCells", fill_merged_cells)
         self.setinitial("preserveFormatting", preserve_formatting)
         self.setinitial("adjustFloatingPointError", adjust_floating_point_error)
-        super().__init__(descriptor, headers=headers)
+        super().__init__(
+            descriptor=descriptor,
+            header=header,
+            header_rows=header_rows,
+            header_join=header_join,
+        )
 
     @property
     def sheet(self):
@@ -302,21 +296,30 @@ class InlineDialect(Dialect):
         "properties": {
             "keys": {"type": "array"},
             "keyed": {"type": "boolean"},
-            "headers": {
-                "type": "object",
-                "requried": ["rows"],
-                "properties": {
-                    "rows": {"type": "array", "items": {"type": "number"}},
-                    "join": {"type": "string"},
-                },
-            },
+            "header": {"type": "boolean"},
+            "headerRows": {"type": "array", "items": {"type": "number"}},
+            "headerJoin": {"type": "string"},
         },
     }
 
-    def __init__(self, descriptor=None, *, keys=None, keyed=None, headers=None):
+    def __init__(
+        self,
+        descriptor=None,
+        *,
+        keys=None,
+        keyed=None,
+        header=None,
+        header_rows=None,
+        header_join=None,
+    ):
         self.setinitial("keys", keys)
         self.setinitial("keyed", keyed)
-        super().__init__(descriptor, headers=headers)
+        super().__init__(
+            descriptor=descriptor,
+            header=header,
+            header_rows=header_rows,
+            header_join=header_join,
+        )
 
     @property
     def keys(self):
@@ -352,24 +355,32 @@ class JsonDialect(Dialect):
             "keys": {"type": "array"},
             "keyed": {"type": "boolean"},
             "property": {"type": "string"},
-            "headers": {
-                "type": "object",
-                "requried": ["rows"],
-                "properties": {
-                    "rows": {"type": "array", "items": {"type": "number"}},
-                    "join": {"type": "string"},
-                },
-            },
+            "header": {"type": "boolean"},
+            "headerRows": {"type": "array", "items": {"type": "number"}},
+            "headerJoin": {"type": "string"},
         },
     }
 
     def __init__(
-        self, descriptor=None, *, keys=None, keyed=None, property=None, headers=None,
+        self,
+        descriptor=None,
+        *,
+        keys=None,
+        keyed=None,
+        property=None,
+        header=None,
+        header_rows=None,
+        header_join=None,
     ):
         self.setinitial("keys", keys)
         self.setinitial("keyed", keyed)
         self.setinitial("property", property)
-        super().__init__(descriptor, headers=headers)
+        super().__init__(
+            descriptor=descriptor,
+            header=header,
+            header_rows=header_rows,
+            header_join=header_join,
+        )
 
     @property
     def keys(self):

@@ -611,8 +611,7 @@ def test_table_headers_xlsx_multiline():
 
 def test_table_headers_csv_multiline_headers_join():
     source = "text://k1\nk2\nv1\nv2\nv3"
-    headers = {"rows": [1, 2], "join": ":"}
-    with Table(source, format="csv", headers=headers) as table:
+    with Table(source, format="csv", headers=[[1, 2], ":"]) as table:
         assert table.headers == ["k1:k2"]
         assert table.read_data() == [["v1"], ["v2"], ["v3"]]
 

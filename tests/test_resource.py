@@ -515,14 +515,15 @@ def test_resource_expand_with_dialect():
         "path": "data/table.csv",
         "profile": "data-resource",
         "dialect": {
-            "headers": {"join": " ", "rows": [1]},
+            "header": True,
+            "headerRows": [1],
+            "headerJoin": " ",
             "delimiter": "custom",
             "lineTerminator": "\r\n",
             "doubleQuote": True,
             "quoteChar": '"',
             "skipInitialSpace": True,
             "caseSensitiveHeader": False,
-            "header": True,
         },
     }
 

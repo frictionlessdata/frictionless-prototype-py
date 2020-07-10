@@ -161,14 +161,16 @@ class Table:
 
         # Update dialect
         if headers is not None:
-            if headers is False:
-                headers = {"rows": []}
-            elif isinstance(headers, int):
-                headers = {"rows": [headers]}
-            elif isinstance(headers, list):
-                headers = {"rows": headers}
             dialect = (dialect or {}).copy()
-            dialect["headers"] = headers
+            if not headers:
+                dialect["header"] = False
+            elif isinstance(headers, int):
+                dialect["headerRows"] = [headers]
+            elif isinstance(headers, list):
+                dialect["headerRows"] = headers
+                if isinstance(headers[0], list):
+                    dialect["headerRows"] = headers[0]
+                    dialect["headerJoin"] = headers[1]
 
         # Update filters
         pick_fields = helpers.compile_regex(pick_fields)
@@ -495,7 +497,7 @@ class Table:
         row_number = 0
         headers_data = []
         headers_ready = False
-        headers_numbers = dialect.headers["rows"] or config.DEFAULT_HEADERS_ROWS
+        headers_numbers = dialect.header_rows or config.DEFAULT_HEADER_ROWS
         for row_position, cells in enumerate(self.__parser.data_stream, start=1):
             if self.__read_data_stream_pick_skip_row(row_position, cells):
                 row_number += 1
@@ -508,7 +510,7 @@ class Table:
                         infer = self.__read_data_stream_infer_headers
                         headers, field_positions = infer(headers_data)
                         headers_ready = True
-                    if not headers_ready or dialect.headers["rows"]:
+                    if not headers_ready or dialect.header:
                         continue
 
                 # Sample
@@ -552,17 +554,15 @@ class Table:
         self.__schema = schema
         self.__field_positions = field_positions
         self.__sample_positions = sample_positions
-        self.__headers = (
-            Headers(headers, fields=schema.fields, field_positions=field_positions)
-            if headers is not False
-            else False
+        self.__headers = Headers(
+            headers, fields=schema.fields, field_positions=field_positions
         )
 
     def __read_data_stream_infer_headers(self, headers_data):
         dialect = self.__file.dialect
 
         # No headers
-        if not dialect.headers["rows"]:
+        if not dialect.header:
             return [], list(range(1, len(headers_data[0]) + 1))
 
         # Get headers
@@ -576,7 +576,7 @@ class Table:
                 if len(headers) <= index:
                     headers.append(cell)
                     continue
-                headers[index] = dialect.headers["join"].join([headers[index], cell])
+                headers[index] = dialect.header_join.join([headers[index], cell])
 
         # Filter headers
         filter_headers = []

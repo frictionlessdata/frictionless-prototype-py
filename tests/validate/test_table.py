@@ -182,16 +182,16 @@ def test_validate_dialect_delimiter():
 def test_validate_headers_none():
     report = validate("data/without-headers.csv", headers=False)
     assert report.valid
-    assert report.table["headers"] == []
-    assert report.table["dialect"]["headers"]["rows"] == []
     assert report.table.stats["rows"] == 3
+    assert report.table["dialect"]["header"] is False
+    assert report.table["headers"] == []
 
 
 def test_validate_headers_none_extra_cell():
     report = validate("data/without-headers-extra.csv", headers=False)
     assert report.table.stats["rows"] == 3
+    assert report.table["dialect"]["header"] is False
     assert report.table["headers"] == []
-    assert report.table["dialect"]["headers"]["rows"] == []
     assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
         [3, 3, "extra-cell"],
     ]
@@ -210,8 +210,7 @@ def test_validate_headers_list_of_numbers():
 
 
 def test_validate_headers_list_of_numbers_and_headers_join():
-    headers = {"rows": [2, 3, 4], "join": "."}
-    report = validate("data/matrix.csv", headers=headers)
+    report = validate("data/matrix.csv", headers=[[2, 3, 4], "."])
     assert report.table["headers"] == ["11.21.31", "12.22.32", "13.23.33", "14.24.34"]
     assert report.valid
 

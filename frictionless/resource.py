@@ -113,7 +113,7 @@ class Resource(Metadata):
             drop_headers = False
             if path[0].endswith(".csv"):
                 dialect = dialects.CsvDialect(self.get("dialect"))
-                if dialect.headers["rows"]:
+                if dialect.header:
                     drop_headers = True
             for index, path_item in enumerate(path):
                 if not helpers.is_remote_path(path_item):

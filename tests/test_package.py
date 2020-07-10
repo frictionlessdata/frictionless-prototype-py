@@ -264,19 +264,19 @@ def test_package_expand_resource_dialect():
     dialect = {"delimiter": ";"}
     package = Package({"resources": [{"path": "data/table.csv", "dialect": dialect}]})
     package.expand()
-    print(package)
     assert package == {
         "resources": [
             {
                 "path": "data/table.csv",
                 "dialect": {
                     "delimiter": ";",
-                    "headers": {"rows": [1], "join": " "},
+                    "header": True,
+                    "headerRows": [1],
+                    "headerJoin": " ",
                     "lineTerminator": "\r\n",
                     "quoteChar": '"',
                     "doubleQuote": True,
                     "skipInitialSpace": True,
-                    "header": True,
                     "caseSensitiveHeader": False,
                 },
                 "profile": "data-resource",
