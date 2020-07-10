@@ -16,7 +16,8 @@ def test_table():
         assert table.scheme == "file"
         assert table.format == "csv"
         assert table.encoding == "utf-8"
-        assert table.compression == "no"
+        assert table.compression is False
+        assert table.compression_path is False
         assert table.headers == ["id", "name"]
         assert table.sample == [["1", "english"], ["2", "中国人"]]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
@@ -382,18 +383,23 @@ def test_table_encoding_error_non_matching_encoding():
 def test_table_compression_local_csv_zip():
     with Table("data/table.csv.zip") as table:
         assert table.compression == "zip"
+        assert table.compression_path == "table.csv"
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
 def test_table_compression_local_csv_zip_multiple_files():
     with Table("data/2-files.zip") as table:
+        assert table.compression == "zip"
+        assert table.compression_path == "table-reverse.csv"
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "中国人"], ["2", "english"]]
 
 
 def test_table_compression_local_csv_zip_multiple_files_compression_path():
     with Table("data/2-files.zip", compression_path="table.csv") as table:
+        assert table.compression == "zip"
+        assert table.compression_path == "table.csv"
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
@@ -413,6 +419,8 @@ def test_table_compression_local_csv_zip_multiple_open():
 
 def test_table_compression_local_csv_gz():
     with Table("data/table.csv.gz") as table:
+        assert table.compression == "gz"
+        assert table.compression_path is False
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 

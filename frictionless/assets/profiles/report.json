@@ -102,9 +102,6 @@
           "encoding",
           "compression",
           "compressionPath",
-          "dialect",
-          "headers",
-          "schema",
           "time",
           "valid",
           "scope",
@@ -139,22 +136,22 @@
             "description": "The encoding of the table."
           },
           "compression": {
-            "type": "string",
+            "type": ["string", "boolean"],
             "title": "Compression",
             "description": "The compression of the table."
           },
           "compressionPath": {
-            "type": ["string", "null"],
+            "type": ["string", "boolean"],
             "title": "Compression path",
             "description": "The path inside the compressed source."
           },
           "dialect": {
-            "type": ["object", "null"],
+            "type": "object",
             "title": "Dialect",
             "description": "The tabular dialect of the table."
           },
           "headers": {
-            "type": ["array", "boolean", "null"],
+            "type": ["array", "boolean"],
             "title": "Headers",
             "description": "List of table's headers.",
             "items": {
@@ -162,15 +159,9 @@
             }
           },
           "schema": {
-            "type": ["object", "null"],
+            "type": "object",
             "title": "Schema",
             "description": "A Table Schema Object."
-          },
-          "time": {
-            "type": "number",
-            "title": "Time",
-            "description": "The time it took to validate this table.",
-            "minimum": 0
           },
           "pickFields": {
             "type": "array",
@@ -211,6 +202,12 @@
             "type": "number",
             "title": "Row Offset",
             "description": "Offset of rows."
+          },
+          "time": {
+            "type": "number",
+            "title": "Time",
+            "description": "The time it took to validate this table.",
+            "minimum": 0
           },
           "valid": {
             "type": "boolean",

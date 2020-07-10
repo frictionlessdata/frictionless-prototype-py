@@ -129,11 +129,12 @@ class Loader:
                     shutil.copyfileobj(file, target)
                     target.seek(0)
                 byte_stream = target
+                self.file["compressionPath"] = name
             return byte_stream
         if self.file.compression == "gz":
             byte_stream = gzip.open(byte_stream)
             return byte_stream
-        if self.file.compression == "no":
+        if self.file.compression is False:
             return byte_stream
         note = f'compression "{self.file.compression}" is not supported'
         raise exceptions.FrictionlessException(errors.CompressionError(note=note))

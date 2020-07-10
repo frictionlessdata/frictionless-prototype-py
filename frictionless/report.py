@@ -189,9 +189,9 @@ class ReportTable(Metadata):
         self["compression"] = compression
         self["compressionPath"] = compression_path
         # Table
-        self["dialect"] = dialect
-        self["headers"] = headers
-        self["schema"] = schema
+        self.setinitial("dialect", dialect)
+        self.setinitial("headers", headers)
+        self.setinitial("schema", schema)
         # Discovery
         self.setinitial("pickFields", pick_fields)
         self.setinitial("skipFields", skip_fields)

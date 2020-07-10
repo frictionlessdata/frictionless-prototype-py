@@ -273,6 +273,7 @@ class Resource(Metadata):
                 patch["hashing"] = self.table.hashing
                 patch["encoding"] = self.table.encoding
                 patch["compression"] = self.table.compression
+                patch["compressionPath"] = self.table.compression_path
                 patch["dialect"] = self.table.dialect
                 patch["schema"] = self.table.schema
 
@@ -285,6 +286,7 @@ class Resource(Metadata):
             patch["hashing"] = self.__file.hashing
             patch["encoding"] = self.__file.encoding
             patch["compression"] = self.__file.compression
+            patch["compressionPath"] = self.__file.compression_path
 
         # Stats
         if not only_sample:

@@ -18,8 +18,8 @@ class File(Metadata):
             "format": {"type": "string"},
             "hashing": {"type": "string"},
             "encoding": {"type": "string"},
-            "compression": {"type": "string"},
-            "compressionPath": {"type": "string"},
+            "compression": {"type": ["string", "boolean"]},
+            "compressionPath": {"type": ["string", "boolean"]},
             "contorl": {"type": "object"},
             "dialect": {"type": "object"},
             "newline": {"type": "string"},
@@ -66,6 +66,7 @@ class File(Metadata):
         # Detect from source
         detect = helpers.detect_source_scheme_and_format(source)
         self.__detected_compression = config.DEFAULT_COMPRESSION
+        self.__detected_compression_path = config.DEFAULT_COMPRESSION_PATH
         if detect[1] in config.COMPRESSION_FORMATS:
             self.__detected_compression = detect[1]
             source = source[: -len(detect[1]) - 1]
@@ -105,7 +106,7 @@ class File(Metadata):
 
     @cached_property
     def compression_path(self):
-        return self.get("compressionPath")
+        return self.get("compressionPath", self.__detected_compression_path)
 
     @cached_property
     def control(self):
@@ -133,6 +134,7 @@ class File(Metadata):
         self.setdefault("hashing", self.hashing)
         self.setdefault("encoding", self.encoding)
         self.setdefault("compression", self.compression)
+        self.setdefault("compressionPath", self.compression_path)
 
     # Metadata
 
