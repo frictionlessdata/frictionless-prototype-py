@@ -1,5 +1,7 @@
 import io
 import os
+import json
+import zipfile
 from urllib.request import urlopen
 from .helpers import cached_property
 from .metadata import Metadata
@@ -141,6 +143,12 @@ class Resource(Metadata):
         finally:
             self.table.close()
         return True
+
+    @cached_property
+    def network(self):
+        if self.inline:
+            return False
+        return helpers.is_remote_path(self.path[0] if self.multipart else self.path)
 
     @cached_property
     def multipart(self):
@@ -374,9 +382,32 @@ class Resource(Metadata):
 
     # Save
 
-    # TODO: zip metadata + data
-    def save(self, target):
-        self.metadata_save(target)
+    # TODO: support multipart
+    def save(self, target, *, only_descriptor=False):
+
+        # Descriptor
+        if only_descriptor:
+            return self.metadata_save(target)
+
+        # Resource
+        try:
+            with zipfile.ZipFile(target, "w") as zip:
+                descriptor = self.copy()
+                for resource in [self]:
+                    if resource.inline:
+                        continue
+                    if resource.multipart:
+                        continue
+                    if resource.network:
+                        continue
+                    if not helpers.is_safe_path(resource.path):
+                        continue
+                    zip.write(resource.source, resource.path)
+                descriptor = json.dumps(descriptor, indent=2, ensure_ascii=False)
+                zip.writestr("dataresource.json", descriptor)
+        except (IOError, zipfile.BadZipfile, zipfile.LargeZipFile) as exception:
+            error = errors.ResourceError(note=str(exception))
+            raise exceptions.FrictionlessException(error) from exception
 
     # Metadata
 

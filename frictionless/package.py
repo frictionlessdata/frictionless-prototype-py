@@ -1,8 +1,11 @@
 import os
+import json
 import glob
+import zipfile
 from .helpers import cached_property
 from .metadata import Metadata
 from .resource import Resource
+from . import exceptions
 from . import helpers
 from . import errors
 from . import config
@@ -194,9 +197,32 @@ class Package(Metadata):
 
     # Save
 
-    # TODO: zip metadata + data
-    def save(self, target):
-        self.metadata_save(target)
+    # TODO: support multipart
+    def save(self, target, *, only_descriptor=False):
+
+        # Descriptor
+        if only_descriptor:
+            return self.metadata_save(target)
+
+        # Package
+        try:
+            with zipfile.ZipFile(target, "w") as zip:
+                descriptor = self.copy()
+                for resource in self.resources:
+                    if resource.inline:
+                        continue
+                    if resource.multipart:
+                        continue
+                    if resource.network:
+                        continue
+                    if not helpers.is_safe_path(resource.path):
+                        continue
+                    zip.write(resource.source, resource.path)
+                descriptor = json.dumps(descriptor, indent=2, ensure_ascii=False)
+                zip.writestr("datapackage.json", descriptor)
+        except Exception as exception:
+            error = errors.PackageError(note=str(exception))
+            raise exceptions.FrictionlessException(error) from exception
 
     # Metadata
 

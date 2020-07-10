@@ -1,6 +1,5 @@
 import os
 import json
-import mock
 import zipfile
 import pytest
 from frictionless import Package, exceptions
@@ -392,156 +391,76 @@ def test_package_infer_empty_file():
 # Save
 
 
-@pytest.mark.skip
-def test_save_as_json(json_tmpfile):
-    package = Package({})
-    package.save(json_tmpfile.name)
-    assert json.loads(json_tmpfile.read().decode("utf-8")) == {
-        "profile": "data-package",
+def test_package_save(tmpdir):
+
+    # Save
+    target = os.path.join(tmpdir, "datapackage.zip")
+    package = Package("data/package.json")
+    package.save(target)
+
+    # Load
+    package = Package(target)
+    assert package == {
+        "name": "name",
+        "resources": [{"name": "name", "path": "table.csv"}],
     }
+    assert package.get_resource("name").read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
 
 
-@pytest.mark.skip
-# TODO: use a self-removing directory
-def test_save_as_json_base_path(json_tmpfile):
-    package = Package({}, base_path="/tmp")
-    package.save(json_tmpfile.name, to_base_path=True)
-    with open(os.path.join("/tmp", json_tmpfile.name), "r") as test_file:
-        assert json.loads(test_file.read()) == {
-            "profile": "data-package",
-        }
+@pytest.mark.slow
+def test_package_save_source_remote(tmpdir):
 
+    # Save
+    path = BASE_URL % "data/table.csv"
+    target = os.path.join(tmpdir, "datapackage.zip")
+    package = Package(name="name", resources=[{"name": "name", "path": path}])
+    package.save(target)
 
-@pytest.mark.skip("deprecated")
-def test_saves_as_zip(tmpfile):
-    package = Package(schema={})
-    package.save(tmpfile)
-    assert zipfile.is_zipfile(tmpfile)
-
-
-@pytest.mark.skip
-def test_accepts_file_paths(tmpfile):
-    package = Package(schema={})
-    package.save(tmpfile.name)
-    assert zipfile.is_zipfile(tmpfile.name)
-
-
-@pytest.mark.skip
-def test_adds_datapackage_descriptor_at_zipfile_root(tmpfile):
-    descriptor = {"name": "proverbs", "resources": [{"data": "万事开头难"}]}
-    schema = {}
-    package = Package(descriptor, schema)
-    package.save(tmpfile)
-    with zipfile.ZipFile(tmpfile, "r") as z:
-        package_json = z.read("datapackage.json").decode("utf-8")
-    assert json.loads(package_json) == json.loads(package.to_json())
-
-
-@pytest.mark.skip
-def test_generates_filenames_for_named_resources(tmpfile):
-    descriptor = {
-        "name": "proverbs",
-        "resources": [
-            {"name": "proverbs", "format": "TXT", "path": "unicode.txt"},
-            {"name": "proverbs_without_format", "path": "unicode.txt"},
-        ],
+    # Load
+    package = Package(target)
+    assert package == {
+        "name": "name",
+        "resources": [{"name": "name", "path": path}],
     }
-    schema = {}
-    package = Package(descriptor, schema, default_base_path="data")
-    package.save(tmpfile)
-    with zipfile.ZipFile(tmpfile, "r") as z:
-        assert "data/proverbs.txt" in z.namelist()
-        assert "data/proverbs_without_format" in z.namelist()
+    assert package.get_resource("name").read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
 
 
-@pytest.mark.skip
-def test_generates_unique_filenames_for_unnamed_resources(tmpfile):
-    descriptor = {
-        "name": "proverbs",
-        "resources": [{"path": "unicode.txt"}, {"path": "foo.txt"}],
+def test_package_save_source_inline(tmpdir):
+
+    # Save
+    target = os.path.join(tmpdir, "datapackage.zip")
+    data = [["id", "name"], ["1", "english"], ["2", "中国人"]]
+    package = Package(name="name", resources=[{"name": "name", "data": data}])
+    package.save(target)
+
+    # Load
+    package = Package(target)
+    assert package == {
+        "name": "name",
+        "resources": [{"name": "name", "data": data}],
     }
-    schema = {}
-    package = Package(descriptor, schema, default_base_path="data")
-    package.save(tmpfile)
-    with zipfile.ZipFile(tmpfile, "r") as z:
-        files = z.namelist()
-        assert sorted(set(files)) == sorted(files)
+    assert package.get_resource("name").read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
 
 
-@pytest.mark.skip
-def test_adds_resources_inside_data_subfolder(tmpfile):
-    descriptor = {
-        "name": "proverbs",
-        "resources": [{"name": "name", "path": "unicode.txt"}],
-    }
-    schema = {}
-    package = Package(descriptor, schema, default_base_path="data")
-    package.save(tmpfile)
-    with zipfile.ZipFile(tmpfile, "r") as z:
-        filename = [name for name in z.namelist() if name.startswith("data/")]
-        assert len(filename) == 1
-        resource_data = z.read(filename[0]).decode("utf-8")
-    assert resource_data == "万事开头难\n"
+def test_package_save_descriptor_only(tmpdir):
 
+    # Save
+    target = os.path.join(tmpdir, "datapackage.json")
+    package = Package("data/package.json")
+    package.save(target, only_descriptor=True)
 
-@pytest.mark.skip
-def test_fixes_resources_paths_to_be_relative_to_package(tmpfile):
-    descriptor = {
-        "name": "proverbs",
-        "resources": [{"name": "unicode", "format": "txt", "path": "unicode.txt"}],
-    }
-    schema = {}
-    pakage = Package(descriptor, schema, default_base_path="data")
-    pakage.save(tmpfile)
-    with zipfile.ZipFile(tmpfile, "r") as z:
-        json_string = z.read("datapackage.json").decode("utf-8")
-        generated_pakage_dict = json.loads(json_string)
-    assert generated_pakage_dict["resources"][0]["path"] == "data/unicode.txt"
-
-
-@pytest.mark.skip(reason="Wait for specs-v1.rc2 resource.data/path")
-def test_works_with_resources_with_relative_paths(tmpfile):
-    package = Package("data/datapackage_with_foo.txt_resource.json")
-    package.save(tmpfile)
-    with zipfile.ZipFile(tmpfile, "r") as z:
-        assert len(z.filelist) == 2
-
-
-@pytest.mark.skip
-def test_should_raise_validation_error_if_datapackage_is_invalid(tmpfile):
-    descriptor = {}
-    schema = {
-        "properties": {"name": {}},
-        "required": ["name"],
-    }
-    package = Package(descriptor, schema)
-    with pytest.raises(exceptions.ValidationError):
-        package.save(tmpfile)
-
-
-@pytest.mark.skip
-def test_should_raise_if_path_doesnt_exist():
-    package = Package({}, {})
-    with pytest.raises(exceptions.DataPackageException):
-        package.save("/non/existent/file/path")
-
-
-@pytest.mark.skip
-@mock.patch("zipfile.ZipFile")
-def test_should_raise_if_zipfile_raised_BadZipfile(zipfile_mock, tmpfile):
-    zipfile_mock.side_effect = zipfile.BadZipfile()
-    package = Package({}, {})
-    with pytest.raises(exceptions.DataPackageException):
-        package.save(tmpfile)
-
-
-@pytest.mark.skip
-@mock.patch("zipfile.ZipFile")
-def test_should_raise_if_zipfile_raised_LargeZipFile(zipfile_mock, tmpfile):
-    zipfile_mock.side_effect = zipfile.LargeZipFile()
-    package = Package({}, {})
-    with pytest.raises(exceptions.DataPackageException):
-        package.save(tmpfile)
+    # Load
+    with open(target, encoding="utf-8") as file:
+        assert package == json.load(file)
 
 
 # Compression

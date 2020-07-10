@@ -1,4 +1,3 @@
-import io
 import os
 import json
 import pytest
@@ -616,18 +615,66 @@ def test_resource_infer_from_path():
 
 
 def test_resource_save(tmpdir):
-    path = str(tmpdir.join("resource.json"))
+
+    # Save
+    target = os.path.join(tmpdir, "dataresource.zip")
     resource = Resource("data/resource.json")
-    resource.save(path)
-    with io.open(path, encoding="utf-8") as file:
-        descriptor = json.load(file)
-    assert descriptor == {
-        "name": "name",
-        "path": "table.csv",
-    }
+    resource.save(target)
+
+    # Load
+    resource = Resource(target)
+    assert resource == {"name": "name", "path": "table.csv"}
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
 
 
-# TODO: add more save tests
+@pytest.mark.slow
+def test_resource_save_source_remote(tmpdir):
+
+    # Save
+    path = BASE_URL % "data/table.csv"
+    target = os.path.join(tmpdir, "datapackage.zip")
+    resource = Resource(name="name", path=path)
+    resource.save(target)
+
+    # Load
+    resource = Resource(target)
+    assert resource == {"name": "name", "path": path}
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
+
+
+def test_resource_save_source_inline(tmpdir):
+
+    # Save
+    target = os.path.join(tmpdir, "dataresource.zip")
+    data = [["id", "name"], ["1", "english"], ["2", "中国人"]]
+    resource = Resource(name="name", data=data)
+    resource.save(target)
+
+    # Load
+    resource = Resource(target)
+    assert resource == {"name": "name", "data": data}
+    assert resource.read_rows() == [
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
+    ]
+
+
+def test_resource_save_descriptor_only(tmpdir):
+
+    # Save
+    target = os.path.join(tmpdir, "dataresource.json")
+    resource = Resource("data/resource.json")
+    resource.save(target, only_descriptor=True)
+
+    # Load
+    with open(target, encoding="utf-8") as file:
+        assert resource == json.load(file)
 
 
 # Multipart

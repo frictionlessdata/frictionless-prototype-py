@@ -320,11 +320,15 @@ def test_schema_infer_no_names():
 
 
 def test_schema_save(tmpdir):
-    path = str(tmpdir.join("schema.json"))
-    Schema(DESCRIPTOR_MIN).save(path)
-    with io.open(path, encoding="utf-8") as file:
-        descriptor = json.load(file)
-    assert descriptor == DESCRIPTOR_MIN
+
+    # Save
+    target = str(tmpdir.join("schema.json"))
+    schema = Schema(DESCRIPTOR_MIN)
+    schema.save(target)
+
+    # Load
+    with open(target, encoding="utf-8") as file:
+        assert schema == json.load(file)
 
 
 # Issues
