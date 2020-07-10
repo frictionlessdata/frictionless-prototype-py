@@ -136,7 +136,7 @@ class Table:
         control=None,
         # Table
         dialect=None,
-        headers=config.DEFAULT_HEADERS_ROW,
+        headers=None,
         schema=None,
         sync_schema=False,
         patch_schema=False,
@@ -160,7 +160,13 @@ class Table:
             source = str(source)
 
         # Update dialect
-        if headers != config.DEFAULT_HEADERS_ROW:
+        if headers is not None:
+            if headers is False:
+                headers = {"rows": []}
+            elif isinstance(headers, int):
+                headers = {"rows": [headers]}
+            elif isinstance(headers, list):
+                headers = {"rows": headers}
             dialect = (dialect or {}).copy()
             dialect["headers"] = headers
 
@@ -480,7 +486,7 @@ class Table:
 
         # Prepare state
         sample = []
-        headers = False
+        headers = []
         field_positions = []
         sample_positions = []
         schema = Schema(self.__init_schema)
@@ -489,7 +495,7 @@ class Table:
         row_number = 0
         headers_data = []
         headers_ready = False
-        headers_numbers = dialect.headers["rows"] or [config.DEFAULT_HEADERS_ROW]
+        headers_numbers = dialect.headers["rows"] or config.DEFAULT_HEADERS_ROWS
         for row_position, cells in enumerate(self.__parser.data_stream, start=1):
             if self.__read_data_stream_pick_skip_row(row_position, cells):
                 row_number += 1
@@ -502,7 +508,7 @@ class Table:
                         infer = self.__read_data_stream_infer_headers
                         headers, field_positions = infer(headers_data)
                         headers_ready = True
-                    if not headers_ready or headers is not False:
+                    if not headers_ready or dialect.headers["rows"]:
                         continue
 
                 # Sample
@@ -557,7 +563,7 @@ class Table:
 
         # No headers
         if not dialect.headers["rows"]:
-            return False, list(range(1, len(headers_data[0]) + 1))
+            return [], list(range(1, len(headers_data[0]) + 1))
 
         # Get headers
         headers = []

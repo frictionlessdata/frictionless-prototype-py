@@ -9,7 +9,7 @@ def describe(
     source,
     *,
     source_type=None,
-    headers=config.DEFAULT_HEADERS_ROW,
+    headers=None,
     expand=False,
     missing_values=None,
     infer_type=None,

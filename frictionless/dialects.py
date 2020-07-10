@@ -20,7 +20,16 @@ class Dialect(Metadata):
     metadata_Error = errors.DialectError
     metadata_profile = {  # type: ignore
         "type": "object",
-        "properties": {"headers": {"type": ["object", "array", "number", "boolean"]}},
+        "properties": {
+            "headers": {
+                "type": "object",
+                "requried": ["rows"],
+                "properties": {
+                    "rows": {"type": "array", "items": {"type": "number"}},
+                    "join": {"type": "string"},
+                },
+            }
+        },
     }
 
     def __init__(self, descriptor=None, headers=None):
@@ -29,15 +38,9 @@ class Dialect(Metadata):
 
     @property
     def headers(self):
-        row = config.DEFAULT_HEADERS_ROW
-        join = config.DEFAULT_HEADERS_JOIN
-        headers = self.get("headers", row)
-        if headers is False:
-            headers = {"rows": [], "join": join}
-        elif isinstance(headers, int):
-            headers = {"rows": [int(headers)], "join": join}
-        elif isinstance(headers, list):
-            headers = {"rows": headers, "join": join}
+        headers = self.get("headers", {})
+        headers.setdefault("rows", config.DEFAULT_HEADERS_ROWS)
+        headers.setdefault("join", config.DEFAULT_HEADERS_JOIN)
         return self.metadata_attach("headers", headers)
 
     # Expand
@@ -81,7 +84,14 @@ class CsvDialect(Dialect):
             "header": {"type": "boolean"},
             "commentChar": {"type": "string"},
             "caseSensitiveHeader": {"type": "boolean"},
-            "headers": {"type": ["object", "array", "number", "boolean"]},
+            "headers": {
+                "type": "object",
+                "requried": ["rows"],
+                "properties": {
+                    "rows": {"type": "array", "items": {"type": "number"}},
+                    "join": {"type": "string"},
+                },
+            },
         },
     }
 
@@ -215,7 +225,14 @@ class ExcelDialect(Dialect):
             "fillMergedCells": {"type": "boolean"},
             "preserveFormatting": {"type": "boolean"},
             "adjustFloatingPointError": {"type": "boolean"},
-            "headers": {"type": ["object", "array", "number", "boolean"]},
+            "headers": {
+                "type": "object",
+                "requried": ["rows"],
+                "properties": {
+                    "rows": {"type": "array", "items": {"type": "number"}},
+                    "join": {"type": "string"},
+                },
+            },
         },
     }
 
@@ -285,7 +302,14 @@ class InlineDialect(Dialect):
         "properties": {
             "keys": {"type": "array"},
             "keyed": {"type": "boolean"},
-            "headers": {"type": ["object", "array", "number", "boolean"]},
+            "headers": {
+                "type": "object",
+                "requried": ["rows"],
+                "properties": {
+                    "rows": {"type": "array", "items": {"type": "number"}},
+                    "join": {"type": "string"},
+                },
+            },
         },
     }
 
@@ -328,7 +352,14 @@ class JsonDialect(Dialect):
             "keys": {"type": "array"},
             "keyed": {"type": "boolean"},
             "property": {"type": "string"},
-            "headers": {"type": ["object", "array", "number", "boolean"]},
+            "headers": {
+                "type": "object",
+                "requried": ["rows"],
+                "properties": {
+                    "rows": {"type": "array", "items": {"type": "number"}},
+                    "join": {"type": "string"},
+                },
+            },
         },
     }
 

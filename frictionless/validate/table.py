@@ -21,7 +21,7 @@ def validate_table(
     control=None,
     # Table
     dialect=None,
-    headers=config.DEFAULT_HEADERS_ROW,
+    headers=None,
     schema=None,
     sync_schema=False,
     patch_schema=False,

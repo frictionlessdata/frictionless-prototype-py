@@ -73,7 +73,14 @@ class HtmlDialect(Dialect):
         "additionalProperties": False,
         "properties": {
             "selector": {"type": "string"},
-            "headers": {"type": ["object", "array", "number", "boolean"]},
+            "headers": {
+                "type": "object",
+                "requried": ["rows"],
+                "properties": {
+                    "rows": {"type": "array", "items": {"type": "number"}},
+                    "join": {"type": "string"},
+                },
+            },
         },
     }
 
