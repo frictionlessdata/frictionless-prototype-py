@@ -20,7 +20,7 @@ class Dialect(Metadata):
     metadata_Error = errors.DialectError
     metadata_profile = {  # type: ignore
         "type": "object",
-        "properties": {"headers": {"type": ["object", "array", "number", "null"]}},
+        "properties": {"headers": {"type": ["object", "array", "number", "boolean"]}},
     }
 
     def __init__(self, descriptor=None, headers=None):
@@ -32,10 +32,10 @@ class Dialect(Metadata):
         row = config.DEFAULT_HEADERS_ROW
         join = config.DEFAULT_HEADERS_JOIN
         headers = self.get("headers", row)
-        if not headers:
+        if headers is False:
             headers = {"rows": [], "join": join}
         elif isinstance(headers, int):
-            headers = {"rows": [headers], "join": join}
+            headers = {"rows": [int(headers)], "join": join}
         elif isinstance(headers, list):
             headers = {"rows": headers, "join": join}
         return self.metadata_attach("headers", headers)
@@ -81,7 +81,7 @@ class CsvDialect(Dialect):
             "header": {"type": "boolean"},
             "commentChar": {"type": "string"},
             "caseSensitiveHeader": {"type": "boolean"},
-            "headers": {"type": ["object", "array", "number", "null"]},
+            "headers": {"type": ["object", "array", "number", "boolean"]},
         },
     }
 
@@ -215,7 +215,7 @@ class ExcelDialect(Dialect):
             "fillMergedCells": {"type": "boolean"},
             "preserveFormatting": {"type": "boolean"},
             "adjustFloatingPointError": {"type": "boolean"},
-            "headers": {"type": ["object", "array", "number", "null"]},
+            "headers": {"type": ["object", "array", "number", "boolean"]},
         },
     }
 
@@ -285,7 +285,7 @@ class InlineDialect(Dialect):
         "properties": {
             "keys": {"type": "array"},
             "keyed": {"type": "boolean"},
-            "headers": {"type": ["object", "array", "number", "null"]},
+            "headers": {"type": ["object", "array", "number", "boolean"]},
         },
     }
 
@@ -328,7 +328,7 @@ class JsonDialect(Dialect):
             "keys": {"type": "array"},
             "keyed": {"type": "boolean"},
             "property": {"type": "string"},
-            "headers": {"type": ["object", "array", "number", "null"]},
+            "headers": {"type": ["object", "array", "number", "boolean"]},
         },
     }
 

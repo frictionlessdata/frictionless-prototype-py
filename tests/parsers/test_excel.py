@@ -70,14 +70,14 @@ def test_table_xlsx_format_errors_sheet_by_name_not_existent():
 
 def test_table_xlsx_merged_cells():
     source = "data/special/merged-cells.xlsx"
-    with Table(source, headers=None) as table:
+    with Table(source, headers=False) as table:
         assert table.read_data() == [["data", None]]
 
 
 def test_table_xlsx_merged_cells_fill():
     source = "data/special/merged-cells.xlsx"
     dialect = dialects.ExcelDialect(fill_merged_cells=True)
-    with Table(source, dialect=dialect, headers=None) as table:
+    with Table(source, dialect=dialect, headers=False) as table:
         assert table.read_data() == [["data", "data"], ["data", "data"], ["data", "data"]]
 
 
@@ -199,14 +199,14 @@ def test_table_xls_sheet_by_name_not_existent():
 
 def test_table_xls_merged_cells():
     source = "data/special/merged-cells.xls"
-    with Table(source, headers=None) as table:
+    with Table(source, headers=False) as table:
         assert table.read_data() == [["data", ""], ["", ""], ["", ""]]
 
 
 def test_table_xls_merged_cells_fill():
     source = "data/special/merged-cells.xls"
     dialect = dialects.ExcelDialect(fill_merged_cells=True)
-    with Table(source, dialect=dialect, headers=None) as table:
+    with Table(source, dialect=dialect, headers=False) as table:
         assert table.read_data() == [["data", "data"], ["data", "data"], ["data", "data"]]
 
 
@@ -218,14 +218,14 @@ def test_table_xls_with_boolean():
 
 def test_table_xlsx_merged_cells_boolean():
     source = "data/special/merged-cells-boolean.xls"
-    with Table(source, headers=None) as table:
+    with Table(source, headers=False) as table:
         assert table.read_data() == [[True, ""], ["", ""], ["", ""]]
 
 
 def test_table_xlsx_merged_cells_fill_boolean():
     source = "data/special/merged-cells-boolean.xls"
     dialect = dialects.ExcelDialect(fill_merged_cells=True)
-    with Table(source, dialect=dialect, headers=None) as table:
+    with Table(source, dialect=dialect, headers=False) as table:
         assert table.read_data() == [[True, True], [True, True], [True, True]]
 
 

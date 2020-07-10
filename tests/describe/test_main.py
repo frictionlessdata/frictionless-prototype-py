@@ -73,7 +73,7 @@ def test_describe_with_missing_values_using_the_argument():
 
 
 def test_describe_check_type_boolean_string_tie():
-    schema = describe([["f"], ["stringish"]], headers=None, infer_names=["field"])
+    schema = describe([["f"], ["stringish"]], headers=False, infer_names=["field"])
     assert schema["fields"][0]["type"] == "string"
 
 

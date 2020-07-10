@@ -89,7 +89,7 @@ class OdsDialect(Dialect):
         "additionalProperties": False,
         "properties": {
             "sheet": {"type": ["number", "string"]},
-            "headers": {"type": ["object", "array", "number", "null"]},
+            "headers": {"type": ["object", "array", "number", "boolean"]},
         },
     }
 

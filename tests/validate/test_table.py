@@ -180,14 +180,14 @@ def test_validate_dialect_delimiter():
 
 
 def test_validate_headers_none():
-    report = validate("data/without-headers.csv", headers=None)
+    report = validate("data/without-headers.csv", headers=False)
     assert report.valid
     assert report.table.stats["rows"] == 3
     assert report.table["headers"] is None
 
 
 def test_validate_headers_none_extra_cell():
-    report = validate("data/without-headers-extra.csv", headers=None)
+    report = validate("data/without-headers-extra.csv", headers=False)
     assert report.table.stats["rows"] == 3
     assert report.table["headers"] is None
     assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
@@ -540,7 +540,7 @@ def test_validate_infer_type_any():
 
 def test_validate_infer_names():
     report = validate(
-        "data/without-headers.csv", headers=None, infer_names=["id", "name"]
+        "data/without-headers.csv", headers=False, infer_names=["id", "name"]
     )
     assert report.table["headers"] is None
     assert report.table.stats["rows"] == 3
@@ -814,7 +814,7 @@ def test_validate_structure_errors_with_limit_errors():
 def test_validate_limit_memory():
     source = lambda: ([integer] for integer in range(1, 100000000))
     schema = {"fields": [{"name": "integer", "type": "integer"}], "primaryKey": "integer"}
-    report = validate(source, headers=None, schema=schema, limit_memory=50)
+    report = validate(source, headers=False, schema=schema, limit_memory=50)
     assert report.flatten(["code", "note"]) == [
         ["task-error", 'exceeded memory limit "50MB"']
     ]

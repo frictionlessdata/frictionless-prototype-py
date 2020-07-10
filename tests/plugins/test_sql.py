@@ -38,7 +38,7 @@ def test_table_format_sql_table_is_required_error(database_url):
 
 def test_table_format_sql_headers_none(database_url):
     dialect = SqlDialect(table="data")
-    with Table(database_url, dialect=dialect, headers=None) as table:
+    with Table(database_url, dialect=dialect, headers=False) as table:
         assert table.headers is None
         assert table.read_data() == [["id", "name"], [1, "english"], [2, "中国人"]]
 

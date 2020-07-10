@@ -85,7 +85,7 @@ class SqlDialect(Dialect):
         "properties": {
             "table": {"type": "string"},
             "order_by": {"type": "string"},
-            "headers": {"type": ["object", "array", "number", "null"]},
+            "headers": {"type": ["object", "array", "number", "boolean"]},
         },
     }
 

@@ -20,8 +20,7 @@ from . import config
 @click.option("--compression", type=str, help="File compression")
 @click.option("--compression-path", type=str, help="File compression path")
 # Table
-@click.option("--headers-row", type=int, multiple=True, help="Headers row")
-@click.option("--headers-joiner", type=str, help="Headers joiner")
+@click.option("--headers", type=int, multiple=True, help="Headers")
 @click.option("--pick-fields", type=str, multiple=True, help="Pick fields")
 @click.option("--skip-fields", type=str, multiple=True, help="Skip fields")
 @click.option("--limit-fields", type=int, help="Limit fields")

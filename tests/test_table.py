@@ -136,7 +136,7 @@ def test_table_without_rows():
 
 
 def test_table_without_headers():
-    with Table("data/without-headers.csv", headers=None) as table:
+    with Table("data/without-headers.csv", headers=False) as table:
         assert table.headers is None
         assert table.read_data() == [["1", "english"], ["2", "中国人"], ["3", "german"]]
         assert table.schema == {
@@ -353,7 +353,7 @@ def test_table_encoding_explicit_latin1():
 def test_table_encoding_utf_16():
     # Bytes encoded as UTF-16 with BOM in platform order is detected
     bio = io.BytesIO(u"en,English\nja,日本語".encode("utf-16"))
-    with Table(bio, format="csv", headers=None) as table:
+    with Table(bio, format="csv", headers=False) as table:
         assert table.encoding == "utf-16"
         assert table.read_data() == [[u"en", u"English"], [u"ja", u"日本語"]]
 
@@ -583,7 +583,7 @@ def test_table_headers_inline_keyed():
 
 def test_table_headers_inline_keyed_headers_is_none():
     source = [{"id": "1", "name": "english"}, {"id": "2", "name": "中国人"}]
-    with Table(source, headers=None) as table:
+    with Table(source, headers=False) as table:
         assert table.headers is None
         assert table.read_data() == [["id", "name"], ["1", "english"], ["2", "中国人"]]
 
@@ -777,13 +777,13 @@ def test_table_limit_offset_fields():
 
 def test_table_pick_rows():
     source = "data/special/skip-rows.csv"
-    with Table(source, headers=None, pick_rows=["1", "2"]) as table:
+    with Table(source, headers=False, pick_rows=["1", "2"]) as table:
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
 def test_table_pick_rows_number():
     source = "data/special/skip-rows.csv"
-    with Table(source, headers=None, pick_rows=[3, 5]) as table:
+    with Table(source, headers=False, pick_rows=[3, 5]) as table:
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
@@ -1097,7 +1097,7 @@ def test_table_stats_rows_remote():
 
 
 def test_table_stats_rows_significant():
-    with Table("data/table1.csv", headers=None) as table:
+    with Table("data/table1.csv", headers=False) as table:
         table.read_data()
         assert table.stats["rows"] == 10000
 
@@ -1150,7 +1150,7 @@ def test_table_reopen_generator():
         yield [1]
         yield [2]
 
-    with Table(generator, headers=None) as table:
+    with Table(generator, headers=False) as table:
         # Before reopen
         assert table.read_data() == [[1], [2]]
         # Reset table
@@ -1191,7 +1191,7 @@ def test_table_write_format_error_bad_format(tmpdir):
 
 def test_table_reset_on_close_issue_190():
     source = [["1", "english"], ["2", "中国人"]]
-    table = Table(source, headers=None, limit_rows=1)
+    table = Table(source, headers=False, limit_rows=1)
     table.open()
     table.read_data() == [["1", "english"]]
     table.open()

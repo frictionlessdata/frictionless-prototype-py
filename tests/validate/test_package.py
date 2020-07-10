@@ -138,7 +138,7 @@ def test_validate_package_dialect_header_false():
                 "schema": {
                     "fields": [{"name": "name"}, {"name": "age", "type": "integer"}]
                 },
-                "dialect": {"headers": None},
+                "dialect": {"headers": False},
             }
         ]
     }
