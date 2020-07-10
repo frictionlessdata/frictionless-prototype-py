@@ -568,8 +568,8 @@ def test_resource_infer():
         "format": "csv",
         "hashing": "md5",
         "encoding": "utf-8",
-        "compression": False,
-        "compressionPath": False,
+        "compression": "no",
+        "compressionPath": "",
         "dialect": {
             "delimiter": ",",
             "lineTerminator": "\r\n",
@@ -601,8 +601,8 @@ def test_resource_infer_source_non_tabular():
         "format": "txt",
         "hashing": "md5",
         "encoding": "utf-8",
-        "compression": False,
-        "compressionPath": False,
+        "compression": "no",
+        "compressionPath": "",
     }
 
 
@@ -774,8 +774,8 @@ def test_resource_source_multipart_infer():
         "format": "csv",
         "hashing": "md5",
         "encoding": "utf-8",
-        "compression": False,
-        "compressionPath": False,
+        "compression": "no",
+        "compressionPath": "",
         "dialect": {
             "delimiter": ",",
             "lineTerminator": "\r\n",
@@ -879,8 +879,8 @@ def test_resource_preserve_format_from_descriptor_on_infer_issue_188():
         "scheme": "file",
         "hashing": "md5",
         "encoding": "utf-8",
-        "compression": False,
-        "compressionPath": False,
+        "compression": "no",
+        "compressionPath": "",
         "dialect": {
             "delimiter": ",",
             "lineTerminator": "\r\n",

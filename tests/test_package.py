@@ -307,8 +307,8 @@ def test_package_infer():
                 "format": "csv",
                 "hashing": "md5",
                 "encoding": "utf-8",
-                "compression": False,
-                "compressionPath": False,
+                "compression": "no",
+                "compressionPath": "",
                 "dialect": {
                     "delimiter": ",",
                     "lineTerminator": "\r\n",
@@ -336,8 +336,8 @@ def test_package_infer():
                 "format": "csv",
                 "hashing": "md5",
                 "encoding": "utf-8",
-                "compression": False,
-                "compressionPath": False,
+                "compression": "no",
+                "compressionPath": "",
                 "dialect": {
                     "delimiter": ",",
                     "lineTerminator": "\r\n",

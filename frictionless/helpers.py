@@ -107,7 +107,7 @@ def is_zip_descriptor(descriptor):
 
 def unzip_descriptor(descriptor, compression_path):
     frictionless = import_module("frictionless")
-    file = frictionless.File(source=descriptor, compression=False)
+    file = frictionless.File(source=descriptor, compression="no")
     with frictionless.system.create_loader(file) as loader:
         byte_stream = loader.byte_stream
         if loader.network:

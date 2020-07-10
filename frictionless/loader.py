@@ -134,7 +134,7 @@ class Loader:
         if self.file.compression == "gz":
             byte_stream = gzip.open(byte_stream)
             return byte_stream
-        if self.file.compression is False:
+        if self.file.compression == "no":
             return byte_stream
         note = f'compression "{self.file.compression}" is not supported'
         raise exceptions.FrictionlessException(errors.CompressionError(note=note))

@@ -66,9 +66,7 @@
             "type": "array",
             "title": "Tags",
             "description": "The error tags.",
-            "items": {
-              "type": "string"
-            }
+            "items": {"type": "string"}
           },
           "note": {
             "type": "string",
@@ -136,12 +134,12 @@
             "description": "The encoding of the table."
           },
           "compression": {
-            "type": ["string", "boolean"],
+            "type": "string",
             "title": "Compression",
             "description": "The compression of the table."
           },
           "compressionPath": {
-            "type": ["string", "boolean"],
+            "type": "string",
             "title": "Compression path",
             "description": "The path inside the compressed source."
           },
