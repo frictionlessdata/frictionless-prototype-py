@@ -15,13 +15,13 @@ def test_table_local_csv():
 
 
 def test_table_local_csv_with_bom():
-    with Table("data/special/bom.csv") as table:
+    with Table("data/bom.csv") as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
 def test_table_local_csv_with_bom_with_encoding():
-    with Table("data/special/bom.csv", encoding="utf-8") as table:
+    with Table("data/bom.csv", encoding="utf-8") as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
@@ -50,7 +50,7 @@ def test_table_csv_unix():
 
 def test_table_csv_escaping():
     dialect = dialects.CsvDialect(escape_char="\\")
-    with Table("data/special/escaping.csv", dialect=dialect) as table:
+    with Table("data/escaping.csv", dialect=dialect) as table:
         assert table.headers == ["ID", "Test"]
         assert table.read_data() == [
             ["1", "Test line 1"],
@@ -60,7 +60,7 @@ def test_table_csv_escaping():
 
 
 def test_table_csv_doublequote():
-    with Table("data/special/doublequote.csv") as table:
+    with Table("data/doublequote.csv") as table:
         assert len(table.headers) == 17
         for row in table:
             assert len(row) == 17
@@ -203,6 +203,8 @@ def test_table_csv_write_delimiter(tmpdir):
             "doubleQuote": True,
             "quoteChar": '"',
             "skipInitialSpace": False,
+            "header": True,
+            "headerRows": [1],
         }
 
 

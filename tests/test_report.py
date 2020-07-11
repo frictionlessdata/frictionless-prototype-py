@@ -24,6 +24,8 @@ def test_validate_report_props():
         "lineTerminator": "\r\n",
         "quoteChar": '"',
         "skipInitialSpace": False,
+        "header": True,
+        "headerRows": [1],
     }
     assert report.table["headers"] == ["id", "name"]
     assert report.table["schema"] == {

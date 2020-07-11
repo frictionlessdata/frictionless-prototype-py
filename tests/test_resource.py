@@ -577,6 +577,8 @@ def test_resource_infer():
             "doubleQuote": True,
             "quoteChar": '"',
             "skipInitialSpace": False,
+            "header": True,
+            "headerRows": [1],
         },
         "schema": {
             "fields": [
@@ -783,6 +785,8 @@ def test_resource_source_multipart_infer():
             "doubleQuote": True,
             "quoteChar": '"',
             "skipInitialSpace": False,
+            "header": True,
+            "headerRows": [1],
         },
         "schema": {
             "fields": [
@@ -888,6 +892,8 @@ def test_resource_preserve_format_from_descriptor_on_infer_issue_188():
             "doubleQuote": True,
             "quoteChar": '"',
             "skipInitialSpace": False,
+            "header": True,
+            "headerRows": [1],
         },
         "schema": {
             "fields": [

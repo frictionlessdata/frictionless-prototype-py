@@ -486,19 +486,48 @@ class Table:
     def __read_data_stream_infer(self):
         dialect = self.__file.dialect
 
-        # Prepare state
+        # Create state
         sample = []
         headers = []
         field_positions = []
         sample_positions = []
         schema = Schema(self.__init_schema)
 
+        # Prepare header
+        buffer = []
+        widths = []
+        for row_position, cells in enumerate(self.__parser.data_stream, start=1):
+            buffer.append(cells)
+            if self.__read_data_stream_pick_skip_row(row_position, cells):
+                widths.append(len(cells))
+                if len(widths) >= self.__infer_volume:
+                    break
+
+        # Infer header
+        row_number = 0
+        if dialect.get("header") is None and dialect.get("headerRows") is None and widths:
+            dialect["header"] = False
+            width = round(sum(widths) / len(widths))
+            drift = max(round(width * 0.1), 1)
+            match = list(range(width - drift, width + drift + 1))
+            for row_position, cells in enumerate(buffer, start=1):
+                if self.__read_data_stream_pick_skip_row(row_position, cells):
+                    row_number += 1
+                    if len(cells) not in match:
+                        continue
+                    if not helpers.is_only_strings(cells):
+                        continue
+                    dialect["header"] = True
+                    dialect["headerRows"] = [row_number]
+                    break
+
         # Infer table
         row_number = 0
         headers_data = []
         headers_ready = False
         headers_numbers = dialect.header_rows or config.DEFAULT_HEADER_ROWS
-        for row_position, cells in enumerate(self.__parser.data_stream, start=1):
+        iterator = chain(buffer, self.__parser.data_stream)
+        for row_position, cells in enumerate(iterator, start=1):
             if self.__read_data_stream_pick_skip_row(row_position, cells):
                 row_number += 1
 

@@ -25,7 +25,7 @@ def test_table_xlsx_remote():
 
 
 def test_table_xlsx_sheet_by_index():
-    source = "data/special/sheet2.xlsx"
+    source = "data/sheet2.xlsx"
     dialect = dialects.ExcelDialect(sheet=2)
     with Table(source, dialect=dialect) as table:
         assert table.headers == ["id", "name"]
@@ -33,21 +33,18 @@ def test_table_xlsx_sheet_by_index():
 
 
 def test_table_xlsx_format_error_sheet_by_index_not_existent():
-    source = "data/special/sheet2.xlsx"
+    source = "data/sheet2.xlsx"
     dialect = dialects.ExcelDialect(sheet=3)
     table = Table(source, dialect=dialect)
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
     error = excinfo.value.error
     assert error.code == "format-error"
-    assert (
-        error.note
-        == 'Excel document "data/special/sheet2.xlsx" does not have a sheet "3"'
-    )
+    assert error.note == 'Excel document "data/sheet2.xlsx" does not have a sheet "3"'
 
 
 def test_table_xlsx_sheet_by_name():
-    source = "data/special/sheet2.xlsx"
+    source = "data/sheet2.xlsx"
     dialect = dialects.ExcelDialect(sheet="Sheet2")
     with Table(source, dialect=dialect) as table:
         assert table.headers == ["id", "name"]
@@ -55,34 +52,31 @@ def test_table_xlsx_sheet_by_name():
 
 
 def test_table_xlsx_format_errors_sheet_by_name_not_existent():
-    source = "data/special/sheet2.xlsx"
+    source = "data/sheet2.xlsx"
     dialect = dialects.ExcelDialect(sheet="bad")
     table = Table(source, dialect=dialect)
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
     error = excinfo.value.error
     assert error.code == "format-error"
-    assert (
-        error.note
-        == 'Excel document "data/special/sheet2.xlsx" does not have a sheet "bad"'
-    )
+    assert error.note == 'Excel document "data/sheet2.xlsx" does not have a sheet "bad"'
 
 
 def test_table_xlsx_merged_cells():
-    source = "data/special/merged-cells.xlsx"
+    source = "data/merged-cells.xlsx"
     with Table(source, headers=False) as table:
         assert table.read_data() == [["data", None]]
 
 
 def test_table_xlsx_merged_cells_fill():
-    source = "data/special/merged-cells.xlsx"
+    source = "data/merged-cells.xlsx"
     dialect = dialects.ExcelDialect(fill_merged_cells=True)
     with Table(source, dialect=dialect, headers=False) as table:
         assert table.read_data() == [["data", "data"], ["data", "data"], ["data", "data"]]
 
 
 def test_table_xlsx_adjust_floating_point_error():
-    source = "data/special/adjust_floating_point_error.xlsx"
+    source = "data/adjust-floating-point-error.xlsx"
     dialect = dialects.ExcelDialect(
         fill_merged_cells=False,
         preserve_formatting=True,
@@ -94,7 +88,7 @@ def test_table_xlsx_adjust_floating_point_error():
 
 
 def test_table_xlsx_adjust_floating_point_error_default():
-    source = "data/special/adjust_floating_point_error.xlsx"
+    source = "data/adjust-floating-point-error.xlsx"
     dialect = dialects.ExcelDialect(preserve_formatting=True)
     with pytest.warns(UserWarning):
         with Table(source, dialect=dialect, skip_fields=["<blank>"]) as table:
@@ -102,9 +96,9 @@ def test_table_xlsx_adjust_floating_point_error_default():
 
 
 def test_table_xlsx_preserve_formatting():
-    source = "data/special/preserve-formatting.xlsx"
+    source = "data/preserve-formatting.xlsx"
     dialect = dialects.ExcelDialect(preserve_formatting=True)
-    with Table(source, dialect=dialect, infer_type="any") as table:
+    with Table(source, dialect=dialect, headers=1, infer_type="any") as table:
         assert table.read_rows() == [
             {
                 # general
@@ -126,7 +120,7 @@ def test_table_xlsx_preserve_formatting():
 
 
 def test_table_xlsx_preserve_formatting_percentage():
-    source = "data/special/preserve-formatting-percentage.xlsx"
+    source = "data/preserve-formatting-percentage.xlsx"
     dialect = dialects.ExcelDialect(preserve_formatting=True)
     with Table(source, dialect=dialect) as table:
         assert table.read_data() == [
@@ -137,7 +131,7 @@ def test_table_xlsx_preserve_formatting_percentage():
 
 
 def test_table_xlsx_preserve_formatting_number_multicode():
-    source = "data/special/number_format_multicode.xlsx"
+    source = "data/number-format-multicode.xlsx"
     dialect = dialects.ExcelDialect(preserve_formatting=True)
     with Table(source, dialect=dialect, skip_fields=["<blank>"]) as table:
         assert table.read_data() == [["4.5"], ["-9.032"], ["15.8"]]
@@ -166,7 +160,7 @@ def test_table_remote_xls():
 
 
 def test_table_xls_sheet_by_index():
-    source = "data/special/sheet2.xls"
+    source = "data/sheet2.xls"
     dialect = dialects.ExcelDialect(sheet=2)
     with Table(source, dialect=dialect) as table:
         assert table.headers == ["id", "name"]
@@ -174,7 +168,7 @@ def test_table_xls_sheet_by_index():
 
 
 def test_table_xls_sheet_by_index_not_existent():
-    source = "data/special/sheet2.xls"
+    source = "data/sheet2.xls"
     dialect = dialects.ExcelDialect(sheet=3)
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         Table(source, dialect=dialect).open()
@@ -182,7 +176,7 @@ def test_table_xls_sheet_by_index_not_existent():
 
 
 def test_table_xls_sheet_by_name():
-    source = "data/special/sheet2.xls"
+    source = "data/sheet2.xls"
     dialect = dialects.ExcelDialect(sheet="Sheet2")
     with Table(source, dialect=dialect) as table:
         assert table.headers == ["id", "name"]
@@ -190,7 +184,7 @@ def test_table_xls_sheet_by_name():
 
 
 def test_table_xls_sheet_by_name_not_existent():
-    source = "data/special/sheet2.xls"
+    source = "data/sheet2.xls"
     dialect = dialects.ExcelDialect(sheet="bad")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         Table(source, dialect=dialect).open()
@@ -198,39 +192,39 @@ def test_table_xls_sheet_by_name_not_existent():
 
 
 def test_table_xls_merged_cells():
-    source = "data/special/merged-cells.xls"
+    source = "data/merged-cells.xls"
     with Table(source, headers=False) as table:
         assert table.read_data() == [["data", ""], ["", ""], ["", ""]]
 
 
 def test_table_xls_merged_cells_fill():
-    source = "data/special/merged-cells.xls"
+    source = "data/merged-cells.xls"
     dialect = dialects.ExcelDialect(fill_merged_cells=True)
     with Table(source, dialect=dialect, headers=False) as table:
         assert table.read_data() == [["data", "data"], ["data", "data"], ["data", "data"]]
 
 
 def test_table_xls_with_boolean():
-    with Table("data/special/table-with-booleans.xls") as table:
+    with Table("data/table-with-booleans.xls") as table:
         assert table.headers == ["id", "boolean"]
         assert table.read_data() == [[1, True], [2, False]]
 
 
 def test_table_xlsx_merged_cells_boolean():
-    source = "data/special/merged-cells-boolean.xls"
+    source = "data/merged-cells-boolean.xls"
     with Table(source, headers=False) as table:
         assert table.read_data() == [[True, ""], ["", ""], ["", ""]]
 
 
 def test_table_xlsx_merged_cells_fill_boolean():
-    source = "data/special/merged-cells-boolean.xls"
+    source = "data/merged-cells-boolean.xls"
     dialect = dialects.ExcelDialect(fill_merged_cells=True)
     with Table(source, dialect=dialect, headers=False) as table:
         assert table.read_data() == [[True, True], [True, True], [True, True]]
 
 
 def test_table_xls_with_ints_floats_dates():
-    source = "data/special/table-with-ints-floats-dates.xls"
+    source = "data/table-with-ints-floats-dates.xls"
     with Table(source) as table:
         assert table.headers == ["Int", "Float", "Date"]
         assert table.read_data() == [

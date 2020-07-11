@@ -315,6 +315,8 @@ def test_package_infer():
                     "doubleQuote": True,
                     "quoteChar": '"',
                     "skipInitialSpace": False,
+                    "header": True,
+                    "headerRows": [1],
                 },
                 "schema": {
                     "fields": [
@@ -344,6 +346,8 @@ def test_package_infer():
                     "doubleQuote": True,
                     "quoteChar": '"',
                     "skipInitialSpace": False,
+                    "header": True,
+                    "headerRows": [1],
                 },
                 "schema": {
                     "fields": [

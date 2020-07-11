@@ -60,13 +60,13 @@ def test_table_ods_sheet_by_name_not_existent():
 
 
 def test_table_ods_with_boolean():
-    with Table("data/special/table-with-booleans.ods") as table:
+    with Table("data/table-with-booleans.ods") as table:
         assert table.headers == ["id", "boolean"]
         assert table.read_data() == [[1, True], [2, False]]
 
 
 def test_table_ods_with_ints_floats_dates():
-    source = "data/special/table-with-ints-floats-dates.ods"
+    source = "data/table-with-ints-floats-dates.ods"
     with Table(source) as table:
         assert table.headers == ["Int", "Float", "Date", "Datetime"]
         assert table.read_data() == [

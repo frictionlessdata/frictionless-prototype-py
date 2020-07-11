@@ -137,7 +137,7 @@ def test_table_without_rows():
 
 
 def test_table_without_headers():
-    with Table("data/without-headers.csv", headers=False) as table:
+    with Table("data/without-headers.csv") as table:
         assert table.headers == []
         assert table.schema == {
             "fields": [
@@ -284,7 +284,7 @@ def test_table_format_html():
 
 
 def test_table_format_error_bad_format():
-    table = Table("data/special/table.bad")
+    table = Table("data/table.bad")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         table.open()
     error = excinfo.value.error
@@ -345,7 +345,7 @@ def test_table_encoding_explicit_utf8():
 
 
 def test_table_encoding_explicit_latin1():
-    with Table("data/special/latin1.csv", encoding="latin1") as table:
+    with Table("data/latin1.csv", encoding="latin1") as table:
         assert table.encoding == "iso8859-1"
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "©"]]
@@ -389,7 +389,7 @@ def test_table_compression_local_csv_zip():
 
 
 def test_table_compression_local_csv_zip_multiple_files():
-    with Table("data/2-files.zip") as table:
+    with Table("data/table-multiple-files.zip") as table:
         assert table.compression == "zip"
         assert table.compression_path == "table-reverse.csv"
         assert table.headers == ["id", "name"]
@@ -397,7 +397,7 @@ def test_table_compression_local_csv_zip_multiple_files():
 
 
 def test_table_compression_local_csv_zip_multiple_files_compression_path():
-    with Table("data/2-files.zip", compression_path="table.csv") as table:
+    with Table("data/table-multiple-files.zip", compression_path="table.csv") as table:
         assert table.compression == "zip"
         assert table.compression_path == "table.csv"
         assert table.headers == ["id", "name"]
@@ -526,6 +526,8 @@ def test_table_dialect():
             "doubleQuote": True,
             "quoteChar": '"',
             "skipInitialSpace": False,
+            "header": True,
+            "headerRows": [1],
         }
 
 
@@ -597,7 +599,7 @@ def test_table_headers_inline_keyed_headers_is_none():
 
 
 def test_table_headers_xlsx_multiline():
-    source = "data/special/multiline-headers.xlsx"
+    source = "data/multiline-headers.xlsx"
     dialect = dialects.ExcelDialect(fill_merged_cells=True)
     with Table(source, dialect=dialect, headers=[1, 2, 3, 4, 5]) as table:
         assert table.headers == [
@@ -625,7 +627,7 @@ def test_table_headers_csv_multiline_headers_duplicates():
 
 def test_table_headers_strip_and_non_strings():
     source = [[" header ", 2, 3, None], ["value1", "value2", "value3", "value4"]]
-    with Table(source) as table:
+    with Table(source, headers=1) as table:
         assert table.headers == ["header", "2", "3", ""]
         assert table.read_data() == [["value1", "value2", "value3", "value4"]]
 
@@ -783,13 +785,13 @@ def test_table_limit_offset_fields():
 
 
 def test_table_pick_rows():
-    source = "data/special/skip-rows.csv"
+    source = "data/skip-rows.csv"
     with Table(source, headers=False, pick_rows=["1", "2"]) as table:
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
 def test_table_pick_rows_number():
-    source = "data/special/skip-rows.csv"
+    source = "data/skip-rows.csv"
     with Table(source, headers=False, pick_rows=[3, 5]) as table:
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
@@ -810,20 +812,20 @@ def test_table_pick_rows_regex():
 
 
 def test_table_skip_rows():
-    source = "data/special/skip-rows.csv"
+    source = "data/skip-rows.csv"
     with Table(source, skip_rows=["#", 5]) as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"]]
 
 
 def test_table_skip_rows_excel_empty_column():
-    source = "data/special/skip-rows.xlsx"
+    source = "data/skip-rows.xlsx"
     with Table(source, skip_rows=[""]) as table:
         assert table.read_data() == [["A", "B"], [8, 9]]
 
 
 def test_table_skip_rows_with_headers():
-    source = "data/special/skip-rows.csv"
+    source = "data/skip-rows.csv"
     with Table(source, skip_rows=["#"]) as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
@@ -875,21 +877,21 @@ def test_table_skip_rows_preset():
 
 
 def test_table_limit_rows():
-    source = "data/special/long.csv"
+    source = "data/long.csv"
     with Table(source, limit_rows=1) as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "a"]]
 
 
 def test_table_offset_rows():
-    source = "data/special/long.csv"
+    source = "data/long.csv"
     with Table(source, offset_rows=5) as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["6", "f"]]
 
 
 def test_table_limit_offset_rows():
-    source = "data/special/long.csv"
+    source = "data/long.csv"
     with Table(source, limit_rows=2, offset_rows=2) as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["3", "c"], ["4", "d"]]
@@ -1013,28 +1015,28 @@ def test_table_schema_infer_names():
 
 
 def test_table_stats_hash():
-    with Table("data/special/doublequote.csv") as table:
+    with Table("data/doublequote.csv") as table:
         table.read_data()
         assert table.hashing == "md5"
         assert table.stats["hash"] == "d82306001266c4343a2af4830321ead8"
 
 
 def test_table_stats_hash_md5():
-    with Table("data/special/doublequote.csv", hashing="md5") as table:
+    with Table("data/doublequote.csv", hashing="md5") as table:
         table.read_data()
         assert table.hashing == "md5"
         assert table.stats["hash"] == "d82306001266c4343a2af4830321ead8"
 
 
 def test_table_stats_hash_sha1():
-    with Table("data/special/doublequote.csv", hashing="sha1") as table:
+    with Table("data/doublequote.csv", hashing="sha1") as table:
         table.read_data()
         assert table.hashing == "sha1"
         assert table.stats["hash"] == "2842768834a6804d8644dd689da61c7ab71cbb33"
 
 
 def test_table_stats_hash_sha256():
-    with Table("data/special/doublequote.csv", hashing="sha256") as table:
+    with Table("data/doublequote.csv", hashing="sha256") as table:
         table.read_data()
         assert table.hashing == "sha256"
         assert (
@@ -1044,7 +1046,7 @@ def test_table_stats_hash_sha256():
 
 
 def test_table_stats_hash_sha512():
-    with Table("data/special/doublequote.csv", hashing="sha512") as table:
+    with Table("data/doublequote.csv", hashing="sha512") as table:
         table.read_data()
         assert table.hashing == "sha512"
         assert (
@@ -1054,7 +1056,7 @@ def test_table_stats_hash_sha512():
 
 
 def test_table_stats_hash_compressed():
-    with Table("data/special/doublequote.csv.zip") as table:
+    with Table("data/doublequote.csv.zip") as table:
         table.read_data()
         assert table.hashing == "md5"
         assert table.stats["hash"] == "2a72c90bd48c1fa48aec632db23ce8f7"
@@ -1069,13 +1071,13 @@ def test_table_stats_hash_remote():
 
 
 def test_table_stats_bytes():
-    with Table("data/special/doublequote.csv") as table:
+    with Table("data/doublequote.csv") as table:
         table.read_data()
         assert table.stats["bytes"] == 7346
 
 
 def test_table_stats_bytes_compressed():
-    with Table("data/special/doublequote.csv.zip") as table:
+    with Table("data/doublequote.csv.zip") as table:
         table.read_data()
         assert table.stats["bytes"] == 1265
 
@@ -1088,7 +1090,7 @@ def test_table_stats_bytes_remote():
 
 
 def test_table_stats_rows():
-    with Table("data/special/doublequote.csv") as table:
+    with Table("data/doublequote.csv") as table:
         table.read_data()
         assert table.stats["rows"] == 5
         table.open()
@@ -1126,7 +1128,7 @@ def test_table_reopen():
 
 
 def test_table_reopen_and_infer_volume():
-    with Table("data/special/long.csv", infer_volume=3) as table:
+    with Table("data/long.csv", infer_volume=3) as table:
         # Before reset
         assert table.sample == [["1", "a"], ["2", "b"], ["3", "c"]]
         assert table.read_data() == [
@@ -1207,14 +1209,14 @@ def test_table_reset_on_close_issue_190():
 
 
 def test_table_skip_blank_at_the_end_issue_bco_dmo_33():
-    source = "data/special/skip-blank-at-the-end.csv"
+    source = "data/skip-blank-at-the-end.csv"
     with Table(source, skip_rows=["#"]) as table:
         assert table.headers == ["test1", "test2"]
         assert table.read_data() == [["1", "2"], []]
 
 
 def test_table_wrong_encoding_detection_issue_265():
-    with Table("data/special/accent.csv") as table:
+    with Table("data/accent.csv") as table:
         #  Underlaying "chardet" can't detect correct utf-8 here
         assert table.encoding == "iso8859-1"
 
@@ -1247,7 +1249,7 @@ def test_table_chardet_raises_remote_issue_305():
 
 
 def test_table_skip_rows_non_string_cell_issue_320():
-    source = "data/special/issue320.xlsx"
+    source = "data/issue320.xlsx"
     dialect = dialects.ExcelDialect(fill_merged_cells=True)
     with pytest.warns(UserWarning):
         with Table(source, dialect=dialect, headers=[10, 11, 12]) as table:

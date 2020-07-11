@@ -105,6 +105,20 @@ def is_zip_descriptor(descriptor):
         return format == "zip"
 
 
+def is_only_strings(cells):
+    for cell in cells:
+        if cell is None:
+            continue
+        if not isinstance(cell, str):
+            return False
+        try:
+            float(cell)
+            return False
+        except Exception:
+            pass
+    return True
+
+
 def unzip_descriptor(descriptor, compression_path):
     frictionless = import_module("frictionless")
     file = frictionless.File(source=descriptor, compression="no")
