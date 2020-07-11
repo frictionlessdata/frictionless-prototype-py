@@ -138,6 +138,7 @@ class Table:
         dialect=None,
         headers=None,
         schema=None,
+        lookup=None,
         sync_schema=False,
         patch_schema=False,
         infer_type=None,
@@ -191,6 +192,14 @@ class Table:
         self.__sample_positions = None
 
         # Store params
+        self.__lookup = lookup
+        self.__init_schema = schema
+        self.__sync_schema = sync_schema
+        self.__patch_schema = patch_schema
+        self.__infer_type = infer_type
+        self.__infer_names = infer_names
+        self.__infer_volume = infer_volume
+        self.__infer_confidence = infer_confidence
         self.__pick_fields = pick_fields
         self.__skip_fields = skip_fields
         self.__limit_fields = limit_fields
@@ -199,13 +208,6 @@ class Table:
         self.__skip_rows = skip_rows
         self.__limit_rows = limit_rows
         self.__offset_rows = offset_rows
-        self.__init_schema = schema
-        self.__sync_schema = sync_schema
-        self.__patch_schema = patch_schema
-        self.__infer_type = infer_type
-        self.__infer_names = infer_names
-        self.__infer_volume = infer_volume
-        self.__infer_confidence = infer_confidence
 
         # Detect filtering
         self.__field_filtering = (
@@ -686,14 +688,80 @@ class Table:
         return self.__read_row_stream_create()
 
     def __read_row_stream_create(self):
+        schema = self.schema
+
+        # Create state
+        memory_unique = {}
+        memory_primary = {}
+        foreign_groups = []
+        for field in self.schema.fields:
+            if field.constraints.get("unique"):
+                memory_unique[field.name] = {}
+        if self.__lookup:
+            for fk in self.schema.foreign_keys:
+                group = {}
+                group["sourceName"] = fk["reference"]["resource"]
+                group["sourceKey"] = tuple(fk["reference"]["fields"])
+                group["targetKey"] = tuple(fk["fields"])
+                foreign_groups.append(group)
+
+        # Stream rows
         for cells in self.__data_stream:
-            yield Row(
+
+            # Create row
+            row = Row(
                 cells,
                 fields=self.__schema.fields,
                 field_positions=self.__field_positions,
                 row_position=self.__row_position,
                 row_number=self.__file.stats["rows"],
             )
+
+            # Unique Error
+            if memory_unique:
+                for field_name in memory_unique.keys():
+                    cell = row[field_name]
+                    if cell is not None:
+                        match = memory_unique[field_name].get(cell)
+                        memory_unique[field_name][cell] = row.row_position
+                        if match:
+                            Error = errors.UniqueError
+                            note = "the same as in the row at position %s" % match
+                            error = Error.from_row(row, note=note, field_name=field_name)
+                            row.errors.append(error)
+
+            # Primary Key Error
+            if schema.primary_key:
+                cells = tuple(row[field_name] for field_name in schema.primary_key)
+                if set(cells) == {None}:
+                    note = 'cells composing the primary keys are all "None"'
+                    error = errors.PrimaryKeyError.from_row(row, note=note)
+                    row.errors.append(error)
+                else:
+                    match = memory_primary.get(cells)
+                    memory_primary[cells] = row.row_position
+                    if match:
+                        if match:
+                            note = "the same as in the row at position %s" % match
+                            error = errors.PrimaryKeyError.from_row(row, note=note)
+                            row.errors.append(error)
+
+            # Foreign Key Error
+            if foreign_groups:
+                for group in foreign_groups:
+                    group_lookup = self.__lookup.get(group["sourceName"])
+                    if group_lookup:
+                        cells = tuple(row[name] for name in group["targetKey"])
+                        if set(cells) == {None}:
+                            continue
+                        match = cells in group_lookup.get(group["sourceKey"], set())
+                        if not match:
+                            note = "not found in the lookup table"
+                            error = errors.ForeignKeyError.from_row(row, note=note)
+                            row.errors.append(error)
+
+            # Stream row
+            yield row
 
     def __read_row_stream_raise_closed(self):
         if not self.__row_stream:

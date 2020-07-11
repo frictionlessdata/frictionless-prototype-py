@@ -632,7 +632,121 @@ def test_table_headers_strip_and_non_strings():
         assert table.read_data() == [["value1", "value2", "value3", "value4"]]
 
 
-# Fields
+# Schema
+
+
+def test_table_schema():
+    with Table("data/table.csv") as table:
+        assert table.headers == ["id", "name"]
+        assert table.schema == {
+            "fields": [
+                {"name": "id", "type": "integer"},
+                {"name": "name", "type": "string"},
+            ]
+        }
+        assert table.read_rows() == [
+            {"id": 1, "name": "english"},
+            {"id": 2, "name": "中国人"},
+        ]
+
+
+def test_table_schema_provided():
+    schema = {
+        "fields": [
+            {"name": "new1", "type": "string"},
+            {"name": "new2", "type": "string"},
+        ]
+    }
+    with Table("data/table.csv", schema=schema) as table:
+        assert table.headers == ["id", "name"]
+        assert table.schema == schema
+        assert table.read_rows() == [
+            {"new1": "1", "new2": "english"},
+            {"new1": "2", "new2": "中国人"},
+        ]
+
+
+def test_table_sync_schema():
+    schema = describe("data/table.csv")
+    with Table("data/sync-schema.csv", schema=schema, sync_schema=True) as table:
+        assert table.headers == ["name", "id"]
+        assert table.schema == {
+            "fields": [
+                {"name": "name", "type": "string"},
+                {"name": "id", "type": "integer"},
+            ]
+        }
+        assert table.sample == [["english", "1"], ["中国人", "2"]]
+        assert table.read_rows() == [
+            {"id": 1, "name": "english"},
+            {"id": 2, "name": "中国人"},
+        ]
+
+
+def test_table_schema_patch_schema():
+    patch_schema = {"fields": {"id": {"name": "new", "type": "string"}}}
+    with Table("data/table.csv", patch_schema=patch_schema) as table:
+        assert table.headers == ["id", "name"]
+        assert table.schema == {
+            "fields": [
+                {"name": "new", "type": "string"},
+                {"name": "name", "type": "string"},
+            ]
+        }
+        assert table.read_rows() == [
+            {"new": "1", "name": "english"},
+            {"new": "2", "name": "中国人"},
+        ]
+
+
+def test_table_schema_patch_schema_missing_values():
+    patch_schema = {"missingValues": ["1", "2"]}
+    with Table("data/table.csv", patch_schema=patch_schema) as table:
+        assert table.headers == ["id", "name"]
+        assert table.schema == {
+            "fields": [
+                {"name": "id", "type": "integer"},
+                {"name": "name", "type": "string"},
+            ],
+            "missingValues": ["1", "2"],
+        }
+        assert table.read_rows() == [
+            {"id": None, "name": "english"},
+            {"id": None, "name": "中国人"},
+        ]
+
+
+def test_table_schema_infer_type():
+    with Table("data/table.csv", infer_type="string") as table:
+        assert table.headers == ["id", "name"]
+        assert table.schema == {
+            "fields": [
+                {"name": "id", "type": "string"},
+                {"name": "name", "type": "string"},
+            ]
+        }
+        assert table.read_rows() == [
+            {"id": "1", "name": "english"},
+            {"id": "2", "name": "中国人"},
+        ]
+
+
+def test_table_schema_infer_names():
+    with Table("data/table.csv", infer_names=["new1", "new2"]) as table:
+        assert table.headers == ["id", "name"]
+        assert table.schema == {
+            "fields": [
+                {"name": "new1", "type": "integer"},
+                {"name": "new2", "type": "string"},
+            ]
+        }
+        assert table.read_rows() == [
+            {"new1": 1, "new2": "english"},
+            {"new1": 2, "new2": "中国人"},
+        ]
+
+
+# Discovery
 
 
 def test_table_pick_fields():
@@ -781,9 +895,6 @@ def test_table_limit_offset_fields():
         ]
 
 
-# Rows
-
-
 def test_table_pick_rows():
     source = "data/skip-rows.csv"
     with Table(source, headers=False, pick_rows=["1", "2"]) as table:
@@ -897,120 +1008,6 @@ def test_table_limit_offset_rows():
         assert table.read_data() == [["3", "c"], ["4", "d"]]
 
 
-# Schema
-
-
-def test_table_schema():
-    with Table("data/table.csv") as table:
-        assert table.headers == ["id", "name"]
-        assert table.schema == {
-            "fields": [
-                {"name": "id", "type": "integer"},
-                {"name": "name", "type": "string"},
-            ]
-        }
-        assert table.read_rows() == [
-            {"id": 1, "name": "english"},
-            {"id": 2, "name": "中国人"},
-        ]
-
-
-def test_table_schema_provided():
-    schema = {
-        "fields": [
-            {"name": "new1", "type": "string"},
-            {"name": "new2", "type": "string"},
-        ]
-    }
-    with Table("data/table.csv", schema=schema) as table:
-        assert table.headers == ["id", "name"]
-        assert table.schema == schema
-        assert table.read_rows() == [
-            {"new1": "1", "new2": "english"},
-            {"new1": "2", "new2": "中国人"},
-        ]
-
-
-def test_table_sync_schema():
-    schema = describe("data/table.csv")
-    with Table("data/sync-schema.csv", schema=schema, sync_schema=True) as table:
-        assert table.headers == ["name", "id"]
-        assert table.schema == {
-            "fields": [
-                {"name": "name", "type": "string"},
-                {"name": "id", "type": "integer"},
-            ]
-        }
-        assert table.sample == [["english", "1"], ["中国人", "2"]]
-        assert table.read_rows() == [
-            {"id": 1, "name": "english"},
-            {"id": 2, "name": "中国人"},
-        ]
-
-
-def test_table_schema_patch_schema():
-    patch_schema = {"fields": {"id": {"name": "new", "type": "string"}}}
-    with Table("data/table.csv", patch_schema=patch_schema) as table:
-        assert table.headers == ["id", "name"]
-        assert table.schema == {
-            "fields": [
-                {"name": "new", "type": "string"},
-                {"name": "name", "type": "string"},
-            ]
-        }
-        assert table.read_rows() == [
-            {"new": "1", "name": "english"},
-            {"new": "2", "name": "中国人"},
-        ]
-
-
-def test_table_schema_patch_schema_missing_values():
-    patch_schema = {"missingValues": ["1", "2"]}
-    with Table("data/table.csv", patch_schema=patch_schema) as table:
-        assert table.headers == ["id", "name"]
-        assert table.schema == {
-            "fields": [
-                {"name": "id", "type": "integer"},
-                {"name": "name", "type": "string"},
-            ],
-            "missingValues": ["1", "2"],
-        }
-        assert table.read_rows() == [
-            {"id": None, "name": "english"},
-            {"id": None, "name": "中国人"},
-        ]
-
-
-def test_table_schema_infer_type():
-    with Table("data/table.csv", infer_type="string") as table:
-        assert table.headers == ["id", "name"]
-        assert table.schema == {
-            "fields": [
-                {"name": "id", "type": "string"},
-                {"name": "name", "type": "string"},
-            ]
-        }
-        assert table.read_rows() == [
-            {"id": "1", "name": "english"},
-            {"id": "2", "name": "中国人"},
-        ]
-
-
-def test_table_schema_infer_names():
-    with Table("data/table.csv", infer_names=["new1", "new2"]) as table:
-        assert table.headers == ["id", "name"]
-        assert table.schema == {
-            "fields": [
-                {"name": "new1", "type": "integer"},
-                {"name": "new2", "type": "string"},
-            ]
-        }
-        assert table.read_rows() == [
-            {"new1": 1, "new2": "english"},
-            {"new1": 2, "new2": "中国人"},
-        ]
-
-
 # Stats
 
 
@@ -1111,7 +1108,7 @@ def test_table_stats_rows_significant():
         assert table.stats["rows"] == 10000
 
 
-# Reopen
+# Open
 
 
 def test_table_reopen():
@@ -1193,6 +1190,71 @@ def test_table_write_format_error_bad_format(tmpdir):
         assert (
             error.note == 'cannot create parser "bad". Try installing "frictionless-bad"'
         )
+
+
+# Integrity
+
+
+def test_table_integrity_unique():
+    source = [["name"], [1], [2], [3]]
+    patch_schema = {"fields": {"name": {"constraints": {"unique": True}}}}
+    with Table(source, patch_schema=patch_schema) as table:
+        for row in table:
+            assert row.valid
+
+
+def test_table_integrity_unique_error():
+    source = [["name"], [1], [2], [2]]
+    patch_schema = {"fields": {"name": {"constraints": {"unique": True}}}}
+    with Table(source, patch_schema=patch_schema) as table:
+        for row in table:
+            if row.row_number == 3:
+                assert row.valid is False
+                assert row.errors[0].code == "unique-error"
+                continue
+            assert row.valid
+
+
+def test_table_integrity_primary_key():
+    source = [["name"], [1], [2], [3]]
+    patch_schema = {"primaryKey": ["name"]}
+    with Table(source, patch_schema=patch_schema) as table:
+        for row in table:
+            assert row.valid
+
+
+def test_table_integrity_primary_key_error():
+    source = [["name"], [1], [2], [2]]
+    patch_schema = {"primaryKey": ["name"]}
+    with Table(source, patch_schema=patch_schema) as table:
+        for row in table:
+            if row.row_number == 3:
+                assert row.valid is False
+                assert row.errors[0].code == "primary-key-error"
+                continue
+            assert row.valid
+
+
+def test_table_integrity_foreign_keys():
+    source = [["name"], [1], [2], [3]]
+    lookup = {"other": {("name",): {(1,), (2,), (3,)}}}
+    fk = {"fields": ["name"], "reference": {"fields": ["name"], "resource": "other"}}
+    with Table(source, lookup=lookup, patch_schema={"foreignKeys": [fk]}) as table:
+        for row in table:
+            assert row.valid
+
+
+def test_table_integrity_foreign_keys_error():
+    source = [["name"], [1], [2], [4]]
+    lookup = {"other": {("name",): {(1,), (2,), (3,)}}}
+    fk = {"fields": ["name"], "reference": {"fields": ["name"], "resource": "other"}}
+    with Table(source, lookup=lookup, patch_schema={"foreignKeys": [fk]}) as table:
+        for row in table:
+            if row.row_number == 3:
+                assert row.valid is False
+                assert row.errors[0].code == "foreign-key-error"
+                continue
+            assert row.valid
 
 
 # Issues
