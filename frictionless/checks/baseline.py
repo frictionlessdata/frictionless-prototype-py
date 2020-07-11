@@ -24,7 +24,12 @@ class BaselineCheck(Check):
         errors.RequiredError,
         errors.TypeError,
         errors.ConstraintError,
+        errors.UniqueError,
+        errors.PrimaryKeyError,
+        errors.ForeignKeyError,
     ]
+
+    # Validate
 
     def validate_schema(self, schema):
         yield from schema.metadata_errors if self.table.sample else [

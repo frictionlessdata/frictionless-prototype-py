@@ -27,8 +27,8 @@ class System:
         if check is None:
             if name == "baseline":
                 return checks.BaselineCheck(descriptor)
-            elif name == "integrity":
-                return checks.IntegrityCheck(descriptor)
+            elif name == "checksum":
+                return checks.ChecksumCheck(descriptor)
             elif name == "duplicate-row":
                 return checks.DuplicateRowCheck(descriptor)
             elif name == "deviated-value":

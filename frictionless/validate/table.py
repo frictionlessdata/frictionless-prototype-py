@@ -40,7 +40,7 @@ def validate_table(
     limit_rows=None,
     offset_rows=None,
     # Validation
-    stats=None,
+    checksum=None,
     extra_checks=None,
     pick_errors=None,
     skip_errors=None,
@@ -102,7 +102,7 @@ def validate_table(
     # Create checks
     items = []
     items.append("baseline")
-    items.append(("integrity", {"stats": stats}))
+    items.append(("checksum", checksum))
     items.extend(extra_checks or [])
     create = system.create_check
     for item in items:

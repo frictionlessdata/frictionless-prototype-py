@@ -40,8 +40,8 @@ def validate_resource(source, basepath=None, noinfer=False, lookup=None, **optio
         compression_path=resource.compression_path,
         dialect=resource.dialect,
         schema=resource.schema,
-        stats=resource.stats,
         lookup=lookup,
+        checksum=resource.stats,
         **options,
     )
 

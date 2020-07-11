@@ -49,10 +49,10 @@ def test_validate_report_props():
         "required-error",
         "type-error",
         "constraint-error",
-        "checksum-error",
         "unique-error",
         "primary-key-error",
         "foreign-key-error",
+        "checksum-error",
     ]
     assert report.table.stats == {
         "hash": "6c2c61dd9b0e9c6876139a449ed87933",

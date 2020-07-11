@@ -316,7 +316,7 @@ class SchemaError(Error):
 class ChecksumError(Error):
     code = "checksum-error"
     name = "Checksum Error"
-    tags = ["#table", "#integrity"]
+    tags = ["#table", "#checksum"]
     template = "The data source does not match the expected checksum: {note}"
     description = "This error can happen if the data is corrupted."
 
