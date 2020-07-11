@@ -23,6 +23,7 @@ def validate_table(
     dialect=None,
     headers=None,
     schema=None,
+    lookup=None,
     sync_schema=False,
     patch_schema=False,
     infer_type=None,
@@ -40,7 +41,6 @@ def validate_table(
     offset_rows=None,
     # Validation
     stats=None,
-    lookup=None,
     extra_checks=None,
     pick_errors=None,
     skip_errors=None,
@@ -102,7 +102,7 @@ def validate_table(
     # Create checks
     items = []
     items.append("baseline")
-    items.append(("integrity", {"stats": stats, "lookup": lookup}))
+    items.append(("integrity", {"stats": stats}))
     items.extend(extra_checks or [])
     create = system.create_check
     for item in items:
@@ -125,6 +125,7 @@ def validate_table(
         dialect=dialect,
         headers=headers,
         schema=schema,
+        lookup=lookup,
         sync_schema=sync_schema,
         patch_schema=patch_schema,
         infer_type=infer_type,

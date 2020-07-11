@@ -133,15 +133,16 @@ class Resource(Metadata):
 
     @cached_property
     def tabular(self):
+        table = self.to_table()
         try:
-            self.table.open()
+            table.open()
         except Exception as exception:
             if exception.error.code == "format-error":
                 return False
         except Exception:
             pass
         finally:
-            self.table.close()
+            table.close()
         return True
 
     @cached_property
@@ -216,33 +217,17 @@ class Resource(Metadata):
             schema = Schema(os.path.join(self.basepath, schema))
         return schema
 
+    # TODO: remove this state
     @cached_property
     def table(self):
-        return Table(
-            self.source,
-            scheme=self.scheme,
-            format=self.format,
-            hashing=self.hashing,
-            encoding=self.encoding,
-            compression=self.compression,
-            compression_path=self.compression_path,
-            dialect=self.dialect,
-            schema=self.schema,
-        )
+        lookup = self.read_lookup()
+        return self.to_table(lookup=lookup)
 
+    # TODO: remove this state
     # TODO: review the file/table situation
     @cached_property
     def __file(self):
-        return File(
-            source=self.source,
-            scheme=self.scheme,
-            format=self.format,
-            hashing=self.hashing,
-            encoding=self.encoding,
-            compression=self.compression,
-            compression_path=self.compression_path,
-            stats={"hash": "", "bytes": 0, "rows": 0},
-        )
+        return self.to_file()
 
     # Expand
 
@@ -265,17 +250,17 @@ class Resource(Metadata):
 
         # Tabular
         if self.tabular:
-            with self.table:
+            with self.to_table() as table:
                 patch["profile"] = "tabular-data-resource"
-                patch["name"] = self.get("name", helpers.detect_name(self.table.path))
-                patch["scheme"] = self.table.scheme
-                patch["format"] = self.table.format
-                patch["hashing"] = self.table.hashing
-                patch["encoding"] = self.table.encoding
-                patch["compression"] = self.table.compression
-                patch["compressionPath"] = self.table.compression_path
-                patch["dialect"] = self.table.dialect
-                patch["schema"] = self.table.schema
+                patch["name"] = self.get("name", helpers.detect_name(table.path))
+                patch["scheme"] = table.scheme
+                patch["format"] = table.format
+                patch["hashing"] = table.hashing
+                patch["encoding"] = table.encoding
+                patch["compression"] = table.compression
+                patch["compressionPath"] = table.compression_path
+                patch["dialect"] = table.dialect
+                patch["schema"] = table.schema
 
         # General
         else:
@@ -325,15 +310,9 @@ class Resource(Metadata):
         rows = list(self.read_row_stream())
         return rows
 
-    # TODO: move integrity to Table?
     def read_row_stream(self):
-        lookup = self.read_lookup()
-        check = system.create_check("integrity", descriptor={"lookup": lookup})
         with self.table as table:
-            check.connect(table)
-            check.prepare()
             for row in table.row_stream:
-                row.errors.extend(check.validate_row(row))
                 yield row
 
     def read_headers(self):
@@ -359,7 +338,7 @@ class Resource(Metadata):
 
     def read_lookup(self):
         lookup = {}
-        # TODO: remove
+        # TODO: remove whan problem with default schema is resolved
         if not self.schema:
             return lookup
         for fk in self.schema.foreign_keys:
@@ -374,7 +353,7 @@ class Resource(Metadata):
             lookup[source_name][source_key] = set()
             if not source_res:
                 continue
-            with source_res.table as table:
+            with source_res.to_table() as table:
                 for row in table.row_stream:
                     cells = tuple(row.get(field_name) for field_name in source_key)
                     if set(cells) == {None}:
@@ -410,6 +389,36 @@ class Resource(Metadata):
         except (IOError, zipfile.BadZipfile, zipfile.LargeZipFile) as exception:
             error = errors.ResourceError(note=str(exception))
             raise exceptions.FrictionlessException(error) from exception
+
+    # Import/Export
+
+    # TODO: remove lookup argument
+    def to_table(self, *, lookup=None):
+        return Table(
+            self.source,
+            scheme=self.scheme,
+            format=self.format,
+            hashing=self.hashing,
+            encoding=self.encoding,
+            compression=self.compression,
+            compression_path=self.compression_path,
+            dialect=self.dialect,
+            schema=self.schema,
+            lookup=lookup,
+        )
+
+    # TODO: rebase on table
+    def to_file(self):
+        return File(
+            source=self.source,
+            scheme=self.scheme,
+            format=self.format,
+            hashing=self.hashing,
+            encoding=self.encoding,
+            compression=self.compression,
+            compression_path=self.compression_path,
+            stats={"hash": "", "bytes": 0, "rows": 0},
+        )
 
     # Metadata
 
