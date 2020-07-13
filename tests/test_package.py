@@ -276,7 +276,7 @@ def test_package_expand_resource_dialect():
                     "lineTerminator": "\r\n",
                     "quoteChar": '"',
                     "doubleQuote": True,
-                    "skipInitialSpace": True,
+                    "skipInitialSpace": False,
                     "caseSensitiveHeader": False,
                 },
                 "profile": "data-resource",
@@ -309,15 +309,7 @@ def test_package_infer():
                 "encoding": "utf-8",
                 "compression": "no",
                 "compressionPath": "",
-                "dialect": {
-                    "delimiter": ",",
-                    "lineTerminator": "\r\n",
-                    "doubleQuote": True,
-                    "quoteChar": '"',
-                    "skipInitialSpace": False,
-                    "header": True,
-                    "headerRows": [1],
-                },
+                "dialect": {},
                 "schema": {
                     "fields": [
                         {"name": "id", "type": "string"},
@@ -340,15 +332,7 @@ def test_package_infer():
                 "encoding": "utf-8",
                 "compression": "no",
                 "compressionPath": "",
-                "dialect": {
-                    "delimiter": ",",
-                    "lineTerminator": "\r\n",
-                    "doubleQuote": True,
-                    "quoteChar": '"',
-                    "skipInitialSpace": False,
-                    "header": True,
-                    "headerRows": [1],
-                },
+                "dialect": {},
                 "schema": {
                     "fields": [
                         {"name": "parent", "type": "string"},

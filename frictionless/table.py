@@ -486,7 +486,6 @@ class Table:
                 yield row_position, cells
 
     def __read_data_stream_infer(self):
-        dialect = self.__file.dialect
 
         # Create state
         sample = []
@@ -507,6 +506,7 @@ class Table:
 
         # Infer header
         row_number = 0
+        dialect = self.__file.dialect
         if dialect.get("header") is None and dialect.get("headerRows") is None and widths:
             dialect["header"] = False
             width = round(sum(widths) / len(widths))
@@ -519,8 +519,9 @@ class Table:
                         continue
                     if not helpers.is_only_strings(cells):
                         continue
-                    dialect["header"] = True
-                    dialect["headerRows"] = [row_number]
+                    del dialect["header"]
+                    if row_number != config.DEFAULT_HEADER_ROWS[0]:
+                        dialect["headerRows"] = [row_number]
                     break
 
         # Infer table

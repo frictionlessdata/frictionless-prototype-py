@@ -12,13 +12,11 @@ from ..parser import Parser
 from ..system import system
 from ..file import File
 from .. import exceptions
-from .. import dialects
 from .. import helpers
 from .. import errors
 
 
 class XlsxParser(Parser):
-    Dialect = dialects.ExcelDialect
 
     # Read
 
@@ -115,7 +113,6 @@ class XlsxParser(Parser):
 
 
 class XlsParser(Parser):
-    Dialect = dialects.ExcelDialect
 
     # Read
 

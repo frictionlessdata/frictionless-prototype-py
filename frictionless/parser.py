@@ -16,7 +16,6 @@ class Parser:
 
     """
 
-    Dialect = None
     newline = None
     loading = True
 
@@ -24,8 +23,6 @@ class Parser:
         self.__file = file
         self.__loader = None
         self.__data_stream = None
-        if self.Dialect is not None:
-            self.__file["dialect"] = self.Dialect(file.dialect)
         if self.newline is not None:
             self.__file["newline"] = self.newline
 
@@ -53,6 +50,9 @@ class Parser:
 
     def open(self):
         self.close()
+        if self.__file.dialect.metadata_errors:
+            error = self.__file.dialect.metadata_errors[0]
+            raise exceptions.FrictionlessException(error)
         try:
             self.__loader = self.read_loader()
             self.__data_stream = self.read_data_stream()

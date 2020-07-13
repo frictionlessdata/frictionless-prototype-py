@@ -10,7 +10,6 @@ from .. import helpers
 
 
 class JsonParser(Parser):
-    Dialect = dialects.JsonDialect
 
     # Read
 
@@ -46,7 +45,6 @@ class JsonParser(Parser):
 
 
 class JsonlParser(Parser):
-    Dialect = dialects.JsonDialect
 
     # Read
 

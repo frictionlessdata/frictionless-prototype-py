@@ -12,6 +12,10 @@ from .. import errors
 
 
 class OdsPlugin(Plugin):
+    def create_dialect(self, file, *, descriptor):
+        if file.format == "ods":
+            return OdsDialect(descriptor)
+
     def create_parser(self, file):
         if file.format == "ods":
             return OdsParser(file)
@@ -21,7 +25,6 @@ class OdsPlugin(Plugin):
 
 
 class OdsParser(Parser):
-    Dialect = property(lambda self: OdsDialect)
 
     # Read
 

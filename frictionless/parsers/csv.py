@@ -1,14 +1,13 @@
 import io
 import csv
+import stringcase
 import unicodecsv
 from itertools import chain
 from ..parser import Parser
-from .. import dialects
 from .. import helpers
 
 
 class CsvParser(Parser):
-    Dialect = dialects.CsvDialect
     newline = ""
 
     # Read
@@ -16,7 +15,7 @@ class CsvParser(Parser):
     def read_data_stream_create(self):
         sample = self.read_data_stream_infer_dialect()
         source = chain(sample, self.loader.text_stream)
-        data = csv.reader(source, dialect=self.file.dialect)
+        data = csv.reader(source, dialect=self.file.dialect.to_python())
         yield from data
 
     def read_data_stream_infer_dialect(self):
@@ -26,14 +25,15 @@ class CsvParser(Parser):
             dialect = csv.Sniffer().sniff("".join(sample), delimiter)
         except csv.Error:
             dialect = csv.excel()
-        if not dialect.escapechar:
-            dialect.doublequote = True
-        if getattr(dialect, "quotechar", None) == "":
-            setattr(dialect, "quoting", csv.QUOTE_NONE)
         for name in INFER_DIALECT_NAMES:
             value = getattr(dialect, name.lower())
-            if value is not None:
-                self.file.dialect.setdefault(name, value)
+            if value is None:
+                continue
+            if value == getattr(self.file.dialect, stringcase.snakecase(name)):
+                continue
+            if name in self.file.dialect:
+                continue
+            self.file.dialect[name] = value
         return sample
 
     # Write
@@ -60,7 +60,6 @@ INFER_DIALECT_VOLUME = 100
 INFER_DIALECT_NAMES = [
     "delimiter",
     "lineTerminator",
-    "doubleQuote",
     "escapeChar",
     "quoteChar",
     "skipInitialSpace",

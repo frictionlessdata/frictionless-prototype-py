@@ -8,6 +8,10 @@ from ..parser import Parser
 
 
 class SqlPlugin(Plugin):
+    def create_dialect(self, file, *, descriptor):
+        if file.scheme in SQL_SCHEMES:
+            return SqlDialect(descriptor)
+
     def create_parser(self, file):
         if file.scheme in SQL_SCHEMES:
             return SqlParser(file)
@@ -18,7 +22,6 @@ class SqlPlugin(Plugin):
 
 # TODO: implement write
 class SqlParser(Parser):
-    Dialect = property(lambda self: SqlDialect)
     loading = False
 
     # Read

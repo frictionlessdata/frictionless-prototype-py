@@ -197,15 +197,7 @@ def test_table_csv_write_delimiter(tmpdir):
     with Table(target, dialect=dialect) as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
-        assert table.dialect == {
-            "delimiter": ";",
-            "lineTerminator": "\r\n",
-            "doubleQuote": True,
-            "quoteChar": '"',
-            "skipInitialSpace": False,
-            "header": True,
-            "headerRows": [1],
-        }
+        assert table.dialect == {"delimiter": ";"}
 
 
 def test_table_csv_write_inline_source(tmpdir):

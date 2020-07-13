@@ -8,7 +8,6 @@ from . import errors
 from . import config
 
 
-# TODO: implement create_control/dialect?
 class System:
     """System representation
     """
@@ -18,6 +17,7 @@ class System:
     actions = [
         "create_check",
         "create_control",
+        "create_dialect",
         "create_loader",
         "create_parser",
         "create_server",
@@ -66,6 +66,24 @@ class System:
         elif name == "text":
             return controls.TextControl(descriptor)
         return controls.Control(descriptor)
+
+    def create_dialect(self, file, *, descriptor):
+        dialect = None
+        name = file.format
+        dialects = import_module("frictionless.dialects")
+        for func in self.methods["create_dialect"].values():
+            dialect = func(file, descriptor=descriptor)
+            if dialect is not None:
+                return dialect
+        if name == "csv":
+            return dialects.CsvDialect(descriptor)
+        elif name == "inline":
+            return dialects.InlineDialect(descriptor)
+        elif name in ["xlsx", "xls"]:
+            return dialects.ExcelDialect(descriptor)
+        elif name in ["json", "jsonl", "ndjson"]:
+            return dialects.JsonDialect(descriptor)
+        return dialects.Dialect(descriptor)
 
     def create_loader(self, file):
         loader = None

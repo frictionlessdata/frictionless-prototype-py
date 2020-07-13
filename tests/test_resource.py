@@ -522,7 +522,7 @@ def test_resource_expand_with_dialect():
             "lineTerminator": "\r\n",
             "doubleQuote": True,
             "quoteChar": '"',
-            "skipInitialSpace": True,
+            "skipInitialSpace": False,
             "caseSensitiveHeader": False,
         },
     }
@@ -571,15 +571,7 @@ def test_resource_infer():
         "encoding": "utf-8",
         "compression": "no",
         "compressionPath": "",
-        "dialect": {
-            "delimiter": ",",
-            "lineTerminator": "\r\n",
-            "doubleQuote": True,
-            "quoteChar": '"',
-            "skipInitialSpace": False,
-            "header": True,
-            "headerRows": [1],
-        },
+        "dialect": {},
         "schema": {
             "fields": [
                 {"name": "id", "type": "integer"},
@@ -779,15 +771,7 @@ def test_resource_source_multipart_infer():
         "encoding": "utf-8",
         "compression": "no",
         "compressionPath": "",
-        "dialect": {
-            "delimiter": ",",
-            "lineTerminator": "\r\n",
-            "doubleQuote": True,
-            "quoteChar": '"',
-            "skipInitialSpace": False,
-            "header": True,
-            "headerRows": [1],
-        },
+        "dialect": {},
         "schema": {
             "fields": [
                 {"name": "id", "type": "integer"},
@@ -886,15 +870,7 @@ def test_resource_preserve_format_from_descriptor_on_infer_issue_188():
         "encoding": "utf-8",
         "compression": "no",
         "compressionPath": "",
-        "dialect": {
-            "delimiter": ",",
-            "lineTerminator": "\r\n",
-            "doubleQuote": True,
-            "quoteChar": '"',
-            "skipInitialSpace": False,
-            "header": True,
-            "headerRows": [1],
-        },
+        "dialect": {},
         "schema": {
             "fields": [
                 {"name": "city", "type": "string"},

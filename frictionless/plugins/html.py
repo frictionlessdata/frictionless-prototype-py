@@ -8,6 +8,10 @@ from ..parser import Parser
 
 
 class HtmlPlugin(Plugin):
+    def create_dialect(self, file, *, descriptor):
+        if file.format == "html":
+            return HtmlDialect(descriptor)
+
     def create_parser(self, file):
         if file.format == "html":
             return HtmlParser(file)
@@ -18,7 +22,6 @@ class HtmlPlugin(Plugin):
 
 # TODO: implement write
 class HtmlParser(Parser):
-    Dialect = property(lambda self: HtmlDialect)
 
     # Read
 

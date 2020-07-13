@@ -16,10 +16,10 @@ class Dialect(Metadata):
 
     """
 
-    metadata_strict = True
     metadata_Error = errors.DialectError
     metadata_profile = {  # type: ignore
         "type": "object",
+        "additionalProperties": False,
         "properties": {
             "header": {"type": "boolean"},
             "headerRows": {"type": "array", "items": {"type": "number"}},
@@ -125,23 +125,6 @@ class CsvDialect(Dialect):
             header_join=header_join,
         )
 
-    # TODO: Find a better way like to_native/from_native
-    def __getattr__(self, name):
-        # Interoperability with native
-        if name == "lineterminator":
-            return self.line_terminator
-        if name == "doublequote":
-            return self.double_quote
-        elif name == "escapechar":
-            return self.escape_char
-        elif name == "quotechar":
-            return self.quote_char
-        elif name == "quoting":
-            return csv.QUOTE_NONE if self.quote_char == "" else csv.QUOTE_MINIMAL
-        elif name == "skipinitialspace":
-            return self.skip_initial_space
-        raise AttributeError(name)
-
     @property
     def delimiter(self):
         return self.get("delimiter", ",")
@@ -168,7 +151,7 @@ class CsvDialect(Dialect):
 
     @property
     def skip_initial_space(self):
-        return self.get("skipInitialSpace", True)
+        return self.get("skipInitialSpace", False)
 
     @property
     def comment_char(self):
@@ -188,6 +171,19 @@ class CsvDialect(Dialect):
         self.setdefault("doubleQuote", self.double_quote)
         self.setdefault("skipInitialSpace", self.skip_initial_space)
         self.setdefault("caseSensitiveHeader", self.case_sensitive_header)
+
+    # Import/Export
+
+    def to_python(self):
+        dialect = csv.excel()
+        dialect.delimiter = self.delimiter
+        dialect.doublequote = self.double_quote if self.escape_char else True
+        dialect.escapechar = self.escape_char
+        dialect.lineterminator = self.line_terminator
+        dialect.quotechar = self.quote_char
+        dialect.quoting = csv.QUOTE_NONE if self.quote_char == "" else csv.QUOTE_MINIMAL
+        dialect.skipinitialspace = self.skip_initial_space
+        return dialect
 
 
 class ExcelDialect(Dialect):

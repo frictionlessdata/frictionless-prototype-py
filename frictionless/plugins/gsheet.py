@@ -10,6 +10,10 @@ from ..dialects import Dialect
 
 
 class GsheetPlugin(Plugin):
+    def create_dialect(self, file, *, descriptor):
+        if file.format == "gsheet":
+            return GsheetDialect(descriptor)
+
     def create_parser(self, file):
         if file.format == "gsheet":
             return GsheetParser(file)
@@ -20,7 +24,6 @@ class GsheetPlugin(Plugin):
 
 # TODO: implement write (as raising an error not supported)
 class GsheetParser(Parser):
-    Dialect = property(lambda self: GsheetDialect)
     network = True
     loading = False
 

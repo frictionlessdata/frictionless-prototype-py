@@ -520,15 +520,22 @@ def test_table_dialect():
     with Table("data/table.csv") as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
-        assert table.dialect == {
-            "delimiter": ",",
-            "lineTerminator": "\r\n",
-            "doubleQuote": True,
-            "quoteChar": '"',
-            "skipInitialSpace": False,
-            "header": True,
-            "headerRows": [1],
-        }
+        assert table.dialect.delimiter == ","
+        assert table.dialect.line_terminator == "\r\n"
+        assert table.dialect.double_quote is True
+        assert table.dialect.quote_char == '"'
+        assert table.dialect.skip_initial_space is False
+        assert table.dialect.header is True
+        assert table.dialect.header_rows == [1]
+        # All the values are default
+        assert table.dialect == {}
+
+
+def test_table_dialect_csv_delimiter():
+    with Table("data/delimiter.csv") as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_data() == [["1", "english"], ["2", "中国人"]]
+        assert table.dialect == {"delimiter": ";"}
 
 
 def test_table_dialect_json_property():

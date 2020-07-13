@@ -1,7 +1,6 @@
 import os
 from .helpers import cached_property
 from .metadata import Metadata
-from .dialects import Dialect
 from .system import system
 from . import helpers
 from . import config
@@ -118,12 +117,16 @@ class File(Metadata):
         control = self.get("control")
         if control is None:
             control = system.create_control(self, descriptor=control)
-        return self.metadata_attach("control", control)
+            return self.metadata_attach("control", control)
+        return control
 
     @cached_property
     def dialect(self):
-        dialect = self.get("dialect", Dialect())
-        return self.metadata_attach("dialect", dialect)
+        dialect = self.get("dialect")
+        if dialect is None:
+            dialect = system.create_dialect(self, descriptor=dialect)
+            return self.metadata_attach("dialect", dialect)
+        return dialect
 
     @cached_property
     def newline(self):
@@ -156,6 +159,6 @@ class File(Metadata):
 
         # Dialect
         dialect = self.get("dialect")
-        if not isinstance(dialect, (type(None), Dialect)):
-            dialect = Dialect(dialect)
+        if dialect is not None:
+            dialect = system.create_dialect(self, descriptor=dialect)
             dict.__setitem__(self, "dialect", dialect)

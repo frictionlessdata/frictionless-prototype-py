@@ -18,15 +18,7 @@ def test_validate_report_props():
     assert report.table["format"] == "csv"
     assert report.table["hashing"] == "md5"
     assert report.table["encoding"] == "utf-8"
-    assert report.table["dialect"] == {
-        "delimiter": ",",
-        "doubleQuote": True,
-        "lineTerminator": "\r\n",
-        "quoteChar": '"',
-        "skipInitialSpace": False,
-        "header": True,
-        "headerRows": [1],
-    }
+    assert report.table["dialect"] == {}
     assert report.table["headers"] == ["id", "name"]
     assert report.table["schema"] == {
         "fields": [

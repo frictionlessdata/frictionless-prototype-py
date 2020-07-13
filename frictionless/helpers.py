@@ -244,7 +244,7 @@ class Timer:
 
 class ControlledDict(dict):
     def __onchange__(self, onchange=None):
-        if onchange:
+        if onchange is not None:
             self.__onchange = onchange
             return
         onchange = getattr(self, "_ControlledDict__onchange", None)
@@ -298,7 +298,7 @@ class ControlledDict(dict):
 
 class ControlledList(list):
     def __onchange__(self, onchange=None):
-        if onchange:
+        if onchange is not None:
             self.__onchange = onchange
             return
         onchange = getattr(self, "_ControlledList__onchange", None)

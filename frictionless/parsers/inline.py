@@ -2,12 +2,10 @@ from itertools import chain
 from collections import OrderedDict
 from ..parser import Parser
 from .. import exceptions
-from .. import dialects
 from .. import errors
 
 
 class InlineParser(Parser):
-    Dialect = dialects.InlineDialect
     loading = False
 
     # Read

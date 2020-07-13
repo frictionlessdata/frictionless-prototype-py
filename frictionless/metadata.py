@@ -72,7 +72,7 @@ class Metadata(helpers.ControlledDict):
     # Attach
 
     def metadata_attach(self, name, value):
-        if self.get(name) != value:
+        if self.get(name) is not value:
             onchange = partial(metadata_attach, self, name)
             if isinstance(value, dict):
                 if not isinstance(value, Metadata):

@@ -8,6 +8,10 @@ from ..dialects import Dialect
 
 
 class TsvPlugin(Plugin):
+    def create_dialect(self, file, *, descriptor):
+        if file.format == "tsv":
+            return TsvDialect(descriptor)
+
     def create_parser(self, file):
         if file.format == "tsv":
             return TsvParser(file)
@@ -18,7 +22,6 @@ class TsvPlugin(Plugin):
 
 # TODO: implement write
 class TsvParser(Parser):
-    Dialect = property(lambda self: TsvDialect)
 
     # Read
 
