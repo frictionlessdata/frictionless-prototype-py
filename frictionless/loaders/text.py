@@ -1,11 +1,9 @@
 import io
 from ..loader import Loader
-from .. import controls
 from .. import config
 
 
 class TextLoader(Loader):
-    Control = controls.TextControl
 
     # Read
 

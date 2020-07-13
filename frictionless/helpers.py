@@ -242,13 +242,11 @@ class Timer:
 # Collections
 
 
-# TODO: ability to set onchange no in constructor
 class ControlledDict(dict):
-    def __init__(self, value, *, onchange):
-        super().__init__(value)
-        self.__onchange = onchange
-
-    def __onchange__(self, *args, **kwargs):
+    def __onchange__(self, onchange=None):
+        if onchange:
+            self.__onchange = onchange
+            return
         onchange = getattr(self, "_ControlledDict__onchange", None)
         if onchange:
             onchange(self) if signature(onchange).parameters else onchange()
@@ -298,13 +296,11 @@ class ControlledDict(dict):
         return result
 
 
-# TODO: ability to set onchange no in constructor
 class ControlledList(list):
-    def __init__(self, value, *, onchange):
-        super().__init__(value)
-        self.__onchange = onchange
-
-    def __onchange__(self, *args, **kwargs):
+    def __onchange__(self, onchange=None):
+        if onchange:
+            self.__onchange = onchange
+            return
         onchange = getattr(self, "_ControlledList__onchange", None)
         if onchange:
             onchange(self) if signature(onchange).parameters else onchange()

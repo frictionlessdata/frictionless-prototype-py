@@ -94,8 +94,7 @@ class Resource(Metadata):
 
     @cached_property
     def data(self):
-        data = self.get("data")
-        return self.metadata_attach("data", data)
+        return self.get("data")
 
     # TODO: rewrite this method
     @cached_property
@@ -195,7 +194,6 @@ class Resource(Metadata):
     def dialect(self):
         dialect = self.get("dialect")
         if dialect is None:
-            # TODO: metadata_attach re-create it as a ControlledDict
             dialect = self.metadata_attach("dialect", Dialect())
         elif isinstance(dialect, str):
             if not self.__trusted and not helpers.is_safe_path(dialect):
@@ -208,7 +206,6 @@ class Resource(Metadata):
     def schema(self):
         schema = self.get("schema")
         if schema is None:
-            # TODO: metadata_attach re-create it as a ControlledDict
             schema = self.metadata_attach("schema", Schema())
         elif isinstance(schema, str):
             if not self.__trusted and not helpers.is_safe_path(schema):

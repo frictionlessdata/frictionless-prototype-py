@@ -1,11 +1,9 @@
 from ..loader import Loader
 from .. import exceptions
-from .. import controls
 from .. import errors
 
 
 class StreamLoader(Loader):
-    Control = controls.LocalControl
 
     # Read
 

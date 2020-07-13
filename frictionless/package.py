@@ -253,7 +253,6 @@ class Package(Metadata):
                     )
                     list.__setitem__(resources, index, resource)
             if not isinstance(resources, helpers.ControlledList):
-                resources = helpers.ControlledList(
-                    resources, onchange=self.metadata_process
-                )
+                resources = helpers.ControlledList(resources)
+                resources.__onchange__(self.metadata_process)
                 dict.__setitem__(self, "resources", resources)

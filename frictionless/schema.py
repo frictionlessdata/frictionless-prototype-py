@@ -1,4 +1,4 @@
-from copy import deepcopy
+from copy import copy, deepcopy
 from .metadata import Metadata
 from .helpers import cached_property
 from .field import Field
@@ -50,7 +50,7 @@ class Schema(Metadata):
 
     @cached_property
     def missing_values(self):
-        missing_values = self.get("missingValues", config.DEFAULT_MISSING_VALUES)
+        missing_values = self.get("missingValues", copy(config.DEFAULT_MISSING_VALUES))
         return self.metadata_attach("missingValues", missing_values)
 
     @cached_property
@@ -320,7 +320,8 @@ class Schema(Metadata):
                     field = Field(field, schema=self)
                     list.__setitem__(fields, index, field)
             if not isinstance(fields, helpers.ControlledList):
-                fields = helpers.ControlledList(fields, onchange=self.metadata_process)
+                fields = helpers.ControlledList(fields)
+                fields.__onchange__(self.metadata_process)
                 dict.__setitem__(self, "fields", fields)
 
     def metadata_validate(self):

@@ -1,11 +1,9 @@
 import io
 import requests.utils
 from ..loader import Loader
-from .. import controls
 
 
 class RemoteLoader(Loader):
-    Control = controls.RemoteControl
     network = True
 
     # Read

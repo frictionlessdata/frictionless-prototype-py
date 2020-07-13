@@ -21,15 +21,12 @@ class Loader:
 
     """
 
-    Control = None
     network = False
 
     def __init__(self, file):
         self.__file = file
         self.__byte_stream = None
         self.__text_stream = None
-        if self.Control is not None:
-            self.__file["control"] = self.Control(file.control)
 
     def __enter__(self):
         if self.closed:
@@ -58,6 +55,9 @@ class Loader:
     def open(self):
         self.close()
         try:
+            if self.__file.control.metadata_errors:
+                error = self.__file.control.metadata_errors[0]
+                raise exceptions.FrictionlessException(error)
             self.__byte_stream = self.read_byte_stream()
             return self
         except Exception:

@@ -1,8 +1,8 @@
 import os
 from .helpers import cached_property
 from .metadata import Metadata
-from .controls import Control
 from .dialects import Dialect
+from .system import system
 from . import helpers
 from . import config
 
@@ -51,6 +51,8 @@ class File(Metadata):
         newline=None,
         stats=None,
     ):
+
+        # Set attributes
         self.setinitial("source", source)
         self.setinitial("scheme", scheme)
         self.setinitial("format", format)
@@ -62,8 +64,8 @@ class File(Metadata):
         self.setinitial("dialect", dialect)
         self.setinitial("newline", newline)
         self.setinitial("stats", stats)
-        super().__init__(descriptor)
-        # Detect from source
+
+        # Detect attributes
         detect = helpers.detect_source_scheme_and_format(source)
         self.__detected_compression = config.DEFAULT_COMPRESSION
         self.__detected_compression_path = config.DEFAULT_COMPRESSION_PATH
@@ -75,6 +77,9 @@ class File(Metadata):
             detect = helpers.detect_source_scheme_and_format(source)
         self.__detected_scheme = detect[0] or config.DEFAULT_SCHEME
         self.__detected_format = detect[1] or config.DEFAULT_FORMAT
+
+        # Initialize file
+        super().__init__(descriptor)
 
     @cached_property
     def path(self):
@@ -110,12 +115,14 @@ class File(Metadata):
 
     @cached_property
     def control(self):
-        control = self.get("control", {})
+        control = self.get("control")
+        if control is None:
+            control = system.create_control(self, descriptor=control)
         return self.metadata_attach("control", control)
 
     @cached_property
     def dialect(self):
-        dialect = self.get("dialect", {})
+        dialect = self.get("dialect", Dialect())
         return self.metadata_attach("dialect", dialect)
 
     @cached_property
@@ -143,8 +150,8 @@ class File(Metadata):
 
         # Control
         control = self.get("control")
-        if not isinstance(control, (type(None), Control)):
-            control = Control(control)
+        if control is not None:
+            control = system.create_control(self, descriptor=control)
             dict.__setitem__(self, "control", control)
 
         # Dialect

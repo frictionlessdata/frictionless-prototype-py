@@ -1,10 +1,8 @@
 import io
 from ..loader import Loader
-from .. import controls
 
 
 class LocalLoader(Loader):
-    Control = controls.LocalControl
 
     # Read
 

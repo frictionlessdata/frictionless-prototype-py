@@ -134,8 +134,8 @@ class Table:
         compression=None,
         compression_path=None,
         control=None,
-        # Table
         dialect=None,
+        # Table
         headers=None,
         schema=None,
         lookup=None,

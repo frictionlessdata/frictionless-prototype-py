@@ -642,7 +642,7 @@ def test_validate_checksum_bytes_invalid():
     assert report.table.error.get("rowPosition") is None
     assert report.table.error.get("fieldPosition") is None
     assert report.flatten(["code", "note"]) == [
-        ["checksum-error", 'expected size in bytes is "40" and actual is "30"'],
+        ["checksum-error", 'expected bytes count is "40" and actual is "30"'],
     ]
 
 

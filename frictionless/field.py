@@ -2,6 +2,7 @@ import re
 import decimal
 import warnings
 import importlib
+from copy import copy
 from operator import setitem
 from functools import partial
 from collections import OrderedDict
@@ -84,7 +85,7 @@ class Field(Metadata):
     @cached_property
     def missing_values(self):
         schema = self.__schema
-        default = schema.missing_values if schema else config.DEFAULT_MISSING_VALUES
+        default = schema.missing_values if schema else copy(config.DEFAULT_MISSING_VALUES)
         missing_values = self.get("missingValues", default)
         return self.metadata_attach("missingValues", missing_values)
 

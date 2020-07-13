@@ -12,6 +12,10 @@ from ..loader import Loader
 
 
 class AwsPlugin(Plugin):
+    def create_control(self, file, *, descriptor):
+        if file.scheme == "s3":
+            return S3Control(descriptor)
+
     def create_loader(self, file):
         if file.scheme == "s3":
             return S3Loader(file)
@@ -21,7 +25,6 @@ class AwsPlugin(Plugin):
 
 
 class S3Loader(Loader):
-    Control = property(lambda self: S3Control)
     network = True
 
     # Read

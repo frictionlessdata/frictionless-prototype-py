@@ -43,7 +43,8 @@ class Metadata(helpers.ControlledDict):
             return callable(self, value)
         return super().__setattr__(name, value)
 
-    def __onchange__(self):
+    def __onchange__(self, onchange=None):
+        super().__onchange__(onchange)
         if hasattr(self, "_Metadata__Error"):
             helpers.reset_cached_properties(self)
             self.metadata_process()
@@ -72,12 +73,14 @@ class Metadata(helpers.ControlledDict):
 
     def metadata_attach(self, name, value):
         if self.get(name) != value:
-            value = deepcopy(value)
             onchange = partial(metadata_attach, self, name)
             if isinstance(value, dict):
-                value = helpers.ControlledDict(value, onchange=onchange)
+                if not isinstance(value, Metadata):
+                    value = helpers.ControlledDict(value)
+                value.__onchange__(onchange)
             elif isinstance(value, list):
-                value = helpers.ControlledList(value, onchange=onchange)
+                value = helpers.ControlledList(value)
+                value.__onchange__(onchange)
         return value
 
     # Extract
