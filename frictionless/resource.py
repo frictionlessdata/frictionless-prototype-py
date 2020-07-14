@@ -6,7 +6,9 @@ from urllib.request import urlopen
 from .metadata import Metadata
 from .dialects import Dialect
 from .schema import Schema
+from .system import system
 from .table import Table
+from .file import File
 from . import exceptions
 from . import dialects
 from . import helpers
@@ -145,7 +147,6 @@ class Resource(Metadata):
     def format(self):
         return self.get("format")
 
-    # TODO: infer from provided hash
     @Metadata.property
     def hashing(self):
         return self.get("hashing")
@@ -261,6 +262,7 @@ class Resource(Metadata):
     def read_bytes(self):
         byte_stream = self.read_byte_stream()
         bytes = byte_stream.read1(io.DEFAULT_BUFFER_SIZE)
+        byte_stream.close()
         return bytes
 
     def read_byte_stream(self):
@@ -275,6 +277,7 @@ class Resource(Metadata):
         text_stream = self.read_text_stream()
         for line in text_stream:
             text += line
+        text_stream.close()
         return text
 
     def read_text_stream(self):
@@ -400,8 +403,14 @@ class Resource(Metadata):
         return Table(**options)
 
     def to_file(self, **options):
-        table = self.to_table(**options)
-        return table.file
+        options.setdefault("source", self.source)
+        options.setdefault("scheme", self.scheme)
+        options.setdefault("format", self.format)
+        options.setdefault("hashing", self.hashing)
+        options.setdefault("encoding", self.encoding)
+        options.setdefault("compression", self.compression)
+        options.setdefault("compression_path", self.compression_path)
+        return File(**options)
 
     # Metadata
 
@@ -416,9 +425,7 @@ class Resource(Metadata):
         # Dialect
         dialect = self.get("dialect")
         if not isinstance(dialect, (str, type(None), Dialect)):
-            # TODO: rebase on proper system.create_dialect
-            Class = dialects.CsvDialect if "delimiter" in dialect else Dialect
-            dialect = Class(dialect)
+            dialect = system.create_dialect(self.to_file(), descriptor=dialect)
             dict.__setitem__(self, "dialect", dialect)
 
         # Schema

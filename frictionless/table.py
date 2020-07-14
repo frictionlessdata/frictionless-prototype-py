@@ -243,16 +243,6 @@ class Table:
         return iter(self.__row_stream)
 
     @property
-    def file(self):
-        """File
-
-        # Returns
-            File: table file
-
-        """
-        return self.__file
-
-    @property
     def path(self):
         """Path
 
