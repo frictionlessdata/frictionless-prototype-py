@@ -66,23 +66,6 @@ class Report(Metadata):
             raise exceptions.FrictionlessException(error)
         return self.tables[0]
 
-    # Import/Export
-
-    @staticmethod
-    def from_validate(validate):
-        @functools.wraps(validate)
-        def wrapper(*args, **kwargs):
-            timer = helpers.Timer()
-            try:
-                return validate(*args, **kwargs)
-            except Exception as exception:
-                error = TaskError(note=str(exception))
-                if isinstance(exception, exceptions.FrictionlessException):
-                    error = exception.error
-                return Report(time=timer.time, errors=[error], tables=[])
-
-        return wrapper
-
     # Flatten
 
     def flatten(self, spec):
@@ -109,6 +92,23 @@ class Report(Metadata):
 
     def save(self, target):
         self.metadata_save(target)
+
+    # Import/Export
+
+    @staticmethod
+    def from_validate(validate):
+        @functools.wraps(validate)
+        def wrapper(*args, **kwargs):
+            timer = helpers.Timer()
+            try:
+                return validate(*args, **kwargs)
+            except Exception as exception:
+                error = TaskError(note=str(exception))
+                if isinstance(exception, exceptions.FrictionlessException):
+                    error = exception.error
+                return Report(time=timer.time, errors=[error], tables=[])
+
+        return wrapper
 
 
 class ReportTable(Metadata):

@@ -449,50 +449,6 @@ def test_resource_schema_from_path_error_path_not_safe():
     assert error.note.count("schema.json")
 
 
-# Table
-
-
-def test_resource_table():
-    resource = Resource(path="data/table.csv")
-    with resource.table as table:
-        assert table.headers == ["id", "name"]
-        assert table.read_rows() == [
-            {"id": 1, "name": "english"},
-            {"id": 2, "name": "中国人"},
-        ]
-
-
-def test_resource_table_source_data():
-    data = [["id", "name"], ["1", "english"], ["2", "中国人"]]
-    resource = Resource(data=data)
-    with resource.table as table:
-        assert table.headers == ["id", "name"]
-        assert table.read_rows() == [
-            {"id": 1, "name": "english"},
-            {"id": 2, "name": "中国人"},
-        ]
-
-
-@pytest.mark.slow
-def test_resource_table_source_remote():
-    resource = Resource(path=BASE_URL % "data/table.csv")
-    with resource.table as table:
-        assert table.headers == ["id", "name"]
-        assert table.read_rows() == [
-            {"id": 1, "name": "english"},
-            {"id": 2, "name": "中国人"},
-        ]
-
-
-def test_resource_table_source_non_tabular():
-    resource = Resource(path="data/text.txt")
-    with pytest.raises(exceptions.FrictionlessException) as excinfo:
-        resource.table.open()
-    error = excinfo.value.error
-    assert error.code == "format-error"
-    assert error.note == 'cannot create parser "txt". Try installing "frictionless-txt"'
-
-
 # Expand
 
 
@@ -672,6 +628,50 @@ def test_resource_save_descriptor_only(tmpdir):
     # Load
     with open(target, encoding="utf-8") as file:
         assert resource == json.load(file)
+
+
+# Import/Export
+
+
+def test_resource_to_table():
+    resource = Resource(path="data/table.csv")
+    with resource.to_table() as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_rows() == [
+            {"id": 1, "name": "english"},
+            {"id": 2, "name": "中国人"},
+        ]
+
+
+def test_resource_to_table_source_data():
+    data = [["id", "name"], ["1", "english"], ["2", "中国人"]]
+    resource = Resource(data=data)
+    with resource.to_table() as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_rows() == [
+            {"id": 1, "name": "english"},
+            {"id": 2, "name": "中国人"},
+        ]
+
+
+@pytest.mark.slow
+def test_resource_to_table_source_remote():
+    resource = Resource(path=BASE_URL % "data/table.csv")
+    with resource.to_table() as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_rows() == [
+            {"id": 1, "name": "english"},
+            {"id": 2, "name": "中国人"},
+        ]
+
+
+def test_resource_to_table_source_non_tabular():
+    resource = Resource(path="data/text.txt")
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        resource.to_table().open()
+    error = excinfo.value.error
+    assert error.code == "format-error"
+    assert error.note == 'cannot create parser "txt". Try installing "frictionless-txt"'
 
 
 # Multipart

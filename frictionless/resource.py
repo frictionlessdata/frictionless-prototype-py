@@ -6,9 +6,7 @@ from urllib.request import urlopen
 from .metadata import Metadata
 from .dialects import Dialect
 from .schema import Schema
-from .system import system
 from .table import Table
-from .file import File
 from . import exceptions
 from . import dialects
 from . import helpers
@@ -203,18 +201,6 @@ class Resource(Metadata):
     def profile(self):
         return self.get("profile", config.DEFAULT_RESOURCE_PROFILE)
 
-    # TODO: remove this state
-    @Metadata.property(write=False)
-    def table(self):
-        lookup = self.read_lookup()
-        return self.to_table(lookup=lookup)
-
-    # TODO: remove this state
-    # TODO: review the file/table situation
-    @Metadata.property(write=False)
-    def __file(self):
-        return self.to_file()
-
     # Expand
 
     def expand(self):
@@ -250,14 +236,15 @@ class Resource(Metadata):
 
         # General
         else:
-            patch["profile"] = "data-resource"
-            patch["name"] = self.get("name", helpers.detect_name(self.__file.path))
-            patch["scheme"] = self.__file.scheme
-            patch["format"] = self.__file.format
-            patch["hashing"] = self.__file.hashing
-            patch["encoding"] = self.__file.encoding
-            patch["compression"] = self.__file.compression
-            patch["compressionPath"] = self.__file.compression_path
+            with self.to_file() as file:
+                patch["profile"] = "data-resource"
+                patch["name"] = self.get("name", helpers.detect_name(file.path))
+                patch["scheme"] = file.scheme
+                patch["format"] = file.format
+                patch["hashing"] = file.hashing
+                patch["encoding"] = file.encoding
+                patch["compression"] = file.compression
+                patch["compressionPath"] = file.compression_path
 
         # Stats
         if not only_sample:
@@ -273,15 +260,15 @@ class Resource(Metadata):
 
     def read_bytes(self):
         byte_stream = self.read_byte_stream()
-        bytes = byte_stream.read()
+        bytes = byte_stream.read1(io.DEFAULT_BUFFER_SIZE)
         return bytes
 
     def read_byte_stream(self):
         if self.inline:
             return io.BytesIO(b"")
-        loader = system.create_loader(self.__file)
-        loader.open()
-        return loader.byte_stream
+        file = self.to_file()
+        file.open()
+        return file.byte_stream
 
     def read_text(self):
         text = ""
@@ -293,16 +280,16 @@ class Resource(Metadata):
     def read_text_stream(self):
         if self.inline:
             return io.StringIO("")
-        loader = system.create_loader(self.__file)
-        loader.open()
-        return loader.text_stream
+        file = self.to_file()
+        file.open()
+        return file.text_stream
 
     def read_data(self):
         data = list(self.read_data_stream())
         return data
 
     def read_data_stream(self):
-        with self.table as table:
+        with self.to_table() as table:
             for cells in table.data_stream:
                 yield cells
 
@@ -311,30 +298,35 @@ class Resource(Metadata):
         return rows
 
     def read_row_stream(self):
-        with self.table as table:
+        with self.to_table() as table:
             for row in table.row_stream:
                 yield row
 
     def read_headers(self):
-        with self.table as table:
+        with self.to_table() as table:
             return table.headers
 
     def read_sample(self):
-        with self.table as table:
+        with self.to_table() as table:
             return table.sample
 
+    # TODO: optimize this logic/don't re-open
     def read_stats(self):
-        try:
-            for cells in self.read_data_stream():
-                pass
-            return self.table.stats
-        except Exception:
-            # TODO: make loader.ByteStreamWithStatsHandling iterable?
+
+        # Tabular
+        if self.tabular:
+            with self.to_table() as table:
+                for cells in table.data_stream:
+                    pass
+                return table.stats
+
+        # General
+        # TODO: make loader.ByteStreamWithStatsHandling iterable?
+        with self.to_file() as file:
             bytes = True
-            byte_stream = self.read_byte_stream()
             while bytes:
-                bytes = byte_stream.read1(io.DEFAULT_BUFFER_SIZE)
-            return self.__file.stats
+                bytes = file.byte_stream.read1(io.DEFAULT_BUFFER_SIZE)
+            return file.stats
 
     def read_lookup(self):
         lookup = {}
@@ -344,16 +336,16 @@ class Resource(Metadata):
         for fk in self.schema.foreign_keys:
             source_name = fk["reference"]["resource"]
             source_key = tuple(fk["reference"]["fields"])
-            source_res = self.__package.get_resource(source_name) if source_name else self
             if source_name != "" and not self.__package:
                 continue
+            source_res = self.__package.get_resource(source_name) if source_name else self
             lookup.setdefault(source_name, {})
             if source_key in lookup[source_name]:
                 continue
             lookup[source_name][source_key] = set()
             if not source_res:
                 continue
-            with source_res.to_table() as table:
+            with source_res.to_table(lookup=None) as table:
                 for row in table.row_stream:
                     cells = tuple(row.get(field_name) for field_name in source_key)
                     if set(cells) == {None}:
@@ -392,33 +384,24 @@ class Resource(Metadata):
 
     # Import/Export
 
-    # TODO: remove lookup argument
-    def to_table(self, *, lookup=None):
-        return Table(
-            self.source,
-            scheme=self.scheme,
-            format=self.format,
-            hashing=self.hashing,
-            encoding=self.encoding,
-            compression=self.compression,
-            compression_path=self.compression_path,
-            dialect=self.dialect,
-            schema=self.schema,
-            lookup=lookup,
-        )
+    # TODO: cache lookup?
+    def to_table(self, **options):
+        options.setdefault("source", self.source)
+        options.setdefault("scheme", self.scheme)
+        options.setdefault("format", self.format)
+        options.setdefault("hashing", self.hashing)
+        options.setdefault("encoding", self.encoding)
+        options.setdefault("compression", self.compression)
+        options.setdefault("compression_path", self.compression_path)
+        options.setdefault("dialect", self.dialect)
+        options.setdefault("schema", self.schema)
+        if "lookup" not in options:
+            options["lookup"] = self.read_lookup()
+        return Table(**options)
 
-    # TODO: rebase on table
-    def to_file(self):
-        return File(
-            source=self.source,
-            scheme=self.scheme,
-            format=self.format,
-            hashing=self.hashing,
-            encoding=self.encoding,
-            compression=self.compression,
-            compression_path=self.compression_path,
-            stats={"hash": "", "bytes": 0, "rows": 0},
-        )
+    def to_file(self, **options):
+        table = self.to_table(**options)
+        return table.file
 
     # Metadata
 
