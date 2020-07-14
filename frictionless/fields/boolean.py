@@ -8,6 +8,23 @@ class BooleanField(Field):
         "enum",
     ]
 
+    @Metadata.property
+    def true_values(self):
+        true_values = self.get("trueValues", DEFAULT_TRUE_VALUES)
+        return self.metadata_attach("trueValues", true_values)
+
+    @Metadata.property
+    def false_values(self):
+        false_values = self.get("falseValues", DEFAULT_FALSE_VALUES)
+        return self.metadata_attach("falseValues", false_values)
+
+    # Expand
+
+    def expand(self):
+        super().expand()
+        self.setdefault("trueValues", self.true_values)
+        self.setdefault("falseValues", self.false_values)
+
     # Read
 
     def read_cell_cast(self, cell):
@@ -18,9 +35,9 @@ class BooleanField(Field):
     @Metadata.property(write=False)
     def read_cell_cast_mapping(self):
         mapping = {}
-        for value in self.get("trueValues", TRUE_VALUES):
+        for value in self.true_values:
             mapping[value] = True
-        for value in self.get("falseValues", FALSE_VALUES):
+        for value in self.false_values:
             mapping[value] = False
         return mapping
 
@@ -33,5 +50,5 @@ class BooleanField(Field):
 
 # Internal
 
-TRUE_VALUES = ["true", "True", "TRUE", "1"]
-FALSE_VALUES = ["false", "False", "FALSE", "0"]
+DEFAULT_TRUE_VALUES = ["true", "True", "TRUE", "1"]
+DEFAULT_FALSE_VALUES = ["false", "False", "FALSE", "0"]

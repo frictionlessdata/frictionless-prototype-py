@@ -11,6 +11,7 @@ from . import errors
 from . import config
 
 
+# TODO: review the proxy logic
 class Field(Metadata):
     """Field representation
 
@@ -53,6 +54,21 @@ class Field(Metadata):
         self.__schema = schema
         super().__init__(descriptor)
 
+    def __getattr__(self, name):
+        if self.__dict__.get("_Field__proxy"):
+            return getattr(self.__proxy, name)
+        raise AttributeError(name)
+
+    def __setattr__(self, name, value):
+        if name != "_Field__proxy":
+            if self.__dict__.get("_Field__proxy"):
+                try:
+                    setattr(self.__proxy, name, value)
+                    self.update(self.__proxy)
+                except Exception:
+                    pass
+        super().__setattr__(name, value)
+
     @Metadata.property
     def name(self):
         return self.get("name", "field")
@@ -94,6 +110,9 @@ class Field(Metadata):
     # Expand
 
     def expand(self):
+        if self.__dict__.get("_Field__proxy"):
+            self.__proxy.expand()
+            self.update(self.__proxy)
         self.setdefault("name", "field")
         self.setdefault("type", "any")
         self.setdefault("format", "default")

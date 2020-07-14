@@ -12,6 +12,10 @@ class IntegerField(Field):
         "enum",
     ]
 
+    @Metadata.property
+    def bare_number(self):
+        return self.get("bareNumber", DEFAULT_BARE_NUMBER)
+
     # Read
 
     def read_cell_cast(self, cell):
@@ -34,7 +38,7 @@ class IntegerField(Field):
 
     @Metadata.property(write=False)
     def read_cell_cast_pattern(self):
-        if not self.get("bareNumber", DEFAULT_BARE_NUMBER):
+        if not self.bare_number:
             return re.compile(r"((^\D*)|(\D*$))")
 
     # Write

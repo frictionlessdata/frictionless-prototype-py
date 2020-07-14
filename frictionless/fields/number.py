@@ -12,6 +12,18 @@ class NumberField(Field):
         "enum",
     ]
 
+    @Metadata.property
+    def decimal_char(self):
+        return self.get("decimalChar", DEFAULT_DECIMAL_CHAR)
+
+    @Metadata.property
+    def group_char(self):
+        return self.get("groupChar", DEFAULT_GROUP_CHAR)
+
+    @Metadata.property
+    def bare_number(self):
+        return self.get("bareNumber", DEFAULT_BARE_NUMBER)
+
     # Read
 
     def read_cell_cast(self, cell):
@@ -35,12 +47,10 @@ class NumberField(Field):
     @Metadata.property(write=False)
     def read_cell_cast_processor(self):
         if set(["groupChar", "decimalChar", "bareNumber"]).intersection(self.keys()):
-            group_char = self.get("groupChar", DEFAULT_GROUP_CHAR)
-            decimal_char = self.get("decimalChar", DEFAULT_DECIMAL_CHAR)
 
             def processor(cell):
-                cell = cell.replace(group_char, "")
-                cell = cell.replace(decimal_char, ".")
+                cell = cell.replace(self.group_char, "")
+                cell = cell.replace(self.decimal_char, ".")
                 if self.read_cell_cast_pattern:
                     cell = self.read_cell_cast_pattern.sub("", cell)
                 return cell
@@ -49,7 +59,7 @@ class NumberField(Field):
 
     @Metadata.property(write=False)
     def read_cell_cast_pattern(self):
-        if not self.get("bareNumber", DEFAULT_BARE_NUMBER):
+        if not self.bare_number:
             return re.compile(r"((^\D*)|(\D*$))")
 
     # Write
