@@ -27,3 +27,8 @@ class Inquiry(Metadata):
 
     def save(self, target):
         self.metadata_save(target)
+
+    # Import/Export
+
+    def to_dict(self):
+        return self.copy()

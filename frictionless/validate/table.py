@@ -219,8 +219,8 @@ def validate_table(
                 encoding=table.encoding,
                 compression=table.compression,
                 compression_path=table.compression_path,
-                # Table
                 dialect=table.dialect,
+                # Table
                 headers=table.headers,
                 schema=table.schema,
                 # Discovery

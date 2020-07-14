@@ -70,11 +70,6 @@ class Metadata(helpers.ControlledDict):
         if value is not None:
             dict.__setitem__(self, key, value)
 
-    # Import/Export
-
-    def to_dict(self):
-        return self.copy()
-
     # Attach
 
     def metadata_attach(self, name, value):
@@ -142,6 +137,11 @@ class Metadata(helpers.ControlledDict):
                 json.dump(self, file, indent=2, ensure_ascii=False)
         except Exception as exc:
             raise exceptions.FrictionlessException(self.__Error(note=str(exc))) from exc
+
+    # Import/Export
+
+    def to_dict(self):
+        return self.copy()
 
     # Helpers
 

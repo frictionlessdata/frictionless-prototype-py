@@ -153,4 +153,4 @@ class Row(OrderedDict):
     # Import/Export
 
     def to_dict(self):
-        return self.copy()
+        return OrderedDict(self)

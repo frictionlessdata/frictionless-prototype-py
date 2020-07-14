@@ -220,6 +220,16 @@ class Package(Metadata):
             error = errors.PackageError(note=str(exception))
             raise exceptions.FrictionlessException(error) from exception
 
+    # Import/Export
+
+    def to_dict(self, expand=False):
+        result = super().to_dict()
+        if expand:
+            result = type(self)(result)
+            result.expand()
+            result = result.to_dict()
+        return result
+
     # Metadata
 
     @Metadata.property(write=False)

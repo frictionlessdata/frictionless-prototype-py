@@ -52,6 +52,21 @@ class Dialect(Metadata):
         self.setdefault("headerRows", self.header_rows)
         self.setdefault("headerJoin", self.header_join)
 
+    # Save
+
+    def save(self, target):
+        self.metadata_save(target)
+
+    # Import/Export
+
+    def to_dict(self, expand=False):
+        result = super().to_dict()
+        if expand:
+            result = type(self)(result)
+            result.expand()
+            result = result.to_dict()
+        return result
+
 
 class CsvDialect(Dialect):
     """Csv dialect representation

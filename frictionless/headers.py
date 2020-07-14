@@ -128,4 +128,4 @@ class Headers(list):
     # Import/Export
 
     def to_list(self):
-        return self.copy()
+        return list(self)

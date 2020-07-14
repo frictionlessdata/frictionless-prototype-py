@@ -69,28 +69,6 @@ class Schema(Metadata):
                 fk["reference"]["fields"] = [fk["reference"]["fields"]]
         return self.metadata_attach("foreignKeys", foreign_keys)
 
-    # Import/Export
-
-    @staticmethod
-    def from_sample(
-        sample,
-        *,
-        names=None,
-        confidence=config.DEFAULT_INFER_CONFIDENCE,
-        missing_values=None,
-    ):
-        """Infer schema from sample
-
-        # Arguments
-            sample
-            names
-            confidence
-
-        """
-        schema = Schema(missing_values=missing_values)
-        schema.infer(sample, names=names, confidence=confidence)
-        return schema
-
     # Fields
 
     @Metadata.property
@@ -298,6 +276,36 @@ class Schema(Metadata):
 
     def save(self, target):
         self.metadata_save(target)
+
+    # Import/Export
+
+    @staticmethod
+    def from_sample(
+        sample,
+        *,
+        names=None,
+        confidence=config.DEFAULT_INFER_CONFIDENCE,
+        missing_values=None,
+    ):
+        """Infer schema from sample
+
+        # Arguments
+            sample
+            names
+            confidence
+
+        """
+        schema = Schema(missing_values=missing_values)
+        schema.infer(sample, names=names, confidence=confidence)
+        return schema
+
+    def to_dict(self, expand=False):
+        result = super().to_dict()
+        if expand:
+            result = type(self)(result)
+            result.expand()
+            result = result.to_dict()
+        return result
 
     # Metadata
 

@@ -387,6 +387,14 @@ class Resource(Metadata):
 
     # Import/Export
 
+    def to_dict(self, expand=False):
+        result = super().to_dict()
+        if expand:
+            result = type(self)(result)
+            result.expand()
+            result = result.to_dict()
+        return result
+
     # TODO: cache lookup?
     def to_table(self, **options):
         options.setdefault("source", self.source)

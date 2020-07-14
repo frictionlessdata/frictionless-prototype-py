@@ -110,6 +110,9 @@ class Report(Metadata):
 
         return wrapper
 
+    def to_dict(self):
+        return self.copy()
+
 
 class ReportTable(Metadata):
     """Report table representation.
@@ -262,3 +265,8 @@ class ReportTable(Metadata):
 
     def save(self, target):
         self.metadata_save(target)
+
+    # Import/Export
+
+    def to_dict(self):
+        return self.copy()
