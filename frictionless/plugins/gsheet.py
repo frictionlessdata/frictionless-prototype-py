@@ -40,7 +40,7 @@ class GsheetParser(Parser):
         source = source % (key, key)
         if gid:
             source = "%s&gid=%s" % (source, gid)
-        with system.create_parser(File(source=source, stats=self.file.stats)) as parser:
+        with system.create_parser(File(source, stats=self.file.stats)) as parser:
             yield from parser.data_stream
 
 

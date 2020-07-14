@@ -146,7 +146,11 @@ class Metadata(helpers.ControlledDict):
     # Helpers
 
     @staticmethod
-    def property(func=None, *, reset=True, write=True):
+    def property(func=None, *, cache=True, reset=True, write=True):
+
+        # Not caching
+        if not cache:
+            return property
 
         # Actual property
         def metadata_property(func):

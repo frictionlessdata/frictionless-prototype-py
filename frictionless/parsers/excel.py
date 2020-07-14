@@ -35,7 +35,7 @@ class XlsxParser(Parser):
 
             # Cached
             if dialect.workbook_cache is not None and source in dialect.workbook_cache:
-                file = File(source=source, stats=self.file.stats)
+                file = File(source, stats=self.file.stats)
                 loader = system.create_loader(file)
                 return loader.open()
 
@@ -47,7 +47,7 @@ class XlsxParser(Parser):
             if not target.delete:
                 dialect.workbook_cache[source] = target.name
                 atexit.register(os.remove, target.name)
-            file = File(source=target)
+            file = File(target)
             loader = system.create_loader(file)
             return loader.open()
 

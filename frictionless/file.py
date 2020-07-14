@@ -1,7 +1,9 @@
 import os
 from .metadata import Metadata
 from .system import system
+from . import exceptions
 from . import helpers
+from . import errors
 from . import config
 
 
@@ -35,9 +37,8 @@ class File(Metadata):
 
     def __init__(
         self,
-        descriptor=None,
+        source,
         *,
-        source=None,
         scheme=None,
         format=None,
         hashing=None,
@@ -62,6 +63,7 @@ class File(Metadata):
         self.setinitial("dialect", dialect)
         self.setinitial("newline", newline)
         self.setinitial("stats", stats)
+        self.__loader = None
 
         # Detect attributes
         detect = helpers.detect_source_scheme_and_format(source)
@@ -77,7 +79,20 @@ class File(Metadata):
         self.__detected_format = detect[1] or config.DEFAULT_FORMAT
 
         # Initialize file
-        super().__init__(descriptor)
+        super().__init__()
+
+    def __enter__(self):
+        if self.closed:
+            self.open()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
+
+    # TODO: test
+    def __iter__(self):
+        self.__read_raise_closed()
+        return iter(self.__loader.__text_stream)
 
     @property
     def path(self):
@@ -135,6 +150,16 @@ class File(Metadata):
     def stats(self):
         return self.get("stats")
 
+    @Metadata.property(cache=False)
+    def byte_stream(self):
+        if self.__loader:
+            return self.__loader.byte_stream
+
+    @Metadata.property(cache=False)
+    def text_stream(self):
+        if self.__loader:
+            return self.__loader.text_stream
+
     # Expand
 
     def expand(self):
@@ -144,6 +169,55 @@ class File(Metadata):
         self.setdefault("encoding", self.encoding)
         self.setdefault("compression", self.compression)
         self.setdefault("compressionPath", self.compression_path)
+
+    # Open/close
+
+    def open(self):
+        self.close()
+        try:
+            self.stats = {"hash": "", "bytes": 0, "rows": 0}
+            self.__loader = system.create_loader(self)
+            self.__loader.open()
+            return self
+        except Exception:
+            self.close()
+            raise
+
+    def close(self):
+        if self.__loader:
+            self.__loader.close()
+        self.__loader = None
+
+    @property
+    def closed(self):
+        return self.__loader is None
+
+    # Read
+
+    def read_bytes(self):
+        self.__read_raise_closed()
+        return self.__loader.byte_stream.read1()
+
+    def read_text(self):
+        result = ""
+        self.__read_raise_closed()
+        for line in self.__loader.text_stream:
+            result += line
+        return result
+
+    def __read_raise_closed(self):
+        if not self.__loader:
+            note = 'the file has not been opened by "file.open()"'
+            raise exceptions.FrictionlessException(errors.Error(note=note))
+
+    # Write
+
+    # TODO: rebase on a proper implementation
+    # TODO: use tempfile to prevent loosing data
+    def write(self, target):
+        helpers.ensure_dir(target)
+        with open(target, "wb") as file:
+            file.write(self.read_bytes())
 
     # Metadata
 

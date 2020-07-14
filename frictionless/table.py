@@ -416,7 +416,7 @@ class Table:
         """
         self.close()
         try:
-            self.__file["stats"] = {"hash": "", "bytes": 0, "rows": 0}
+            self.__file.stats = {"hash": "", "bytes": 0, "rows": 0}
             self.__parser = system.create_parser(self.__file)
             self.__parser.open()
             self.__data_stream = self.__read_data_stream()

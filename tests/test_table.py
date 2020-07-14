@@ -181,7 +181,7 @@ def test_table_scheme_https():
 
 
 def test_table_scheme_stream():
-    with Table(io.open("data/table.csv", mode="rb"), format="csv") as table:
+    with Table(open("data/table.csv", mode="rb"), format="csv") as table:
         assert table.scheme == "stream"
 
 
@@ -571,7 +571,7 @@ def test_table_headers_unicode():
 
 
 def test_table_headers_stream_context_manager():
-    source = io.open("data/table.csv", mode="rb")
+    source = open("data/table.csv", mode="rb")
     with Table(source, format="csv") as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]

@@ -121,7 +121,7 @@ def is_only_strings(cells):
 
 def unzip_descriptor(descriptor, compression_path):
     frictionless = import_module("frictionless")
-    file = frictionless.File(source=descriptor, compression="no")
+    file = frictionless.File(descriptor, compression="no")
     with frictionless.system.create_loader(file) as loader:
         byte_stream = loader.byte_stream
         if loader.network:
