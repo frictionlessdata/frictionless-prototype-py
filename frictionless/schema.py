@@ -1,6 +1,5 @@
 from copy import copy, deepcopy
 from .metadata import Metadata
-from .helpers import cached_property
 from .field import Field
 from . import helpers
 from . import errors
@@ -26,12 +25,6 @@ class Schema(Metadata):
     metadata_Error = errors.SchemaError  # type: ignore
     metadata_profile = config.SCHEMA_PROFILE
     metadata_duplicate = True
-    metadata_setters = {
-        "fields": "fields",
-        "missing_values": "missingValues",
-        "primary_key": "primaryKey",
-        "foreign_keys": "foreignKeys",
-    }
 
     def __init__(
         self,
@@ -48,19 +41,19 @@ class Schema(Metadata):
         self.setinitial("foreignKeys", foreign_keys)
         super().__init__(descriptor)
 
-    @cached_property
+    @Metadata.property
     def missing_values(self):
         missing_values = self.get("missingValues", copy(config.DEFAULT_MISSING_VALUES))
         return self.metadata_attach("missingValues", missing_values)
 
-    @cached_property
+    @Metadata.property
     def primary_key(self):
         primary_key = self.get("primaryKey", [])
         if not isinstance(primary_key, list):
             primary_key = [primary_key]
         return self.metadata_attach("primaryKey", primary_key)
 
-    @cached_property
+    @Metadata.property
     def foreign_keys(self):
         foreign_keys = deepcopy(self.get("foreignKeys", []))
         for index, fk in enumerate(foreign_keys):
@@ -100,7 +93,7 @@ class Schema(Metadata):
 
     # Fields
 
-    @cached_property
+    @Metadata.property
     def fields(self):
         """Schema's fields
 
@@ -111,7 +104,7 @@ class Schema(Metadata):
         fields = self.get("fields", [])
         return self.metadata_attach("fields", fields)
 
-    @cached_property
+    @Metadata.property(write=False)
     def field_names(self):
         """Schema's field names
 

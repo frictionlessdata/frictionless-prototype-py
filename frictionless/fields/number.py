@@ -1,6 +1,6 @@
 import re
 from decimal import Decimal
-from ..helpers import cached_property
+from ..metadata import Metadata
 from ..field import Field
 
 
@@ -32,7 +32,7 @@ class NumberField(Field):
             return Decimal(str(cell))
         return None
 
-    @cached_property
+    @Metadata.property(write=False)
     def read_cell_cast_processor(self):
         if set(["groupChar", "decimalChar", "bareNumber"]).intersection(self.keys()):
             group_char = self.get("groupChar", DEFAULT_GROUP_CHAR)
@@ -47,7 +47,7 @@ class NumberField(Field):
 
             return processor
 
-    @cached_property
+    @Metadata.property(write=False)
     def read_cell_cast_pattern(self):
         if not self.get("bareNumber", DEFAULT_BARE_NUMBER):
             return re.compile(r"((^\D*)|(\D*$))")

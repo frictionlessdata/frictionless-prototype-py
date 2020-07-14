@@ -54,10 +54,10 @@ class Loader:
 
     def open(self):
         self.close()
+        if self.__file.control.metadata_errors:
+            error = self.__file.control.metadata_errors[0]
+            raise exceptions.FrictionlessException(error)
         try:
-            if self.__file.control.metadata_errors:
-                error = self.__file.control.metadata_errors[0]
-                raise exceptions.FrictionlessException(error)
             self.__byte_stream = self.read_byte_stream()
             return self
         except Exception:

@@ -1,5 +1,4 @@
 import os
-from .helpers import cached_property
 from .metadata import Metadata
 from .system import system
 from . import helpers
@@ -80,39 +79,39 @@ class File(Metadata):
         # Initialize file
         super().__init__(descriptor)
 
-    @cached_property
+    @property
     def path(self):
         return self.source if isinstance(self.source, str) else "memory"
 
-    @cached_property
+    @Metadata.property
     def source(self):
         return self.get("source")
 
-    @cached_property
+    @Metadata.property
     def scheme(self):
         return self.get("scheme", self.__detected_scheme)
 
-    @cached_property
+    @Metadata.property
     def format(self):
         return self.get("format", self.__detected_format)
 
-    @cached_property
+    @Metadata.property
     def hashing(self):
         return self.get("hashing", config.DEFAULT_HASHING)
 
-    @cached_property
+    @Metadata.property
     def encoding(self):
         return self.get("encoding", config.DEFAULT_ENCODING)
 
-    @cached_property
+    @Metadata.property
     def compression(self):
         return self.get("compression", self.__detected_compression)
 
-    @cached_property
+    @Metadata.property
     def compression_path(self):
         return self.get("compressionPath", self.__detected_compression_path)
 
-    @cached_property
+    @Metadata.property
     def control(self):
         control = self.get("control")
         if control is None:
@@ -120,7 +119,7 @@ class File(Metadata):
             return self.metadata_attach("control", control)
         return control
 
-    @cached_property
+    @Metadata.property
     def dialect(self):
         dialect = self.get("dialect")
         if dialect is None:
@@ -128,11 +127,11 @@ class File(Metadata):
             return self.metadata_attach("dialect", dialect)
         return dialect
 
-    @cached_property
+    @Metadata.property
     def newline(self):
         return self.get("newline")
 
-    @cached_property
+    @Metadata.property
     def stats(self):
         return self.get("stats")
 

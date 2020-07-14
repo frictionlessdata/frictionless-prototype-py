@@ -3,7 +3,6 @@ import os
 import json
 import zipfile
 from urllib.request import urlopen
-from .helpers import cached_property
 from .metadata import Metadata
 from .dialects import Dialect
 from .schema import Schema
@@ -20,20 +19,6 @@ from . import config
 class Resource(Metadata):
     metadata_Error = errors.ResourceError
     metadata_duplicate = True
-    metadata_setters = {
-        "name": "name",
-        "path": "path",
-        "data": "data",
-        "scheme": "scheme",
-        "format": "format",
-        "hashing": "hashing",
-        "encoding": "encoding",
-        "compression": "compression",
-        "compression_path": "compressionPath",
-        "dialect": "dialect",
-        "schema": "schema",
-        "profile": "profile",
-    }
 
     def __init__(
         self,
@@ -83,21 +68,21 @@ class Resource(Metadata):
         if hashing != config.DEFAULT_HASHING:
             self["hashing"] = hashing
 
-    @cached_property
+    @Metadata.property
     def name(self):
         return self.get("name", "resource")
 
     # TODO: should it be memory for inline?
-    @cached_property
+    @Metadata.property
     def path(self):
         return self.get("path")
 
-    @cached_property
+    @Metadata.property
     def data(self):
         return self.get("data")
 
     # TODO: rewrite this method
-    @cached_property
+    @Metadata.property(write=False)
     def source(self):
         path = self.path
         if self.inline:
@@ -122,15 +107,15 @@ class Resource(Metadata):
             return os.path.join(self.basepath, path)
         return path
 
-    @cached_property
+    @Metadata.property(write=False)
     def basepath(self):
         return self.__basepath
 
-    @cached_property
+    @Metadata.property(write=False)
     def inline(self):
         return "data" in self
 
-    @cached_property
+    @Metadata.property(write=False)
     def tabular(self):
         table = self.to_table()
         try:
@@ -144,42 +129,42 @@ class Resource(Metadata):
             table.close()
         return True
 
-    @cached_property
+    @Metadata.property(write=False)
     def network(self):
         if self.inline:
             return False
         return helpers.is_remote_path(self.path[0] if self.multipart else self.path)
 
-    @cached_property
+    @Metadata.property(write=False)
     def multipart(self):
         return bool(self.path and isinstance(self.path, list) and len(self.path) >= 2)
 
-    @cached_property
+    @Metadata.property
     def scheme(self):
         return self.get("scheme")
 
-    @cached_property
+    @Metadata.property
     def format(self):
         return self.get("format")
 
     # TODO: infer from provided hash
-    @cached_property
+    @Metadata.property
     def hashing(self):
         return self.get("hashing")
 
-    @cached_property
+    @Metadata.property
     def encoding(self):
         return self.get("encoding")
 
-    @cached_property
+    @Metadata.property
     def compression(self):
         return self.get("compression")
 
-    @cached_property
+    @Metadata.property
     def compression_path(self):
         return self.get("compressionPath")
 
-    @cached_property
+    @Metadata.property
     def stats(self):
         stats = {}
         for name in ["hash", "bytes", "rows"]:
@@ -190,7 +175,7 @@ class Resource(Metadata):
                 stats[name] = value
         return stats
 
-    @cached_property
+    @Metadata.property
     def dialect(self):
         dialect = self.get("dialect")
         if dialect is None:
@@ -202,7 +187,7 @@ class Resource(Metadata):
             dialect = Dialect(os.path.join(self.basepath, dialect))
         return dialect
 
-    @cached_property
+    @Metadata.property
     def schema(self):
         schema = self.get("schema")
         if schema is None:
@@ -214,15 +199,19 @@ class Resource(Metadata):
             schema = Schema(os.path.join(self.basepath, schema))
         return schema
 
+    @Metadata.property
+    def profile(self):
+        return self.get("profile", config.DEFAULT_RESOURCE_PROFILE)
+
     # TODO: remove this state
-    @cached_property
+    @Metadata.property(write=False)
     def table(self):
         lookup = self.read_lookup()
         return self.to_table(lookup=lookup)
 
     # TODO: remove this state
     # TODO: review the file/table situation
-    @cached_property
+    @Metadata.property(write=False)
     def __file(self):
         return self.to_file()
 
@@ -419,11 +408,7 @@ class Resource(Metadata):
 
     # Metadata
 
-    @cached_property
-    def profile(self):
-        return self.get("profile", config.DEFAULT_RESOURCE_PROFILE)
-
-    @cached_property
+    @Metadata.property(write=False)
     def metadata_profile(self):
         if self.profile == "tabular-data-resource":
             return config.TABULAR_RESOURCE_PROFILE

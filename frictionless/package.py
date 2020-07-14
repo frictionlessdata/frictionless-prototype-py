@@ -2,7 +2,6 @@ import os
 import json
 import glob
 import zipfile
-from .helpers import cached_property
 from .metadata import Metadata
 from .resource import Resource
 from . import exceptions
@@ -27,13 +26,6 @@ class Package(Metadata):
 
     metadata_Error = errors.PackageError  # type: ignore
     metadata_duplicate = True
-    metadata_setters = {
-        "name": "name",
-        "title": "title",
-        "description": "description",
-        "resources": "resources",
-        "profile": "profile",
-    }
 
     def __init__(
         self,
@@ -62,25 +54,29 @@ class Package(Metadata):
         self.__trusted = trusted
         super().__init__(descriptor)
 
-    @cached_property
+    @Metadata.property
     def name(self):
         return self.get("name")
 
-    @cached_property
+    @Metadata.property
     def title(self):
         return self.get("title")
 
-    @cached_property
+    @Metadata.property
     def description(self):
         return self.get("description")
 
-    @cached_property
+    @Metadata.property(write=False)
     def basepath(self):
         return self.__basepath
 
+    @Metadata.property
+    def profile(self):
+        return self.get("profile", config.DEFAULT_PACKAGE_PROFILE)
+
     # Resources
 
-    @cached_property
+    @Metadata.property
     def resources(self):
         """Package's resources
 
@@ -91,7 +87,7 @@ class Package(Metadata):
         resources = self.get("resources", [])
         return self.metadata_attach("resources", resources)
 
-    @cached_property
+    @Metadata.property(write=False)
     def resource_names(self):
         """Schema's resource names
 
@@ -226,11 +222,7 @@ class Package(Metadata):
 
     # Metadata
 
-    @cached_property
-    def profile(self):
-        return self.get("profile", config.DEFAULT_PACKAGE_PROFILE)
-
-    @cached_property
+    @Metadata.property(write=False)
     def metadata_profile(self):
         if self.profile == "fiscal-data-package":
             return config.FISCAL_PACKAGE_PROFILE

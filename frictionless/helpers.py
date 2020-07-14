@@ -145,13 +145,6 @@ def parse_resource_hash(hash):
     return parts
 
 
-def reset_cached_properties(obj):
-    for name, attr in type(obj).__dict__.items():
-        if name in obj.__dict__:
-            if isinstance(attr, cached_property):
-                obj.__dict__.pop(name)
-
-
 def detect_encoding(sample):
     result = chardet.detect(sample)
     confidence = result["confidence"] or 0

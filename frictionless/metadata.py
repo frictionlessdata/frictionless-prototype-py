@@ -2,6 +2,7 @@ import io
 import json
 import requests
 import jsonschema
+import stringcase
 from copy import deepcopy
 from operator import setitem
 from functools import partial
@@ -26,7 +27,6 @@ class Metadata(helpers.ControlledDict):
     metadata_profile = None
     metadata_strict = False
     metadata_duplicate = False
-    metadata_setters = {}
 
     def __init__(self, descriptor=None):
         self.__Error = self.metadata_Error or import_module("frictionless.errors").Error
@@ -36,27 +36,33 @@ class Metadata(helpers.ControlledDict):
         self.__onchange__()
 
     def __setattr__(self, name, value):
-        setter = self.metadata_setters.get(name)
-        if isinstance(setter, str):
-            return setitem(self, setter, value)
-        elif callable(setter):
-            return callable(self, value)
+        if hasattr(self, "_Metadata__Error"):
+            attr = type(self).__dict__.get(name)
+            if attr:
+                write = getattr(attr, "metadata_write", None)
+                if write:
+                    if callable(write):
+                        return callable(self, value)
+                    return setitem(self, stringcase.camelcase(name), value)
         return super().__setattr__(name, value)
 
     def __onchange__(self, onchange=None):
         super().__onchange__(onchange)
         if hasattr(self, "_Metadata__Error"):
-            helpers.reset_cached_properties(self)
+            for key, attr in type(self).__dict__.items():
+                reset = getattr(attr, "metadata_reset", None)
+                if reset and key in self.__dict__:
+                    self.__dict__.pop(key)
             self.metadata_process()
             if self.metadata_strict:
                 for error in self.metadata_errors:
                     raise exceptions.FrictionlessException(error)
 
-    @cached_property
+    @property
     def metadata_valid(self):
         return not len(self.metadata_errors)
 
-    @cached_property
+    @property
     def metadata_errors(self):
         return list(self.metadata_validate())
 
@@ -136,6 +142,21 @@ class Metadata(helpers.ControlledDict):
                 json.dump(self, file, indent=2, ensure_ascii=False)
         except Exception as exc:
             raise exceptions.FrictionlessException(self.__Error(note=str(exc))) from exc
+
+    # Helpers
+
+    @staticmethod
+    def property(func=None, *, reset=True, write=True):
+
+        # Actual property
+        def metadata_property(func):
+            prop = cached_property(func)
+            setattr(prop, "metadata_reset", reset)
+            setattr(prop, "metadata_write", write)
+            return prop
+
+        # Allow both forms
+        return metadata_property(func) if func else metadata_property
 
 
 # Internal

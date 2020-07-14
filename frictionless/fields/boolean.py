@@ -1,4 +1,4 @@
-from ..helpers import cached_property
+from ..metadata import Metadata
 from ..field import Field
 
 
@@ -15,7 +15,7 @@ class BooleanField(Field):
             return cell
         return self.read_cell_cast_mapping.get(cell)
 
-    @cached_property
+    @Metadata.property(write=False)
     def read_cell_cast_mapping(self):
         mapping = {}
         for value in self.get("trueValues", TRUE_VALUES):
