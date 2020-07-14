@@ -124,7 +124,7 @@ def unzip_descriptor(descriptor, compression_path):
     file = frictionless.File(descriptor, compression="no")
     with frictionless.system.create_loader(file) as loader:
         byte_stream = loader.byte_stream
-        if loader.network:
+        if loader.remote:
             byte_stream = tempfile.TemporaryFile()
             shutil.copyfileobj(loader.byte_stream, byte_stream)
             byte_stream.seek(0)

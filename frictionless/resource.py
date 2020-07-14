@@ -130,7 +130,7 @@ class Resource(Metadata):
         return True
 
     @Metadata.property(write=False)
-    def network(self):
+    def remote(self):
         if self.inline:
             return False
         return helpers.is_remote_path(self.path[0] if self.multipart else self.path)
@@ -372,9 +372,9 @@ class Resource(Metadata):
                 for resource in [self]:
                     if resource.inline:
                         continue
-                    if resource.multipart:
+                    if resource.remote:
                         continue
-                    if resource.network:
+                    if resource.multipart:
                         continue
                     if not helpers.is_safe_path(resource.path):
                         continue

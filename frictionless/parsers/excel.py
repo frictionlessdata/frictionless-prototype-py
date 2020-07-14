@@ -24,14 +24,14 @@ class XlsxParser(Parser):
         source = self.file.source
         dialect = self.file.dialect
         loader = system.create_loader(self.file)
-        if not loader.network:
+        if not loader.remote:
             return loader.open()
 
-        # Network
+        # Remote
         # Create copy for remote source
         # For remote stream we need local copy (will be deleted on close by Python)
         # https://docs.python.org/3.5/library/tempfile.html#tempfile.TemporaryFile
-        if loader.network:
+        if loader.remote:
 
             # Cached
             if dialect.workbook_cache is not None and source in dialect.workbook_cache:

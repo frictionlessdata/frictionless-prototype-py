@@ -24,7 +24,6 @@ class GsheetPlugin(Plugin):
 
 # TODO: implement write (as raising an error not supported)
 class GsheetParser(Parser):
-    network = True
     loading = False
 
     # Read

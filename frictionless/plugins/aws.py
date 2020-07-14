@@ -25,7 +25,7 @@ class AwsPlugin(Plugin):
 
 
 class S3Loader(Loader):
-    network = True
+    remote = True
 
     # Read
 

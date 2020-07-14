@@ -21,7 +21,7 @@ class Loader:
 
     """
 
-    network = False
+    remote = False
 
     def __init__(self, file):
         self.__file = file
@@ -108,9 +108,9 @@ class Loader:
 
     def read_byte_stream_decompress(self, byte_stream):
         if self.file.compression == "zip":
-            # Network
-            if self.network:
-                self.network = False
+            # Remote
+            if self.remote:
+                self.remote = False
                 target = tempfile.NamedTemporaryFile()
                 shutil.copyfileobj(byte_stream, target)
                 target.seek(0)

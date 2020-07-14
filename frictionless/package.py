@@ -207,9 +207,9 @@ class Package(Metadata):
                 for resource in self.resources:
                     if resource.inline:
                         continue
-                    if resource.multipart:
+                    if resource.remote:
                         continue
-                    if resource.network:
+                    if resource.multipart:
                         continue
                     if not helpers.is_safe_path(resource.path):
                         continue

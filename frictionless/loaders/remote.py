@@ -4,7 +4,7 @@ from ..loader import Loader
 
 
 class RemoteLoader(Loader):
-    network = True
+    remote = True
 
     # Read
 
