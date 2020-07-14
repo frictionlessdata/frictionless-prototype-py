@@ -283,6 +283,20 @@ class Resource(Metadata):
         loader.open()
         return loader.byte_stream
 
+    def read_text(self):
+        text = ""
+        text_stream = self.read_text_stream()
+        for line in text_stream:
+            text += line
+        return text
+
+    def read_text_stream(self):
+        if self.inline:
+            return io.StringIO("")
+        loader = system.create_loader(self.__file)
+        loader.open()
+        return loader.text_stream
+
     def read_data(self):
         data = list(self.read_data_stream())
         return data
