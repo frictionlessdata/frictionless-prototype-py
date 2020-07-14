@@ -35,8 +35,7 @@ def validate_package(source, basepath=None, noinfer=False, **options):
             descriptor["tasks"].append(
                 helpers.create_descriptor(
                     **options,
-                    # TODO: review why copy (problem with cached table)
-                    source=resource.copy(),
+                    source=resource,
                     basepath=resource.basepath,
                     noinfer=noinfer,
                     lookup=lookup,
