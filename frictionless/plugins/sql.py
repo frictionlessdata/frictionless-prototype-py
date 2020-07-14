@@ -1,4 +1,5 @@
 from importlib import import_module
+from ..metadata import Metadata
 from ..dialects import Dialect
 from ..plugin import Plugin
 from ..parser import Parser
@@ -113,11 +114,11 @@ class SqlDialect(Dialect):
             header_join=header_join,
         )
 
-    @property
+    @Metadata.property
     def table(self):
         return self.get("table")
 
-    @property
+    @Metadata.property
     def order_by(self):
         return self.get("order_by")
 

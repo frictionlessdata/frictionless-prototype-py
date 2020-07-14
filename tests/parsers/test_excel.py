@@ -1,7 +1,7 @@
 import io
 import pytest
 from datetime import datetime
-from frictionless import Table, dialects, exceptions
+from frictionless import Table, Query, dialects, exceptions
 
 BASE_URL = "https://raw.githubusercontent.com/frictionlessdata/tabulator-py/master/%s"
 
@@ -82,16 +82,18 @@ def test_table_xlsx_adjust_floating_point_error():
         preserve_formatting=True,
         adjust_floating_point_error=True,
     )
+    query = Query(skip_fields=["<blank>"])
     with pytest.warns(UserWarning):
-        with Table(source, dialect=dialect, skip_fields=["<blank>"]) as table:
+        with Table(source, dialect=dialect, query=query) as table:
             assert table.read_data()[1][2] == 274.66
 
 
 def test_table_xlsx_adjust_floating_point_error_default():
     source = "data/adjust-floating-point-error.xlsx"
     dialect = dialects.ExcelDialect(preserve_formatting=True)
+    query = Query(skip_fields=["<blank>"])
     with pytest.warns(UserWarning):
-        with Table(source, dialect=dialect, skip_fields=["<blank>"]) as table:
+        with Table(source, dialect=dialect, query=query) as table:
             assert table.read_data()[1][2] == 274.65999999999997
 
 
@@ -133,7 +135,8 @@ def test_table_xlsx_preserve_formatting_percentage():
 def test_table_xlsx_preserve_formatting_number_multicode():
     source = "data/number-format-multicode.xlsx"
     dialect = dialects.ExcelDialect(preserve_formatting=True)
-    with Table(source, dialect=dialect, skip_fields=["<blank>"]) as table:
+    query = Query(skip_fields=["<blank>"])
+    with Table(source, dialect=dialect, query=query) as table:
         assert table.read_data() == [["4.5"], ["-9.032"], ["15.8"]]
 
 

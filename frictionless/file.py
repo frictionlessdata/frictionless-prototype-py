@@ -1,4 +1,5 @@
 import os
+from .query import Query
 from .metadata import Metadata
 from .system import system
 from . import exceptions
@@ -22,6 +23,7 @@ class File(Metadata):
             "compressionPath": {"type": "string"},
             "contorl": {"type": "object"},
             "dialect": {"type": "object"},
+            "query": {"type": "object"},
             "newline": {"type": "string"},
             "stats": {
                 "type": "object",
@@ -47,6 +49,7 @@ class File(Metadata):
         compression_path=None,
         control=None,
         dialect=None,
+        query=None,
         newline=None,
         stats=None,
     ):
@@ -61,6 +64,7 @@ class File(Metadata):
         self.setinitial("compressionPath", compression_path)
         self.setinitial("control", control)
         self.setinitial("dialect", dialect)
+        self.setinitial("query", query)
         self.setinitial("newline", newline)
         self.setinitial("stats", stats)
         self.__loader = None
@@ -141,6 +145,14 @@ class File(Metadata):
             dialect = system.create_dialect(self, descriptor=dialect)
             return self.metadata_attach("dialect", dialect)
         return dialect
+
+    @Metadata.property
+    def query(self):
+        query = self.get("query")
+        if query is None:
+            query = Query()
+            return self.metadata_attach("query", query)
+        return query
 
     @Metadata.property
     def newline(self):
@@ -236,3 +248,9 @@ class File(Metadata):
         if dialect is not None:
             dialect = system.create_dialect(self, descriptor=dialect)
             dict.__setitem__(self, "dialect", dialect)
+
+        # Query
+        query = self.get("query")
+        if query is not None:
+            query = Query(query)
+            dict.__setitem__(self, "query", query)

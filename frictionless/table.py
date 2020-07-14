@@ -126,6 +126,7 @@ class Table:
         self,
         source,
         *,
+        headers=None,
         # File
         scheme=None,
         format=None,
@@ -135,25 +136,16 @@ class Table:
         compression_path=None,
         control=None,
         dialect=None,
-        # Table
-        headers=None,
+        query=None,
+        # Schema
         schema=None,
-        lookup=None,
         sync_schema=False,
         patch_schema=False,
         infer_type=None,
         infer_names=None,
         infer_volume=config.DEFAULT_INFER_VOLUME,
         infer_confidence=config.DEFAULT_INFER_CONFIDENCE,
-        # Discovery
-        pick_fields=None,
-        skip_fields=None,
-        limit_fields=None,
-        offset_fields=None,
-        pick_rows=None,
-        skip_rows=None,
-        limit_rows=None,
-        offset_rows=None,
+        lookup=None,
     ):
 
         # Update source
@@ -173,12 +165,6 @@ class Table:
                     dialect["headerRows"] = headers[0]
                     dialect["headerJoin"] = headers[1]
 
-        # Update filters
-        pick_fields = helpers.compile_regex(pick_fields)
-        skip_fields = helpers.compile_regex(skip_fields)
-        pick_rows = helpers.compile_regex(pick_rows)
-        skip_rows = helpers.compile_regex(skip_rows)
-
         # Store state
         self.__parser = None
         self.__sample = None
@@ -192,7 +178,6 @@ class Table:
         self.__sample_positions = None
 
         # Store params
-        self.__lookup = lookup
         self.__init_schema = schema
         self.__sync_schema = sync_schema
         self.__patch_schema = patch_schema
@@ -200,22 +185,7 @@ class Table:
         self.__infer_names = infer_names
         self.__infer_volume = infer_volume
         self.__infer_confidence = infer_confidence
-        self.__pick_fields = pick_fields
-        self.__skip_fields = skip_fields
-        self.__limit_fields = limit_fields
-        self.__offset_fields = offset_fields
-        self.__pick_rows = pick_rows
-        self.__skip_rows = skip_rows
-        self.__limit_rows = limit_rows
-        self.__offset_rows = offset_rows
-
-        # Detect filtering
-        self.__field_filtering = (
-            pick_fields is not None
-            or skip_fields is not None
-            or limit_fields is not None
-            or offset_fields is not None
-        )
+        self.__lookup = lookup
 
         # Create file
         self.__file = File(
@@ -228,6 +198,7 @@ class Table:
             compression_path=compression_path,
             control=control,
             dialect=dialect,
+            query=query,
         )
 
     def __enter__(self):
@@ -334,7 +305,7 @@ class Table:
 
     @property
     def dialect(self):
-        """Dialect (if available)
+        """Dialect
 
         # Returns
             dict/None: dialect
@@ -343,14 +314,24 @@ class Table:
         return self.__file.dialect
 
     @property
-    def stats(self):
-        """Returns stats
+    def query(self):
+        """Query
 
         # Returns
-            int/None: BYTE count
+            dict/None: query
 
         """
-        return self.__file.stats
+        return self.__file.query
+
+    @property
+    def schema(self):
+        """Schema
+
+        # Returns
+            str[]/None: schema
+
+        """
+        return self.__schema
 
     @property
     def headers(self):
@@ -376,16 +357,6 @@ class Table:
         return self.__sample
 
     @property
-    def schema(self):
-        """Schema
-
-        # Returns
-            str[]/None: schema
-
-        """
-        return self.__schema
-
-    @property
     def data_stream(self):
         """Data stream
 
@@ -405,6 +376,16 @@ class Table:
         """
         return self.__row_stream
 
+    @property
+    def stats(self):
+        """Returns stats
+
+        # Returns
+            int/None: BYTE count
+
+        """
+        return self.__file.stats
+
     # Open/Close
 
     def open(self):
@@ -415,6 +396,9 @@ class Table:
 
         """
         self.close()
+        if self.__file.query.metadata_errors:
+            error = self.__file.query.metadata_errors[0]
+            raise exceptions.FrictionlessException(error)
         try:
             self.__file.stats = {"hash": "", "bytes": 0, "rows": 0}
             self.__parser = system.create_parser(self.__file)
@@ -459,8 +443,8 @@ class Table:
 
     def __read_data_stream_create(self):
         stats = self.__file.stats
-        limit = self.__limit_rows
-        offset = self.__offset_rows or 0
+        limit = self.__file.query.limit_rows
+        offset = self.__file.query.offset_rows or 0
         sample_iterator = self.__read_data_stream_create_sample_iterator()
         parser_iterator = self.__read_data_stream_create_parser_iterator()
         for row_position, cells in chain(sample_iterator, parser_iterator):
@@ -613,8 +597,8 @@ class Table:
         # Filter headers
         filter_headers = []
         field_positions = []
-        limit = self.__limit_fields
-        offset = self.__offset_fields or 0
+        limit = self.__file.query.limit_fields
+        offset = self.__file.query.offset_fields or 0
         for field_position, header in enumerate(headers, start=1):
             if self.__read_data_stream_pick_skip_field(field_position, header):
                 if offset:
@@ -630,7 +614,10 @@ class Table:
     def __read_data_stream_pick_skip_field(self, field_position, header):
         match = True
         for name in ["pick", "skip"]:
-            items = self.__pick_fields if name == "pick" else self.__skip_fields
+            if name == "pick":
+                items = self.__file.query.pick_fields_compiled
+            else:
+                items = self.__file.query.skip_fields_compiled
             if not items:
                 continue
             match = match and name == "skip"
@@ -650,7 +637,10 @@ class Table:
         cell = cells[0] if cells else None
         cell = "" if cell is None else str(cell)
         for name in ["pick", "skip"]:
-            items = self.__pick_rows if name == "pick" else self.__skip_rows
+            if name == "pick":
+                items = self.__file.query.pick_rows_compiled
+            else:
+                items = self.__file.query.skip_rows_compiled
             if not items:
                 continue
             match = match and name == "skip"
@@ -668,7 +658,7 @@ class Table:
         return match
 
     def __read_data_stream_filter_data(self, cells, field_positions):
-        if self.__field_filtering:
+        if self.__file.query.is_field_filtering:
             result = []
             for field_position, cell in enumerate(cells, start=1):
                 if field_position in field_positions:

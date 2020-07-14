@@ -1,6 +1,6 @@
 import pytest
 import pathlib
-from frictionless import validate, describe, Check, errors
+from frictionless import validate, describe, Check, Query, errors
 
 
 # General
@@ -111,6 +111,45 @@ def test_validate_source_pathlib_path_table():
     assert report.valid
 
 
+# Headers
+
+
+def test_validate_headers_none():
+    report = validate("data/without-headers.csv", headers=False)
+    assert report.valid
+    assert report.table.stats["rows"] == 3
+    assert report.table["dialect"]["header"] is False
+    assert report.table["headers"] == []
+
+
+def test_validate_headers_none_extra_cell():
+    report = validate("data/without-headers-extra.csv", headers=False)
+    assert report.table.stats["rows"] == 3
+    assert report.table["dialect"]["header"] is False
+    assert report.table["headers"] == []
+    assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
+        [3, 3, "extra-cell"],
+    ]
+
+
+def test_validate_headers_number():
+    report = validate("data/matrix.csv", headers=2)
+    assert report.table["headers"] == ["11", "12", "13", "14"]
+    assert report.valid
+
+
+def test_validate_headers_list_of_numbers():
+    report = validate("data/matrix.csv", headers=[2, 3, 4])
+    assert report.table["headers"] == ["11 21 31", "12 22 32", "13 23 33", "14 24 34"]
+    assert report.valid
+
+
+def test_validate_headers_list_of_numbers_and_headers_join():
+    report = validate("data/matrix.csv", headers=[[2, 3, 4], "."])
+    assert report.table["headers"] == ["11.21.31", "12.22.32", "13.23.33", "14.24.34"]
+    assert report.valid
+
+
 # Scheme
 
 
@@ -188,43 +227,164 @@ def test_validate_dialect_delimiter():
     assert report.table.stats["rows"] == 2
 
 
-# Headers
+# Query
 
 
-def test_validate_headers_none():
-    report = validate("data/without-headers.csv", headers=False)
-    assert report.valid
-    assert report.table.stats["rows"] == 3
-    assert report.table["dialect"]["header"] is False
-    assert report.table["headers"] == []
+def test_validate_pick_fields():
+    query = Query(pick_fields=[2, "f3"])
+    report = validate("data/matrix.csv", query=query)
+    assert report.table["headers"] == ["f2", "f3"]
+    assert report.table.stats["rows"] == 4
+    assert report.table.valid
 
 
-def test_validate_headers_none_extra_cell():
-    report = validate("data/without-headers-extra.csv", headers=False)
-    assert report.table.stats["rows"] == 3
-    assert report.table["dialect"]["header"] is False
-    assert report.table["headers"] == []
+def test_validate_pick_fields_regex():
+    query = Query(pick_fields=["<regex>f[23]"])
+    report = validate("data/matrix.csv", query=query)
+    assert report.table["headers"] == ["f2", "f3"]
+    assert report.table.stats["rows"] == 4
+    assert report.table.valid
+
+
+def test_validate_skip_fields():
+    query = Query(skip_fields=[1, "f4"])
+    report = validate("data/matrix.csv", query=query)
+    assert report.table["headers"] == ["f2", "f3"]
+    assert report.table.stats["rows"] == 4
+    assert report.table.valid
+
+
+def test_validate_skip_fields_regex():
+    query = Query(skip_fields=["<regex>f[14]"])
+    report = validate("data/matrix.csv", query=query)
+    assert report.table["headers"] == ["f2", "f3"]
+    assert report.table.stats["rows"] == 4
+    assert report.table.valid
+
+
+def test_validate_limit_fields():
+    query = Query(limit_fields=1)
+    report = validate("data/matrix.csv", query=query)
+    assert report.table["headers"] == ["f1"]
+    assert report.table.stats["rows"] == 4
+    assert report.table.valid
+
+
+def test_validate_offset_fields():
+    query = Query(offset_fields=3)
+    report = validate("data/matrix.csv", query=query)
+    assert report.table["headers"] == ["f4"]
+    assert report.table.stats["rows"] == 4
+    assert report.table.valid
+
+
+def test_validate_limit_and_offset_fields():
+    query = Query(limit_fields=2, offset_fields=1)
+    report = validate("data/matrix.csv", query=query)
+    assert report.table["headers"] == ["f2", "f3"]
+    assert report.table.stats["rows"] == 4
+    assert report.table.valid
+
+
+def test_validate_pick_rows():
+    query = Query(pick_rows=[1, 3, "31"])
+    report = validate("data/matrix.csv", query=query)
+    assert report.table["headers"] == ["f1", "f2", "f3", "f4"]
+    assert report.table.stats["rows"] == 2
+    assert report.table.valid
+
+
+def test_validate_pick_rows_regex():
+    query = Query(pick_rows=["<regex>[f23]1"])
+    report = validate("data/matrix.csv", query=query)
+    assert report.table["headers"] == ["f1", "f2", "f3", "f4"]
+    assert report.table.stats["rows"] == 2
+    assert report.table.valid
+
+
+def test_validate_skip_rows():
+    query = Query(skip_rows=[2, "41"])
+    report = validate("data/matrix.csv", query=query)
+    assert report.table["headers"] == ["f1", "f2", "f3", "f4"]
+    assert report.table.stats["rows"] == 2
+    assert report.table.valid
+
+
+def test_validate_skip_rows_regex():
+    query = Query(skip_rows=["<regex>[14]1"])
+    report = validate("data/matrix.csv", query=query)
+    assert report.table["headers"] == ["f1", "f2", "f3", "f4"]
+    assert report.table.stats["rows"] == 2
+    assert report.table.valid
+
+
+def test_validate_skip_rows_blank():
+    query = Query(skip_rows=["<blank>"])
+    report = validate("data/blank-rows.csv", query=query)
+    assert report.table["headers"] == ["id", "name", "age"]
+    assert report.table.stats["rows"] == 2
+    assert report.table.valid
+
+
+def test_validate_pick_rows_and_fields():
+    query = Query(pick_rows=[1, 3, "31"], pick_fields=[2, "f3"])
+    report = validate("data/matrix.csv", query=query)
+    assert report.table["headers"] == ["f2", "f3"]
+    assert report.table.stats["rows"] == 2
+    assert report.table.valid
+
+
+def test_validate_skip_rows_and_fields():
+    query = Query(skip_rows=[2, "41"], skip_fields=[1, "f4"])
+    report = validate("data/matrix.csv", query=query)
+    assert report.table["headers"] == ["f2", "f3"]
+    assert report.table.stats["rows"] == 2
+    assert report.table.valid
+
+
+def test_validate_limit_rows():
+    query = Query(limit_rows=1)
+    report = validate("data/matrix.csv", query=query)
+    assert report.table["headers"] == ["f1", "f2", "f3", "f4"]
+    assert report.table.stats["rows"] == 1
+    assert report.table.valid
+
+
+def test_validate_offset_rows():
+    query = Query(offset_rows=3)
+    report = validate("data/matrix.csv", query=query)
+    assert report.table["headers"] == ["f1", "f2", "f3", "f4"]
+    assert report.table.stats["rows"] == 1
+    assert report.table.valid
+
+
+def test_validate_limit_and_offset_rows():
+    query = Query(limit_rows=2, offset_rows=1)
+    report = validate("data/matrix.csv", query=query)
+    assert report.table["headers"] == ["f1", "f2", "f3", "f4"]
+    assert report.table.stats["rows"] == 2
+    assert report.table.valid
+
+
+def test_validate_invalid_limit_rows():
+    query = Query(limit_rows=2)
+    report = validate("data/invalid.csv", query=query)
     assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
-        [3, 3, "extra-cell"],
+        [None, 3, "blank-header"],
+        [None, 4, "duplicate-header"],
+        [2, 3, "missing-cell"],
+        [2, 4, "missing-cell"],
+        [3, 3, "missing-cell"],
+        [3, 4, "missing-cell"],
     ]
 
 
-def test_validate_headers_number():
-    report = validate("data/matrix.csv", headers=2)
-    assert report.table["headers"] == ["11", "12", "13", "14"]
-    assert report.valid
-
-
-def test_validate_headers_list_of_numbers():
-    report = validate("data/matrix.csv", headers=[2, 3, 4])
-    assert report.table["headers"] == ["11 21 31", "12 22 32", "13 23 33", "14 24 34"]
-    assert report.valid
-
-
-def test_validate_headers_list_of_numbers_and_headers_join():
-    report = validate("data/matrix.csv", headers=[[2, 3, 4], "."])
-    assert report.table["headers"] == ["11.21.31", "12.22.32", "13.23.33", "14.24.34"]
-    assert report.valid
+def test_validate_structure_errors_with_limit_rows():
+    query = Query(limit_rows=3)
+    report = validate("data/structure-errors.csv", query=query)
+    assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
+        [4, None, "blank-row"],
+    ]
 
 
 # Schema
@@ -416,147 +576,6 @@ def test_validate_infer_names():
     assert report.table["schema"]["fields"][1]["name"] == "name"
     assert report.table.stats["rows"] == 3
     assert report.valid
-
-
-# Discovery
-
-
-def test_validate_pick_fields():
-    report = validate("data/matrix.csv", pick_fields=[2, "f3"])
-    assert report.table["headers"] == ["f2", "f3"]
-    assert report.table.stats["rows"] == 4
-    assert report.table.valid
-
-
-def test_validate_pick_fields_regex():
-    report = validate("data/matrix.csv", pick_fields=["<regex>f[23]"])
-    assert report.table["headers"] == ["f2", "f3"]
-    assert report.table.stats["rows"] == 4
-    assert report.table.valid
-
-
-def test_validate_skip_fields():
-    report = validate("data/matrix.csv", skip_fields=[1, "f4"])
-    assert report.table["headers"] == ["f2", "f3"]
-    assert report.table.stats["rows"] == 4
-    assert report.table.valid
-
-
-def test_validate_skip_fields_regex():
-    report = validate("data/matrix.csv", skip_fields=["<regex>f[14]"])
-    assert report.table["headers"] == ["f2", "f3"]
-    assert report.table.stats["rows"] == 4
-    assert report.table.valid
-
-
-def test_validate_limit_fields():
-    report = validate("data/matrix.csv", limit_fields=1)
-    assert report.table["headers"] == ["f1"]
-    assert report.table.stats["rows"] == 4
-    assert report.table.valid
-
-
-def test_validate_offset_fields():
-    report = validate("data/matrix.csv", offset_fields=3)
-    assert report.table["headers"] == ["f4"]
-    assert report.table.stats["rows"] == 4
-    assert report.table.valid
-
-
-def test_validate_limit_and_offset_fields():
-    report = validate("data/matrix.csv", limit_fields=2, offset_fields=1)
-    assert report.table["headers"] == ["f2", "f3"]
-    assert report.table.stats["rows"] == 4
-    assert report.table.valid
-
-
-def test_validate_pick_rows():
-    report = validate("data/matrix.csv", pick_rows=[1, 3, "31"])
-    assert report.table["headers"] == ["f1", "f2", "f3", "f4"]
-    assert report.table.stats["rows"] == 2
-    assert report.table.valid
-
-
-def test_validate_pick_rows_regex():
-    report = validate("data/matrix.csv", pick_rows=["<regex>[f23]1"])
-    assert report.table["headers"] == ["f1", "f2", "f3", "f4"]
-    assert report.table.stats["rows"] == 2
-    assert report.table.valid
-
-
-def test_validate_skip_rows():
-    report = validate("data/matrix.csv", skip_rows=[2, "41"])
-    assert report.table["headers"] == ["f1", "f2", "f3", "f4"]
-    assert report.table.stats["rows"] == 2
-    assert report.table.valid
-
-
-def test_validate_skip_rows_regex():
-    report = validate("data/matrix.csv", skip_rows=["<regex>[14]1"])
-    assert report.table["headers"] == ["f1", "f2", "f3", "f4"]
-    assert report.table.stats["rows"] == 2
-    assert report.table.valid
-
-
-def test_validate_skip_rows_blank():
-    report = validate("data/blank-rows.csv", skip_rows=["<blank>"])
-    assert report.table["headers"] == ["id", "name", "age"]
-    assert report.table.stats["rows"] == 2
-    assert report.table.valid
-
-
-def test_validate_pick_rows_and_fields():
-    report = validate("data/matrix.csv", pick_rows=[1, 3, "31"], pick_fields=[2, "f3"])
-    assert report.table["headers"] == ["f2", "f3"]
-    assert report.table.stats["rows"] == 2
-    assert report.table.valid
-
-
-def test_validate_skip_rows_and_fields():
-    report = validate("data/matrix.csv", skip_rows=[2, "41"], skip_fields=[1, "f4"])
-    assert report.table["headers"] == ["f2", "f3"]
-    assert report.table.stats["rows"] == 2
-    assert report.table.valid
-
-
-def test_validate_limit_rows():
-    report = validate("data/matrix.csv", limit_rows=1)
-    assert report.table["headers"] == ["f1", "f2", "f3", "f4"]
-    assert report.table.stats["rows"] == 1
-    assert report.table.valid
-
-
-def test_validate_offset_rows():
-    report = validate("data/matrix.csv", offset_rows=3)
-    assert report.table["headers"] == ["f1", "f2", "f3", "f4"]
-    assert report.table.stats["rows"] == 1
-    assert report.table.valid
-
-
-def test_validate_limit_and_offset_rows():
-    report = validate("data/matrix.csv", limit_rows=2, offset_rows=1)
-    assert report.table["headers"] == ["f1", "f2", "f3", "f4"]
-    assert report.table.stats["rows"] == 2
-    assert report.table.valid
-
-
-def test_validate_invalid_limit_rows():
-    report = validate("data/invalid.csv", limit_rows=2)
-    assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
-        [None, 3, "blank-header"],
-        [None, 4, "duplicate-header"],
-        [2, 3, "missing-cell"],
-        [2, 4, "missing-cell"],
-        [3, 3, "missing-cell"],
-        [3, 4, "missing-cell"],
-    ]
-
-
-def test_validate_structure_errors_with_limit_rows():
-    report = validate("data/structure-errors.csv", limit_rows=3)
-    assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
-        [4, None, "blank-row"],
-    ]
 
 
 # Validation
@@ -955,7 +974,7 @@ def test_validate_table_is_invalid_issue_312():
 
 def test_validate_order_fields_issue_313():
     source = "data/issue-313.xlsx"
-    pick_fields = [1, 2, 3, 4, 5]
+    query = Query(pick_fields=[1, 2, 3, 4, 5])
     schema = {
         "fields": [
             {"name": "Column_1", "type": "string"},
@@ -965,7 +984,7 @@ def test_validate_order_fields_issue_313():
             {"name": "Column_5", "type": "string"},
         ]
     }
-    report = validate(source, pick_fields=pick_fields, schema=schema, sync_schema=True)
+    report = validate(source, query=query, schema=schema, sync_schema=True)
     assert report.valid
 
 

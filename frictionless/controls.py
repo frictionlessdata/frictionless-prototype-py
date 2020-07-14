@@ -28,14 +28,29 @@ class Control(Metadata):
         self.setinitial("detectEncoding", detect_encoding)
         super().__init__(descriptor)
 
-    @property
+    @Metadata.property
     def detect_encoding(self):
-        return helpers.detect_encoding
+        return self.get("detectEncoding", helpers.detect_encoding)
 
     # Expand
 
     def expand(self):
         pass
+
+    # Save
+
+    def save(self, target):
+        self.metadata_save(target)
+
+    # Import/Export
+
+    def to_dict(self, expand=False):
+        result = super().to_dict()
+        if expand:
+            result = type(self)(result)
+            result.expand()
+            result = result.to_dict()
+        return result
 
 
 class LocalControl(Control):
@@ -96,7 +111,7 @@ class RemoteControl(Control):
         self.setinitial("httpTimeout", http_timeout)
         super().__init__(descriptor, detect_encoding=detect_encoding)
 
-    @property
+    @Metadata.property
     def http_session(self):
         http_session = self.get("httpSession")
         if not http_session:
@@ -104,11 +119,11 @@ class RemoteControl(Control):
             http_session.headers.update(config.DEFAULT_HTTP_HEADERS)
         return http_session
 
-    @property
+    @Metadata.property
     def http_preload(self):
         return self.get("httpPreload", False)
 
-    @property
+    @Metadata.property
     def http_timeout(self):
         return self.get("httpTimeout", config.DEFAULT_HTTP_TIMEOUT)
 

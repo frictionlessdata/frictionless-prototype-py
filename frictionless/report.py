@@ -66,6 +66,12 @@ class Report(Metadata):
             raise exceptions.FrictionlessException(error)
         return self.tables[0]
 
+    # Expand
+
+    def expand(self):
+        for table in self.tables:
+            table.expand()
+
     # Flatten
 
     def flatten(self, spec):
@@ -151,67 +157,72 @@ class ReportTable(Metadata):
     metadata_strict = True
     metadata_profile = config.REPORT_PROFILE["properties"]["tables"]["items"]
 
-    def __init__(
-        self,
-        descriptor=None,
-        *,
+    def __init__(self, descriptor=None, *, time, scope, partial, errors, table):
         # File
-        path,
-        scheme,
-        format,
-        hashing,
-        encoding,
-        compression,
-        compression_path,
+        self["path"] = table.path
+        self["scheme"] = table.scheme
+        self["format"] = table.format
+        self["hashing"] = table.hashing
+        self["encoding"] = table.encoding
+        self["compression"] = table.compression
+        self["compressionPath"] = table.compression_path
+        self["dialect"] = table.dialect
+        self["query"] = table.query
         # Table
-        dialect,
-        headers,
-        schema,
-        # Discovery
-        pick_fields,
-        skip_fields,
-        limit_fields,
-        offset_fields,
-        pick_rows,
-        skip_rows,
-        limit_rows,
-        offset_rows,
-        # Validation
-        time,
-        scope,
-        stats,
-        partial,
-        errors,
-    ):
-        # File
-        self["path"] = path
-        self["scheme"] = scheme
-        self["format"] = format
-        self["hashing"] = hashing
-        self["encoding"] = encoding
-        self["compression"] = compression
-        self["compressionPath"] = compression_path
-        # Table
-        self.setinitial("dialect", dialect)
-        self.setinitial("headers", headers)
-        self.setinitial("schema", schema)
-        # Discovery
-        self.setinitial("pickFields", pick_fields)
-        self.setinitial("skipFields", skip_fields)
-        self.setinitial("limitFields", limit_fields)
-        self.setinitial("offsetFields", offset_fields)
-        self.setinitial("pickRows", pick_rows)
-        self.setinitial("skipRows", skip_rows)
-        self.setinitial("limitRows", limit_rows)
-        self.setinitial("offsetRows", offset_rows)
+        self.setinitial("schema", table.schema)
+        self.setinitial("headers", table.headers)
         # Validation
         self["time"] = time
         self["valid"] = not errors
         self["scope"] = scope
-        self["stats"] = helpers.copy_merge(stats, {"errors": len(errors)})
+        self["stats"] = helpers.copy_merge(table.stats, {"errors": len(errors)})
         self["partial"] = partial
         self["errors"] = errors
         super().__init__(descriptor)
+
+    @property
+    def path(self):
+        return self["path"]
+
+    @property
+    def scheme(self):
+        return self["scheme"]
+
+    @property
+    def format(self):
+        return self["format"]
+
+    @property
+    def hashing(self):
+        return self["hashing"]
+
+    @property
+    def encoding(self):
+        return self["encoding"]
+
+    @property
+    def compression(self):
+        return self["compression"]
+
+    @property
+    def compression_path(self):
+        return self["compressionPath"]
+
+    @property
+    def dialect(self):
+        return self["dialect"]
+
+    @property
+    def query(self):
+        return self["query"]
+
+    @property
+    def schema(self):
+        return self["schema"]
+
+    @property
+    def headers(self):
+        return self["headers"]
 
     @property
     def time(self):
@@ -244,6 +255,13 @@ class ReportTable(Metadata):
             raise exceptions.FrictionlessException(error)
         return self.errors[0]
 
+    # Expand
+
+    def expand(self):
+        self.dialect.expand()
+        if self.schema is not None:
+            self.schema.expand()
+
     # Flatten
 
     def flatten(self, spec):
@@ -268,5 +286,10 @@ class ReportTable(Metadata):
 
     # Import/Export
 
-    def to_dict(self):
-        return self.copy()
+    def to_dict(self, expand=False):
+        result = super().to_dict()
+        if expand:
+            result = type(self)(result)
+            result.expand()
+            result = result.to_dict()
+        return result

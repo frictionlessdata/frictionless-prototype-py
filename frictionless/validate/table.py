@@ -11,6 +11,7 @@ from ..report import Report, ReportTable
 def validate_table(
     source,
     *,
+    headers=None,
     # File
     scheme=None,
     format=None,
@@ -19,26 +20,17 @@ def validate_table(
     compression=None,
     compression_path=None,
     control=None,
-    # Table
     dialect=None,
-    headers=None,
+    query=None,
+    # Schema
     schema=None,
-    lookup=None,
     sync_schema=False,
     patch_schema=False,
     infer_type=None,
     infer_names=None,
     infer_volume=config.DEFAULT_INFER_VOLUME,
     infer_confidence=config.DEFAULT_INFER_CONFIDENCE,
-    # Discovery
-    pick_fields=None,
-    skip_fields=None,
-    limit_fields=None,
-    offset_fields=None,
-    pick_rows=None,
-    skip_rows=None,
-    limit_rows=None,
-    offset_rows=None,
+    lookup=None,
     # Validation
     checksum=None,
     extra_checks=None,
@@ -113,6 +105,7 @@ def validate_table(
     # Create table
     table = Table(
         source,
+        headers=headers,
         # File
         scheme=scheme,
         format=format,
@@ -121,9 +114,9 @@ def validate_table(
         compression=compression,
         compression_path=compression_path,
         control=control,
-        # Table
         dialect=dialect,
-        headers=headers,
+        query=query,
+        # Schema
         schema=schema,
         lookup=lookup,
         sync_schema=sync_schema,
@@ -132,15 +125,6 @@ def validate_table(
         infer_names=infer_names,
         infer_volume=infer_volume,
         infer_confidence=infer_confidence,
-        # Discovery
-        pick_fields=pick_fields,
-        skip_fields=skip_fields,
-        limit_fields=limit_fields,
-        offset_fields=offset_fields,
-        pick_rows=pick_rows,
-        skip_rows=skip_rows,
-        limit_rows=limit_rows,
-        offset_rows=offset_rows,
     )
 
     # Open table
@@ -211,33 +195,11 @@ def validate_table(
         errors=task_errors,
         tables=[
             ReportTable(
-                # File
-                path=table.path,
-                scheme=table.scheme,
-                format=table.format,
-                hashing=table.hashing,
-                encoding=table.encoding,
-                compression=table.compression,
-                compression_path=table.compression_path,
-                dialect=table.dialect,
-                # Table
-                headers=table.headers,
-                schema=table.schema,
-                # Discovery
-                pick_fields=pick_fields,
-                skip_fields=skip_fields,
-                limit_fields=limit_fields,
-                offset_fields=offset_fields,
-                pick_rows=pick_rows,
-                skip_rows=skip_rows,
-                limit_rows=limit_rows,
-                offset_rows=offset_rows,
-                # Validation
                 time=timer.time,
                 scope=table_errors.scope,
-                stats=table.stats,
                 partial=partial,
                 errors=table_errors,
+                table=table,
             )
         ],
     )

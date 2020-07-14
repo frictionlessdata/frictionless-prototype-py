@@ -33,15 +33,15 @@ class Dialect(Metadata):
         self.setinitial("headerJoin", header_join)
         super().__init__(descriptor)
 
-    @property
+    @Metadata.property
     def header(self):
         return self.get("header", config.DEFAULT_HEADER)
 
-    @property
+    @Metadata.property
     def header_rows(self):
         return self.get("headerRows", config.DEFAULT_HEADER_ROWS)
 
-    @property
+    @Metadata.property
     def header_join(self):
         return self.get("headerJoin", config.DEFAULT_HEADER_JOIN)
 
@@ -140,39 +140,39 @@ class CsvDialect(Dialect):
             header_join=header_join,
         )
 
-    @property
+    @Metadata.property
     def delimiter(self):
         return self.get("delimiter", ",")
 
-    @property
+    @Metadata.property
     def line_terminator(self):
         return self.get("lineTerminator", "\r\n")
 
-    @property
+    @Metadata.property
     def quote_char(self):
         return self.get("quoteChar", '"')
 
-    @property
+    @Metadata.property
     def double_quote(self):
         return self.get("doubleQuote", True)
 
-    @property
+    @Metadata.property
     def escape_char(self):
         return self.get("escapeChar")
 
-    @property
+    @Metadata.property
     def null_sequence(self):
         return self.get("nullSequence")
 
-    @property
+    @Metadata.property
     def skip_initial_space(self):
         return self.get("skipInitialSpace", False)
 
-    @property
+    @Metadata.property
     def comment_char(self):
         return self.get("commentChar")
 
-    @property
+    @Metadata.property
     def case_sensitive_header(self):
         return self.get("caseSensitiveHeader", False)
 
@@ -257,23 +257,23 @@ class ExcelDialect(Dialect):
             header_join=header_join,
         )
 
-    @property
+    @Metadata.property
     def sheet(self):
         return self.get("sheet", 1)
 
-    @property
+    @Metadata.property
     def workbook_cache(self):
         return self.get("workbookCache")
 
-    @property
+    @Metadata.property
     def fill_merged_cells(self):
         return self.get("fillMergedCells", False)
 
-    @property
+    @Metadata.property
     def preserve_formatting(self):
         return self.get("preserveFormatting", False)
 
-    @property
+    @Metadata.property
     def adjust_floating_point_error(self):
         return self.get("adjustFloatingPointError", False)
 
@@ -330,11 +330,11 @@ class InlineDialect(Dialect):
             header_join=header_join,
         )
 
-    @property
+    @Metadata.property
     def keys(self):
         return self.get("keys")
 
-    @property
+    @Metadata.property
     def keyed(self):
         return self.get("keyed", False)
 
@@ -391,15 +391,15 @@ class JsonDialect(Dialect):
             header_join=header_join,
         )
 
-    @property
+    @Metadata.property
     def keys(self):
         return self.get("keys")
 
-    @property
+    @Metadata.property
     def keyed(self):
         return self.get("keyed", False)
 
-    @property
+    @Metadata.property
     def property(self):
         return self.get("property")
 

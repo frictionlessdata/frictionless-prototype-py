@@ -99,6 +99,8 @@
           "encoding",
           "compression",
           "compressionPath",
+          "dialect",
+          "query",
           "time",
           "valid",
           "scope",
@@ -147,56 +149,21 @@
             "title": "Dialect",
             "description": "The tabular dialect of the table."
           },
-          "headers": {
-            "type": "array",
-            "title": "Headers",
-            "description": "List of table's headers.",
-            "items": {"type": "string"}
+          "query": {
+            "type": "object",
+            "title": "Query",
+            "description": "The tabular query of the table."
           },
           "schema": {
             "type": "object",
             "title": "Schema",
             "description": "A Table Schema Object."
           },
-          "pickFields": {
+          "headers": {
             "type": "array",
-            "title": "Pick Fields",
-            "description": "The list of picked fields."
-          },
-          "skipFields": {
-            "type": "array",
-            "title": "Skip Fields",
-            "description": "The list of skiped fields."
-          },
-          "limitFields": {
-            "type": "number",
-            "title": "Field Limit",
-            "description": "Maxumum amount of fields."
-          },
-          "offsetFields": {
-            "type": "number",
-            "title": "Field Offset",
-            "description": "Offset of fields."
-          },
-          "pickRows": {
-            "type": "array",
-            "title": "Pick Rows",
-            "description": "The list of picked rows."
-          },
-          "skipRows": {
-            "type": "array",
-            "title": "Skip Rows",
-            "description": "The list of skiped rows."
-          },
-          "limitRows": {
-            "type": "number",
-            "title": "Row Limit",
-            "description": "Maxumum amount of rows."
-          },
-          "offsetRows": {
-            "type": "number",
-            "title": "Row Offset",
-            "description": "Offset of rows."
+            "title": "Headers",
+            "description": "List of table's headers.",
+            "items": {"type": "string"}
           },
           "time": {
             "type": "number",

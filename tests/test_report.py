@@ -1,10 +1,10 @@
-from frictionless import validate, ReportTable, errors
+from frictionless import validate
 
 
 # Report
 
 
-def test_validate_report_props():
+def test_report():
     report = validate("data/table.csv")
     # Report
     assert report.version.startswith("0")
@@ -13,19 +13,22 @@ def test_validate_report_props():
     assert report.stats == {"errors": 0, "tables": 1}
     assert report.errors == []
     # Table
-    assert report.table["path"] == "data/table.csv"
-    assert report.table["scheme"] == "file"
-    assert report.table["format"] == "csv"
-    assert report.table["hashing"] == "md5"
-    assert report.table["encoding"] == "utf-8"
-    assert report.table["dialect"] == {}
-    assert report.table["headers"] == ["id", "name"]
-    assert report.table["schema"] == {
+    assert report.table.path == "data/table.csv"
+    assert report.table.scheme == "file"
+    assert report.table.format == "csv"
+    assert report.table.hashing == "md5"
+    assert report.table.encoding == "utf-8"
+    assert report.table.compression == "no"
+    assert report.table.compression_path == ""
+    assert report.table.dialect == {}
+    assert report.table.query == {}
+    assert report.table.schema == {
         "fields": [
             {"name": "id", "type": "integer"},
             {"name": "name", "type": "string"},
         ],
     }
+    assert report.table.headers == ["id", "name"]
     assert report.table.time
     assert report.table.valid is True
     assert report.table.scope == [
@@ -55,74 +58,13 @@ def test_validate_report_props():
     assert report.errors == []
 
 
-# ReportTable
-
-
-def test_table_report_valid():
-    table = create_report_table(errors=[])
-    assert table.valid is True
-    assert table.stats["errors"] == 0
-    assert table.flatten(["code"]) == []
-
-
-def test_table_report_invalid():
-    table = create_report_table(errors=[errors.SourceError(note="note")])
-    assert table.valid is False
-    assert table.stats["errors"] == 1
-    assert table.flatten(["code"]) == [["source-error"]]
-
-
-# Helpers
-
-
-def create_report_table(
-    *,
-    path="path",
-    scheme="scheme",
-    format="format",
-    hashing="hashing",
-    encoding="encoding",
-    compression="compression",
-    compression_path="compression_path",
-    dialect={},
-    headers=None,
-    pick_fields=None,
-    skip_fields=None,
-    limit_fields=None,
-    offset_fields=None,
-    pick_rows=None,
-    skip_rows=None,
-    limit_rows=None,
-    offset_rows=None,
-    schema=None,
-    time=1,
-    scope=[],
-    partial=False,
-    stats={},
-    errors=[]
-):
-    return ReportTable(
-        path=path,
-        scheme=scheme,
-        format=format,
-        hashing=hashing,
-        encoding=encoding,
-        compression=compression,
-        compression_path=compression_path,
-        dialect=dialect,
-        headers=headers,
-        pick_fields=pick_fields,
-        skip_fields=skip_fields,
-        limit_fields=limit_fields,
-        offset_fields=offset_fields,
-        pick_rows=pick_rows,
-        skip_rows=skip_rows,
-        limit_rows=limit_rows,
-        offset_rows=offset_rows,
-        schema=schema,
-        time=time,
-        scope=scope,
-        stats=stats,
-        partial=partial,
-        errors=errors,
-    )
+def test_report_expand():
+    report = validate("data/table.csv")
+    report.expand()
+    assert report.table.schema == {
+        "fields": [
+            {"name": "id", "type": "integer", "format": "default"},
+            {"name": "name", "type": "string", "format": "default"},
+        ],
+        "missingValues": [""],
+    }

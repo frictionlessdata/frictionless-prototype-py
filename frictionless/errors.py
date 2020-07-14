@@ -313,6 +313,14 @@ class SchemaError(Error):
     description = "Provided schema is not valid."
 
 
+class QueryError(Error):
+    code = "query-error"
+    name = "Query Error"
+    tags = ["#table", "#query"]
+    template = "The data source could not be successfully described by the invalid Table Query: {note}"
+    description = "Provided query is not valid."
+
+
 class ChecksumError(Error):
     code = "checksum-error"
     name = "Checksum Error"

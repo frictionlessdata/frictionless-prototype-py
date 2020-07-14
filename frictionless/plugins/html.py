@@ -1,4 +1,5 @@
 from importlib import import_module
+from ..metadata import Metadata
 from ..dialects import Dialect
 from ..plugin import Plugin
 from ..parser import Parser
@@ -99,7 +100,7 @@ class HtmlDialect(Dialect):
             header_join=header_join,
         )
 
-    @property
+    @Metadata.property
     def selector(self):
         return self.get("selector", "table")
 

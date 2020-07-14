@@ -1,6 +1,7 @@
 import io
 from importlib import import_module
 from datetime import datetime
+from ..metadata import Metadata
 from ..dialects import Dialect
 from ..plugin import Plugin
 from ..parser import Parser
@@ -115,7 +116,7 @@ class OdsDialect(Dialect):
             header_join=header_join,
         )
 
-    @property
+    @Metadata.property
     def sheet(self):
         return self.get("sheet", 1)
 
