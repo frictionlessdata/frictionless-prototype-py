@@ -176,6 +176,7 @@ class File(Metadata):
         self.close()
         try:
             self.stats = {"hash": "", "bytes": 0, "rows": 0}
+            # TODO: handle cases like Inline/SQL/etc
             self.__loader = system.create_loader(self)
             self.__loader.open()
             return self
