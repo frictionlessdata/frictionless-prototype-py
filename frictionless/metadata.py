@@ -80,7 +80,7 @@ class Metadata(helpers.ControlledDict):
         try:
             helpers.ensure_dir(target)
             with open(target, mode="w", encoding="utf-8") as file:
-                json.dump(self, file, indent=2, ensure_ascii=False)
+                json.dump(self.to_dict(), file, indent=2, ensure_ascii=False)
         except Exception as exc:
             raise exceptions.FrictionlessException(self.__Error(note=str(exc))) from exc
 
@@ -88,7 +88,7 @@ class Metadata(helpers.ControlledDict):
         try:
             helpers.ensure_dir(target)
             with open(target, mode="w", encoding="utf-8") as file:
-                yaml.dump(self, file)
+                yaml.safe_dump(self.to_dict(), file)
         except Exception as exc:
             raise exceptions.FrictionlessException(self.__Error(note=str(exc))) from exc
 
@@ -106,7 +106,6 @@ class Metadata(helpers.ControlledDict):
                 value.__onchange__(onchange)
         return value
 
-    # TODO: support yaml?
     def metadata_extract(self, descriptor):
         try:
             if descriptor is None:
@@ -117,13 +116,16 @@ class Metadata(helpers.ControlledDict):
                 if helpers.is_remote_path(descriptor):
                     response = requests.get(descriptor)
                     response.raise_for_status()
-                    metadata = response.json()
-                    assert isinstance(metadata, dict)
-                    return metadata
-                with io.open(descriptor, encoding="utf-8") as file:
-                    metadata = json.load(file)
-                    assert isinstance(metadata, dict)
-                    return metadata
+                    content = response.text
+                else:
+                    with open(descriptor) as file:
+                        content = file.read()
+                if descriptor.endswith(".yaml"):
+                    metadata = yaml.safe_load(io.StringIO(content))
+                else:
+                    metadata = json.loads(content)
+                assert isinstance(metadata, dict)
+                return metadata
             raise TypeError("descriptor type is not supported")
         except Exception as exception:
             note = f'canot extract metadata "{descriptor}" because "{exception}"'

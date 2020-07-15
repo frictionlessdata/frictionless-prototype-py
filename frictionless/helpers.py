@@ -173,13 +173,13 @@ def detect_source_type(source):
         if source.get("tasks") is not None:
             source_type = "inquiry"
     if isinstance(source, str):
-        if source.endswith("schema.json"):
+        if source.endswith("schema.json") or source.endswith("schema.yaml"):
             source_type = "schema"
-        if source.endswith("resource.json"):
+        if source.endswith("resource.json") or source.endswith("resource.yaml"):
             source_type = "resource"
-        if source.endswith("package.json"):
+        if source.endswith("package.json") or source.endswith("package.yaml"):
             source_type = "package"
-        if source.endswith("inquiry.json"):
+        if source.endswith("inquiry.json") or source.endswith("inquiry.yaml"):
             source_type = "inquiry"
     return source_type
 
