@@ -1,9 +1,11 @@
+import pytest
 from frictionless import describe
 
 
 # General
 
 
+@pytest.mark.skip
 def test_describe():
     schema = describe("data/table-infer.csv")
     assert schema == {
@@ -15,6 +17,7 @@ def test_describe():
     }
 
 
+@pytest.mark.skip
 def test_describe_utf8():
     schema = describe("data/table-infer-utf8.csv")
     assert schema == {
@@ -26,6 +29,7 @@ def test_describe_utf8():
     }
 
 
+@pytest.mark.skip
 def test_describe_expand():
     schema = describe("data/table-infer.csv", expand=True)
     assert schema == {
@@ -38,6 +42,7 @@ def test_describe_expand():
     }
 
 
+@pytest.mark.skip
 def test_describe_infer_volume():
     schema = describe("data/table-infer-row-limit.csv", infer_volume=4)
     assert schema == {
@@ -49,6 +54,7 @@ def test_describe_infer_volume():
     }
 
 
+@pytest.mark.skip
 def test_describe_with_missing_values_default():
     schema = describe("data/table-infer-missing-values.csv")
     assert schema == {
@@ -60,6 +66,7 @@ def test_describe_with_missing_values_default():
     }
 
 
+@pytest.mark.skip
 def test_describe_with_missing_values_using_the_argument():
     schema = describe("data/table-infer-missing-values.csv", missing_values=["-"])
     assert schema == {
@@ -72,11 +79,13 @@ def test_describe_with_missing_values_using_the_argument():
     }
 
 
+@pytest.mark.skip
 def test_describe_check_type_boolean_string_tie():
     schema = describe([["f"], ["stringish"]], headers=False, infer_names=["field"])
     assert schema["fields"][0]["type"] == "string"
 
 
+@pytest.mark.skip
 def test_describe_xlsx_file_with_boolean_column_issue_203():
     schema = describe("data/table-infer-boolean.xlsx")
     assert schema == {
@@ -91,6 +100,7 @@ def test_describe_xlsx_file_with_boolean_column_issue_203():
 # Issues
 
 
+@pytest.mark.skip
 def test_describe_increase_limit_issue_212():
     schema = describe("data/table-infer-increase-limit.csv", infer_volume=200)
     assert schema == {

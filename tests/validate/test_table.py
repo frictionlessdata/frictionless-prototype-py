@@ -1,6 +1,6 @@
 import pytest
 import pathlib
-from frictionless import validate, describe, Check, Query, errors
+from frictionless import validate, Check, Query, errors
 
 
 # General
@@ -490,7 +490,12 @@ def test_validate_schema_maximum_constraint():
 
 
 def test_validate_sync_schema():
-    schema = describe("data/table.csv")
+    schema = {
+        "fields": [
+            {"name": "id", "type": "integer"},
+            {"name": "name", "type": "string"},
+        ],
+    }
     report = validate("data/sync-schema.csv", schema=schema, sync_schema=True)
     assert report.valid
     assert report.table["schema"] == {

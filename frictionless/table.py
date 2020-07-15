@@ -145,6 +145,7 @@ class Table:
         infer_names=None,
         infer_volume=config.DEFAULT_INFER_VOLUME,
         infer_confidence=config.DEFAULT_INFER_CONFIDENCE,
+        infer_missing_values=config.DEFAULT_MISSING_VALUES,
         lookup=None,
     ):
 
@@ -185,6 +186,7 @@ class Table:
         self.__infer_names = infer_names
         self.__infer_volume = infer_volume
         self.__infer_confidence = infer_confidence
+        self.__infer_missing_values = infer_missing_values
         self.__lookup = lookup
 
         # Create file
@@ -542,6 +544,7 @@ class Table:
                 type=self.__infer_type,
                 names=self.__infer_names or headers,
                 confidence=self.__infer_confidence,
+                missing_values=self.__infer_missing_values,
             )
 
         # Sync schema

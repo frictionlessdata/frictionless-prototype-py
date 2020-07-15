@@ -319,12 +319,11 @@ class Resource(Metadata):
         # Tabular
         if self.tabular:
             with self.to_table() as table:
-                for cells in table.data_stream:
-                    pass
+                helpers.pass_through(table.data_stream)
                 return table.stats
 
         # General
-        # TODO: make loader.ByteStreamWithStatsHandling iterable?
+        # TODO: make loader.ByteStreamWithStatsHandling iterable / rebase on pass_through?
         with self.to_file() as file:
             bytes = True
             while bytes:

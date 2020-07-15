@@ -1,6 +1,6 @@
 import io
 import pytest
-from frictionless import Table, Query, controls, dialects, exceptions, describe
+from frictionless import Table, Query, controls, dialects, exceptions
 
 
 # General
@@ -959,15 +959,12 @@ def test_table_schema_provided():
 
 
 def test_table_sync_schema():
-    schema = describe("data/table.csv")
+    schema = {
+        "fields": [{"name": "name", "type": "string"}, {"name": "id", "type": "integer"},]
+    }
     with Table("data/sync-schema.csv", schema=schema, sync_schema=True) as table:
+        assert table.schema == schema
         assert table.headers == ["name", "id"]
-        assert table.schema == {
-            "fields": [
-                {"name": "name", "type": "string"},
-                {"name": "id", "type": "integer"},
-            ]
-        }
         assert table.sample == [["english", "1"], ["中国人", "2"]]
         assert table.read_rows() == [
             {"id": 1, "name": "english"},

@@ -172,7 +172,13 @@ class Schema(Metadata):
     # Infer
 
     def infer(
-        self, sample, *, type=None, names=None, confidence=config.DEFAULT_INFER_CONFIDENCE
+        self,
+        sample,
+        *,
+        type=None,
+        names=None,
+        confidence=config.DEFAULT_INFER_CONFIDENCE,
+        missing_values=config.DEFAULT_MISSING_VALUES,
     ):
         """Infer schema
 
@@ -182,6 +188,10 @@ class Schema(Metadata):
             confidence
 
         """
+
+        # Missing values
+        if missing_values != config.DEFAULT_MISSING_VALUES:
+            self.missing_values = missing_values
 
         # Prepare names
         if not names:
@@ -283,9 +293,10 @@ class Schema(Metadata):
     def from_sample(
         sample,
         *,
+        type=None,
         names=None,
         confidence=config.DEFAULT_INFER_CONFIDENCE,
-        missing_values=None,
+        missing_values=config.DEFAULT_MISSING_VALUES,
     ):
         """Infer schema from sample
 
@@ -295,8 +306,14 @@ class Schema(Metadata):
             confidence
 
         """
-        schema = Schema(missing_values=missing_values)
-        schema.infer(sample, names=names, confidence=confidence)
+        schema = Schema()
+        schema.infer(
+            sample,
+            type=type,
+            names=names,
+            confidence=confidence,
+            missing_values=missing_values,
+        )
         return schema
 
     def to_dict(self, expand=False):

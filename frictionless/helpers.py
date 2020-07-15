@@ -35,6 +35,11 @@ def stringify_headers(cells):
     return ["" if cell is None else str(cell).strip() for cell in cells]
 
 
+def pass_through(iterator):
+    for item in iterator:
+        pass
+
+
 def copy_merge(source, patch):
     source = source.copy()
     source.update(patch)
