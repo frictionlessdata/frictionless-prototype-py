@@ -65,6 +65,10 @@ def describe_resource(
             profile="tabular-data-resource",
         )
 
+    # Inline resource
+    if not isinstance(table.source, str):
+        resource.data = table.source
+
     # Stats resource
     resource.update(table.stats)
     if resource["hashing"] != config.DEFAULT_HASHING:

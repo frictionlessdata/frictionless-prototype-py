@@ -1,108 +1,50 @@
-import pytest
-from frictionless import describe
+from frictionless import describe, Resource, Package
 
 
 # General
 
 
-@pytest.mark.skip
 def test_describe():
-    schema = describe("data/table-infer.csv")
-    assert schema == {
-        "fields": [
-            {"name": "id", "type": "integer"},
-            {"name": "age", "type": "integer"},
-            {"name": "name", "type": "string"},
-        ],
+    resource = describe("data/table.csv")
+    assert resource.metadata_valid
+    assert resource == {
+        "name": "table",
+        "path": "data/table.csv",
+        "scheme": "file",
+        "format": "csv",
+        "hashing": "md5",
+        "encoding": "utf-8",
+        "compression": "no",
+        "compressionPath": "",
+        "dialect": {},
+        "schema": {
+            "fields": [
+                {"name": "id", "type": "integer"},
+                {"name": "name", "type": "string"},
+            ]
+        },
+        "profile": "tabular-data-resource",
+        "hash": "6c2c61dd9b0e9c6876139a449ed87933",
+        "bytes": 30,
+        "rows": 2,
     }
 
 
-@pytest.mark.skip
-def test_describe_utf8():
-    schema = describe("data/table-infer-utf8.csv")
-    assert schema == {
-        "fields": [
-            {"name": "id", "type": "integer"},
-            {"name": "age", "type": "integer"},
-            {"name": "name", "type": "string"},
-        ],
-    }
+def test_describe_resource():
+    resource = describe("data/table.csv")
+    assert isinstance(resource, Resource)
 
 
-@pytest.mark.skip
-def test_describe_expand():
-    schema = describe("data/table-infer.csv", expand=True)
-    assert schema == {
-        "fields": [
-            {"name": "id", "type": "integer", "format": "default"},
-            {"name": "age", "type": "integer", "format": "default"},
-            {"name": "name", "type": "string", "format": "default"},
-        ],
-        "missingValues": [""],
-    }
+def test_describe_package():
+    resource = describe(["data/table.csv"])
+    assert isinstance(resource, Package)
 
 
-@pytest.mark.skip
-def test_describe_infer_volume():
-    schema = describe("data/table-infer-row-limit.csv", infer_volume=4)
-    assert schema == {
-        "fields": [
-            {"name": "id", "type": "integer"},
-            {"name": "age", "type": "integer"},
-            {"name": "name", "type": "string"},
-        ],
-    }
+def test_describe_package_pattern():
+    resource = describe("data/chunk*.csv")
+    assert isinstance(resource, Package)
 
 
-@pytest.mark.skip
-def test_describe_with_missing_values_default():
-    schema = describe("data/table-infer-missing-values.csv")
-    assert schema == {
-        "fields": [
-            {"name": "id", "type": "string"},
-            {"name": "age", "type": "integer"},
-            {"name": "name", "type": "string"},
-        ],
-    }
-
-
-@pytest.mark.skip
-def test_describe_with_missing_values_using_the_argument():
-    schema = describe("data/table-infer-missing-values.csv", missing_values=["-"])
-    assert schema == {
-        "fields": [
-            {"name": "id", "type": "integer"},
-            {"name": "age", "type": "integer"},
-            {"name": "name", "type": "string"},
-        ],
-        "missingValues": ["-"],
-    }
-
-
-@pytest.mark.skip
-def test_describe_check_type_boolean_string_tie():
-    schema = describe([["f"], ["stringish"]], headers=False, infer_names=["field"])
-    assert schema["fields"][0]["type"] == "string"
-
-
-@pytest.mark.skip
-def test_describe_xlsx_file_with_boolean_column_issue_203():
-    schema = describe("data/table-infer-boolean.xlsx")
-    assert schema == {
-        "fields": [
-            {"name": "number", "type": "integer"},
-            {"name": "string", "type": "string"},
-            {"name": "boolean", "type": "boolean"},
-        ],
-    }
-
-
-# Issues
-
-
-@pytest.mark.skip
-def test_describe_increase_limit_issue_212():
-    schema = describe("data/table-infer-increase-limit.csv", infer_volume=200)
-    assert schema == {
-        "fields": [{"name": "a", "type": "integer"}, {"name": "b", "type": "number"}],
-    }
+def test_describe_package_source_type():
+    resource = describe("data/table.csv", source_type="package")
+    assert isinstance(resource, Package)

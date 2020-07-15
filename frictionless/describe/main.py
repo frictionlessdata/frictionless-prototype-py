@@ -9,7 +9,8 @@ def describe(source, *, source_type=None, **options):
     if not source_type:
         source_type = "resource"
         if isinstance(source, list):
-            source_type = "package"
+            if source and isinstance(source[0], str):
+                source_type = "package"
         elif glob.has_magic(source):
             source_type = "package"
 
