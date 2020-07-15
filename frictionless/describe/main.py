@@ -1,9 +1,14 @@
 import glob
+from pathlib import Path
 from importlib import import_module
 
 
 def describe(source, *, source_type=None, **options):
     module = import_module("frictionless.describe")
+
+    # Normalize source
+    if isinstance(source, Path):
+        source = str(source)
 
     # Detect source type
     if not source_type:

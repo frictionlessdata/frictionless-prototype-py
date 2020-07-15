@@ -30,6 +30,7 @@ def validate_table(
     infer_names=None,
     infer_volume=config.DEFAULT_INFER_VOLUME,
     infer_confidence=config.DEFAULT_INFER_CONFIDENCE,
+    infer_missing_values=config.DEFAULT_MISSING_VALUES,
     lookup=None,
     # Validation
     checksum=None,
@@ -118,13 +119,14 @@ def validate_table(
         query=query,
         # Schema
         schema=schema,
-        lookup=lookup,
         sync_schema=sync_schema,
         patch_schema=patch_schema,
         infer_type=infer_type,
         infer_names=infer_names,
         infer_volume=infer_volume,
         infer_confidence=infer_confidence,
+        infer_missing_values=infer_missing_values,
+        lookup=lookup,
     )
 
     # Open table

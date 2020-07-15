@@ -177,7 +177,7 @@ def detect_source_type(source):
             source_type = "schema"
         if source.endswith("resource.json"):
             source_type = "resource"
-        if source.endswith("datapackage.json"):
+        if source.endswith("package.json"):
             source_type = "package"
         if source.endswith("inquiry.json"):
             source_type = "inquiry"
