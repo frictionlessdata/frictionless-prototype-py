@@ -355,7 +355,7 @@ def test_package_infer_with_basepath():
 
 def test_package_infer_multiple_paths():
     package = Package(basepath="data/infer")
-    package.infer("data.csv", "data2.csv")
+    package.infer(["data.csv", "data2.csv"])
     assert package.metadata_valid
     assert len(package.resources) == 2
     assert package.resources[0].path == "data.csv"

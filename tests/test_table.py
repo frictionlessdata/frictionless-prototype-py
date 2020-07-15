@@ -960,7 +960,7 @@ def test_table_schema_provided():
 
 def test_table_sync_schema():
     schema = {
-        "fields": [{"name": "name", "type": "string"}, {"name": "id", "type": "integer"},]
+        "fields": [{"name": "name", "type": "string"}, {"name": "id", "type": "integer"}]
     }
     with Table("data/sync-schema.csv", schema=schema, sync_schema=True) as table:
         assert table.schema == schema

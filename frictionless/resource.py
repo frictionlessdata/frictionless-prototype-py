@@ -214,12 +214,15 @@ class Resource(Metadata):
     # Infer
 
     # TODO: optimize this logic/don't re-open
-    def infer(self, path=None, *, only_sample=False):
+    def infer(self, source=None, *, only_sample=False):
         patch = {}
 
-        # From path
-        if path:
-            self.path = path
+        # From source
+        if source:
+            if isinstance(source, str):
+                self.path = source
+            if isinstance(source, list):
+                self.data = source
 
         # Tabular
         if self.tabular:

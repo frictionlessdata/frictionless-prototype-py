@@ -41,7 +41,7 @@ def pass_through(iterator):
 
 
 def copy_merge(source, patch):
-    source = source.copy()
+    source = (source or {}).copy()
     source.update(patch)
     return source
 
