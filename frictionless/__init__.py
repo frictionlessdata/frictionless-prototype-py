@@ -9,6 +9,7 @@ from .metadata import Metadata
 from .package import Package
 from .plugin import Plugin
 from .query import Query
+from .pipeline import Pipeline
 from .report import Report, ReportTable
 from .resource import Resource
 from .row import Row

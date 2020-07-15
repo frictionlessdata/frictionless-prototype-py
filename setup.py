@@ -34,6 +34,7 @@ EXTRAS_REQUIRE = {
     "aws": ["boto3>=1.9"],
     "bigquery": ["google-api-python-client>=1.5"],
     "ckan": ["ckanapi>=4.3"],
+    "dataflows": ["dataflows>=0.1"],
     "elastic": ["elasticsearch>=7.0,<8.0"],
     "gsheet": ["google-api-python-client>=1.5"],
     "html": ["pyquery>=1.4"],

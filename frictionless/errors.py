@@ -214,12 +214,28 @@ class ResourceError(Error):
     description = "A validation cannot be processed."
 
 
+class InquiryError(Error):
+    code = "inquiry-error"
+    name = "Inquiry Error"
+    tags = ["#general"]
+    template = "The inquiry is not valid: {note}"
+    description = "Provided inquiry is not valid."
+
+
 class ReportError(Error):
     code = "report-error"
     name = "Report Error"
     tags = ["#general"]
     template = "The validation report has an error: {note}"
     description = "A validation cannot be presented."
+
+
+class PipelineError(Error):
+    code = "pipeline-error"
+    name = "Pipeline Error"
+    tags = ["#general"]
+    template = "The pipeline is not valid: {note}"
+    description = "Provided pipeline is not valid."
 
 
 class TaskError(Error):

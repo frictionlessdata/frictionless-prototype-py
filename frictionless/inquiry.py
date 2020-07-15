@@ -1,4 +1,5 @@
 from .metadata import Metadata
+from . import errors
 from . import config
 
 
@@ -14,6 +15,7 @@ class Inquiry(Metadata):
     """
 
     metadata_strict = True
+    metadata_Error = errors.InquiryError
     metadata_profile = config.INQUIRY_PROFILE
 
     def __init__(self, descriptor):
