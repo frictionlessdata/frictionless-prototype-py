@@ -209,11 +209,6 @@ class Field(Metadata):
         """
         return self.__proxy.write_cell_cast(cell)
 
-    # Save
-
-    def save(self, target):
-        self.metadata_save(target)
-
     # Import/Export
 
     def to_dict(self, expand=False):
@@ -223,6 +218,9 @@ class Field(Metadata):
             result.expand()
             result = result.to_dict()
         return result
+
+    def to_json(self, target):
+        self.metadata_save(target)
 
     # Metadata
 

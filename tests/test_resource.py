@@ -564,17 +564,29 @@ def test_resource_infer_from_path():
     assert resource.path == "data/table.csv"
 
 
-# Save
+# Import/Export
 
 
-def test_resource_save(tmpdir):
+def test_resource_to_json(tmpdir):
 
-    # Save
+    # Write
+    target = os.path.join(tmpdir, "dataresource.json")
+    resource = Resource("data/resource.json")
+    resource.to_json(target)
+
+    # Read
+    with open(target, encoding="utf-8") as file:
+        assert resource == json.load(file)
+
+
+def test_resource_to_zip(tmpdir):
+
+    # Write
     target = os.path.join(tmpdir, "dataresource.zip")
     resource = Resource("data/resource.json")
-    resource.save(target)
+    resource.to_zip(target)
 
-    # Load
+    # Read
     resource = Resource(target)
     assert resource == {"name": "name", "path": "table.csv"}
     assert resource.read_rows() == [
@@ -584,15 +596,15 @@ def test_resource_save(tmpdir):
 
 
 @pytest.mark.slow
-def test_resource_save_source_remote(tmpdir):
+def test_resource_to_zip_source_remote(tmpdir):
 
-    # Save
+    # Write
     path = BASE_URL % "data/table.csv"
     target = os.path.join(tmpdir, "datapackage.zip")
     resource = Resource(name="name", path=path)
-    resource.save(target)
+    resource.to_zip(target)
 
-    # Load
+    # Read
     resource = Resource(target)
     assert resource == {"name": "name", "path": path}
     assert resource.read_rows() == [
@@ -601,33 +613,21 @@ def test_resource_save_source_remote(tmpdir):
     ]
 
 
-def test_resource_save_source_inline(tmpdir):
+def test_resource_to_zip_source_inline(tmpdir):
 
-    # Save
+    # Write
     target = os.path.join(tmpdir, "dataresource.zip")
     data = [["id", "name"], ["1", "english"], ["2", "中国人"]]
     resource = Resource(name="name", data=data)
-    resource.save(target)
+    resource.to_zip(target)
 
-    # Load
+    # Read
     resource = Resource(target)
     assert resource == {"name": "name", "data": data}
     assert resource.read_rows() == [
         {"id": 1, "name": "english"},
         {"id": 2, "name": "中国人"},
     ]
-
-
-def test_resource_save_descriptor_only(tmpdir):
-
-    # Save
-    target = os.path.join(tmpdir, "dataresource.json")
-    resource = Resource("data/resource.json")
-    resource.save(target, only_descriptor=True)
-
-    # Load
-    with open(target, encoding="utf-8") as file:
-        assert resource == json.load(file)
 
 
 # Import/Export

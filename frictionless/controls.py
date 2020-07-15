@@ -37,11 +37,6 @@ class Control(Metadata):
     def expand(self):
         pass
 
-    # Save
-
-    def save(self, target):
-        self.metadata_save(target)
-
     # Import/Export
 
     def to_dict(self, expand=False):
@@ -51,6 +46,9 @@ class Control(Metadata):
             result.expand()
             result = result.to_dict()
         return result
+
+    def to_json(self, target):
+        self.metadata_save(target)
 
 
 class LocalControl(Control):

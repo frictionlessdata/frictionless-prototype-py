@@ -247,7 +247,7 @@ def test_fix_for_2007_xls():
 # Write
 
 
-def test_table_save_xlsx(tmpdir):
+def test_table_write_xlsx(tmpdir):
     source = "data/table.csv"
     target = str(tmpdir.join("table.xlsx"))
     with Table(source) as table:
@@ -257,7 +257,7 @@ def test_table_save_xlsx(tmpdir):
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
-def test_table_save_xlsx_sheet_name(tmpdir):
+def test_table_write_xlsx_sheet_name(tmpdir):
     source = "data/table.csv"
     target = str(tmpdir.join("table.xlsx"))
     dialect = dialects.ExcelDialect(sheet="sheet")
@@ -268,7 +268,7 @@ def test_table_save_xlsx_sheet_name(tmpdir):
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
-def test_table_save_xls(tmpdir):
+def test_table_write_xls(tmpdir):
     source = "data/table.csv"
     target = str(tmpdir.join("table.xls"))
     with Table(source) as table:
@@ -278,7 +278,7 @@ def test_table_save_xls(tmpdir):
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
-def test_table_save_xls_sheet_name(tmpdir):
+def test_table_write_xls_sheet_name(tmpdir):
     source = "data/table.csv"
     target = str(tmpdir.join("table.xls"))
     dialect = dialects.ExcelDialect(sheet="sheet")

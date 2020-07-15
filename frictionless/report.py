@@ -94,11 +94,6 @@ class Report(Metadata):
                 result.append([context.get(prop) for prop in spec])
         return result
 
-    # Save
-
-    def save(self, target):
-        self.metadata_save(target)
-
     # Import/Export
 
     @staticmethod
@@ -118,6 +113,9 @@ class Report(Metadata):
 
     def to_dict(self):
         return self.copy()
+
+    def to_json(self, target):
+        self.metadata_save(target)
 
 
 class ReportTable(Metadata):
@@ -279,11 +277,6 @@ class ReportTable(Metadata):
             result.append([context.get(prop) for prop in spec])
         return result
 
-    # Save
-
-    def save(self, target):
-        self.metadata_save(target)
-
     # Import/Export
 
     def to_dict(self, expand=False):
@@ -293,3 +286,6 @@ class ReportTable(Metadata):
             result.expand()
             result = result.to_dict()
         return result
+
+    def to_json(self, target):
+        self.metadata_save(target)

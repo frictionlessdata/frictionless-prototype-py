@@ -316,17 +316,17 @@ def test_schema_infer_no_names():
     }
 
 
-# Save
+# Import/export
 
 
-def test_schema_save(tmpdir):
+def test_schema_to_json(tmpdir):
 
-    # Save
+    # Write
     target = str(tmpdir.join("schema.json"))
     schema = Schema(DESCRIPTOR_MIN)
-    schema.save(target)
+    schema.to_json(target)
 
-    # Load
+    # Read
     with open(target, encoding="utf-8") as file:
         assert schema == json.load(file)
 

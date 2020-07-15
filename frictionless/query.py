@@ -109,11 +109,6 @@ class Query(Metadata):
     def expand(self):
         pass
 
-    # Save
-
-    def save(self, target):
-        self.metadata_save(target)
-
     # Import/Export
 
     def to_dict(self, expand=False):
@@ -123,3 +118,6 @@ class Query(Metadata):
             result.expand()
             result = result.to_dict()
         return result
+
+    def to_json(self, target):
+        self.metadata_save(target)

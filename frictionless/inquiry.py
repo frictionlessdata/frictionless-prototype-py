@@ -23,12 +23,10 @@ class Inquiry(Metadata):
     def tasks(self):
         return self["tasks"]
 
-    # Save
-
-    def save(self, target):
-        self.metadata_save(target)
-
     # Import/Export
 
     def to_dict(self):
         return self.copy()
+
+    def to_json(self, target):
+        self.metadata_save(target)

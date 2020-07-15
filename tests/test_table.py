@@ -1214,7 +1214,7 @@ def test_table_reopen_generator():
         assert table.read_data() == [[1], [2]]
 
 
-# Save
+# Write
 
 
 def test_table_write(tmpdir):

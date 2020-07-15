@@ -191,16 +191,21 @@ class Package(Metadata):
         for resource in self.resources:
             resource.infer(only_sample=only_sample)
 
-    # Save
+    # Import/Export
+
+    def to_dict(self, expand=False):
+        result = super().to_dict()
+        if expand:
+            result = type(self)(result)
+            result.expand()
+            result = result.to_dict()
+        return result
+
+    def to_json(self, target):
+        self.metadata_save(target)
 
     # TODO: support multipart
-    def save(self, target, *, only_descriptor=False):
-
-        # Descriptor
-        if only_descriptor:
-            return self.metadata_save(target)
-
-        # Package
+    def to_zip(self, target):
         try:
             with zipfile.ZipFile(target, "w") as zip:
                 descriptor = self.copy()
@@ -219,16 +224,6 @@ class Package(Metadata):
         except Exception as exception:
             error = errors.PackageError(note=str(exception))
             raise exceptions.FrictionlessException(error) from exception
-
-    # Import/Export
-
-    def to_dict(self, expand=False):
-        result = super().to_dict()
-        if expand:
-            result = type(self)(result)
-            result.expand()
-            result = result.to_dict()
-        return result
 
     # Metadata
 

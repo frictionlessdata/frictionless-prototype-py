@@ -378,17 +378,29 @@ def test_package_infer_empty_file():
     assert package.resources[0].stats["bytes"] == 0
 
 
-# Save
+# Import/Export
 
 
-def test_package_save(tmpdir):
+def test_package_to_json(tmpdir):
 
-    # Save
+    # Write
+    target = os.path.join(tmpdir, "datapackage.json")
+    package = Package("data/package.json")
+    package.to_json(target)
+
+    # Read
+    with open(target, encoding="utf-8") as file:
+        assert package == json.load(file)
+
+
+def test_package_to_zip(tmpdir):
+
+    # Write
     target = os.path.join(tmpdir, "datapackage.zip")
     package = Package("data/package.json")
-    package.save(target)
+    package.to_zip(target)
 
-    # Load
+    # Read
     package = Package(target)
     assert package == {
         "name": "name",
@@ -401,15 +413,15 @@ def test_package_save(tmpdir):
 
 
 @pytest.mark.slow
-def test_package_save_source_remote(tmpdir):
+def test_package_to_zip_source_remote(tmpdir):
 
-    # Save
+    # Write
     path = BASE_URL % "data/table.csv"
     target = os.path.join(tmpdir, "datapackage.zip")
     package = Package(name="name", resources=[{"name": "name", "path": path}])
-    package.save(target)
+    package.to_zip(target)
 
-    # Load
+    # Read
     package = Package(target)
     assert package == {
         "name": "name",
@@ -421,15 +433,15 @@ def test_package_save_source_remote(tmpdir):
     ]
 
 
-def test_package_save_source_inline(tmpdir):
+def test_package_to_zip_source_inline(tmpdir):
 
-    # Save
+    # Read
     target = os.path.join(tmpdir, "datapackage.zip")
     data = [["id", "name"], ["1", "english"], ["2", "中国人"]]
     package = Package(name="name", resources=[{"name": "name", "data": data}])
-    package.save(target)
+    package.to_zip(target)
 
-    # Load
+    # Write
     package = Package(target)
     assert package == {
         "name": "name",
@@ -439,18 +451,6 @@ def test_package_save_source_inline(tmpdir):
         {"id": 1, "name": "english"},
         {"id": 2, "name": "中国人"},
     ]
-
-
-def test_package_save_descriptor_only(tmpdir):
-
-    # Save
-    target = os.path.join(tmpdir, "datapackage.json")
-    package = Package("data/package.json")
-    package.save(target, only_descriptor=True)
-
-    # Load
-    with open(target, encoding="utf-8") as file:
-        assert package == json.load(file)
 
 
 # Compression

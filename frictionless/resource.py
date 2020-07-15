@@ -358,35 +358,6 @@ class Resource(Metadata):
                     lookup[source_name][source_key].add(cells)
         return lookup
 
-    # Save
-
-    # TODO: support multipart
-    def save(self, target, *, only_descriptor=False):
-
-        # Descriptor
-        if only_descriptor:
-            return self.metadata_save(target)
-
-        # Resource
-        try:
-            with zipfile.ZipFile(target, "w") as zip:
-                descriptor = self.copy()
-                for resource in [self]:
-                    if resource.inline:
-                        continue
-                    if resource.remote:
-                        continue
-                    if resource.multipart:
-                        continue
-                    if not helpers.is_safe_path(resource.path):
-                        continue
-                    zip.write(resource.source, resource.path)
-                descriptor = json.dumps(descriptor, indent=2, ensure_ascii=False)
-                zip.writestr("dataresource.json", descriptor)
-        except (IOError, zipfile.BadZipfile, zipfile.LargeZipFile) as exception:
-            error = errors.ResourceError(note=str(exception))
-            raise exceptions.FrictionlessException(error) from exception
-
     # Import/Export
 
     def to_dict(self, expand=False):
@@ -421,6 +392,30 @@ class Resource(Metadata):
         options.setdefault("compression", self.compression)
         options.setdefault("compression_path", self.compression_path)
         return File(**options)
+
+    def to_json(self, target):
+        self.metadata_save(target)
+
+    # TODO: support multipart
+    def to_zip(self, target):
+        try:
+            with zipfile.ZipFile(target, "w") as zip:
+                descriptor = self.copy()
+                for resource in [self]:
+                    if resource.inline:
+                        continue
+                    if resource.remote:
+                        continue
+                    if resource.multipart:
+                        continue
+                    if not helpers.is_safe_path(resource.path):
+                        continue
+                    zip.write(resource.source, resource.path)
+                descriptor = json.dumps(descriptor, indent=2, ensure_ascii=False)
+                zip.writestr("dataresource.json", descriptor)
+        except (IOError, zipfile.BadZipfile, zipfile.LargeZipFile) as exception:
+            error = errors.ResourceError(note=str(exception))
+            raise exceptions.FrictionlessException(error) from exception
 
     # Metadata
 

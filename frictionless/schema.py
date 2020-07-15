@@ -282,11 +282,6 @@ class Schema(Metadata):
             result_notes.append(notes)
         return result_cells, result_notes
 
-    # Save
-
-    def save(self, target):
-        self.metadata_save(target)
-
     # Import/Export
 
     @staticmethod
@@ -323,6 +318,9 @@ class Schema(Metadata):
             result.expand()
             result = result.to_dict()
         return result
+
+    def to_json(self, target):
+        self.metadata_save(target)
 
     # Metadata
 
