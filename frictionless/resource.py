@@ -393,9 +393,6 @@ class Resource(Metadata):
         options.setdefault("compression_path", self.compression_path)
         return File(**options)
 
-    def to_json(self, target):
-        self.metadata_save(target)
-
     # TODO: support multipart
     def to_zip(self, target):
         try:

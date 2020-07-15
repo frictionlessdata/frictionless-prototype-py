@@ -62,9 +62,6 @@ class Dialect(Metadata):
             result = result.to_dict()
         return result
 
-    def to_json(self, target):
-        self.metadata_save(target)
-
 
 class CsvDialect(Dialect):
     """Csv dialect representation

@@ -111,11 +111,13 @@ class Report(Metadata):
 
         return wrapper
 
-    def to_dict(self):
-        return self.copy()
-
-    def to_json(self, target):
-        self.metadata_save(target)
+    def to_dict(self, expand=False):
+        result = super().to_dict()
+        if expand:
+            result = type(self)(result)
+            result.expand()
+            result = result.to_dict()
+        return result
 
 
 class ReportTable(Metadata):
@@ -286,6 +288,3 @@ class ReportTable(Metadata):
             result.expand()
             result = result.to_dict()
         return result
-
-    def to_json(self, target):
-        self.metadata_save(target)

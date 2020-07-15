@@ -201,9 +201,6 @@ class Package(Metadata):
             result = result.to_dict()
         return result
 
-    def to_json(self, target):
-        self.metadata_save(target)
-
     # TODO: support multipart
     def to_zip(self, target):
         try:

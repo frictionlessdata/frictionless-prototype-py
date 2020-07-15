@@ -22,11 +22,3 @@ class Inquiry(Metadata):
     @property
     def tasks(self):
         return self["tasks"]
-
-    # Import/Export
-
-    def to_dict(self):
-        return self.copy()
-
-    def to_json(self, target):
-        self.metadata_save(target)

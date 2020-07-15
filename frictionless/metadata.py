@@ -1,5 +1,6 @@
 import io
 import json
+import yaml
 import requests
 import jsonschema
 import stringcase
@@ -70,7 +71,28 @@ class Metadata(helpers.ControlledDict):
         if value is not None:
             dict.__setitem__(self, key, value)
 
-    # Attach
+    # Import/Export
+
+    def to_dict(self):
+        return self.copy()
+
+    def to_json(self, target):
+        try:
+            helpers.ensure_dir(target)
+            with open(target, mode="w", encoding="utf-8") as file:
+                json.dump(self, file, indent=2, ensure_ascii=False)
+        except Exception as exc:
+            raise exceptions.FrictionlessException(self.__Error(note=str(exc))) from exc
+
+    def to_yaml(self, target):
+        try:
+            helpers.ensure_dir(target)
+            with open(target, mode="w", encoding="utf-8") as file:
+                yaml.dump(self, file)
+        except Exception as exc:
+            raise exceptions.FrictionlessException(self.__Error(note=str(exc))) from exc
+
+    # Metadata
 
     def metadata_attach(self, name, value):
         if self.get(name) is not value:
@@ -83,8 +105,6 @@ class Metadata(helpers.ControlledDict):
                 value = helpers.ControlledList(value)
                 value.__onchange__(onchange)
         return value
-
-    # Extract
 
     # TODO: support yaml?
     def metadata_extract(self, descriptor):
@@ -109,12 +129,8 @@ class Metadata(helpers.ControlledDict):
             note = f'canot extract metadata "{descriptor}" because "{exception}"'
             raise exceptions.FrictionlessException(self.__Error(note=note)) from exception
 
-    # Process
-
     def metadata_process(self):
         pass
-
-    # Validate
 
     def metadata_validate(self):
         if self.metadata_profile:
@@ -127,21 +143,6 @@ class Metadata(helpers.ControlledDict):
                 note = note % (error.message, metadata_path, profile_path)
                 yield self.__Error(note=note)
         yield from []
-
-    # Save
-
-    def metadata_save(self, target):
-        try:
-            helpers.ensure_dir(target)
-            with io.open(target, mode="w", encoding="utf-8") as file:
-                json.dump(self, file, indent=2, ensure_ascii=False)
-        except Exception as exc:
-            raise exceptions.FrictionlessException(self.__Error(note=str(exc))) from exc
-
-    # Import/Export
-
-    def to_dict(self):
-        return self.copy()
 
     # Helpers
 
