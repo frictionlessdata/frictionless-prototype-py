@@ -18,12 +18,13 @@ from .server import Server
 from .system import System, system
 from .table import Table
 from .transform import *
+from .type import Type
 from .validate import *
 from . import checks
 from . import controls
 from . import dialects
 from . import errors
 from . import exceptions
-from . import fields
 from . import loaders
 from . import parsers
+from . import types

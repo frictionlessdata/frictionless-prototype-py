@@ -248,7 +248,12 @@ def test_package_expand_resource_schema():
                 "path": "data/table.csv",
                 "schema": {
                     "fields": [
-                        {"name": "id", "type": "integer", "format": "default"},
+                        {
+                            "name": "id",
+                            "type": "integer",
+                            "format": "default",
+                            "bareNumber": True,
+                        },
                         {"name": "name", "type": "string", "format": "default"},
                     ],
                     "missingValues": [""],

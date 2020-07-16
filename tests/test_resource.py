@@ -499,7 +499,12 @@ def test_resource_expand_with_schema():
         "profile": "data-resource",
         "schema": {
             "fields": [
-                {"name": "id", "type": "integer", "format": "default"},
+                {
+                    "name": "id",
+                    "type": "integer",
+                    "format": "default",
+                    "bareNumber": True,
+                },
                 {"name": "name", "type": "string", "format": "default"},
             ],
             "missingValues": [""],

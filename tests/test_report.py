@@ -63,7 +63,7 @@ def test_report_expand():
     report.expand()
     assert report.table.schema == {
         "fields": [
-            {"name": "id", "type": "integer", "format": "default"},
+            {"name": "id", "type": "integer", "format": "default", "bareNumber": True},
             {"name": "name", "type": "string", "format": "default"},
         ],
         "missingValues": [""],

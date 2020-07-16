@@ -11,7 +11,6 @@ from . import errors
 from . import config
 
 
-# TODO: review the proxy logic
 class Field(Metadata):
     """Field representation
 
@@ -33,7 +32,6 @@ class Field(Metadata):
     metadata_Error = errors.FieldError  # type: ignore
     metadata_profile = config.SCHEMA_PROFILE["properties"]["fields"]["items"]
     metadata_duplicate = True
-    supported_constraints = []  # type: ignore
 
     def __init__(
         self,
@@ -52,22 +50,8 @@ class Field(Metadata):
         self.setinitial("missingValues", missing_values)
         self.setinitial("constraints", constraints)
         self.__schema = schema
+        self.__type = None
         super().__init__(descriptor)
-
-    def __getattr__(self, name):
-        if self.__dict__.get("_Field__proxy"):
-            return getattr(self.__proxy, name)
-        raise AttributeError(name)
-
-    def __setattr__(self, name, value):
-        if name != "_Field__proxy":
-            if self.__dict__.get("_Field__proxy"):
-                try:
-                    setattr(self.__proxy, name, value)
-                    self.update(self.__proxy)
-                except Exception:
-                    pass
-        super().__setattr__(name, value)
 
     @Metadata.property
     def name(self):
@@ -107,15 +91,50 @@ class Field(Metadata):
     def required(self):
         return self.constraints.get("required", False)
 
+    # Boolean
+
+    @Metadata.property
+    def true_values(self):
+        true_values = self.get("trueValues", config.DEFAULT_TRUE_VALUES)
+        return self.metadata_attach("trueValues", true_values)
+
+    @Metadata.property
+    def false_values(self):
+        false_values = self.get("falseValues", config.DEFAULT_FALSE_VALUES)
+        return self.metadata_attach("falseValues", false_values)
+
+    # Integer/Number
+
+    @Metadata.property
+    def bare_number(self):
+        return self.get("bareNumber", config.DEFAULT_BARE_NUMBER)
+
+    @Metadata.property
+    def decimal_char(self):
+        return self.get("decimalChar", config.DEFAULT_DECIMAL_CHAR)
+
+    @Metadata.property
+    def group_char(self):
+        return self.get("groupChar", config.DEFAULT_GROUP_CHAR)
+
     # Expand
 
     def expand(self):
-        if self.__dict__.get("_Field__proxy"):
-            self.__proxy.expand()
-            self.update(self.__proxy)
         self.setdefault("name", "field")
         self.setdefault("type", "any")
         self.setdefault("format", "default")
+
+        # Boolean
+        if self.type == "boolean":
+            self.setdefault("trueValues", self.true_values)
+            self.setdefault("falseValues", self.false_values)
+
+        # Integer/Number
+        if self.type in ["integer", "number"]:
+            self.setdefault("bareNumber", self.bare_number)
+            if self.type == "number":
+                self.setdefault("decimalChar", self.decimal_char)
+                self.setdefault("groupChar", self.group_char)
 
     # Read
 
@@ -133,7 +152,7 @@ class Field(Metadata):
         if cell in self.missing_values:
             cell = None
         if cell is not None:
-            cell = self.__proxy.read_cell_cast(cell)
+            cell = self.__type.read_cell(cell)
             if cell is None:
                 notes = notes or OrderedDict()
                 notes["type"] = f'type is "{self.type}/{self.format}"'
@@ -154,7 +173,7 @@ class Field(Metadata):
             any/None: processed cell or None if an error
 
         """
-        return self.__proxy.read_cell_cast(cell)
+        return self.__type.read_cell(cell)
 
     @Metadata.property(write=False)
     def read_cell_checks(self):
@@ -165,7 +184,7 @@ class Field(Metadata):
 
         """
         checks = OrderedDict()
-        for name in self.__proxy.supported_constraints:
+        for name in self.__type.supported_constraints:
             constraint = self.constraints.get(name)
             if constraint is not None:
                 if name in ["minimum", "maximum"]:
@@ -191,7 +210,7 @@ class Field(Metadata):
         if cell is None:
             cell = ""
         if cell is not None:
-            cell = self.__proxy.write_cell_cast(cell)
+            cell = self.__type.write_cell(cell)
         if cell is None:
             notes = notes or OrderedDict()
             notes["type"] = f'type is "{self.type}/{self.format}"'
@@ -207,7 +226,7 @@ class Field(Metadata):
             any/None: processed cell or None if an error
 
         """
-        return self.__proxy.write_cell_cast(cell)
+        return self.__type.write_cell(cell)
 
     # Import/Export
 
@@ -223,26 +242,18 @@ class Field(Metadata):
 
     def metadata_process(self):
 
-        # Proxy
-        self.__proxy = None
-        if type(self) is Field:
-            pref = self.get("type", "any")
-            name = f"{pref.capitalize()}Field"
-            module = importlib.import_module("frictionless.fields")
-            self.__proxy = getattr(module, name, getattr(module, "AnyField"))(self)
+        # Type
+        type = self.get("type", "any")
+        name = f"{type.capitalize()}Type"
+        module = importlib.import_module("frictionless.types")
+        self.__type = getattr(module, name, getattr(module, "AnyType"))(self)
 
     def metadata_validate(self):
-
-        # Proxy
-        if type(self) is Field:
-            yield from self.__proxy.metadata_errors
-            return
+        yield from super().metadata_validate()
 
         # Constraints
-        if not self.__schema:
-            yield from super().metadata_validate()
         for name in self.constraints.keys():
-            if name not in self.supported_constraints + ["unique"]:
+            if name not in self.__type.supported_constraints + ["unique"]:
                 note = f'constraint "{name}" is not supported by type "{self.type}"'
                 yield errors.SchemaError(note=note)
 

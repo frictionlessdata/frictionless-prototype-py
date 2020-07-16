@@ -1,0 +1,44 @@
+import json
+import jsonschema
+from .. import config
+from ..type import Type
+
+
+class GeojsonType(Type):
+    supported_constraints = [
+        "required",
+        "enum",
+    ]
+
+    # Read
+
+    def read_cell(self, cell):
+        if isinstance(cell, str):
+            try:
+                cell = json.loads(cell)
+            except Exception:
+                return None
+        if not isinstance(cell, dict):
+            return None
+        if self.field.format == "default":
+            try:
+                validator.validate(cell)
+            except Exception:
+                return None
+        elif self.field.format == "topojson":
+            pass  # Accept any dict as possibly topojson for now
+        return cell
+
+    # Write
+
+    # TODO: implement proper casting
+    def write_cell(self, cell):
+        return str(cell)
+
+
+# Internal
+
+
+validator = jsonschema.validators.validator_for(config.GEOJSON_PROFILE)(
+    config.GEOJSON_PROFILE
+)

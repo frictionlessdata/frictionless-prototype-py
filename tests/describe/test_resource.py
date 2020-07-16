@@ -56,8 +56,8 @@ def test_describe_resource_schema_expand():
     resource = describe("data/table-infer.csv", expand=True)
     assert resource.schema == {
         "fields": [
-            {"name": "id", "type": "integer", "format": "default"},
-            {"name": "age", "type": "integer", "format": "default"},
+            {"name": "id", "type": "integer", "format": "default", "bareNumber": True},
+            {"name": "age", "type": "integer", "format": "default", "bareNumber": True},
             {"name": "name", "type": "string", "format": "default"},
         ],
         "missingValues": [""],

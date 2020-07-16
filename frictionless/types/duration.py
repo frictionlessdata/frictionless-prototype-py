@@ -1,0 +1,28 @@
+import isodate
+import datetime
+from ..type import Type
+
+
+class DurationType(Type):
+    supported_constraints = [
+        "required",
+        "enum",
+    ]
+
+    # Read
+
+    def read_cell(self, cell):
+        if not isinstance(cell, (isodate.Duration, datetime.timedelta)):
+            if not isinstance(cell, str):
+                return None
+            try:
+                cell = isodate.parse_duration(cell)
+            except Exception:
+                return None
+        return cell
+
+    # Write
+
+    # TODO: implement proper casting
+    def write_cell(self, cell):
+        return str(cell)
