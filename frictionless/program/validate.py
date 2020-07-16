@@ -2,91 +2,8 @@ import click
 from sys import exit
 import json as json_module
 from pprint import pformat
-from .describe import describe
-from .extract import extract
-from .validate import validate
-from .transform import transform
-from . import config
-
-
-# General
-
-
-@click.group(name="frictionless")
-@click.version_option(config.VERSION, message="%(version)s", help="Print version")
-def program():
-    pass
-
-
-# Describe
-
-
-@program.command(name="describe")
-@click.argument("source", type=click.Path(), nargs=-1, required=True)
-@click.option("--source-type", type=str, help="Source type")
-@click.option("--json", is_flag=True, help="Output report as JSON")
-# File
-@click.option("--scheme", type=str, help="File scheme")
-@click.option("--format", type=str, help="File format")
-@click.option("--hashing", type=str, help="File hashing")
-@click.option("--encoding", type=str, help="File encoding")
-@click.option("--compression", type=str, help="File compression")
-@click.option("--compression-path", type=str, help="File compression path")
-# Schema
-@click.option("--sync-schema", is_flag=True, help="Sync schema")
-@click.option("--infer-type", type=str, help="Infer type")
-@click.option("--infer-names", type=str, multiple=True, help="Infer names")
-@click.option("--infer-sample", type=int, help="Infer sample")
-@click.option("--infer-confidence", type=float, help="Infer confidence")
-@click.option("--infer-missing-values", type=str, multiple=True, help="Infer missing")
-def program_describe(source, *, source_type, json, **options):
-    for key, value in list(options.items()):
-        if not value:
-            del options[key]
-        elif isinstance(value, tuple):
-            options[key] = list(value)
-    source = list(source) if len(source) > 1 else source[0]
-    result = describe(source, source_type=source_type, **options)
-    if json:
-        return click.secho(json_module.dumps(result, indent=2, ensure_ascii=False))
-    click.secho(pformat(result.to_dict()))
-
-
-# Extract
-
-
-# TODO: use tabulate?
-@program.command(name="extract")
-@click.argument("source", type=click.Path(), required=True)
-@click.option("--source-type", type=str, help="Source type")
-@click.option("--json", is_flag=True, help="Output report as JSON")
-# File
-@click.option("--scheme", type=str, help="File scheme")
-@click.option("--format", type=str, help="File format")
-@click.option("--hashing", type=str, help="File hashing")
-@click.option("--encoding", type=str, help="File encoding")
-@click.option("--compression", type=str, help="File compression")
-@click.option("--compression-path", type=str, help="File compression path")
-# Schema
-@click.option("--sync-schema", is_flag=True, help="Sync schema")
-@click.option("--infer-type", type=str, help="Infer type")
-@click.option("--infer-names", type=str, multiple=True, help="Infer names")
-@click.option("--infer-sample", type=int, help="Infer sample")
-@click.option("--infer-confidence", type=float, help="Infer confidence")
-@click.option("--infer-missing-values", type=str, multiple=True, help="Infer missing")
-def program_extract(source, *, source_type, json, **options):
-    for key, value in list(options.items()):
-        if not value:
-            del options[key]
-        elif isinstance(value, tuple):
-            options[key] = list(value)
-    result = extract(source, source_type=source_type, **options)
-    if json:
-        return click.secho(json_module.dumps(result, indent=2, ensure_ascii=False))
-    click.secho(pformat(result))
-
-
-# Validate
+from ..validate import validate
+from .main import program
 
 
 @program.command(name="validate")
@@ -129,15 +46,6 @@ def program_validate(source, *, headers, source_type, json, **options):
     report = validate(source, source_type=source_type, **options)
     print_report(report, json=json)
     exit(int(not report["valid"]))
-
-
-# Transform
-
-
-@program.command(name="transform")
-@click.argument("source", type=click.Path(), required=True)
-def program_transform(source):
-    transform(source)
 
 
 # Server
