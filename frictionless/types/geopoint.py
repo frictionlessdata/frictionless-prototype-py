@@ -48,9 +48,12 @@ class GeopointType(Type):
 
     # Write
 
-    # TODO: implement proper casting
     def write_cell(self, cell):
-        return str(cell)
+        if self.field.format == "array":
+            return json.dumps(list(cell))
+        elif self.field.format == "object":
+            return json.dumps({"lon": cell.lon, "lat": cell.lat})
+        return ",".join(cell)
 
 
 # Internal

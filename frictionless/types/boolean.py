@@ -26,6 +26,5 @@ class BooleanType(Type):
 
     # Write
 
-    # TODO: implement proper casting
     def write_cell(self, cell):
-        return str(cell)
+        return self.field.true_values[0] if cell else self.field.false_values[0]

@@ -54,6 +54,6 @@ class NumberType(Type):
 
     # Write
 
-    # TODO: implement proper casting
+    # TODO: handle group_char/decimal_char
     def write_cell(self, cell):
         return str(cell)

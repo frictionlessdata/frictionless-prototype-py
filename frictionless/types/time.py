@@ -31,6 +31,6 @@ class TimeType(Type):
 
     # Write
 
-    # TODO: implement proper casting
     def write_cell(self, cell):
-        return str(cell)
+        format = self.field.format or config.DEFAULT_TIME_PATTERN
+        return datetime.strftime(cell, format)

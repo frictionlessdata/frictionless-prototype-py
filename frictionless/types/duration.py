@@ -23,6 +23,5 @@ class DurationType(Type):
 
     # Write
 
-    # TODO: implement proper casting
     def write_cell(self, cell):
-        return str(cell)
+        return isodate.duration_isoformat(cell)

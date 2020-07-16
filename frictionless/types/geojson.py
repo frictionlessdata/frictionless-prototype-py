@@ -31,9 +31,8 @@ class GeojsonType(Type):
 
     # Write
 
-    # TODO: implement proper casting
     def write_cell(self, cell):
-        return str(cell)
+        return json.dumps(cell)
 
 
 # Internal

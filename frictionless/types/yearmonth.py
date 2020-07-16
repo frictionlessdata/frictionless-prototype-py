@@ -33,9 +33,8 @@ class YearmonthType(Type):
 
     # Write
 
-    # TODO: implement proper casting
     def write_cell(self, cell):
-        return str(cell)
+        return "-".join(cell)
 
 
 # Internal
