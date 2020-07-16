@@ -1,8 +1,8 @@
-from importlib import import_module
 from ..metadata import Metadata
 from ..dialects import Dialect
 from ..plugin import Plugin
 from ..parser import Parser
+from .. import helpers
 
 
 # Plugin
@@ -28,7 +28,7 @@ class SqlParser(Parser):
     # Read
 
     def read_data_stream_create(self):
-        sa = import_module("sqlalchemy")
+        sa = helpers.import_from_plugin("sqlalchemy", plugin="sql")
         dialect = self.file.dialect
         engine = sa.create_engine(self.file.source)
         engine.update_execution_options(stream_results=True)
@@ -45,7 +45,7 @@ class SqlParser(Parser):
     # Write
 
     def write(self, source, target, headers, encoding=None):
-        sa = import_module("sqlalchemy")
+        sa = helpers.import_from_plugin("sqlalchemy", plugin="sql")
         engine = sa.create_engine(target)
         count = 0
         buffer = []

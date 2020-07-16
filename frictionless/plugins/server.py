@@ -1,6 +1,6 @@
-from importlib import import_module
 from ..plugin import Plugin
 from ..server import Server
+from .. import helpers
 
 
 # Plugin
@@ -17,5 +17,5 @@ class ServerPlugin(Plugin):
 
 class ApiServer(Server):
     def listen(self, port):
-        gunicorn = import_module("gunicorn")
+        gunicorn = helpers.import_from_plugin("gunicorn", plugin="server")
         gunicorn

@@ -40,6 +40,16 @@ def pass_through(iterator):
         pass
 
 
+def import_from_plugin(name, *, plugin):
+    try:
+        return import_module(name)
+    except ImportError:
+        exceptions = import_module("frictionless.exceptions")
+        errors = import_module("frictionless.errors")
+        error = errors.Error(note=f'Please install "frictionless[{plugin}]"')
+        raise exceptions.FrictionlessException(error)
+
+
 def copy_merge(source, patch):
     source = (source or {}).copy()
     source.update(patch)

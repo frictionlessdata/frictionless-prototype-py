@@ -1,11 +1,11 @@
 import io
-from importlib import import_module
 from datetime import datetime
 from ..metadata import Metadata
 from ..dialects import Dialect
 from ..plugin import Plugin
 from ..parser import Parser
 from .. import exceptions
+from .. import helpers
 from .. import errors
 
 
@@ -30,7 +30,7 @@ class OdsParser(Parser):
     # Read
 
     def read_data_stream_create(self):
-        ezodf = import_module("ezodf")
+        ezodf = helpers.import_from_plugin("ezodf", plugin="ods")
         dialect = self.file.dialect
 
         # Get book

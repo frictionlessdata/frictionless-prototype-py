@@ -1,11 +1,11 @@
 import os
 import io
 import requests.utils
-from importlib import import_module
 from urllib.parse import urlparse
 from ..controls import Control
 from ..plugin import Plugin
 from ..loader import Loader
+from .. import helpers
 
 
 # Plugin
@@ -30,7 +30,7 @@ class S3Loader(Loader):
     # Read
 
     def read_byte_stream_create(self):
-        boto3 = import_module("boto3")
+        boto3 = helpers.import_from_plugin("boto3", plugin="aws")
         control = self.file.control
         client = boto3.client("s3", endpoint_url=control.endpoint_url)
         source = requests.utils.requote_uri(self.file.source)
