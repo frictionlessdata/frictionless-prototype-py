@@ -99,7 +99,7 @@ class XlsxParser(Parser):
 
     # Write
 
-    def write(self, data_stream):
+    def write(self, row_stream, *, schema):
         dialect = self.file.dialect
         helpers.ensure_dir(self.file.source)
         book = openpyxl.Workbook(write_only=True)
@@ -107,7 +107,15 @@ class XlsxParser(Parser):
         if isinstance(title, int):
             title = f"Sheet {dialect.sheet}"
         sheet = book.create_sheet(title)
-        for cells in data_stream:
+        for row in row_stream:
+            cells = []
+            if row.row_number == 1:
+                sheet.append(schema.field_names)
+            for field in schema.fields:
+                cell = row[field.name]
+                if field.type not in NATIVE_TYPES:
+                    cell = field.write_cell(cell)
+                cells.append(cell)
             sheet.append(cells)
         book.save(self.file.source)
 
@@ -181,7 +189,7 @@ class XlsParser(Parser):
 
     # Write
 
-    def write(self, data_stream):
+    def write(self, row_stream, *, schema):
         dialect = self.file.dialect
         helpers.ensure_dir(self.file.source)
         book = xlwt.Workbook()
@@ -189,13 +197,30 @@ class XlsParser(Parser):
         if isinstance(title, int):
             title = f"Sheet {dialect.sheet}"
         sheet = book.add_sheet(title)
-        for row_index, cells in enumerate(data_stream):
-            for column_index, cell in enumerate(cells):
-                sheet.write(row_index, column_index, cell)
+        for row_index, row in enumerate(row_stream):
+            if row.row_number == 1:
+                for field_index, name in enumerate(schema.field_names):
+                    sheet.write(0, field_index, name)
+            for field_index, field in enumerate(schema.fields):
+                cell = row[field.name]
+                if field.type not in NATIVE_TYPES:
+                    cell = field.write_cell(cell)
+                sheet.write(row_index + 1, field_index, cell)
         book.save(self.file.source)
 
 
 # Internal
+
+NATIVE_TYPES = [
+    "boolean",
+    "date",
+    "datetime",
+    "integer",
+    "number",
+    "string",
+    "time",
+    "year",
+]
 
 EXCEL_CODES = {
     "yyyy": "%Y",

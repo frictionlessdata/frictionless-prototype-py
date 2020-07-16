@@ -82,8 +82,8 @@ def test_table_json_write(tmpdir):
     with open(target) as file:
         assert json.load(file) == [
             ["id", "name"],
-            ["1", "english"],
-            ["2", "中国人"],
+            [1, "english"],
+            [2, "中国人"],
         ]
 
 
@@ -95,8 +95,8 @@ def test_table_json_write_keyed(tmpdir):
         table.write(target, dialect=dialect)
     with open(target) as file:
         assert json.load(file) == [
-            {"id": "1", "name": "english"},
-            {"id": "2", "name": "中国人"},
+            {"id": 1, "name": "english"},
+            {"id": 2, "name": "中国人"},
         ]
 
 
@@ -107,7 +107,7 @@ def test_table_jsonl_write(tmpdir):
         table.write(target)
     with Table(target) as table:
         assert table.headers == ["id", "name"]
-        assert table.read_data() == [["1", "english"], ["2", "中国人"]]
+        assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
 def test_table_jsonl_write_keyed(tmpdir):
@@ -118,4 +118,4 @@ def test_table_jsonl_write_keyed(tmpdir):
         table.write(target, dialect=dialect)
     with Table(target, dialect=dialect) as table:
         assert table.headers == ["id", "name"]
-        assert table.read_data() == [["1", "english"], ["2", "中国人"]]
+        assert table.read_data() == [[1, "english"], [2, "中国人"]]

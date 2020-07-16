@@ -87,6 +87,11 @@ class Parser:
     def read_data_stream_handle_errors(self, data_stream):
         return DataStreamWithErrorHandling(data_stream)
 
+    # Write
+
+    def write(self, row_stream, *, schema):
+        raise NotImplementedError
+
 
 # Internal
 

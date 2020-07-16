@@ -39,18 +39,20 @@ class CsvParser(Parser):
     # Write
 
     # TODO: use tempfile to prevent loosing data
-    def write(self, data_stream):
+    def write(self, row_stream, *, schema):
         options = {}
-        dialect = self.file.dialect
-        for name in INFER_DIALECT_NAMES + ["quoting"]:
-            name = name.lower()
-            value = getattr(dialect, name, None)
+        for name in vars(self.file.dialect.to_python()):
+            value = getattr(self.file.dialect, name, None)
             if value is not None:
                 options[name] = value
         helpers.ensure_dir(self.file.source)
         with io.open(self.file.source, "wb") as file:
             writer = unicodecsv.writer(file, encoding=self.file.encoding, **options)
-            for cells in data_stream:
+            for row in row_stream:
+                if row.row_number == 1:
+                    writer.writerow(schema.field_names)
+                cells = list(row.values())
+                cells, notes = schema.write_data(cells)
                 writer.writerow(cells)
 
 

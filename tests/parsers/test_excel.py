@@ -254,7 +254,7 @@ def test_table_write_xlsx(tmpdir):
         table.write(target)
     with Table(target) as table:
         assert table.headers == ["id", "name"]
-        assert table.read_data() == [["1", "english"], ["2", "中国人"]]
+        assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
 def test_table_write_xlsx_sheet_name(tmpdir):
@@ -265,7 +265,7 @@ def test_table_write_xlsx_sheet_name(tmpdir):
         table.write(target, dialect=dialect)
     with Table(target, dialect=dialect) as table:
         assert table.headers == ["id", "name"]
-        assert table.read_data() == [["1", "english"], ["2", "中国人"]]
+        assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
 def test_table_write_xls(tmpdir):
@@ -275,7 +275,7 @@ def test_table_write_xls(tmpdir):
         table.write(target)
     with Table(target) as table:
         assert table.headers == ["id", "name"]
-        assert table.read_data() == [["1", "english"], ["2", "中国人"]]
+        assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
 def test_table_write_xls_sheet_name(tmpdir):
@@ -286,4 +286,4 @@ def test_table_write_xls_sheet_name(tmpdir):
         table.write(target, dialect=dialect)
     with Table(target, dialect=dialect) as table:
         assert table.headers == ["id", "name"]
-        assert table.read_data() == [["1", "english"], ["2", "中国人"]]
+        assert table.read_data() == [[1, "english"], [2, "中国人"]]

@@ -5,7 +5,6 @@ from ..extract import extract
 from .main import program
 
 
-# TODO: use tabulate?
 @program.command(name="extract")
 @click.argument("source", type=click.Path(), nargs=-1, required=True)
 @click.option("--source-type", type=str, help="Source type")

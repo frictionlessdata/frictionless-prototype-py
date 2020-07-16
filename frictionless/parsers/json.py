@@ -29,16 +29,14 @@ class JsonParser(Parser):
     # Write
 
     # TODO: use tempfile to prevent loosing data
-    def write(self, data_stream):
+    def write(self, row_stream, *, schema):
         data = []
         dialect = self.file.dialect
         helpers.ensure_dir(self.file.source)
-        headers = next(data_stream)
-        if not dialect.keyed:
-            data.append(headers)
-        for item in data_stream:
-            if dialect.keyed:
-                item = dict(zip(headers, item))
+        for row in row_stream:
+            item = row.to_dict() if dialect.keyed else list(row.values())
+            if not dialect.keyed and row.row_number == 1:
+                data.append(schema.field_names)
             data.append(item)
         with open(self.file.source, "w") as file:
             json.dump(data, file, indent=2)
@@ -61,15 +59,28 @@ class JsonlParser(Parser):
     # Write
 
     # TODO: use tempfile to prevent loosing data
-    def write(self, data_stream):
+    def write(self, row_stream, *, schema):
         dialect = self.file.dialect
         helpers.ensure_dir(self.file.source)
-        headers = next(data_stream)
         with io.open(self.file.source, "wb") as file:
             writer = jsonlines.Writer(file)
-            if not dialect.keyed:
-                writer.write(headers)
-            for item in data_stream:
-                if dialect.keyed:
-                    item = dict(zip(headers, item))
+            for row in row_stream:
+                item = row.to_dict() if dialect.keyed else list(row.values())
+                if not dialect.keyed and row.row_number == 1:
+                    writer.write(schema.field_names)
                 writer.write(item)
+
+
+# Internal
+
+
+NATIVE_TYPES = [
+    "array",
+    "boolean",
+    "geojson",
+    "integer",
+    "number",
+    "object",
+    "string",
+    "year",
+]

@@ -79,8 +79,8 @@ def test_table_inline_write(tmpdir):
         table.write(target)
     assert target == [
         ["id", "name"],
-        ["1", "english"],
-        ["2", "中国人"],
+        [1, "english"],
+        [2, "中国人"],
     ]
 
 
@@ -91,6 +91,6 @@ def test_table_inline_write_keyed(tmpdir):
     with Table(source) as table:
         table.write(target, dialect=dialect)
     assert target == [
-        {"id": "1", "name": "english"},
-        {"id": "2", "name": "中国人"},
+        {"id": 1, "name": "english"},
+        {"id": 2, "name": "中国人"},
     ]

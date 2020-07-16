@@ -793,14 +793,10 @@ class Table:
         )
 
         # Write file
-        data_stream = self.__write_data_stream_create()
+        row_stream = self.__write_row_stream_create()
         parser = system.create_parser(file)
-        parser.write(data_stream)
+        parser.write(row_stream, schema=self.schema)
 
-    def __write_data_stream_create(self):
+    def __write_row_stream_create(self):
         self.__read_data_stream_raise_closed()
-        yield self.__schema.field_names
-        for row in self.row_stream:
-            cells = list(row.values())
-            cells, notes = self.__schema.write_data(cells)
-            yield cells
+        yield from self.row_stream
