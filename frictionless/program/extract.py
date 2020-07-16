@@ -1,6 +1,6 @@
 import click
 import json as json_module
-from pprint import pformat
+from tabulate import tabulate
 from ..extract import extract
 from .main import program
 
@@ -32,6 +32,14 @@ def program_extract(source, *, source_type, json, **options):
             options[key] = list(value)
     source = list(source) if len(source) > 1 else source[0]
     data = extract(source, source_type=source_type, **options)
-    if json:
-        return click.secho(json_module.dumps(data, indent=2, ensure_ascii=False))
-    click.secho(pformat(data))
+    if data:
+        if json:
+            # TODO: fix the problem with objects serialization
+            return click.secho(json_module.dumps(data, indent=2, ensure_ascii=False))
+        if isinstance(data, list):
+            return click.secho(tabulate(data, headers="keys"))
+        for number, (name, rows) in enumerate(data.items(), start=1):
+            if number != 1:
+                click.secho("\n")
+            click.secho(f"{name}\n", bold=True)
+            click.secho(tabulate(rows, headers="keys"))
