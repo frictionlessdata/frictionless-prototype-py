@@ -2,6 +2,7 @@ import io
 import os
 import json
 import zipfile
+from copy import deepcopy
 from urllib.request import urlopen
 from .metadata import Metadata
 from .dialects import Dialect
@@ -17,8 +18,11 @@ from . import config
 
 
 class Resource(Metadata):
-    metadata_Error = errors.ResourceError
     metadata_duplicate = True
+    metadata_Error = errors.ResourceError
+    metadata_profile = deepcopy(config.RESOURCE_PROFILE)
+    metadata_profile["properties"]["dialect"] = {"type": "object"}
+    metadata_profile["properties"]["schema"] = {"type": "object"}
 
     def __init__(
         self,
@@ -416,12 +420,6 @@ class Resource(Metadata):
 
     # Metadata
 
-    @Metadata.property(write=False)
-    def metadata_profile(self):
-        if self.profile == "tabular-data-resource":
-            return config.TABULAR_RESOURCE_PROFILE
-        return config.RESOURCE_PROFILE
-
     def metadata_process(self):
 
         # Dialect
@@ -435,6 +433,17 @@ class Resource(Metadata):
         if not isinstance(schema, (str, type(None), Schema)):
             schema = Schema(schema)
             dict.__setitem__(self, "schema", schema)
+
+    def metadata_validate(self):
+        yield from super().metadata_validate()
+
+        # Dialect
+        if self.dialect:
+            yield from self.dialect.metadata_errors
+
+        # Schema
+        if self.schema:
+            yield from self.schema.metadata_errors
 
 
 # Internal

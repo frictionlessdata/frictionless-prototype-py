@@ -97,8 +97,8 @@ def test_validate_invalid_package_noinfer():
     report = validate({"resources": [{"path": "data/table.csv"}]}, noinfer=True)
     assert report.flatten(["code", "note"]) == [
         [
-            "package-error",
-            '"{\'path\': \'data/table.csv\'} is not valid under any of the given schemas" at "resources/0" in metadata and at "properties/resources/items/oneOf" in profile',
+            "resource-error",
+            '"{\'path\': \'data/table.csv\'} is not valid under any of the given schemas" at "" in metadata and at "oneOf" in profile',
         ]
     ]
 

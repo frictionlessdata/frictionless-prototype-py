@@ -308,7 +308,7 @@ class CompressionError(Error):
 class ControlError(Error):
     code = "control-error"
     name = "Control Error"
-    tags = ["#table", "#schema"]
+    tags = ["#table", "#control"]
     template = "Control object is not valid: {note}"
     description = "Provided control is not valid."
 
@@ -316,7 +316,7 @@ class ControlError(Error):
 class DialectError(Error):
     code = "dialect-error"
     name = "Dialect Error"
-    tags = ["#table", "#schema"]
+    tags = ["#table", "#dialect"]
     template = "Dialect object is not valid: {note}"
     description = "Provided dialect is not valid."
 
@@ -327,6 +327,14 @@ class SchemaError(Error):
     tags = ["#table", "#schema"]
     template = "The data source could not be successfully described by the invalid Table Schema: {note}"
     description = "Provided schema is not valid."
+
+
+class FieldError(Error):
+    code = "field-error"
+    name = "Field Error"
+    tags = ["#table", "schema", "#field"]
+    template = "The data source could not be successfully described by the invalid Table Schema: {note}"
+    description = "Provided field is not valid."
 
 
 class QueryError(Error):

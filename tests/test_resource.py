@@ -540,6 +540,7 @@ def test_resource_infer():
 def test_resource_infer_source_non_tabular():
     resource = Resource(path="data/text.txt")
     resource.infer()
+    print(resource.metadata_errors)
     assert resource.metadata_valid
     assert resource == {
         "name": "text",

@@ -22,9 +22,13 @@ class Schema(Metadata):
 
     """
 
-    metadata_Error = errors.SchemaError  # type: ignore
-    metadata_profile = config.SCHEMA_PROFILE
     metadata_duplicate = True
+    metadata_Error = errors.SchemaError  # type: ignore
+    metadata_profile = deepcopy(config.SCHEMA_PROFILE)
+    metadata_profile["properties"]["fields"] = {
+        "type": "array",
+        "items": {"type": "object"},
+    }
 
     def __init__(
         self,
@@ -339,6 +343,10 @@ class Schema(Metadata):
 
     def metadata_validate(self):
         yield from super().metadata_validate()
+
+        # Fields
+        for field in self.fields:
+            yield from field.metadata_errors
 
         # Primary Key
         for name in self.primary_key:

@@ -1,9 +1,10 @@
 import functools
+from copy import deepcopy
 from . import config
 from . import helpers
 from . import exceptions
 from .metadata import Metadata
-from .errors import Error, TaskError
+from .errors import Error, TaskError, ReportError
 
 
 class Report(Metadata):
@@ -21,7 +22,12 @@ class Report(Metadata):
     """
 
     metadata_strict = True
-    metadata_profile = config.REPORT_PROFILE
+    metadata_Error = ReportError
+    metadata_profile = deepcopy(config.REPORT_PROFILE)
+    metadata_profile["properties"]["tables"] = {
+        "type": "array",
+        "items": {"type": "object"},
+    }
 
     def __init__(self, descriptor=None, *, time, errors, tables):
         self["version"] = config.VERSION
@@ -119,6 +125,15 @@ class Report(Metadata):
             result = result.to_dict()
         return result
 
+    # Metadata
+
+    def metadata_validate(self):
+        yield from super().metadata_validate()
+
+        # Tables
+        for table in self.tables:
+            yield from table.metadata_errors
+
 
 class ReportTable(Metadata):
     """Report table representation.
@@ -155,6 +170,7 @@ class ReportTable(Metadata):
     """
 
     metadata_strict = True
+    metadata_Error = ReportError
     metadata_profile = config.REPORT_PROFILE["properties"]["tables"]["items"]
 
     def __init__(self, descriptor=None, *, time, scope, partial, errors, table):

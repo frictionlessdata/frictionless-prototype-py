@@ -134,10 +134,11 @@ class Metadata(helpers.ControlledDict):
     def metadata_process(self):
         pass
 
-    def metadata_validate(self):
-        if self.metadata_profile:
-            validator_class = jsonschema.validators.validator_for(self.metadata_profile)
-            validator = validator_class(self.metadata_profile)
+    def metadata_validate(self, profile=None):
+        profile = profile or self.metadata_profile
+        if profile:
+            validator_class = jsonschema.validators.validator_for(profile)
+            validator = validator_class(profile)
             for error in validator.iter_errors(self):
                 metadata_path = "/".join(map(str, error.path))
                 profile_path = "/".join(map(str, error.schema_path))

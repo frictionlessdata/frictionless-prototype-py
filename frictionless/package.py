@@ -2,6 +2,7 @@ import os
 import json
 import glob
 import zipfile
+from copy import deepcopy
 from .metadata import Metadata
 from .resource import Resource
 from . import exceptions
@@ -24,8 +25,13 @@ class Package(Metadata):
 
     """
 
-    metadata_Error = errors.PackageError  # type: ignore
     metadata_duplicate = True
+    metadata_Error = errors.PackageError  # type: ignore
+    metadata_profile = deepcopy(config.PACKAGE_PROFILE)
+    metadata_profile["properties"]["resources"] = {
+        "type": "array",
+        "items": {"type": "object"},
+    }
 
     def __init__(
         self,
@@ -224,12 +230,6 @@ class Package(Metadata):
 
     # Metadata
 
-    @Metadata.property(write=False)
-    def metadata_profile(self):
-        if self.profile == "fiscal-data-package":
-            return config.FISCAL_PACKAGE_PROFILE
-        return config.PACKAGE_PROFILE
-
     def metadata_process(self):
 
         # Resources
@@ -250,3 +250,14 @@ class Package(Metadata):
                 resources = helpers.ControlledList(resources)
                 resources.__onchange__(self.metadata_process)
                 dict.__setitem__(self, "resources", resources)
+
+    def metadata_validate(self):
+        yield from super().metadata_validate()
+
+        # Extensions
+        if self.profile == "fiscal-data-package":
+            yield from super().metadata_validate(config.FISCAL_PACKAGE_PROFILE)
+
+        # Resources
+        for resource in self.resources:
+            yield from resource.metadata_errors

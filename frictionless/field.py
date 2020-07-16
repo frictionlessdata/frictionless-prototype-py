@@ -30,7 +30,7 @@ class Field(Metadata):
 
     """
 
-    metadata_Error = errors.SchemaError  # type: ignore
+    metadata_Error = errors.FieldError  # type: ignore
     metadata_profile = config.SCHEMA_PROFILE["properties"]["fields"]["items"]
     metadata_duplicate = True
     supported_constraints = []  # type: ignore
@@ -239,7 +239,8 @@ class Field(Metadata):
             return
 
         # Constraints
-        yield from super().metadata_validate()
+        if not self.__schema:
+            yield from super().metadata_validate()
         for name in self.constraints.keys():
             if name not in self.supported_constraints + ["unique"]:
                 note = f'constraint "{name}" is not supported by type "{self.type}"'

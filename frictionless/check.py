@@ -1,4 +1,5 @@
 from .metadata import Metadata
+from . import errors
 
 
 class Check(Metadata):
@@ -13,6 +14,7 @@ class Check(Metadata):
     """
 
     metadata_strict = True
+    metadata_Error = errors.CheckError
     possible_Errors = []  # type: ignore
 
     def __init__(self, descriptor=None):

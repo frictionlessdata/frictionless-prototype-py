@@ -40,6 +40,9 @@ def test_schema_extract_metadata_error():
 
 def test_schema_metadata_invalid():
     schema = Schema("data/schema-invalid-multiple-errors.json")
+    from pprint import pprint
+
+    pprint(schema.metadata_errors)
     assert len(schema.metadata_errors) == 5
 
 
@@ -226,8 +229,8 @@ def test_schema_metadata_error_message():
     note = schema.metadata_errors[0]["note"]
     assert len(schema.metadata_errors) == 1
     assert "is not valid" in note
-    assert 'at "fields/0" in metadata' in note
-    assert 'at "properties/fields/items/anyOf" in profile' in note
+    assert "{'name': 'name', 'type': 'other'}" in note
+    assert "is not valid under any of the given schema" in note
 
 
 # Expand

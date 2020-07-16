@@ -396,8 +396,8 @@ def test_validate_schema_invalid():
     report = validate(source, schema=schema)
     assert report.flatten(["code", "note"]) == [
         [
-            "schema-error",
-            "\"{'name': 'age', 'type': 'bad'} is not valid under any of the given schemas\" at \"fields/1\" in metadata and at \"properties/fields/items/anyOf\" in profile",
+            "field-error",
+            "\"{'name': 'age', 'type': 'bad'} is not valid under any of the given schemas\" at \"\" in metadata and at \"anyOf\" in profile",
         ],
     ]
 
@@ -961,8 +961,8 @@ def test_validate_invalid_table_schema_issue_304():
     report = validate(source, schema=schema)
     assert report.flatten(["code", "note"]) == [
         [
-            "schema-error",
-            "\"{'name': 'age', 'type': 'bad'} is not valid under any of the given schemas\" at \"fields/1\" in metadata and at \"properties/fields/items/anyOf\" in profile",
+            "field-error",
+            "\"{'name': 'age', 'type': 'bad'} is not valid under any of the given schemas\" at \"\" in metadata and at \"anyOf\" in profile",
         ],
     ]
 
