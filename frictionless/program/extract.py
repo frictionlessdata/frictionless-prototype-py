@@ -7,7 +7,7 @@ from .main import program
 
 # TODO: use tabulate?
 @program.command(name="extract")
-@click.argument("source", type=click.Path(), required=True)
+@click.argument("source", type=click.Path(), nargs=-1, required=True)
 @click.option("--source-type", type=str, help="Source type")
 @click.option("--json", is_flag=True, help="Output report as JSON")
 # File
@@ -30,7 +30,8 @@ def program_extract(source, *, source_type, json, **options):
             del options[key]
         elif isinstance(value, tuple):
             options[key] = list(value)
-    result = extract(source, source_type=source_type, **options)
+    source = list(source) if len(source) > 1 else source[0]
+    data = extract(source, source_type=source_type, **options)
     if json:
-        return click.secho(json_module.dumps(result, indent=2, ensure_ascii=False))
-    click.secho(pformat(result))
+        return click.secho(json_module.dumps(data, indent=2, ensure_ascii=False))
+    click.secho(pformat(data))
