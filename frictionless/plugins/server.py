@@ -1,4 +1,8 @@
 import multiprocessing
+from ..describe import describe
+from ..extract import extract
+from ..validate import validate
+from ..transform import transform
 from ..plugin import Plugin
 from ..server import Server
 from .. import helpers
@@ -27,6 +31,7 @@ class ApiServer(Server):
 # Internal
 
 
+# NOTE: it's a POC: not secure and with no error handling
 def create_api():
     flask = helpers.import_from_plugin("flask", plugin="server")
 
@@ -34,13 +39,33 @@ def create_api():
     app = flask.Flask("app")
 
     @app.route("/")
-    def main():
-        return flask.jsonify(
-            {
-                "version": config.VERSION,
-                "options": ["/describe", "/extract", "/validate", "/transform"],
-            }
-        )
+    def api_main():
+        options = ["/describe", "/extract", "/validate", "/transform"]
+        return flask.jsonify({"version": config.VERSION, "options": options})
+
+    @app.route("/describe", methods=["POST"])
+    def api_describe():
+        options = helpers.create_options(flask.request.json)
+        metadata = describe(**options)
+        return flask.jsonify(metadata)
+
+    @app.route("/extract", methods=["POST"])
+    def api_extract():
+        options = helpers.create_options(flask.request.json)
+        data = extract(**options)
+        return flask.jsonify(data)
+
+    @app.route("/validate", methods=["POST"])
+    def api_validate():
+        options = helpers.create_options(flask.request.json)
+        report = validate(**options)
+        return flask.jsonify(report)
+
+    @app.route("/transform", methods=["POST"])
+    def api_transform():
+        options = helpers.create_options(flask.request.json)
+        transform(**options)
+        return flask.jsonify({"success": True})
 
     return app
 
@@ -71,7 +96,7 @@ def create_server(app, *, port):
     # Define options
     options = {
         "bind": "%s:%s" % ("127.0.0.1", str(port)),
-        "workers": (multiprocessing.cpu_count() * 2) + 1,
+        "workers": multiprocessing.cpu_count() + 1,
         "accesslog": "-",
     }
 
