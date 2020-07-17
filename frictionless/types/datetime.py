@@ -32,5 +32,5 @@ class DatetimeType(Type):
     # Write
 
     def write_cell(self, cell):
-        format = self.field.format or config.DEFAULT_DATETIME_PATTERN
-        return datetime.strftime(cell, format)
+        format = self.field.get("format", config.DEFAULT_DATETIME_PATTERN)
+        return cell.strftime(format)

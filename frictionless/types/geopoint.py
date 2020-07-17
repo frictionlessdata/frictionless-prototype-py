@@ -53,7 +53,7 @@ class GeopointType(Type):
             return json.dumps(list(cell))
         elif self.field.format == "object":
             return json.dumps({"lon": cell.lon, "lat": cell.lat})
-        return ",".join(cell)
+        return ",".join(map(str, cell))
 
 
 # Internal

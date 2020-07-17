@@ -374,9 +374,9 @@ class Schema(Metadata):
 
 INFER_TYPES = [
     "yearmonth",
+    "geopoint",
     "duration",
     "geojson",
-    "geopoint",
     "object",
     "array",
     "datetime",
