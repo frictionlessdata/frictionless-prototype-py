@@ -11,10 +11,9 @@ def test_extract_resource():
     ]
 
 
-def test_extract_resource_stream():
-    row_stream = extract("data/resource.json", stream=True)
-    assert isinstance(row_stream, list) is False
-    assert list(row_stream) == [
-        {"id": 1, "name": "english"},
-        {"id": 2, "name": "中国人"},
+def test_extract_resource_process():
+    process = lambda row: row.to_list()
+    assert extract("data/resource.json", process=process) == [
+        [1, "english"],
+        [2, "中国人"],
     ]

@@ -1,21 +1,15 @@
 from ..resource import Resource
 
 
-def extract_resource(source, *, stream=False, json=False):
+def extract_resource(source, *, process=None):
 
     # Create resource
     resource = Resource(source)
 
-    # Stream
-    if stream:
-        return resource.read_row_stream()
-
-    # Json
-    elif json:
+    # Extract resource
+    if process:
         result = []
         for row in resource.read_row_stream():
-            result.append(row.to_dict(json=True))
+            result.append(process(row))
         return result
-
-    # Default
     return resource.read_rows()

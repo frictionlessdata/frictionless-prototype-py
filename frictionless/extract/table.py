@@ -27,8 +27,7 @@ def extract_table(
     infer_missing_values=config.DEFAULT_MISSING_VALUES,
     lookup=None,
     # Extraction
-    stream=False,
-    json=False,
+    process=None,
 ):
 
     # Create table
@@ -58,17 +57,9 @@ def extract_table(
 
     # Extract table
     with table as table:
-
-        # Stream
-        if stream:
-            return table.row_stream
-
-        # Json
-        elif json:
+        if process:
             result = []
             for row in table.row_stream:
-                result.append(row.to_dict(json=True))
+                result.append(process(row))
             return result
-
-        # Default
         return table.read_rows()

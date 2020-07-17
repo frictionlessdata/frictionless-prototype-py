@@ -52,7 +52,7 @@ def create_api():
     @app.route("/extract", methods=["POST"])
     def api_extract():
         options = helpers.create_options(flask.request.json)
-        options["json"] = True
+        options["process"] = lambda row: row.to_dict(json=True)
         data = extract(**options)
         return flask.jsonify(data)
 

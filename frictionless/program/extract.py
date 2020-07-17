@@ -31,7 +31,8 @@ def program_extract(source, *, source_type, json, **options):
         elif isinstance(value, tuple):
             options[key] = list(value)
     source = list(source) if len(source) > 1 else source[0]
-    result = extract(source, source_type=source_type, json=json, **options)
+    process = lambda row: row.to_dict(json=True) if json else None
+    result = extract(source, source_type=source_type, process=process, **options)
     if result:
         if json:
             return click.secho(simplejson.dumps(result, indent=2, ensure_ascii=False))
