@@ -14,23 +14,23 @@ class BlacklistedValueCheck(Check):
     ]
 
     def prepare(self):
-        self.field_name = self["fieldName"]
-        self.blacklist = self["blacklist"]
+        self.__field_name = self["fieldName"]
+        self.__blacklist = self["blacklist"]
 
     # Validate
 
     def validate_task(self):
-        if self.field_name not in self.table.schema.field_names:
-            note = 'blacklisted value check requires field "%s"' % self.field_name
+        if self.__field_name not in self.table.schema.field_names:
+            note = 'blacklisted value check requires field "%s"' % self.__field_name
             yield errors.TaskError(note=note)
 
     def validate_row(self, row):
-        cell = row[self.field_name]
-        if cell in self.blacklist:
+        cell = row[self.__field_name]
+        if cell in self.__blacklist:
             yield errors.BlacklistedValueError.from_row(
                 row,
-                note='blacklisted values are "%s"' % self.blacklist,
-                field_name=self.field_name,
+                note='blacklisted values are "%s"' % self.__blacklist,
+                field_name=self.__field_name,
             )
 
 
@@ -45,28 +45,28 @@ class SequentialValueCheck(Check):
     ]
 
     def prepare(self):
-        self.cursor = None
-        self.exited = False
-        self.field_name = self.get("fieldName")
+        self.__cursor = None
+        self.__exited = False
+        self.__field_name = self.get("fieldName")
 
     # Validate
 
     def validate_task(self):
-        if self.field_name not in self.table.schema.field_names:
-            note = 'sequential value check requires field "%s"' % self.field_name
+        if self.__field_name not in self.table.schema.field_names:
+            note = 'sequential value check requires field "%s"' % self.__field_name
             yield errors.TaskError(note=note)
 
     def validate_row(self, row):
-        if not self.exited:
-            cell = row[self.field_name]
+        if not self.__exited:
+            cell = row[self.__field_name]
             try:
-                self.cursor = self.cursor or cell
-                assert self.cursor == cell
-                self.cursor += 1
+                self.__cursor = self.__cursor or cell
+                assert self.__cursor == cell
+                self.__cursor += 1
             except Exception:
-                self.exited = True
+                self.__exited = True
                 yield errors.SequentialValueError.from_row(
-                    row, note="the value is not sequential", field_name=self.field_name,
+                    row, note="the value is not sequential", field_name=self.__field_name,
                 )
 
 
@@ -81,7 +81,7 @@ class RowConstraintCheck(Check):
     ]
 
     def prepare(self):
-        self.constraint = self["constraint"]
+        self.__constraint = self["constraint"]
 
     # Validate
 
@@ -89,8 +89,8 @@ class RowConstraintCheck(Check):
         try:
             # This call should be considered as a safe expression evaluation
             # https://github.com/danthedeckie/simpleeval
-            assert simpleeval.simple_eval(self.constraint, names=row)
+            assert simpleeval.simple_eval(self.__constraint, names=row)
         except Exception:
             yield errors.RowConstraintError.from_row(
-                row, note='the row constraint to conform is "%s"' % self.constraint,
+                row, note='the row constraint to conform is "%s"' % self.__constraint,
             )

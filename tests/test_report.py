@@ -32,7 +32,9 @@ def test_report():
     assert report.table.time
     assert report.table.valid is True
     assert report.table.scope == [
+        "dialect-error",
         "schema-error",
+        "field-error",
         "extra-header",
         "missing-header",
         "blank-header",

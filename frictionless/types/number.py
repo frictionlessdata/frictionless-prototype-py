@@ -54,6 +54,11 @@ class NumberType(Type):
 
     # Write
 
-    # TODO: handle group_char/decimal_char
     def write_cell(self, cell):
-        return str(cell)
+        if "groupChar" in self.field:
+            cell = f"{cell:,}".replace(",", self.field.group_char)
+        else:
+            cell = str(cell)
+        if "decimalChar" in self.field:
+            cell = cell.replace(".", self.field.decimal_char)
+        return cell

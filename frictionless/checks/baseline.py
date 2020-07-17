@@ -10,7 +10,9 @@ class BaselineCheck(Check):
     }
     possible_Errors = [  # type: ignore
         # table
+        errors.DialectError,
         errors.SchemaError,
+        errors.FieldError,
         # head
         errors.ExtraHeaderError,
         errors.MissingHeaderError,
