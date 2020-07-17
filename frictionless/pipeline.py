@@ -18,7 +18,7 @@ class Pipeline(Metadata):
             "type": {"type": "string"},
             "steps": {
                 "type": "array",
-                "items": {"type": "object", "required": ["type", "body"]},
+                "items": {"type": "object", "required": ["type", "spec"]},
             },
         },
     }
@@ -43,8 +43,7 @@ class Pipeline(Metadata):
 
     # Run
 
-    # TODO: rename step.body
-    # TODO: rebase on the plugin system
+    # NOTE: rebase on the plugin system
     def run(self):
 
         # Check type
@@ -63,7 +62,7 @@ class Pipeline(Metadata):
         items = []
         for step in self.steps:
             func = getattr(dataflows, stringcase.lowercase(step["type"]))
-            items.append(func(**helpers.create_options(step["body"])))
+            items.append(func(**helpers.create_options(step["spec"])))
         flow = dataflows.Flow(*items)
 
         # Process flow

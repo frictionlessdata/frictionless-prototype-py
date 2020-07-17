@@ -2,13 +2,13 @@ name: pipeline
 type: dataflows
 steps:
   - type: load
-    body:
+    spec:
       loadSource: 'data/table.csv'
   - type: set_type
-    body:
+    spec:
       name: id
       type: string
   - type: dump_to_path
-    body:
+    spec:
       outPath: 'tmp/pipeline'
       prettyDescriptor: true

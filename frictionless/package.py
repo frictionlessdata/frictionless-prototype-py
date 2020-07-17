@@ -207,7 +207,7 @@ class Package(Metadata):
             result = result.to_dict()
         return result
 
-    # TODO: support multipart
+    # NOTE: support multipart
     def to_zip(self, target):
         try:
             with zipfile.ZipFile(target, "w") as zip:

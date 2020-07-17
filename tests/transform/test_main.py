@@ -12,9 +12,9 @@ def test_ensure_dir(tmpdir):
         {
             "type": "dataflows",
             "steps": [
-                {"type": "load", "body": {"loadSource": "data/table.csv"}},
-                {"type": "set_type", "body": {"name": "id", "type": "string"}},
-                {"type": "dump_to_path", "body": {"outPath": tmpdir}},
+                {"type": "load", "spec": {"loadSource": "data/table.csv"}},
+                {"type": "set_type", "spec": {"name": "id", "type": "string"}},
+                {"type": "dump_to_path", "spec": {"outPath": tmpdir}},
             ],
         }
     )

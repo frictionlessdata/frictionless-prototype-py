@@ -5,16 +5,16 @@ from frictionless import Pipeline, Package
 # General
 
 
-def test_ensure_dir(tmpdir):
+def test_pipeline(tmpdir):
 
     # Write
     pipeline = Pipeline(
         {
             "type": "dataflows",
             "steps": [
-                {"type": "load", "body": {"loadSource": "data/table.csv"}},
-                {"type": "set_type", "body": {"name": "id", "type": "string"}},
-                {"type": "dump_to_path", "body": {"outPath": tmpdir}},
+                {"type": "load", "spec": {"loadSource": "data/table.csv"}},
+                {"type": "set_type", "spec": {"name": "id", "type": "string"}},
+                {"type": "dump_to_path", "spec": {"outPath": tmpdir}},
             ],
         }
     )

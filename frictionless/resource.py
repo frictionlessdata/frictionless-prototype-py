@@ -76,7 +76,7 @@ class Resource(Metadata):
     def name(self):
         return self.get("name", "resource")
 
-    # TODO: should it be memory for inline?
+    # NOTE: should it be memory for inline?
     @Metadata.property
     def path(self):
         return self.get("path")
@@ -85,7 +85,7 @@ class Resource(Metadata):
     def data(self):
         return self.get("data")
 
-    # TODO: rewrite this method
+    # NOTE: rewrite this method
     @Metadata.property(write=False)
     def source(self):
         path = self.path
@@ -217,7 +217,7 @@ class Resource(Metadata):
 
     # Infer
 
-    # TODO: optimize this logic/don't re-open
+    # NOTE: optimize this logic/don't re-open
     def infer(self, source=None, *, only_sample=False):
         patch = {}
 
@@ -320,7 +320,7 @@ class Resource(Metadata):
         with self.to_table() as table:
             return table.sample
 
-    # TODO: optimize this logic/don't re-open
+    # NOTE: optimize this logic/don't re-open
     def read_stats(self):
 
         # Tabular
@@ -330,7 +330,7 @@ class Resource(Metadata):
                 return table.stats
 
         # General
-        # TODO: make loader.ByteStreamWithStatsHandling iterable / rebase on pass_through?
+        # NOTE: make loader.ByteStreamWithStatsHandling iterable / rebase on pass_through?
         with self.to_file() as file:
             bytes = True
             while bytes:
@@ -339,9 +339,6 @@ class Resource(Metadata):
 
     def read_lookup(self):
         lookup = {}
-        # TODO: remove whan problem with default schema is resolved
-        if not self.schema:
-            return lookup
         for fk in self.schema.foreign_keys:
             source_name = fk["reference"]["resource"]
             source_key = tuple(fk["reference"]["fields"])
@@ -372,7 +369,7 @@ class Resource(Metadata):
             result = result.to_dict()
         return result
 
-    # TODO: cache lookup?
+    # NOTE: cache lookup?
     def to_table(self, **options):
         options.setdefault("source", self.source)
         options.setdefault("scheme", self.scheme)
@@ -397,7 +394,7 @@ class Resource(Metadata):
         options.setdefault("compression_path", self.compression_path)
         return File(**options)
 
-    # TODO: support multipart
+    # NOTE: support multipart
     def to_zip(self, target):
         try:
             with zipfile.ZipFile(target, "w") as zip:

@@ -96,7 +96,7 @@ class Parser:
 # Internal
 
 
-# TODO: Try moving loader related errors to loader
+# NOTE: Try moving loader related errors to loader
 class DataStreamWithErrorHandling:
     def __init__(self, data_stream):
         self.data_stream = data_stream

@@ -79,7 +79,7 @@ class XlsxParser(Parser):
             raise exceptions.FrictionlessException(error)
 
         # Fill merged cells
-        # TODO: use algorithm from xls to merge after reading?
+        # NOTE: use algorithm from xls to merge after reading (to use read-only mode)?
         if dialect.fill_merged_cells:
             for merged_cell_range in list(sheet.merged_cells.ranges):
                 merged_cell_range = str(merged_cell_range)

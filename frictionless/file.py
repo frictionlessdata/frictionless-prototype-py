@@ -1,4 +1,5 @@
 import os
+import shutil
 from .query import Query
 from .metadata import Metadata
 from .system import system
@@ -93,7 +94,6 @@ class File(Metadata):
     def __exit__(self, type, value, traceback):
         self.close()
 
-    # TODO: test
     def __iter__(self):
         self.__read_raise_closed()
         return iter(self.__loader.__text_stream)
@@ -188,7 +188,7 @@ class File(Metadata):
         self.close()
         try:
             self.stats = {"hash": "", "bytes": 0, "rows": 0}
-            # TODO: handle cases like Inline/SQL/etc
+            # NOTE: handle cases like Inline/SQL/etc
             self.__loader = system.create_loader(self)
             self.__loader.open()
             return self
@@ -225,12 +225,11 @@ class File(Metadata):
 
     # Write
 
-    # TODO: rebase on a proper implementation
     # TODO: use tempfile to prevent loosing data
     def write(self, target):
         helpers.ensure_dir(target)
         with open(target, "wb") as file:
-            file.write(self.read_bytes())
+            shutil.copyfileobj(self.byte_stream, file)
 
     # Metadata
 

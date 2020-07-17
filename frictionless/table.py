@@ -764,7 +764,7 @@ class Table:
 
     # Write
 
-    # TODO: allow None target and return result for inline/pandas/etc?
+    # NOTE: allow None target and return result for inline/pandas/etc?
     def write(
         self,
         target,

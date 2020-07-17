@@ -48,14 +48,10 @@ def program_validate(source, *, headers, source_type, json, **options):
     exit(int(not report["valid"]))
 
 
-# Server
-# TODO: implement
-
-
 # Internal
 
 
-# TODO: rewrite this function
+# NOTE: rewrite this function
 def print_report(report, output=None, json=False):
     if json:
         return click.secho(json_module.dumps(report, indent=2, ensure_ascii=False))
