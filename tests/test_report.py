@@ -43,7 +43,6 @@ def test_report():
         "extra-cell",
         "missing-cell",
         "blank-row",
-        "required-error",
         "type-error",
         "constraint-error",
         "unique-error",

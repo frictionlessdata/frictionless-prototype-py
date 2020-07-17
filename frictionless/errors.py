@@ -423,15 +423,6 @@ class BlankRowError(RowError):
     description = "This row is empty. A row should contain at least one value."
 
 
-# TODO: merge with ConstraintError
-class RequiredError(CellError):
-    code = "required-error"
-    name = "Required Error"
-    tags = ["#body", "#schema"]
-    template = 'Field "{fieldName}" at position "{fieldPosition}" is a required field, but row at position "{rowPosition}" has no value'
-    description = "This field is a required field, but it contains no value."
-
-
 class TypeError(CellError):
     code = "type-error"
     name = "Missing Cell"

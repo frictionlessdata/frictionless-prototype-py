@@ -184,9 +184,9 @@ class Loader:
 # Internal
 
 
-# TODO: implement __iter__
-# TODO: review read/read1 usage
-# TODO: Try buffering byte sample especially for remote
+# NOTE: implement __iter__
+# NOTE: review read/read1 usage
+# NOTE: Try buffering byte sample especially for remote
 class ByteStreamWithStatsHandling:
     def __init__(self, byte_stream, *, hashing, stats):
         try:

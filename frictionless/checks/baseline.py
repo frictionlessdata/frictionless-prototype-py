@@ -23,7 +23,6 @@ class BaselineCheck(Check):
         errors.ExtraCellError,
         errors.MissingCellError,
         errors.BlankRowError,
-        errors.RequiredError,
         errors.TypeError,
         errors.ConstraintError,
         errors.UniqueError,
