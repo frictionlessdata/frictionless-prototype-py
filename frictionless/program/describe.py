@@ -5,6 +5,7 @@ from ..describe import describe
 from .main import program
 
 
+# NOTE: rewrite this function
 @program.command(name="describe")
 @click.argument("source", type=click.Path(), nargs=-1, required=True)
 @click.option("--source-type", type=str, help="Source type")
@@ -30,7 +31,7 @@ def program_describe(source, *, source_type, json, **options):
         elif isinstance(value, tuple):
             options[key] = list(value)
     source = list(source) if len(source) > 1 else source[0]
-    metadata = describe(source, source_type=source_type, **options)
+    result = describe(source, source_type=source_type, **options)
     if json:
-        return click.secho(json_module.dumps(metadata, indent=2, ensure_ascii=False))
-    click.secho(pformat(metadata.to_dict()))
+        return click.secho(json_module.dumps(result, indent=2, ensure_ascii=False))
+    click.secho(pformat(result.to_dict()))

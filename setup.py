@@ -57,6 +57,7 @@ INSTALL_REQUIRES = [
     "stringcase>=1.2",
     "unicodecsv>=0.14",
     "jsonlines>=1.2",
+    "simplejson>=3.10",
     "tabulate>=0.8",
     "openpyxl>=3.0",
     "ijson>=3.0",

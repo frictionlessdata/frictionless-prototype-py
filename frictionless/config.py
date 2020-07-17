@@ -15,6 +15,8 @@ def read_asset(*paths):
 
 
 VERSION = read_asset("VERSION")
+COMPRESSION_FORMATS = ["zip", "gz"]
+REMOTE_SCHEMES = ["http", "https", "ftp", "ftps"]
 GEOJSON_PROFILE = json.loads(read_asset("profiles", "geojson.json"))
 INQUIRY_PROFILE = json.loads(read_asset("profiles", "inquiry.json"))
 REPORT_PROFILE = json.loads(read_asset("profiles", "report.json"))
@@ -23,8 +25,6 @@ RESOURCE_PROFILE = json.loads(read_asset("profiles", "resource", "general.json")
 TABULAR_RESOURCE_PROFILE = json.loads(read_asset("profiles", "resource", "tabular.json"))
 PACKAGE_PROFILE = json.loads(read_asset("profiles", "package", "general.json"))
 FISCAL_PACKAGE_PROFILE = json.loads(read_asset("profiles", "package", "fiscal.json"))
-REMOTE_SCHEMES = ["http", "https", "ftp", "ftps"]
-COMPRESSION_FORMATS = ["zip", "gz"]
 UNDEFINED = object()
 
 

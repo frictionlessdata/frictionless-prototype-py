@@ -18,6 +18,7 @@ class Parser:
 
     newline = None
     loading = True
+    native_types = []
 
     def __init__(self, file):
         self.__file = file

@@ -5,7 +5,7 @@ from ..package import Package
 from .. import helpers
 
 
-def extract(source, source_type=None, **options):
+def extract(source, *, source_type=None, stream=False, json=False, **options):
     module = import_module("frictionless.extract")
 
     # Normalize source
@@ -20,6 +20,6 @@ def extract(source, source_type=None, **options):
             source = package
         source_type = helpers.detect_source_type(source)
 
-    # Validate source
+    # Extract source
     extract = getattr(module, "extract_%s" % source_type)
-    return extract(source, **options)
+    return extract(source, stream=stream, json=json, **options)

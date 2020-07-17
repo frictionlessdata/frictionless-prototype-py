@@ -7,6 +7,22 @@ from .. import errors
 
 class InlineParser(Parser):
     loading = False
+    native_types = [
+        "array",
+        "boolean",
+        "date",
+        "datetime",
+        "duration",
+        "geojson",
+        "geopoint",
+        "integer",
+        "number",
+        "object",
+        "string",
+        "time",
+        "year",
+        "yearmonth",
+    ]
 
     # Read
 

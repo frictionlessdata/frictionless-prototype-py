@@ -764,6 +764,7 @@ class Table:
 
     # Write
 
+    # NOTE: implement proper usage of loaders (e.g. write to s3)
     # NOTE: allow None target and return result for inline/pandas/etc?
     def write(
         self,

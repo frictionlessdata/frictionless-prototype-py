@@ -2,7 +2,7 @@ from ..package import Package
 from .. import helpers
 
 
-def extract_package(source, *, stream=False):
+def extract_package(source, *, stream=False, json=False):
 
     # Create package
     package = Package(source)
@@ -11,5 +11,19 @@ def extract_package(source, *, stream=False):
     result = {}
     for resource in package.resources:
         name = resource.name or helpers.detect_name(resource.path)
-        result[name] = resource.read_row_stream() if stream else resource.read_rows()
+
+        # Stream
+        if stream:
+            result[name] = resource.read_row_stream()
+
+        # Json
+        elif json:
+            result[name] = []
+            for row in resource.read_row_stream():
+                result[name].append(row.to_dict(json=True))
+
+        # Default
+        else:
+            result[name] = resource.read_rows()
+
     return result

@@ -1,10 +1,11 @@
 import click
-import json as json_module
+import simplejson
 from tabulate import tabulate
 from ..extract import extract
 from .main import program
 
 
+# NOTE: rewrite this function
 @program.command(name="extract")
 @click.argument("source", type=click.Path(), nargs=-1, required=True)
 @click.option("--source-type", type=str, help="Source type")
@@ -30,14 +31,13 @@ def program_extract(source, *, source_type, json, **options):
         elif isinstance(value, tuple):
             options[key] = list(value)
     source = list(source) if len(source) > 1 else source[0]
-    data = extract(source, source_type=source_type, **options)
-    if data:
+    result = extract(source, source_type=source_type, json=json, **options)
+    if result:
         if json:
-            # TODO: fix the problem with objects serialization
-            return click.secho(json_module.dumps(data, indent=2, ensure_ascii=False))
-        if isinstance(data, list):
-            return click.secho(tabulate(data, headers="keys"))
-        for number, (name, rows) in enumerate(data.items(), start=1):
+            return click.secho(simplejson.dumps(result, indent=2, ensure_ascii=False))
+        if isinstance(result, list):
+            return click.secho(tabulate(result, headers="keys"))
+        for number, (name, rows) in enumerate(result.items(), start=1):
             if number != 1:
                 click.secho("\n")
             click.secho(f"{name}\n", bold=True)

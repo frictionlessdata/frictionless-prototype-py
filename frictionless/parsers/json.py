@@ -1,7 +1,7 @@
 import io
-import json
 import ijson
 import jsonlines
+import simplejson
 from ..file import File
 from ..parser import Parser
 from ..system import system
@@ -10,6 +10,16 @@ from .. import helpers
 
 
 class JsonParser(Parser):
+    native_types = [
+        "array",
+        "boolean",
+        "geojson",
+        "integer",
+        "number",
+        "object",
+        "string",
+        "year",
+    ]
 
     # Read
 
@@ -35,16 +45,26 @@ class JsonParser(Parser):
         helpers.ensure_dir(self.file.source)
         for row in row_stream:
             cells = list(row.values())
-            cells, notes = schema.write_data(cells, native_types=NATIVE_TYPES)
+            cells, notes = schema.write_data(cells, native_types=self.native_types)
             item = dict(zip(schema.field_names, cells)) if dialect.keyed else cells
             if not dialect.keyed and row.row_number == 1:
                 data.append(schema.field_names)
             data.append(item)
         with open(self.file.source, "w") as file:
-            json.dump(data, file, indent=2)
+            simplejson.dump(data, file, indent=2)
 
 
 class JsonlParser(Parser):
+    native_types = [
+        "array",
+        "boolean",
+        "geojson",
+        "integer",
+        "number",
+        "object",
+        "string",
+        "year",
+    ]
 
     # Read
 
@@ -68,23 +88,8 @@ class JsonlParser(Parser):
             writer = jsonlines.Writer(file)
             for row in row_stream:
                 cells = list(row.values())
-                cells, notes = schema.write_data(cells, native_types=NATIVE_TYPES)
+                cells, notes = schema.write_data(cells, native_types=self.native_types)
                 item = dict(zip(schema.field_names, cells)) if dialect.keyed else cells
                 if not dialect.keyed and row.row_number == 1:
                     writer.write(schema.field_names)
                 writer.write(item)
-
-
-# Internal
-
-
-NATIVE_TYPES = [
-    "array",
-    "boolean",
-    "geojson",
-    "integer",
-    "number",
-    "object",
-    "string",
-    "year",
-]

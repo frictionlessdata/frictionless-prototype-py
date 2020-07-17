@@ -49,10 +49,10 @@ def create_api():
         metadata = describe(**options)
         return flask.jsonify(metadata)
 
-    # TODO: fix the problem with objects serialization
     @app.route("/extract", methods=["POST"])
     def api_extract():
         options = helpers.create_options(flask.request.json)
+        options["json"] = True
         data = extract(**options)
         return flask.jsonify(data)
 

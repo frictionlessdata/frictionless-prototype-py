@@ -6,6 +6,7 @@ from ..validate import validate
 from .main import program
 
 
+# NOTE: rewrite this function
 @program.command(name="validate")
 @click.argument("source", type=click.Path(), required=True)
 @click.option("--source-type", type=str, help="Source type")

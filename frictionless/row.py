@@ -1,6 +1,7 @@
 from itertools import zip_longest
 from collections import OrderedDict
 from .helpers import cached_property
+from .parsers import JsonParser
 from . import errors
 
 
@@ -20,6 +21,7 @@ class Row(OrderedDict):
         assert len(field_positions) in (len(cells), len(fields))
 
         # Set params
+        self.__fields = fields
         self.__field_positions = field_positions
         self.__row_position = row_position
         self.__row_number = row_number
@@ -152,5 +154,14 @@ class Row(OrderedDict):
 
     # Import/Export
 
-    def to_dict(self):
+    # NOTE: implement to_list(json=False) - api streaming
+    def to_dict(self, *, json=False):
+        if json:
+            result = OrderedDict()
+            for field in self.__fields:
+                cell = self[field.name]
+                if field.type not in JsonParser.native_types:
+                    cell, notes = field.write_cell(cell)
+                result[field.name] = cell
+            return result
         return OrderedDict(self)

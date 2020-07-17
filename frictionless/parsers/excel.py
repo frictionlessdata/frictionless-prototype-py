@@ -17,6 +17,16 @@ from .. import errors
 
 
 class XlsxParser(Parser):
+    native_types = [
+        "boolean",
+        "date",
+        "datetime",
+        "integer",
+        "number",
+        "string",
+        "time",
+        "year",
+    ]
 
     # Read
 
@@ -112,12 +122,22 @@ class XlsxParser(Parser):
             if row.row_number == 1:
                 sheet.append(schema.field_names)
             cells = list(row.values())
-            cells, notes = schema.write_data(cells, native_types=NATIVE_TYPES)
+            cells, notes = schema.write_data(cells, native_types=self.native_types)
             sheet.append(cells)
         book.save(self.file.source)
 
 
 class XlsParser(Parser):
+    native_types = [
+        "boolean",
+        "date",
+        "datetime",
+        "integer",
+        "number",
+        "string",
+        "time",
+        "year",
+    ]
 
     # Read
 
@@ -199,24 +219,13 @@ class XlsParser(Parser):
                 for field_index, name in enumerate(schema.field_names):
                     sheet.write(0, field_index, name)
             cells = list(row.values())
-            cells, notes = schema.write_data(cells, native_types=NATIVE_TYPES)
+            cells, notes = schema.write_data(cells, native_types=self.native_types)
             for field_index, cell in enumerate(cells):
                 sheet.write(row_index + 1, field_index, cell)
         book.save(self.file.source)
 
 
 # Internal
-
-NATIVE_TYPES = [
-    "boolean",
-    "date",
-    "datetime",
-    "integer",
-    "number",
-    "string",
-    "time",
-    "year",
-]
 
 EXCEL_CODES = {
     "yyyy": "%Y",
