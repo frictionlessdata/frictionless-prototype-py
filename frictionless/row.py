@@ -125,6 +125,10 @@ class Row(OrderedDict):
             ]
 
     @cached_property
+    def fields(self):
+        return self.__fields
+
+    @cached_property
     def field_positions(self):
         return self.__field_positions
 
@@ -154,14 +158,24 @@ class Row(OrderedDict):
 
     # Import/Export
 
-    # NOTE: implement to_list(json=False) - api streaming
     def to_dict(self, *, json=False):
         if json:
-            result = OrderedDict()
+            result = {}
             for field in self.__fields:
                 cell = self[field.name]
                 if field.type not in JsonParser.native_types:
                     cell, notes = field.write_cell(cell)
                 result[field.name] = cell
             return result
-        return OrderedDict(self)
+        return dict(self)
+
+    def to_list(self, *, json=False):
+        if json:
+            result = []
+            for field in self.__fields:
+                cell = self[field.name]
+                if field.type not in JsonParser.native_types:
+                    cell, notes = field.write_cell(cell)
+                result.append(cell)
+            return result
+        return list(self.values())

@@ -17,6 +17,7 @@ class Headers(list):
         assert len(field_positions) in (len(cells), len(fields))
 
         # Set params
+        self.__fields = fields
         self.__field_positions = field_positions
         self.__errors = []
 
@@ -114,6 +115,10 @@ class Headers(list):
         super().__init__(cells)
 
     @cached_property
+    def fields(self):
+        return self.__fields
+
+    @cached_property
     def field_positions(self):
         return self.__field_positions
 
@@ -126,6 +131,12 @@ class Headers(list):
         return not self.__errors
 
     # Import/Export
+
+    def to_dict(self):
+        result = {}
+        for field, header in zip(self.__fields, self):
+            result[field.name] = header
+        return result
 
     def to_list(self):
         return list(self)
