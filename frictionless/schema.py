@@ -267,7 +267,7 @@ class Schema(Metadata):
 
     # Write
 
-    def write_data(self, cells):
+    def write_data(self, cells, *, native_types=[]):
         """Write a list of cells (normalize/uncast)
 
         # Arguments
@@ -280,8 +280,10 @@ class Schema(Metadata):
         result_cells = []
         result_notes = []
         for index, field in enumerate(self.fields):
+            notes = None
             cell = cells[index] if len(cells) > index else None
-            cell, notes = field.write_cell(cell)
+            if field.type not in native_types:
+                cell, notes = field.write_cell(cell)
             result_cells.append(cell)
             result_notes.append(notes)
         return result_cells, result_notes

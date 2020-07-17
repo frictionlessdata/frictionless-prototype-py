@@ -111,11 +111,8 @@ class XlsxParser(Parser):
             cells = []
             if row.row_number == 1:
                 sheet.append(schema.field_names)
-            for field in schema.fields:
-                cell = row[field.name]
-                if field.type not in NATIVE_TYPES:
-                    cell = field.write_cell(cell)
-                cells.append(cell)
+            cells = list(row.values())
+            cells, notes = schema.write_data(cells, native_types=NATIVE_TYPES)
             sheet.append(cells)
         book.save(self.file.source)
 
@@ -201,10 +198,9 @@ class XlsParser(Parser):
             if row.row_number == 1:
                 for field_index, name in enumerate(schema.field_names):
                     sheet.write(0, field_index, name)
-            for field_index, field in enumerate(schema.fields):
-                cell = row[field.name]
-                if field.type not in NATIVE_TYPES:
-                    cell = field.write_cell(cell)
+            cells = list(row.values())
+            cells, notes = schema.write_data(cells, native_types=NATIVE_TYPES)
+            for field_index, cell in enumerate(cells):
                 sheet.write(row_index + 1, field_index, cell)
         book.save(self.file.source)
 

@@ -34,7 +34,9 @@ class JsonParser(Parser):
         dialect = self.file.dialect
         helpers.ensure_dir(self.file.source)
         for row in row_stream:
-            item = row.to_dict() if dialect.keyed else list(row.values())
+            cells = list(row.values())
+            cells, notes = schema.write_data(cells, native_types=NATIVE_TYPES)
+            item = dict(zip(schema.field_names, cells)) if dialect.keyed else cells
             if not dialect.keyed and row.row_number == 1:
                 data.append(schema.field_names)
             data.append(item)
@@ -65,7 +67,9 @@ class JsonlParser(Parser):
         with io.open(self.file.source, "wb") as file:
             writer = jsonlines.Writer(file)
             for row in row_stream:
-                item = row.to_dict() if dialect.keyed else list(row.values())
+                cells = list(row.values())
+                cells, notes = schema.write_data(cells, native_types=NATIVE_TYPES)
+                item = dict(zip(schema.field_names, cells)) if dialect.keyed else cells
                 if not dialect.keyed and row.row_number == 1:
                     writer.write(schema.field_names)
                 writer.write(item)
