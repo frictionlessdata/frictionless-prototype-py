@@ -1,3 +1,4 @@
+import tempfile
 from ..parser import Parser
 from ..plugin import Plugin
 from ..dialects import Dialect
@@ -26,8 +27,22 @@ class TsvParser(Parser):
 
     def read_data_stream_create(self):
         tsv = helpers.import_from_plugin("tsv", plugin="tsv")
-        data = tsv.un(self.loader.text_stream)
+        data = tsv.reader(self.loader.text_stream)
         yield from data
+
+    # Write
+
+    def write(self, row_stream):
+        tsv = helpers.import_from_plugin("tsv", plugin="tsv")
+        with tempfile.NamedTemporaryFile("wt", delete=False) as file:
+            writer = tsv.writer(file)
+            for row in row_stream:
+                if row.row_number == 1:
+                    writer.writerow(row.schema.field_names)
+                cells = list(row.values())
+                cells, notes = row.schema.write_data(cells)
+                writer.writerow(cells)
+        helpers.move_file(file.name, self.file.source)
 
 
 # Dialect
