@@ -128,7 +128,7 @@ $ frictionless validate data/invalid.csv
 Now having all this information:
 - we can clean up the table to ensure the data quality
 - we can use the metadata to describe and share the dataset
-- we can include the validation into our workflow guarantee validity
+- we can include the validation into our workflow to guarantee validity
 - and much more: don't hesitate and read the documentation below!
 
 ## Documentation
