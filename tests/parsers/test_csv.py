@@ -1,4 +1,3 @@
-import io
 import pytest
 from frictionless import Table, dialects
 
@@ -8,19 +7,19 @@ BASE_URL = "https://raw.githubusercontent.com/okfn/tabulator-py/master/%s"
 # Read
 
 
-def test_table_local_csv():
+def test_table_csv():
     with Table("data/table.csv") as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
-def test_table_local_csv_with_bom():
+def test_table_csv_with_bom():
     with Table("data/bom.csv") as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
-def test_table_local_csv_with_bom_with_encoding():
+def test_table_csv_with_bom_with_encoding():
     with Table("data/bom.csv", encoding="utf-8") as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
@@ -66,14 +65,14 @@ def test_table_csv_doublequote():
             assert len(row) == 17
 
 
-def test_table_table_csv():
-    source = io.open("data/table.csv", mode="rb")
+def test_table_csv_stream():
+    source = open("data/table.csv", mode="rb")
     with Table(source, format="csv") as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
-def test_table_text_csv():
+def test_table_csv_text():
     source = "text://id,name\n1,english\n2,中国人\n"
     with Table(source, format="csv") as table:
         assert table.headers == ["id", "name"]
@@ -81,14 +80,14 @@ def test_table_text_csv():
 
 
 @pytest.mark.slow
-def test_table_remote_csv():
+def test_table_csv_remote():
     with Table(BASE_URL % "data/table.csv") as table:
         assert table.headers == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
 @pytest.mark.slow
-def test_table_remote_csv_non_ascii_url():
+def test_table_csv_remote_non_ascii_url():
     source = "http://data.defra.gov.uk/ops/government_procurement_card/over_£500_GPC_apr_2013.csv"
     with Table(source) as table:
         assert table.headers == [

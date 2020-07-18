@@ -22,7 +22,6 @@ from frictionless import Field
         ("default", "no", False, {"falseValues": ["no"]}),
         ("default", "t", None, {}),
         ("default", "YES", None, {}),
-        ("default", "Yes", None, {}),
         ("default", "f", None, {}),
         ("default", "NO", None, {}),
         ("default", "No", None, {}),
