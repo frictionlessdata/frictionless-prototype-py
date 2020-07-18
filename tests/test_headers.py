@@ -1,4 +1,4 @@
-from frictionless import Headers, Field
+from frictionless import Headers, Field, Schema
 
 
 # General
@@ -14,9 +14,11 @@ def test_basic():
 # Helpers
 
 
-def create_headers(headers, *, fields=[], field_positions=[]):
+def create_headers(headers, *, schema=None, field_positions=[]):
     field_positions = field_positions or list(range(1, len(headers) + 1))
-    if not fields:
+    if not schema:
+        fields = []
         for field_position in field_positions:
             fields.append(Field({"name": "field%s" % field_position, "type": "any"}))
-    return Headers(headers, fields=fields, field_positions=field_positions)
+        schema = Schema({"fields": fields})
+    return Headers(headers, schema=schema, field_positions=field_positions)

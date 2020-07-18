@@ -90,7 +90,7 @@ class Parser:
 
     # Write
 
-    def write(self, row_stream, *, schema):
+    def write(self, row_stream):
         raise NotImplementedError
 
 

@@ -38,7 +38,7 @@ class CsvParser(Parser):
 
     # Write
 
-    def write(self, row_stream, *, schema):
+    def write(self, row_stream):
         options = {}
         for name in vars(self.file.dialect.to_python()):
             value = getattr(self.file.dialect, name, None)
@@ -48,9 +48,10 @@ class CsvParser(Parser):
             writer = unicodecsv.writer(file, encoding=self.file.encoding, **options)
             for row in row_stream:
                 if row.row_number == 1:
-                    writer.writerow(schema.field_names)
+                    writer.writerow(row.schema.field_names)
+                # NOTE: move this logic to Row?
                 cells = list(row.values())
-                cells, notes = schema.write_data(cells)
+                cells, notes = row.schema.write_data(cells)
                 writer.writerow(cells)
         helpers.move_file(file.name, self.file.source)
 

@@ -17,11 +17,12 @@ class Row(OrderedDict):
 
     """
 
-    def __init__(self, cells, *, fields, field_positions, row_position, row_number):
-        assert len(field_positions) in (len(cells), len(fields))
+    def __init__(self, cells, *, schema, field_positions, row_position, row_number):
+        assert len(field_positions) in (len(cells), len(schema.fields))
 
-        # Set params
-        self.__fields = fields
+        # Set attributes
+        fields = schema.fields
+        self.__schema = schema
         self.__field_positions = field_positions
         self.__row_position = row_position
         self.__row_number = row_number
@@ -125,8 +126,8 @@ class Row(OrderedDict):
             ]
 
     @cached_property
-    def fields(self):
-        return self.__fields
+    def schema(self):
+        return self.__schema
 
     @cached_property
     def field_positions(self):
@@ -161,7 +162,7 @@ class Row(OrderedDict):
     def to_dict(self, *, json=False):
         if json:
             result = {}
-            for field in self.__fields:
+            for field in self.__schema.fields:
                 cell = self[field.name]
                 if field.type not in JsonParser.native_types:
                     cell, notes = field.write_cell(cell)
@@ -172,7 +173,7 @@ class Row(OrderedDict):
     def to_list(self, *, json=False):
         if json:
             result = []
-            for field in self.__fields:
+            for field in self.__schema.fields:
                 cell = self[field.name]
                 if field.type not in JsonParser.native_types:
                     cell, notes = field.write_cell(cell)

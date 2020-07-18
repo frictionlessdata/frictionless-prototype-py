@@ -109,7 +109,7 @@ class XlsxParser(Parser):
 
     # Write
 
-    def write(self, row_stream, *, schema):
+    def write(self, row_stream):
         dialect = self.file.dialect
         helpers.ensure_dir(self.file.source)
         book = openpyxl.Workbook(write_only=True)
@@ -120,9 +120,9 @@ class XlsxParser(Parser):
         for row in row_stream:
             cells = []
             if row.row_number == 1:
-                sheet.append(schema.field_names)
+                sheet.append(row.schema.field_names)
             cells = list(row.values())
-            cells, notes = schema.write_data(cells, native_types=self.native_types)
+            cells, notes = row.schema.write_data(cells, native_types=self.native_types)
             sheet.append(cells)
         book.save(self.file.source)
 
@@ -206,7 +206,7 @@ class XlsParser(Parser):
 
     # Write
 
-    def write(self, row_stream, *, schema):
+    def write(self, row_stream):
         dialect = self.file.dialect
         helpers.ensure_dir(self.file.source)
         book = xlwt.Workbook()
@@ -216,10 +216,10 @@ class XlsParser(Parser):
         sheet = book.add_sheet(title)
         for row_index, row in enumerate(row_stream):
             if row.row_number == 1:
-                for field_index, name in enumerate(schema.field_names):
+                for field_index, name in enumerate(row.schema.field_names):
                     sheet.write(0, field_index, name)
             cells = list(row.values())
-            cells, notes = schema.write_data(cells, native_types=self.native_types)
+            cells, notes = row.schema.write_data(cells, native_types=self.native_types)
             for field_index, cell in enumerate(cells):
                 sheet.write(row_index + 1, field_index, cell)
         book.save(self.file.source)

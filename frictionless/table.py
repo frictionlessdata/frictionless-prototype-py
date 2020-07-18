@@ -573,9 +573,7 @@ class Table:
         self.__schema = schema
         self.__field_positions = field_positions
         self.__sample_positions = sample_positions
-        self.__headers = Headers(
-            headers, fields=schema.fields, field_positions=field_positions
-        )
+        self.__headers = Headers(headers, schema=schema, field_positions=field_positions)
 
     def __read_data_stream_infer_headers(self, headers_data):
         dialect = self.__file.dialect
@@ -705,7 +703,7 @@ class Table:
             # Create row
             row = Row(
                 cells,
-                fields=self.__schema.fields,
+                schema=self.__schema,
                 field_positions=self.__field_positions,
                 row_position=self.__row_position,
                 row_number=self.__file.stats["rows"],
@@ -796,7 +794,7 @@ class Table:
         # Write file
         row_stream = self.__write_row_stream_create()
         parser = system.create_parser(file)
-        parser.write(row_stream, schema=self.schema)
+        parser.write(row_stream)
 
     def __write_row_stream_create(self):
         self.__read_data_stream_raise_closed()

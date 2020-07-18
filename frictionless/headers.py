@@ -13,11 +13,12 @@ class Headers(list):
 
     """
 
-    def __init__(self, cells, *, fields, field_positions):
-        assert len(field_positions) in (len(cells), len(fields))
+    def __init__(self, cells, *, schema, field_positions):
+        assert len(field_positions) in (len(cells), len(schema.fields))
 
-        # Set params
-        self.__fields = fields
+        # Set attributes
+        fields = schema.fields
+        self.__schema = schema
         self.__field_positions = field_positions
         self.__errors = []
 
@@ -115,8 +116,8 @@ class Headers(list):
         super().__init__(cells)
 
     @cached_property
-    def fields(self):
-        return self.__fields
+    def schema(self):
+        return self.__schema
 
     @cached_property
     def field_positions(self):
@@ -134,7 +135,7 @@ class Headers(list):
 
     def to_dict(self):
         result = {}
-        for field, header in zip(self.__fields, self):
+        for field, header in zip(self.__schema.fields, self):
             result[field.name] = header
         return result
 

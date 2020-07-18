@@ -65,10 +65,10 @@ class InlineParser(Parser):
 
     # Write
 
-    def write(self, row_stream, *, schema):
+    def write(self, row_stream):
         dialect = self.file.dialect
         for row in row_stream:
             item = row.to_dict() if dialect.keyed else list(row.values())
             if not dialect.keyed and row.row_number == 1:
-                self.file.source.append(schema.field_names)
+                self.file.source.append(row.schema.field_names)
             self.file.source.append(item)

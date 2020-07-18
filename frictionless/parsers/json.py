@@ -38,15 +38,15 @@ class JsonParser(Parser):
 
     # Write
 
-    def write(self, row_stream, *, schema):
+    def write(self, row_stream):
         data = []
         dialect = self.file.dialect
         for row in row_stream:
             cells = list(row.values())
-            cells, notes = schema.write_data(cells, native_types=self.native_types)
-            item = dict(zip(schema.field_names, cells)) if dialect.keyed else cells
+            cells, notes = row.schema.write_data(cells, native_types=self.native_types)
+            item = dict(zip(row.schema.field_names, cells)) if dialect.keyed else cells
             if not dialect.keyed and row.row_number == 1:
-                data.append(schema.field_names)
+                data.append(row.schema.field_names)
             data.append(item)
         with tempfile.NamedTemporaryFile("wt", delete=False) as file:
             simplejson.dump(data, file, indent=2)
@@ -79,11 +79,12 @@ class JsonlParser(Parser):
 
     # Write
 
-    def write(self, row_stream, *, schema):
+    def write(self, row_stream):
         dialect = self.file.dialect
         with tempfile.NamedTemporaryFile(delete=False) as file:
             writer = jsonlines.Writer(file)
             for row in row_stream:
+                schema = row.schema
                 cells = list(row.values())
                 cells, notes = schema.write_data(cells, native_types=self.native_types)
                 item = dict(zip(schema.field_names, cells)) if dialect.keyed else cells
