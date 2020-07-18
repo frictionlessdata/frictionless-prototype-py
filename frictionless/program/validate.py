@@ -81,7 +81,7 @@ def print_report(report, output=None, json=False):
                 % (
                     error.get("rowPosition"),
                     error.get("fieldPosition"),
-                    error.code,
-                    error.message,
+                    error.get("code"),
+                    error.get("message"),
                 )
             )
