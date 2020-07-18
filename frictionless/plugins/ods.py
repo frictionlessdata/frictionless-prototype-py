@@ -25,7 +25,6 @@ class OdsPlugin(Plugin):
 # Parser
 
 
-# TODO: implement write
 class OdsParser(Parser):
 
     # Read

@@ -21,7 +21,6 @@ class HtmlPlugin(Plugin):
 # Parser
 
 
-# TODO: implement write
 class HtmlParser(Parser):
 
     # Read

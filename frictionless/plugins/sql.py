@@ -21,7 +21,6 @@ class SqlPlugin(Plugin):
 # Parser
 
 
-# TODO: implement write
 class SqlParser(Parser):
     loading = False
 

@@ -20,7 +20,6 @@ class TsvPlugin(Plugin):
 # Parser
 
 
-# TODO: implement write
 class TsvParser(Parser):
 
     # Read
