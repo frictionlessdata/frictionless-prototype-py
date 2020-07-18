@@ -1,7 +1,4 @@
-global-include *.json
-global-include *.yml
-global-include *.txt
-global-include VERSION
+include assets/**/*.*
 include LICENSE.md
 include Makefile
 include pylama.ini
