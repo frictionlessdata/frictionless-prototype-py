@@ -95,6 +95,11 @@ def ensure_dir(path):
         os.makedirs(dirpath)
 
 
+def move_file(source, target):
+    ensure_dir(target)
+    shutil.move(source, target)
+
+
 def is_remote_path(path):
     return urlparse(path).scheme in config.REMOTE_SCHEMES
 

@@ -1,6 +1,7 @@
 import io
 import json
 import yaml
+import tempfile
 import requests
 import jsonschema
 import stringcase
@@ -81,17 +82,17 @@ class Metadata(helpers.ControlledDict):
 
     def to_json(self, target):
         try:
-            helpers.ensure_dir(target)
-            with open(target, mode="w", encoding="utf-8") as file:
+            with tempfile.NamedTemporaryFile("wt", delete=False) as file:
                 json.dump(self.to_dict(), file, indent=2, ensure_ascii=False)
+            helpers.move_file(file.name, target)
         except Exception as exc:
             raise exceptions.FrictionlessException(self.__Error(note=str(exc))) from exc
 
     def to_yaml(self, target):
         try:
-            helpers.ensure_dir(target)
-            with open(target, mode="w", encoding="utf-8") as file:
+            with tempfile.NamedTemporaryFile("wt", delete=False) as file:
                 yaml.safe_dump(self.to_dict(), file)
+            helpers.move_file(file.name, target)
         except Exception as exc:
             raise exceptions.FrictionlessException(self.__Error(note=str(exc))) from exc
 

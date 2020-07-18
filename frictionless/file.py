@@ -1,5 +1,6 @@
 import os
 import shutil
+import tempfile
 from .query import Query
 from .metadata import Metadata
 from .system import system
@@ -225,11 +226,10 @@ class File(Metadata):
 
     # Write
 
-    # TODO: use tempfile to prevent loosing data
     def write(self, target):
-        helpers.ensure_dir(target)
-        with open(target, "wb") as file:
+        with tempfile.NamedTemporaryFile(delete=False) as file:
             shutil.copyfileobj(self.byte_stream, file)
+        helpers.move_file(file.name, target)
 
     # Metadata
 

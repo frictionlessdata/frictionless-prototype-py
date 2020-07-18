@@ -1,5 +1,5 @@
-import io
 import ijson
+import tempfile
 import jsonlines
 import simplejson
 from ..file import File
@@ -38,11 +38,9 @@ class JsonParser(Parser):
 
     # Write
 
-    # TODO: use tempfile to prevent loosing data
     def write(self, row_stream, *, schema):
         data = []
         dialect = self.file.dialect
-        helpers.ensure_dir(self.file.source)
         for row in row_stream:
             cells = list(row.values())
             cells, notes = schema.write_data(cells, native_types=self.native_types)
@@ -50,8 +48,9 @@ class JsonParser(Parser):
             if not dialect.keyed and row.row_number == 1:
                 data.append(schema.field_names)
             data.append(item)
-        with open(self.file.source, "w") as file:
+        with tempfile.NamedTemporaryFile("wt", delete=False) as file:
             simplejson.dump(data, file, indent=2)
+        helpers.move_file(file.name, self.file.source)
 
 
 class JsonlParser(Parser):
@@ -80,11 +79,9 @@ class JsonlParser(Parser):
 
     # Write
 
-    # TODO: use tempfile to prevent loosing data
     def write(self, row_stream, *, schema):
         dialect = self.file.dialect
-        helpers.ensure_dir(self.file.source)
-        with io.open(self.file.source, "wb") as file:
+        with tempfile.NamedTemporaryFile(delete=False) as file:
             writer = jsonlines.Writer(file)
             for row in row_stream:
                 cells = list(row.values())
@@ -93,3 +90,4 @@ class JsonlParser(Parser):
                 if not dialect.keyed and row.row_number == 1:
                     writer.write(schema.field_names)
                 writer.write(item)
+        helpers.move_file(file.name, self.file.source)

@@ -1,5 +1,5 @@
-import io
 import csv
+import tempfile
 import stringcase
 import unicodecsv
 from itertools import chain
@@ -38,15 +38,13 @@ class CsvParser(Parser):
 
     # Write
 
-    # TODO: use tempfile to prevent loosing data
     def write(self, row_stream, *, schema):
         options = {}
         for name in vars(self.file.dialect.to_python()):
             value = getattr(self.file.dialect, name, None)
             if value is not None:
                 options[name] = value
-        helpers.ensure_dir(self.file.source)
-        with io.open(self.file.source, "wb") as file:
+        with tempfile.NamedTemporaryFile(delete=False) as file:
             writer = unicodecsv.writer(file, encoding=self.file.encoding, **options)
             for row in row_stream:
                 if row.row_number == 1:
@@ -54,6 +52,7 @@ class CsvParser(Parser):
                 cells = list(row.values())
                 cells, notes = schema.write_data(cells)
                 writer.writerow(cells)
+        helpers.move_file(file.name, self.file.source)
 
 
 # Internal
