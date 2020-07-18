@@ -137,6 +137,7 @@ This readme gives a high-level overview of the framework. A detailed documentati
 - [Introductory Guide](docs/introductory-guide.md)
 - [Advanced Guide](docs/advanced-guide.md)
 - [Contribution Guide](docs/contribution-guide.md)
+- [Sources and Formats](docs/sources-and-formats.md)
 - [Using with SQL](docs/using-with-sql.md)
 - [Using with Pandas](docs/using-with-pandas.md)
 - [Error Reference](docs/errors-reference.md)
