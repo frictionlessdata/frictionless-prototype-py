@@ -4,6 +4,8 @@ from ..plugin import Plugin
 from ..parser import Parser
 from ..system import system
 from ..dialects import Dialect
+from .. import exceptions
+from .. import errors
 
 
 # Plugin
@@ -22,7 +24,6 @@ class GsheetPlugin(Plugin):
 # Parser
 
 
-# TODO: implement write (as raising an error not supported)
 class GsheetParser(Parser):
     loading = False
 
@@ -41,6 +42,13 @@ class GsheetParser(Parser):
             source = "%s&gid=%s" % (source, gid)
         with system.create_parser(File(source, stats=self.file.stats)) as parser:
             yield from parser.data_stream
+
+    # Write
+
+    # NOTE: if we migrate to the native driver we can enable it
+    def write(self, row_stream, *, schema):
+        error = errors.Error(note="Writing to Google Sheets is not supported")
+        raise exceptions.FrictionlessException(error)
 
 
 # Dialect
