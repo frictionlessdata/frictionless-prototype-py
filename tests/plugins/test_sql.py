@@ -46,11 +46,11 @@ def test_table_format_sql_headers_none(database_url):
 # Write
 
 
-@pytest.mark.skip
 def test_table_write_sqlite(database_url):
     source = "data/table.csv"
+    dialect = SqlDialect(table="name", order_by="id")
     with Table(source) as table:
-        table.write(database_url, table="test_table_write_sqlite")
-    with Table(database_url, table="test_table_write_sqlite", order_by="id") as table:
-        assert table.read() == [["1", "english"], ["2", "中国人"]]
+        table.write(database_url, dialect=dialect)
+    with Table(database_url, dialect=dialect) as table:
         assert table.headers == ["id", "name"]
+        assert table.read_data() == [["1", "english"], ["2", "中国人"]]

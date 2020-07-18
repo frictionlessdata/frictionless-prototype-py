@@ -21,8 +21,12 @@ class SqlPlugin(Plugin):
 # Parser
 
 
+# NOTE: extend native types (make property as it depends on the database engine)
 class SqlParser(Parser):
     loading = False
+    native_types = [
+        "string",
+    ]
 
     # Read
 
@@ -43,26 +47,30 @@ class SqlParser(Parser):
 
     # Write
 
-    def write(self, source, target, headers, encoding=None):
+    # NOTE: rewrite this method
+    # NOTE: create columns using extended native types
+    def write(self, row_stream):
         sa = helpers.import_from_plugin("sqlalchemy", plugin="sql")
-        engine = sa.create_engine(target)
-        count = 0
+        engine = sa.create_engine(self.file.source)
+        dialect = self.file.dialect
         buffer = []
         buffer_size = 1000
         with engine.begin() as conn:
-            meta = sa.MetaData()
-            columns = [sa.Column(header, sa.String()) for header in headers]
-            table = sa.Table(self.__table, meta, *columns)
-            meta.create_all(conn)
-            for row in source:
-                count += 1
-                buffer.append(row)
+            for row in row_stream:
+                schema = row.schema
+                if row.row_number == 1:
+                    meta = sa.MetaData()
+                    columns = [sa.Column(nm, sa.String()) for nm in schema.field_names]
+                    table = sa.Table(dialect.table, meta, *columns)
+                    meta.create_all(conn)
+                cells = list(row.values())
+                cells, notes = schema.write_data(cells, native_types=self.native_types)
+                buffer.append(cells)
                 if len(buffer) > buffer_size:
                     conn.execute(table.insert().values(buffer))
                     buffer = []
             if len(buffer):
                 conn.execute(table.insert().values(buffer))
-        return count
 
 
 # Dialect

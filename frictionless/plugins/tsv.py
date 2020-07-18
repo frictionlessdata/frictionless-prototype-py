@@ -40,10 +40,11 @@ class TsvParser(Parser):
         with tempfile.NamedTemporaryFile("wt", delete=False) as file:
             writer = tsv.writer(file)
             for row in row_stream:
+                schema = row.schema
                 if row.row_number == 1:
-                    writer.writerow(row.schema.field_names)
+                    writer.writerow(schema.field_names)
                 cells = list(row.values())
-                cells, notes = row.schema.write_data(cells)
+                cells, notes = schema.write_data(cells, native_types=self.native_types)
                 writer.writerow(cells)
         helpers.move_file(file.name, self.file.source)
 
