@@ -15,7 +15,7 @@ Frictionless is a framework to describe, extract, validate, and transform tabula
 - **Validate your data**: You can validate data table, resource, and datasets. Frictionless generates a unified validation report, as well as supports a lot of options to customize the validation process.
 - **Transform your data**: You can clean, reshape, and transfer your data tables and datasets. Frictionless provides a pipeline capability and a lower-level interface to work with the data.
 
-> You might also be interested in:
+You might also be interested in:
 
 - powerful command-line interface
 - low memory consumption for data of any size
