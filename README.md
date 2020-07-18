@@ -6,4 +6,4 @@
 [![Github](https://img.shields.io/badge/github-master-brightgreen)](https://github.com/frictionlessdata/frictionless-py)
 [![Discord](https://img.shields.io/gitter/room/frictionlessdata/chat.svg)](https://discord.com/channels/695635777199145130/695635777199145133)
 
-Frictionless is a framework providing an ability to describe, extract, validate and transform data.
+Frictionless is a framework providing an ability to describe, extract, validate and transform tabular data.
