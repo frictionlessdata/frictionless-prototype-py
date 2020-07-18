@@ -6,7 +6,7 @@
 [![Github](https://img.shields.io/badge/github-master-brightgreen)](https://github.com/frictionlessdata/frictionless-py)
 [![Discord](https://img.shields.io/gitter/room/frictionlessdata/chat.svg)](https://discord.com/channels/695635777199145130/695635777199145133)
 
-Frictionless is a framework to describe, extract, validate, and transform tabular data. It supports a great deal of data sources and formats, as well as provides popular platforms integrations. The framework is powered by the lightweight yet comprehensive Frictionless Data [specifications](https://specs.frictionlessdata.io/).
+Frictionless is a framework to describe, extract, validate, and transform tabular data. It supports a great deal of data sources and formats, as well as provides popular platforms integrations. The framework is powered by the lightweight yet comprehensive [Frictionless Data Specifications](https://specs.frictionlessdata.io/).
 
 ## Features
 
@@ -27,7 +27,7 @@ Frictionless is a framework to describe, extract, validate, and transform tabula
 
 ## Installation
 
-> Versioning follows the SemVer [standard](https://semver.org/)
+> Versioning follows the [SemVer Standard](https://semver.org/)
 
 ```bash
 $ pip install frictionless
