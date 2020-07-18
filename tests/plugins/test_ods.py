@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from frictionless import Table, exceptions
+from frictionless import Table, Query, exceptions
 from frictionless.plugins.ods import OdsDialect
 
 BASE_URL = "https://raw.githubusercontent.com/okfn/tabulator-py/master/%s"
@@ -74,3 +74,18 @@ def test_table_ods_with_ints_floats_dates():
             [1997, 5.6, datetime(2009, 9, 20).date(), datetime(2009, 9, 20, 15, 30, 0)],
             [1969, 11.7, datetime(2012, 8, 23).date(), datetime(2012, 8, 23, 20, 40, 59)],
         ]
+
+
+# Write
+
+
+def test_table_write_xlsx(tmpdir):
+    source = "data/table.csv"
+    target = str(tmpdir.join("table.ods"))
+    with Table(source) as table:
+        table.write(target)
+    # NOTE: ezodf writer creates more cells than we ask
+    query = Query(limit_fields=2, limit_rows=2)
+    with Table(target, query=query) as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_data() == [[1, "english"], [2, "中国人"]]

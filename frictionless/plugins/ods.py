@@ -26,6 +26,16 @@ class OdsPlugin(Plugin):
 
 
 class OdsParser(Parser):
+    native_types = [
+        "boolean",
+        "date",
+        "datetime",
+        "integer",
+        "number",
+        "string",
+        "time",
+        "year",
+    ]
 
     # Read
 
@@ -71,6 +81,26 @@ class OdsParser(Parser):
         # Stream data
         for cells in sheet.rows():
             yield [type_value(cell) for cell in cells]
+
+    # Write
+
+    def write(self, row_stream):
+        dialect = self.file.dialect
+        helpers.ensure_dir(self.file.source)
+        ezodf = helpers.import_from_plugin("ezodf", plugin="ods")
+        book = ezodf.newdoc(doctype="ods", filename=self.file.source)
+        title = f"Sheet {dialect.sheet}"
+        book.sheets += ezodf.Sheet(title)
+        sheet = book.sheets[title]
+        for row_index, row in enumerate(row_stream):
+            if row.row_number == 1:
+                for field_index, name in enumerate(row.schema.field_names):
+                    sheet[(0, field_index)].set_value(name)
+            cells = list(row.values())
+            cells, notes = row.schema.write_data(cells, native_types=self.native_types)
+            for field_index, cell in enumerate(cells):
+                sheet[(row_index + 1, field_index)].set_value(cell)
+        book.save()
 
 
 # Dialect
