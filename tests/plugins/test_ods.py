@@ -79,7 +79,7 @@ def test_table_ods_with_ints_floats_dates():
 # Write
 
 
-def test_table_write_xlsx(tmpdir):
+def test_table_write_ods(tmpdir):
     source = "data/table.csv"
     target = str(tmpdir.join("table.ods"))
     with Table(source) as table:

@@ -9,6 +9,9 @@ from .. import helpers
 
 class CsvParser(Parser):
     newline = ""
+    native_types = [
+        "string",
+    ]
 
     # Read
 

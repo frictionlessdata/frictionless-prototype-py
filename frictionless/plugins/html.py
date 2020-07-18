@@ -1,3 +1,4 @@
+import tempfile
 from ..metadata import Metadata
 from ..dialects import Dialect
 from ..plugin import Plugin
@@ -39,6 +40,7 @@ class HtmlParser(Parser):
             table = page
 
         # Stream headers
+        # NOTE: support th headers tag
         data = (
             table.children("thead").children("tr")
             + table.children("thead")
@@ -54,6 +56,29 @@ class HtmlParser(Parser):
         data = [pq(tr).find("td") for tr in data]
         data = [[pq(td).text() for td in tr] for tr in data if len(tr) > 0]
         yield from data
+
+    # Write
+
+    # NOTE: rebase on proper pyquery
+    # NOTE: take dialect into account
+    def write(self, row_stream):
+        html = "<html><body><table>\n"
+        for row in row_stream:
+            if row.row_number == 1:
+                html += "<tr>"
+                for name in row.schema.field_names:
+                    html += f"<td>{name}</td>"
+                html += "</tr>\n"
+            cells = list(row.values())
+            cells, notes = row.schema.write_data(cells)
+            html += "<tr>"
+            for cell in cells:
+                html += f"<td>{cell}</td>"
+            html += "</tr>\n"
+        html += "</table></body></html>"
+        with tempfile.NamedTemporaryFile("wt", delete=False) as file:
+            file.write(html)
+        helpers.move_file(file.name, self.file.source)
 
 
 # Dialect

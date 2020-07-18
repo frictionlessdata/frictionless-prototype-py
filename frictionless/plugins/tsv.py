@@ -22,6 +22,9 @@ class TsvPlugin(Plugin):
 
 
 class TsvParser(Parser):
+    native_types = [
+        "string",
+    ]
 
     # Read
 

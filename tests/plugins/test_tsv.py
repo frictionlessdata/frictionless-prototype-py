@@ -17,7 +17,7 @@ def test_table_format_tsv():
 # Write
 
 
-def test_table_csv_write(tmpdir):
+def test_table_tsv_write(tmpdir):
     source = "data/table.csv"
     target = str(tmpdir.join("table.tsv"))
     with Table(source) as table:
