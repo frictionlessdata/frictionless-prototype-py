@@ -80,23 +80,29 @@ Firt of all, let's infer the metadata. We can save and edit it to provide useful
 
 ```bash
 $ frictionless describe data/invalid.csv
-{'bytes': 50,
- 'compression': 'no',
- 'compressionPath': '',
- 'dialect': {},
- 'encoding': 'utf-8',
- 'format': 'csv',
- 'hash': '8c73c3d9d59088dcb2508e0b348bf8a8',
- 'hashing': 'md5',
- 'name': 'invalid',
- 'path': 'data/invalid.csv',
- 'profile': 'tabular-data-resource',
- 'rows': 4,
- 'schema': {'fields': [{'name': 'id', 'type': 'integer'},
-                       {'name': 'name', 'type': 'string'},
-                       {'name': '', 'type': 'integer'},
-                       {'name': 'name2', 'type': 'integer'}]},
- 'scheme': 'file'}
+bytes: 50
+compression: 'no'
+compressionPath: ''
+dialect: {}
+encoding: utf-8
+format: csv
+hash: 8c73c3d9d59088dcb2508e0b348bf8a8
+hashing: md5
+name: invalid
+path: data/invalid.csv
+profile: tabular-data-resource
+rows: 4
+schema:
+  fields:
+    - name: id
+      type: integer
+    - name: name
+      type: string
+    - name: field3
+      type: integer
+    - name: name2
+      type: integer
+scheme: file
 ```
 
 Secondly, we can extract the cleaned data. It conforms to the inferred schema from above e.g., the dimension is fixed, and bad cells are omitted:
@@ -115,14 +121,16 @@ Last but not least, let's get a validation report. This report will help us to f
 
 ```bash
 $ frictionless validate data/invalid.csv
-[None, 3] [blank-header] Header in field at position "3" is blank
-[None, 4] [duplicate-header] Header "name" in field at position "4" is duplicated to header in another field: at position "2"
-[2, 3] [missing-cell] Row at position "2" has a missing cell in field "" at position "3"
-[2, 4] [missing-cell] Row at position "2" has a missing cell in field "name2" at position "4"
-[3, 3] [missing-cell] Row at position "3" has a missing cell in field "" at position "3"
-[3, 4] [missing-cell] Row at position "3" has a missing cell in field "name2" at position "4"
-[4, None] [blank-row] Row at position "4" is completely blank
-[5, 5] [extra-cell] Row at position "5" has an extra value in field at position "5"
+row    field    code              message
+-----  -------  ----------------  ------------------------------------------------------------------------------------------------
+-      3        blank-header      Header in field at position "3" is blank
+-      4        duplicate-header  Header "name" in field at position "4" is duplicated to header in another field: at position "2"
+2      3        missing-cell      Row at position "2" has a missing cell in field "field3" at position "3"
+2      4        missing-cell      Row at position "2" has a missing cell in field "name2" at position "4"
+3      3        missing-cell      Row at position "3" has a missing cell in field "field3" at position "3"
+3      4        missing-cell      Row at position "3" has a missing cell in field "name2" at position "4"
+4      -        blank-row         Row at position "4" is completely blank
+5      5        extra-cell        Row at position "5" has an extra value in field at position "5"
 ```
 
 Now having all this information:
