@@ -8,6 +8,8 @@ import tempfile
 import datetime
 import stringcase
 from copy import deepcopy
+from pprint import pformat
+from tabulate import tabulate
 from inspect import signature
 from importlib import import_module
 from urllib.parse import urlparse, parse_qs
@@ -72,6 +74,14 @@ def compile_regex(items):
                 item = re.compile(item.replace("<regex>", ""))
             result.append(item)
         return result
+
+
+def tabulate_metadata(metadata):
+    headers = ["name", "value"]
+    content = []
+    for key, value in metadata.items():
+        content.append([key, pformat(value)])
+    return tabulate(content, headers=headers)
 
 
 def detect_name(path):

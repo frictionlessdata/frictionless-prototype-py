@@ -33,14 +33,14 @@ def program_extract(source, *, source_type, json, **options):
             options[key] = list(value)
     source = list(source) if len(source) > 1 else source[0]
     process = (lambda row: row.to_dict(json=True)) if json else None
-    result = extract(source, source_type=source_type, process=process, **options)
-    if result:
+    data = extract(source, source_type=source_type, process=process, **options)
+    if data:
         if json:
-            return click.secho(simplejson.dumps(result, indent=2, ensure_ascii=False))
-        if isinstance(result, list):
-            return click.secho(tabulate(result, headers="keys"))
-        for number, (name, rows) in enumerate(result.items(), start=1):
+            return click.secho(simplejson.dumps(data, indent=2, ensure_ascii=False))
+        if isinstance(data, list):
+            return click.secho(tabulate(data, headers="keys"))
+        for number, (name, rows) in enumerate(data.items(), start=1):
             if number != 1:
-                click.secho("\n")
+                click.secho("")
             click.secho(f"{name}\n", bold=True)
             click.secho(tabulate(rows, headers="keys"))

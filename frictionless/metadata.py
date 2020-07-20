@@ -80,7 +80,10 @@ class Metadata(helpers.ControlledDict):
     def to_dict(self):
         return self.copy()
 
-    def to_json(self, target):
+    # NOTE: improve this code
+    def to_json(self, target=None):
+        if not target:
+            return json.dumps(self.to_dict(), indent=2, ensure_ascii=False)
         try:
             with tempfile.NamedTemporaryFile("wt", delete=False) as file:
                 json.dump(self.to_dict(), file, indent=2, ensure_ascii=False)
@@ -88,10 +91,13 @@ class Metadata(helpers.ControlledDict):
         except Exception as exc:
             raise exceptions.FrictionlessException(self.__Error(note=str(exc))) from exc
 
-    def to_yaml(self, target):
+    # NOTE: improve this code
+    def to_yaml(self, target=None):
+        if not target:
+            return yaml.dump(self.to_dict(), Dumper=IndentDumper)
         try:
             with tempfile.NamedTemporaryFile("wt", delete=False) as file:
-                yaml.safe_dump(self.to_dict(), file)
+                yaml.dump(self.to_dict(), file, Dumper=IndentDumper)
             helpers.move_file(file.name, target)
         except Exception as exc:
             raise exceptions.FrictionlessException(self.__Error(note=str(exc))) from exc
@@ -177,3 +183,8 @@ class Metadata(helpers.ControlledDict):
 def metadata_attach(self, name, value):
     copy = dict if isinstance(value, dict) else list
     setitem(self, name, copy(value))
+
+
+class IndentDumper(yaml.SafeDumper):
+    def increase_indent(self, flow=False, indentless=False):
+        return super().increase_indent(flow, False)

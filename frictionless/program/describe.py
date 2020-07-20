@@ -1,6 +1,5 @@
 import click
-import json as json_module
-from pprint import pformat
+import simplejson
 from ..describe import describe
 from .main import program
 
@@ -32,7 +31,7 @@ def program_describe(source, *, source_type, json, **options):
         elif isinstance(value, tuple):
             options[key] = list(value)
     source = list(source) if len(source) > 1 else source[0]
-    result = describe(source, source_type=source_type, **options)
+    metadata = describe(source, source_type=source_type, **options)
     if json:
-        return click.secho(json_module.dumps(result, indent=2, ensure_ascii=False))
-    click.secho(pformat(result.to_dict()))
+        return click.secho(simplejson.dumps(metadata, indent=2, ensure_ascii=False))
+    click.secho(metadata.to_yaml().strip())
