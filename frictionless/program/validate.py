@@ -1,11 +1,12 @@
 import click
-from sys import exit
-import json as json_module
+import simplejson
 from pprint import pformat
+from tabulate import tabulate
 from ..validate import validate
 from .main import program
 
 
+# NOTE: rebase on tabulate?
 # NOTE: rewrite this function
 @program.command(name="validate")
 @click.argument("source", type=click.Path(), required=True)
@@ -45,43 +46,37 @@ def program_validate(source, *, headers, source_type, json, **options):
         elif isinstance(value, tuple):
             options[key] = list(value)
     report = validate(source, source_type=source_type, **options)
-    print_report(report, json=json)
-    exit(int(not report["valid"]))
 
-
-# Internal
-
-
-# NOTE: rewrite this function
-def print_report(report, output=None, json=False):
+    # Json
     if json:
-        return click.secho(json_module.dumps(report, indent=2, ensure_ascii=False))
-    color = "green" if report.valid else "red"
-    report = report.to_dict()
-    tables = report.pop("tables")
-    errors = report.pop("errors")
-    click.secho("REPORT", bold=True)
-    click.secho("=" * 7, bold=True)
-    click.secho(pformat(report), fg=color, bold=True)
-    if errors:
-        click.secho("-" * 9, bold=True)
-    for error in errors:
-        click.secho("Error: %s" % error.message, fg="yellow")
-    for table_number, table in enumerate(tables, start=1):
-        click.secho("\nTABLE [%s]" % table_number, bold=True)
-        click.secho("=" * 9, bold=True)
-        color = "green" if table["valid"] else "red"
-        errors = table.pop("errors")
-        click.secho(pformat(table), fg=color, bold=True)
-        if errors:
-            click.secho("-" * 9, bold=True)
-        for error in errors:
-            click.secho(
-                "[%s, %s] [%s] %s"
-                % (
-                    error.get("rowPosition"),
-                    error.get("fieldPosition"),
-                    error.get("code"),
-                    error.get("message"),
+        return click.secho(simplejson.dumps(report, indent=2, ensure_ascii=False))
+
+    # Report
+    if report.errors:
+        content = []
+        click.secho("general", bold=True)
+        click.secho("")
+        for error in report.errors:
+            content.append([error.code, error.message])
+        click.secho(tabulate(content, headers=["code", "message"]))
+
+    # Tables
+    for table in report.tables:
+        prefix = "valid" if table.valid else "invalid"
+        click.secho(f"[{prefix}] {table.path}", bold=True)
+        if table.errors:
+            click.secho("")
+            content = []
+            for error in table.errors:
+                content.append(
+                    [
+                        error.get("rowPosition", "-"),
+                        error.get("fieldPosition", "-"),
+                        error.code,
+                        error.message,
+                    ]
                 )
-            )
+            click.secho(tabulate(content, headers=["row", "field", "code", "message"]))
+
+    # Retcode
+    exit(int(not report.valid))
