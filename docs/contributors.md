@@ -4,9 +4,7 @@
 
 This package is a collective effort made by many great people working on various projects. You can click on the pictures below to see their contribution in detail.
 
-## frictionless-py
-
-> Forked from goodtables-py
+## goodtables-py
 
 <a href="https://github.com/frictionlessdata/goodtables-py/graphs/contributors">
   <img src="https://contributors-img.web.app/image?repo=frictionlessdata/goodtables-py" />
