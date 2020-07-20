@@ -6,11 +6,7 @@ This package is a collective effort made by many great people working on various
 
 ## frictionless-py
 
-<a href="https://github.com/frictionlessdata/frictionless-py/graphs/contributors">
-  <img src="https://contributors-img.web.app/image?repo=frictionlessdata/frictionless-py" />
-</a>
-
-## goodtables-py
+> Forked from goodtables-py
 
 <a href="https://github.com/frictionlessdata/goodtables-py/graphs/contributors">
   <img src="https://contributors-img.web.app/image?repo=frictionlessdata/goodtables-py" />
