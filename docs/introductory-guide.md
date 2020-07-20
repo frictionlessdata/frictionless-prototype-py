@@ -1,7 +1,5 @@
 # Introductory Guide
 
-> it's a work in progress
-
 Let's say we have a few raw data files. It's been just collected by the data reasearches and the quality of data is not yet perfect. To tell you more, they haven't even removed the comments from the first row!
 
 ```bash
@@ -178,14 +176,14 @@ Ahh, we had seen it coming... The data is not valid there are some missing and e
 $ frictionless validate countries.resource.yaml
 [invalid] data/countries.csv
 
-  row  field    code               message
+  row    field  code               message
 -----  -------  -----------------  ----------------------------------------------------------------------------------------------------------------------------------
-    3  2        type-error         The cell "Ireland" in row at position "3" and field "neighbor_id" at position "2" has incompatible type: type is "integer/default"
-    4  5        extra-cell         Row at position "4" has an extra value in field at position "5"
-    5  -        foreign-key-error  The row at position "5" does not conform to the foreign key constraint: not found in the lookup table
-    7  2        missing-cell       Row at position "7" has a missing cell in field "neighbor_id" at position "2"
-    7  3        missing-cell       Row at position "7" has a missing cell in field "name" at position "3"
-    7  4        missing-cell       Row at position "7" has a missing cell in field "population" at position "4"
+    3        2  type-error         The cell "Ireland" in row at position "3" and field "neighbor_id" at position "2" has incompatible type: type is "integer/default"
+    4        5  extra-cell         Row at position "4" has an extra value in field at position "5"
+    5           foreign-key-error  The row at position "5" does not conform to the foreign key constraint: not found in the lookup table
+    7        2  missing-cell       Row at position "7" has a missing cell in field "neighbor_id" at position "2"
+    7        3  missing-cell       Row at position "7" has a missing cell in field "name" at position "3"
+    7        4  missing-cell       Row at position "7" has a missing cell in field "population" at position "4"
 ```
 
 Now it's even worse but regarding data validation errors, the more the better, actually. Thanks to the metadata, we were able to reveal some critical errors:

@@ -74,8 +74,8 @@ def program_validate(source, *, headers, source_type, json, **options):
             for error in table.errors:
                 content.append(
                     [
-                        error.get("rowPosition", "-"),
-                        error.get("fieldPosition", "-"),
+                        error.get("rowPosition"),
+                        error.get("fieldPosition"),
                         error.code,
                         error.message,
                     ]
