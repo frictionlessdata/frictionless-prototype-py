@@ -1,6 +1,5 @@
 import click
 import simplejson
-from pprint import pformat
 from tabulate import tabulate
 from ..validate import validate
 from .main import program
@@ -9,7 +8,7 @@ from .main import program
 # NOTE: rebase on tabulate?
 # NOTE: rewrite this function
 @program.command(name="validate")
-@click.argument("source", type=click.Path(), required=True)
+@click.argument("source", type=click.Path(), nargs=-1, required=True)
 @click.option("--source-type", type=str, help="Source type")
 @click.option("--json", is_flag=True, help="Output report as JSON")
 # Headers
@@ -45,6 +44,7 @@ def program_validate(source, *, headers, source_type, json, **options):
             del options[key]
         elif isinstance(value, tuple):
             options[key] = list(value)
+    source = {"tasks": [{"source": v} for v in source]} if len(source) > 1 else source[0]
     report = validate(source, source_type=source_type, **options)
 
     # Json
@@ -54,17 +54,21 @@ def program_validate(source, *, headers, source_type, json, **options):
     # Report
     if report.errors:
         content = []
-        click.secho("general", bold=True)
+        click.secho(f"[invalid] {source}", bold=True)
         click.secho("")
         for error in report.errors:
             content.append([error.code, error.message])
         click.secho(tabulate(content, headers=["code", "message"]))
 
     # Tables
-    for table in report.tables:
+    prev_invalid = False
+    for number, table in enumerate(report.tables, start=1):
+        if number != 1 and prev_invalid:
+            click.secho("")
         prefix = "valid" if table.valid else "invalid"
         click.secho(f"[{prefix}] {table.path}", bold=True)
         if table.errors:
+            prev_invalid = True
             click.secho("")
             content = []
             for error in table.errors:

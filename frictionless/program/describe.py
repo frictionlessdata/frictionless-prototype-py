@@ -34,4 +34,8 @@ def program_describe(source, *, source_type, json, **options):
     metadata = describe(source, source_type=source_type, **options)
     if json:
         return click.secho(simplejson.dumps(metadata, indent=2, ensure_ascii=False))
+    if isinstance(source, list):
+        source = " ".join(source)
+    click.secho(f"[metadata] {source}", bold=True)
+    click.secho("")
     click.secho(metadata.to_yaml().strip())

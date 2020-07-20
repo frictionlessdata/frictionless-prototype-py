@@ -38,9 +38,11 @@ def program_extract(source, *, source_type, json, **options):
         if json:
             return click.secho(simplejson.dumps(data, indent=2, ensure_ascii=False))
         if isinstance(data, list):
+            click.secho(f"[data] {source}", bold=True)
+            click.secho("")
             return click.secho(tabulate(data, headers="keys"))
         for number, (name, rows) in enumerate(data.items(), start=1):
             if number != 1:
                 click.secho("")
-            click.secho(f"{name}\n", bold=True)
+            click.secho(f"[data] {name}\n", bold=True)
             click.secho(tabulate(rows, headers="keys"))

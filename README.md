@@ -80,6 +80,8 @@ Firt of all, let's infer the metadata. We can save and edit it to provide useful
 
 ```bash
 $ frictionless describe data/invalid.csv
+[metadata] data/invalid.csv
+
 bytes: 50
 compression: 'no'
 compressionPath: ''
@@ -109,18 +111,22 @@ Secondly, we can extract the cleaned data. It conforms to the inferred schema fr
 
 ```bash
 $ frictionless extract data/invalid.csv
-  id  name           name2
-----  -------  --  -------
+[data] data/invalid.csv
+
+  id  name       field3    name2
+----  -------  --------  -------
    1  english
    1  english
 
-   2  german    1        2
+   2  german          1        2
 ```
 
 Last but not least, let's get a validation report. This report will help us to fix all these errors as comprehensive information is provided for every tabular problem:
 
 ```bash
 $ frictionless validate data/invalid.csv
+[invalid] data/invalid.csv
+
 row    field    code              message
 -----  -------  ----------------  ------------------------------------------------------------------------------------------------
 -      3        blank-header      Header in field at position "3" is blank
