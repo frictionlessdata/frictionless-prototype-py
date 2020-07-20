@@ -1,6 +1,6 @@
 # Introductory Guide
 
-Let's say we have a few raw data files. It's been just collected by the data reasearches and the quality of data is not yet perfect. To tell you more, they haven't even removed the comments from the first row!
+Let's say we have a few raw data files. It's been just collected by the data researchers, and the quality of data is not yet perfect. To tell you more, they haven't even removed the comments from the first row!
 
 ```bash
 $ cat data/countries.csv
@@ -13,11 +13,11 @@ id,neighbor_id,name,population
 5
 ```
 
-As we can see, it's a data containing information about European countries and their populations. Also, it's easy to notice that there are two fields having a relation based on a country's identifier.
+As we can see, it's a data containing information about European countries and their populations. Also, it's easy to notice that there are two fields having a relationship based on a country's identifier.
 
 ## Describing data
 
-First at all, we're going to describe our dataset. Frictionless uses powerfull [Frictionless Data Specifications](https://specs.frictionlessdata.io/). They are very handy to describe:
+First of all, we're going to describe our dataset. Frictionless uses powerful [Frictionless Data Specifications](https://specs.frictionlessdata.io/). They are very handy to describe:
 - a data table - [Table Schema](https://specs.frictionlessdata.io/table-schema/)
 - a data resource - [Data Resource](https://specs.frictionlessdata.io/data-resource/)
 - a data package - [Data Package](https://specs.frictionlessdata.io/data-package/)
@@ -54,7 +54,7 @@ schema:
 scheme: file
 ```
 
-As we can see, Frictionless was smart enough to understand that the first row contains a comment. It's good but we still have a few problems:
+As we can see, Frictionless was smart enough to understand that the first row contains a comment. It's good, but we still have a few problems:
 - we use `n/a` as a missing values marker
 - `neighbor_id` must be numerical: let's edit the schema
 - `population` must be numerical: setting proper missing values will solve it
@@ -116,7 +116,7 @@ It has the same metadata as we saw above but also includes our editing related t
 
 ## Extracting data
 
-It's time to try extracting our data as a table. As a first naive attempt we will ignore the metadata we saved on the previous step:
+It's time to try extracting our data as a table. As a first naive attempt, we will ignore the metadata we saved on the previous step:
 
 ```bash
 $ frictionless extract data/countries.csv
@@ -131,8 +131,8 @@ $ frictionless extract data/countries.csv
    5
 ```
 
-Actually it doesn't look really terrible but in reality data like this is not quite useful:
-- it's not possible to export this data e.g. to SQL because integers are mixed with strings
+Actually, it doesn't look quite terrible, but in reality, data like this is not quite useful:
+- it's not possible to export this data e.g., to SQL because integers are mixed with strings
 - there is still a basically empty row we don't want to have
 - there is a clear mistake in Germany's neighborhood!
 
@@ -151,7 +151,7 @@ $ frictionless extract countries.resource.yaml
    5
 ```
 
-It's now much better! Numerical fields are numerical fields and there are no more textual missing values markers. We can't see in the command-line but missing values are now `None` values in Python and the data can be e.g. exported to SQL. Although, it's still not ready for being published. In the next section we will validate it!
+It's now much better! Numerical fields are numerical fields, and there are no more textual missing values markers. We can't see in the command-line, but missing values are now `None` values in Python, and the data can be e.g., exported to SQL. Although, it's still not ready for being published. In the next section, we will validate it!
 
 
 ## Validating data
@@ -170,7 +170,7 @@ $ frictionless validate data/countries.csv
     7        4  missing-cell  Row at position "7" has a missing cell in field "population" at position "4"
 ```
 
-Ahh, we had seen it coming... The data is not valid there are some missing and extra cells. But wait a minute, in the first step we have created the metadata file with more information about our table. We have to use it.
+Ahh, we had seen it coming. The data is not valid; there are some missing and extra cells. But wait a minute, in the first step, we have created the metadata file with more information about our table. We have to use it.
 
 ```bash
 $ frictionless validate countries.resource.yaml
@@ -186,17 +186,17 @@ $ frictionless validate countries.resource.yaml
     7        4  missing-cell       Row at position "7" has a missing cell in field "population" at position "4"
 ```
 
-Now it's even worse but regarding data validation errors, the more the better, actually. Thanks to the metadata, we were able to reveal some critical errors:
-- the bad data types i.e. `Ireland` instead of an id
+Now it's even worse, but regarding data validation errors, the more, the better, actually. Thanks to the metadata, we were able to reveal some critical errors:
+- the bad data types, i.e. `Ireland` instead of an id
 - the bad relation between `id` and `neighbor_id`: we don't have a country number 5
 
 In the next section, we will clean up the data.
 
 ## Transforming data
 
-> Currently, the pipeline capabilities are under consruction. It's already possible to run `dataflows` spec as a pipeline and more is coming but, for now, we will use Python programming for data cleaning.
+> Currently, the pipeline capabilities are under construction. It's already possible to run `dataflows` spec as a pipeline, and more is coming but, for now, we will use Python programming for data cleaning.
 
-We will use metadata to fix all the types problems automatically. The only two things we need to handle manually:
+We will use metadata to fix all the types of problems automatically. The only two things we need to handle manually:
 - France's population
 - Germany's neighborhood
 
@@ -217,7 +217,7 @@ with Table(source) as table:
     table.write("countries.csv")
 ```
 
-Finally, we've got the cleaned version of our data which can be exported to a database or published. We have used a CSV as a output format but could have used Excel, JSON, SQL, and others.
+Finally, we've got the cleaned version of our data, which can be exported to a database or published. We have used a CSV as an output format but could have used Excel, JSON, SQL, and others.
 
 ```bash
 $ cat countries.csv
@@ -275,7 +275,7 @@ schema:
 scheme: file
 ```
 
-Basically, that's it, now we have a valid data file and a corresponding metadata file. It can be shared with other people or stored withouth a fear of type errors or other problems making data reasearch not reprodicibile.
+Basically, that's it; now, we have a valid data file and a corresponding metadata file. It can be shared with other people or stored without fear of type errors or other problems making data research not reproducible.
 
 ```bash
 $ ls -la countries.*
