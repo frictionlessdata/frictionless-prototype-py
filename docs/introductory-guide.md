@@ -114,7 +114,7 @@ schema:
 scheme: file
 ```
 
-It has the same metadata as we saw above but also includes our editing related to missing values and data types. We didn't change data types manually because providing proper missing values had fixed it automatically. Now we have a resource descriptor. In the next section, we will show why metadata matters and how to use it.
+It has the same metadata as we saw above but also includes our editing related to missing values and data types. We didn't change all the wrong data types manually because providing proper missing values had fixed it automatically. Now we have a resource descriptor. In the next section, we will show why metadata matters and how to use it.
 
 ## Extracting data
 
@@ -133,7 +133,7 @@ $ frictionless extract data/countries.csv
    5
 ```
 
-Actually, it doesn't look quite terrible, but in reality, data like this is not quite useful:
+Actually, it doesn't look terrible, but in reality, data like this is not quite useful:
 - it's not possible to export this data e.g., to SQL because integers are mixed with strings
 - there is still a basically empty row we don't want to have
 - there is a clear mistake in Germany's neighborhood!
