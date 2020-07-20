@@ -13,5 +13,5 @@ def test_extract():
 
 def test_extract_source_type():
     assert extract("data/package.json", source_type="package") == {
-        "name": [{"id": 1, "name": "english"}, {"id": 2, "name": "中国人"}]
+        "data/table.csv": [{"id": 1, "name": "english"}, {"id": 2, "name": "中国人"}]
     }

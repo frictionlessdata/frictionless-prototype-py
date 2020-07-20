@@ -115,6 +115,15 @@ class Resource(Metadata):
     def basepath(self):
         return self.__basepath
 
+    # NOTE: move this logic to path?
+    @Metadata.property(write=False)
+    def fullpath(self):
+        if self.inline:
+            return "memory"
+        if helpers.is_remote_path(self.path):
+            return self.path
+        return os.path.join(self.basepath, self.path)
+
     @Metadata.property(write=False)
     def inline(self):
         return "data" in self

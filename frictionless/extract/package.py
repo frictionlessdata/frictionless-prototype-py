@@ -1,5 +1,5 @@
+from collections import OrderedDict
 from ..package import Package
-from .. import helpers
 
 
 def extract_package(source, *, process=None):
@@ -8,13 +8,13 @@ def extract_package(source, *, process=None):
     package = Package(source)
 
     # Extract package
-    result = {}
-    for resource in package.resources:
-        name = resource.name or helpers.detect_name(resource.path)
+    result = OrderedDict()
+    for number, resource in enumerate(package.resources, start=1):
+        key = resource.fullpath if not resource.inline else f"memory{number}"
         if process:
-            result[name] = []
+            result[key] = []
             for row in resource.read_row_stream():
-                result[name].append(process(row))
+                result[key].append(process(row))
             continue
-        result[name] = resource.read_rows()
+        result[key] = resource.read_rows()
     return result

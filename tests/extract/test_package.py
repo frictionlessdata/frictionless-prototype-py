@@ -6,5 +6,5 @@ from frictionless import extract
 
 def test_extract_package():
     assert extract("data/package.json") == {
-        "name": [{"id": 1, "name": "english"}, {"id": 2, "name": "中国人"}]
+        "data/table.csv": [{"id": 1, "name": "english"}, {"id": 2, "name": "中国人"}]
     }
