@@ -27,30 +27,32 @@ Let's describe the `countries` table:
 
 ```bash
 $ frictionless describe data/countries.csv
-[metadata] data/invalid.csv
+[metadata] data/countries.csv
 
-bytes: 50
+bytes: 136
 compression: 'no'
 compressionPath: ''
-dialect: {}
+dialect:
+  headerRows:
+    - 2
 encoding: utf-8
 format: csv
-hash: 8c73c3d9d59088dcb2508e0b348bf8a8
+hash: b0481536cb4ab3e5db64f0feede627fa
 hashing: md5
-name: invalid
-path: data/invalid.csv
+name: countries
+path: data/countries.csv
 profile: tabular-data-resource
-rows: 4
+rows: 5
 schema:
   fields:
     - name: id
       type: integer
+    - name: neighbor_id
+      type: string
     - name: name
       type: string
-    - name: field3
-      type: integer
-    - name: name2
-      type: integer
+    - name: population
+      type: string
 scheme: file
 ```
 
