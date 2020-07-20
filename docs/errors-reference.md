@@ -9,7 +9,7 @@ This document provides a full reference of the Frictionless errors.
 Code: `error` <br>
 Tags: `-` <br>
 Template: `{note}` <br>
-Description: `Error.` <br>
+Description: `Error` <br>
 
 
 ## Header Error
