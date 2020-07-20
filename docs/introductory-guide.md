@@ -172,7 +172,7 @@ $ frictionless validate data/countries.csv
     7        4  missing-cell  Row at position "7" has a missing cell in field "population" at position "4"
 ```
 
-Ahh, we had seen it coming. The data is not valid; there are some missing and extra cells. But wait a minute, in the first step, we have created the metadata file with more information about our table. We have to use it.
+Ahh, we had seen that coming. The data is not valid; there are some missing and extra cells. But wait a minute, in the first step, we have created the metadata file with more information about our table. We have to use it.
 
 ```bash
 $ frictionless validate countries.resource.yaml
