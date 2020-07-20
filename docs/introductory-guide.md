@@ -26,7 +26,7 @@ First at all, we're going to describe our dataset. Frictionless uses powerfull [
 Let's describe the `countries` table:
 
 ```bash
-$ frictionless describe data/invalid.csv
+$ frictionless describe data/countries.csv
 [metadata] data/invalid.csv
 
 bytes: 50
