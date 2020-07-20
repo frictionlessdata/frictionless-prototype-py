@@ -7,7 +7,7 @@ This document provides a full reference of the Frictionless errors.
 ## Error
 
 Code: `error` <br>
-Tags: `` <br>
+Tags: `-` <br>
 Template: `{note}` <br>
 Description: `Error.` <br>
 

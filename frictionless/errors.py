@@ -19,7 +19,7 @@ class Error(Metadata):
     name = "Error"
     tags = []  # type: ignore
     template = "{note}"
-    description = "Error."
+    description = "Error"
 
     def __init__(self, descriptor=None, *, note):
         self["code"] = self.code

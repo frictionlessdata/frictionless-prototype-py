@@ -7,7 +7,7 @@ This document provides a full reference of the Frictionless errors.
 ## {{ Error.name }}
 
 Code: `{{ Error.code }}` <br>
-Tags: `{{ Error.tags|join(' ') }}` <br>
+Tags: `{{ Error.tags|join(' ') or '-' }}` <br>
 Template: `{{ Error.template }}` <br>
 Description: `{{ Error.description }}` <br>
 
