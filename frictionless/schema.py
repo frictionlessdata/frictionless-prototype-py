@@ -203,6 +203,11 @@ class Schema(Metadata):
                 return
             names = [f"field{number}" for number in range(1, len(sample[0]) + 1)]
 
+        # Handle name/empty
+        names = copy(names)
+        for index, name in enumerate(names):
+            names[index] = name or f"field{index+1}"
+
         # Deduplicate names
         if len(names) != len(set(names)):
             seen_names = []
