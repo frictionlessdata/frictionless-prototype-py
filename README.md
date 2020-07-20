@@ -157,4 +157,4 @@ This readme gives a high-level overview of the framework. A detailed documentati
 - [Errors Reference](docs/errors-reference.md)
 - [API Reference](docs/api-reference.md)
 - [Contributors](docs/contributors.md)
-- [Changelog](docs/changelog.md)
+- [Changelog](docs/changelog.md) (ready: 100%)
