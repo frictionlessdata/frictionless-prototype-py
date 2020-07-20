@@ -8,419 +8,377 @@ This document provides a full reference of the Frictionless errors.
 
 > `error`
 
-Template: {note}
-
+Tags: `` <br>
+Template: {note} <br>
 Description: Error.
 
-Tags: ``
 
 ## Header Error
 
 > `header-error`
 
-Template: Cell Error
-
+Tags: `#head` <br>
+Template: Cell Error <br>
 Description: Cell Error
 
-Tags: `#head`
 
 ## Row Error
 
 > `row-error`
 
-Template: Row Error
-
+Tags: `#body` <br>
+Template: Row Error <br>
 Description: Row Error
 
-Tags: `#body`
 
 ## Cell Error
 
 > `cell-error`
 
-Template: Cell Error
-
+Tags: `#body` <br>
+Template: Cell Error <br>
 Description: Cell Error
 
-Tags: `#body`
 
 ## Package Error
 
 > `package-error`
 
-Template: The data package has an error: {note}
-
+Tags: `#general` <br>
+Template: The data package has an error: {note} <br>
 Description: A validation cannot be processed.
 
-Tags: `#general`
 
 ## Resource Error
 
 > `resource-error`
 
-Template: The data resource has an error: {note}
-
+Tags: `#general` <br>
+Template: The data resource has an error: {note} <br>
 Description: A validation cannot be processed.
 
-Tags: `#general`
 
 ## Inquiry Error
 
 > `inquiry-error`
 
-Template: The inquiry is not valid: {note}
-
+Tags: `#general` <br>
+Template: The inquiry is not valid: {note} <br>
 Description: Provided inquiry is not valid.
 
-Tags: `#general`
 
 ## Report Error
 
 > `report-error`
 
-Template: The validation report has an error: {note}
-
+Tags: `#general` <br>
+Template: The validation report has an error: {note} <br>
 Description: A validation cannot be presented.
 
-Tags: `#general`
 
 ## Pipeline Error
 
 > `pipeline-error`
 
-Template: The pipeline is not valid: {note}
-
+Tags: `#general` <br>
+Template: The pipeline is not valid: {note} <br>
 Description: Provided pipeline is not valid.
 
-Tags: `#general`
 
 ## Task Error
 
 > `task-error`
 
-Template: The validation task has an error: {note}
-
+Tags: `#general` <br>
+Template: The validation task has an error: {note} <br>
 Description: General task-level error.
 
-Tags: `#general`
 
 ## Check Error
 
 > `check-error`
 
-Template: The validation check has an error: {note}
-
+Tags: `#general` <br>
+Template: The validation check has an error: {note} <br>
 Description: A validation check cannot be created
 
-Tags: `#general`
 
 ## Source Error
 
 > `source-error`
 
-Template: The data source has not supported or has inconsistent contents: {note}
-
+Tags: `#table` <br>
+Template: The data source has not supported or has inconsistent contents: {note} <br>
 Description: Data reading error because of not supported or inconsistent contents.
 
-Tags: `#table`
 
 ## Scheme Error
 
 > `scheme-error`
 
-Template: The data source could not be successfully loaded: {note}
-
+Tags: `#table` <br>
+Template: The data source could not be successfully loaded: {note} <br>
 Description: Data reading error because of incorrect scheme.
 
-Tags: `#table`
 
 ## Format Error
 
 > `format-error`
 
-Template: The data source could not be successfully parsed: {note}
-
+Tags: `#table` <br>
+Template: The data source could not be successfully parsed: {note} <br>
 Description: Data reading error because of incorrect format.
 
-Tags: `#table`
 
 ## Encoding Error
 
 > `encoding-error`
 
-Template: The data source could not be successfully decoded: {note}
-
+Tags: `#table` <br>
+Template: The data source could not be successfully decoded: {note} <br>
 Description: Data reading error because of an encoding problem.
 
-Tags: `#table`
 
 ## Hashing Error
 
 > `hashing-error`
 
-Template: The data source could not be successfully hashed: {note}
-
+Tags: `#table` <br>
+Template: The data source could not be successfully hashed: {note} <br>
 Description: Data reading error because of a hashing problem.
 
-Tags: `#table`
 
 ## Compression Error
 
 > `compression-error`
 
-Template: The data source could not be successfully decompressed: {note}
-
+Tags: `#table` <br>
+Template: The data source could not be successfully decompressed: {note} <br>
 Description: Data reading error because of a decompression problem.
 
-Tags: `#table`
 
 ## Control Error
 
 > `control-error`
 
-Template: Control object is not valid: {note}
-
+Tags: `#table #control` <br>
+Template: Control object is not valid: {note} <br>
 Description: Provided control is not valid.
 
-Tags: `#table #control`
 
 ## Dialect Error
 
 > `dialect-error`
 
-Template: Dialect object is not valid: {note}
-
+Tags: `#table #dialect` <br>
+Template: Dialect object is not valid: {note} <br>
 Description: Provided dialect is not valid.
 
-Tags: `#table #dialect`
 
 ## Schema Error
 
 > `schema-error`
 
-Template: The data source could not be successfully described by the invalid Table Schema: {note}
-
+Tags: `#table #schema` <br>
+Template: The data source could not be successfully described by the invalid Table Schema: {note} <br>
 Description: Provided schema is not valid.
 
-Tags: `#table #schema`
 
 ## Field Error
 
 > `field-error`
 
-Template: The data source could not be successfully described by the invalid Table Schema: {note}
-
+Tags: `#table schema #field` <br>
+Template: The data source could not be successfully described by the invalid Table Schema: {note} <br>
 Description: Provided field is not valid.
 
-Tags: `#table schema #field`
 
 ## Query Error
 
 > `query-error`
 
-Template: The data source could not be successfully described by the invalid Table Query: {note}
-
+Tags: `#table #query` <br>
+Template: The data source could not be successfully described by the invalid Table Query: {note} <br>
 Description: Provided query is not valid.
 
-Tags: `#table #query`
 
 ## Checksum Error
 
 > `checksum-error`
 
-Template: The data source does not match the expected checksum: {note}
-
+Tags: `#table #checksum` <br>
+Template: The data source does not match the expected checksum: {note} <br>
 Description: This error can happen if the data is corrupted.
 
-Tags: `#table #checksum`
 
 ## Extra Header
 
 > `extra-header`
 
-Template: There is an extra header "{cell}" in field at position "{fieldPosition}"
-
+Tags: `#head #structure` <br>
+Template: There is an extra header "{cell}" in field at position "{fieldPosition}" <br>
 Description: The first row of the data source contains header that does not exist in the schema.
 
-Tags: `#head #structure`
 
 ## Missing Header
 
 > `missing-header`
 
-Template: There is a missing header in the field "{fieldName}" at position "{fieldPosition}"
-
+Tags: `#head #structure` <br>
+Template: There is a missing header in the field "{fieldName}" at position "{fieldPosition}" <br>
 Description: Based on the schema there should be a header that is missing in the first row of the data source.
 
-Tags: `#head #structure`
 
 ## Blank Header
 
 > `blank-header`
 
-Template: Header in field at position "{fieldPosition}" is blank
-
+Tags: `#head #structure` <br>
+Template: Header in field at position "{fieldPosition}" is blank <br>
 Description: A column in the header row is missing a value. Headers should be provided and not be blank.
 
-Tags: `#head #structure`
 
 ## Duplicate Header
 
 > `duplicate-header`
 
-Template: Header "{cell}" in field at position "{fieldPosition}" is duplicated to header in another field: {note}
-
+Tags: `#head #structure` <br>
+Template: Header "{cell}" in field at position "{fieldPosition}" is duplicated to header in another field: {note} <br>
 Description: Two columns in the header row have the same value. Column names should be unique.
 
-Tags: `#head #structure`
 
 ## Non-matching Header
 
 > `non-matching-header`
 
-Template: Header "{cell}" in field {fieldName} at position "{fieldPosition}" does not match the field name in the schema
-
+Tags: `#head #schema` <br>
+Template: Header "{cell}" in field {fieldName} at position "{fieldPosition}" does not match the field name in the schema <br>
 Description: One of the data source headers does not match the field name defined in the schema.
 
-Tags: `#head #schema`
 
 ## Extra Cell
 
 > `extra-cell`
 
-Template: Row at position "{rowPosition}" has an extra value in field at position "{fieldPosition}"
-
+Tags: `#body #structure` <br>
+Template: Row at position "{rowPosition}" has an extra value in field at position "{fieldPosition}" <br>
 Description: This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns.
 
-Tags: `#body #structure`
 
 ## Missing Cell
 
 > `missing-cell`
 
-Template: Row at position "{rowPosition}" has a missing cell in field "{fieldName}" at position "{fieldPosition}"
-
+Tags: `#body #structure` <br>
+Template: Row at position "{rowPosition}" has a missing cell in field "{fieldName}" at position "{fieldPosition}" <br>
 Description: This row has less values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns.
 
-Tags: `#body #structure`
 
 ## Blank Row
 
 > `blank-row`
 
-Template: Row at position "{rowPosition}" is completely blank
-
+Tags: `#body #structure` <br>
+Template: Row at position "{rowPosition}" is completely blank <br>
 Description: This row is empty. A row should contain at least one value.
 
-Tags: `#body #structure`
 
 ## Missing Cell
 
 > `type-error`
 
-Template: The cell "{cell}" in row at position "{rowPosition}" and field "{fieldName}" at position "{fieldPosition}" has incompatible type: {note}
-
+Tags: `#body #schema` <br>
+Template: The cell "{cell}" in row at position "{rowPosition}" and field "{fieldName}" at position "{fieldPosition}" has incompatible type: {note} <br>
 Description: The value does not match the schema type and format for this field.
 
-Tags: `#body #schema`
 
 ## Constraint Error
 
 > `constraint-error`
 
-Template: The cell "{cell}" in row at position "{rowPosition}" and field "{fieldName}" at position "{fieldPosition}" does not conform to a constraint: {note}
-
+Tags: `#body #schema` <br>
+Template: The cell "{cell}" in row at position "{rowPosition}" and field "{fieldName}" at position "{fieldPosition}" does not conform to a constraint: {note} <br>
 Description: A field value does not conform to a constraint.
 
-Tags: `#body #schema`
 
 ## Unique Error
 
 > `unique-error`
 
-Template: Row at position "{rowPosition}" has unique constraint violation in field "{fieldName}" at position "{fieldPosition}": {note}
-
+Tags: `#body #schema #integrity` <br>
+Template: Row at position "{rowPosition}" has unique constraint violation in field "{fieldName}" at position "{fieldPosition}": {note} <br>
 Description: This field is a unique field but it contains a value that has been used in another row.
 
-Tags: `#body #schema #integrity`
 
 ## PrimaryKey Error
 
 > `primary-key-error`
 
-Template: The row at position "{rowPosition}" does not conform to the primary key constraint: {note}
-
+Tags: `#body #schema #integrity` <br>
+Template: The row at position "{rowPosition}" does not conform to the primary key constraint: {note} <br>
 Description: Values in the primary key fields should be unique for every row
 
-Tags: `#body #schema #integrity`
 
 ## ForeignKey Error
 
 > `foreign-key-error`
 
-Template: The row at position "{rowPosition}" does not conform to the foreign key constraint: {note}
-
+Tags: `#body #schema #integrity` <br>
+Template: The row at position "{rowPosition}" does not conform to the foreign key constraint: {note} <br>
 Description: Values in the foreign key fields should exist in the reference table
 
-Tags: `#body #schema #integrity`
 
 ## Duplicate Row
 
 > `duplicate-row`
 
-Template: Row at position {rowPosition} is duplicated: {note}
-
+Tags: `#body #heuristic` <br>
+Template: Row at position {rowPosition} is duplicated: {note} <br>
 Description: The row is duplicated.
 
-Tags: `#body #heuristic`
 
 ## Deviated Value
 
 > `deviated-value`
 
-Template: There is a possible error because the value is deviated: {note}
-
+Tags: `#body #heuristic` <br>
+Template: There is a possible error because the value is deviated: {note} <br>
 Description: The value is deviated.
 
-Tags: `#body #heuristic`
 
 ## Truncated Value
 
 > `truncated-value`
 
-Template: The cell {cell} in row at position {rowPosition} and field {fieldName} at position {fieldPosition} has an error: {note}
-
+Tags: `#body #heuristic` <br>
+Template: The cell {cell} in row at position {rowPosition} and field {fieldName} at position {fieldPosition} has an error: {note} <br>
 Description: The value is possible truncated.
 
-Tags: `#body #heuristic`
 
 ## Blacklisted Value
 
 > `blacklisted-value`
 
-Template: The cell {cell} in row at position {rowPosition} and field {fieldName} at position {fieldPosition} has an error: {note}
-
+Tags: `#body #regulation` <br>
+Template: The cell {cell} in row at position {rowPosition} and field {fieldName} at position {fieldPosition} has an error: {note} <br>
 Description: The value is blacklisted.
 
-Tags: `#body #regulation`
 
 ## Sequential Value
 
 > `sequential-value`
 
-Template: The cell {cell} in row at position {rowPosition} and field {fieldName} at position {fieldPosition} has an error: {note}
-
+Tags: `#body #regulation` <br>
+Template: The cell {cell} in row at position {rowPosition} and field {fieldName} at position {fieldPosition} has an error: {note} <br>
 Description: The value is not sequential.
 
-Tags: `#body #regulation`
 
 ## Row Constraint
 
 > `row-constraint`
 
-Template: The row at position {rowPosition} has an error: {note}
-
+Tags: `#body #regulation` <br>
+Template: The row at position {rowPosition} has an error: {note} <br>
 Description: The value does not conform to the row constraint.
 
-Tags: `#body #regulation`
 

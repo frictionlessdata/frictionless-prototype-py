@@ -8,9 +8,8 @@ This document provides a full reference of the Frictionless errors.
 
 > `{{ Error.code }}`
 
-Template: {{ Error.template }}
-
+Tags: `{{ Error.tags|join(' ') }}` <br>
+Template: {{ Error.template }} <br>
 Description: {{ Error.description }}
 
-Tags: `{{ Error.tags|join(' ') }}`
 {% endfor %}
