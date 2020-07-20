@@ -1,8 +1,8 @@
 # Contributors
 
-> Made with [contributors-img](https://contributors-img.web.app).
+> This page is powered by [contributors-img](https://contributors-img.web.app)
 
-This package is a collective effort made by many developers working on various projects.
+This package is a collective effort made by many great people working on various projects. You can click on the pictures below to see their contribution in detail.
 
 ## frictionless-py
 
