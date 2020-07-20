@@ -28,6 +28,7 @@ TESTS_REQUIRE = [
     "responses",
     "coveralls",
     "ipython",
+    "jinja2",
     "moto",
 ]
 EXTRAS_REQUIRE = {
