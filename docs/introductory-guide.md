@@ -285,4 +285,4 @@ countries.csv
 countries.resource.yaml
 ```
 
-In the next articles we will explore more advanced Frictionless' functionality.
+In the next articles, we will explore more advanced Frictionless' functionality.
