@@ -1,3 +1,3 @@
 # Contribution Guide
 
-> it's a work in progress
+> TODO: Everything about working on the repository

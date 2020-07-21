@@ -1,3 +1,3 @@
 # Formats Reference
 
-> it's a work in progress
+> TODO: All the supported schemes and formats

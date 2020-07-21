@@ -1,3 +1,3 @@
 # Using with SQL
 
-> it's a work in progress
+> TODO: Frictionless-SQL tutorial

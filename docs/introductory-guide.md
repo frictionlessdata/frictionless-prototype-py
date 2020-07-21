@@ -15,7 +15,7 @@ id,neighbor_id,name,population
 
 As we can see, it's a data containing information about European countries and their populations. Also, it's easy to notice that there are two fields having a relationship based on a country's identifier.
 
-## Describing data
+## Describing Data
 
 First of all, we're going to describe our dataset. Frictionless uses powerful [Frictionless Data Specifications](https://specs.frictionlessdata.io/). They are very handy to describe:
 - a data table - [Table Schema](https://specs.frictionlessdata.io/table-schema/)
@@ -116,7 +116,7 @@ scheme: file
 
 It has the same metadata as we saw above but also includes our editing related to missing values and data types. We didn't change all the wrong data types manually because providing proper missing values had fixed it automatically. Now we have a resource descriptor. In the next section, we will show why metadata matters and how to use it.
 
-## Extracting data
+## Extracting Data
 
 It's time to try extracting our data as a table. As a first naive attempt, we will ignore the metadata we saved on the previous step:
 
@@ -156,7 +156,7 @@ $ frictionless extract countries.resource.yaml
 It's now much better! Numerical fields are numerical fields, and there are no more textual missing values markers. We can't see in the command-line, but missing values are now `None` values in Python, and the data can be e.g., exported to SQL. Although, it's still not ready for being published. In the next section, we will validate it!
 
 
-## Validating data
+## Validating Data
 
 Data validation with Frictionless is as easy as describing or extracting data:
 
@@ -194,7 +194,7 @@ Now it's even worse, but regarding data validation errors, the more, the better,
 
 In the next section, we will clean up the data.
 
-## Transforming data
+## Transforming Data
 
 > Currently, the pipeline capabilities are under construction. It's already possible to run `dataflows` spec as a pipeline, and more is coming but, for now, we will use Python programming for data cleaning.
 

@@ -32,7 +32,7 @@ Frictionless is a framework to describe, extract, validate, and transform tabula
 
 ```bash
 $ pip install frictionless
-$ pip install frictionless[sql]  # to install core plugins
+$ pip install frictionless[sql]  # to install a core plugin
 ```
 
 By default, the framework comes with the support of CSV, Excel, and JSON formats. Please use the command above to add support for SQL, Pandas, Html, and others. Usually, you don't need to think about it in advance - frictionless will show a useful error on a missing plugin with installation instruction.
@@ -60,6 +60,16 @@ Arguments follow this naming rule:
 - for Python interfaces, they are lowercased, e.g. `missing_values`
 - within dictionaries or JSON objects they are camel-cased, e.g. `missingValues`
 - in a command line they use dashes, e.g. `--missing-values`
+
+To get documentation for a command-line interface just use the `--help` flag:
+
+```bash
+$ frictionless --help
+$ frictionless describe --help
+$ frictionless extract --help
+$ frictionless validate --help
+$ frictionless transform --help
+```
 
 ## Example
 
@@ -151,6 +161,7 @@ Now having all this information:
 This readme gives a high-level overview of the framework. A detailed documentation is avialable and here is a table of contents:
 - [Introductory Guide](docs/introductory-guide.md)
 - [Advanced Guide](docs/advanced-guide.md)
+- [Extension Guide](docs/extension-guide.md)
 - [Contribution Guide](docs/contribution-guide.md)
 - [Using with SQL](docs/using-with-sql.md)
 - [Using with Pandas](docs/using-with-pandas.md)
