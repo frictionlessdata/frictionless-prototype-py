@@ -1,4 +1,4 @@
-include assets/**/*.*
+include frictionless/assets/*
 include LICENSE.md
 include Makefile
 include pylama.ini

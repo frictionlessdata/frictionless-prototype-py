@@ -56,6 +56,7 @@ INSTALL_REQUIRES = [
     "statistics>=1.0",
     "simpleeval>=0.9",
     "stringcase>=1.2",
+    "python-dateutil>=2.8",
     "unicodecsv>=0.14",
     "jsonlines>=1.2",
     "simplejson>=3.10",
