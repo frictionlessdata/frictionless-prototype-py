@@ -241,7 +241,7 @@ target.schema.foreign_keys = source.schema.foreign_keys
 target.to_yaml("countries.resource.yaml")
 ```
 
-After running this script it will look like this:
+After running this script our metadata will be:
 
 ```bash
 $ cat countries.resource.yaml
