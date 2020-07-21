@@ -198,7 +198,7 @@ In the next section, we will clean up the data.
 
 > Currently, the pipeline capabilities are under construction. It's already possible to run `dataflows` spec as a pipeline, and more is coming but, for now, we will use Python programming for data cleaning.
 
-We will use metadata to fix all the types of problems automatically. The only two things we need to handle manually:
+We will use metadata to fix all the data type problems automatically. The only two things we need to handle manually:
 - France's population
 - Germany's neighborhood
 
