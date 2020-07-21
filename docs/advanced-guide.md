@@ -58,4 +58,4 @@
 
 ### In-Python Manipulations
 
-> TODO: Example of data transforms using low-level API
+> TODO: Examples of data transforms using low-level API
