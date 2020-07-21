@@ -1,6 +1,5 @@
 import click
 import simplejson
-from .. import exceptions
 from ..describe import describe
 from .main import program
 

@@ -244,7 +244,7 @@ target.to_yaml("countries.resource.yaml")
 After running this script it will look like this:
 
 ```bash
-$ can countries.resource.yaml
+$ cat countries.resource.yaml
 bytes: 91
 compression: 'no'
 compressionPath: ''

@@ -44,7 +44,7 @@ def program_validate(source, *, headers, source_type, json, **options):
             del options[key]
         elif isinstance(value, tuple):
             options[key] = list(value)
-    source = {"tasks": [{"source": v} for v in source]} if len(source) > 1 else source[0]
+    source = list(source) if len(source) > 1 else source[0]
     try:
         report = validate(source, source_type=source_type, **options)
     except Exception as exception:

@@ -24,6 +24,7 @@ Frictionless is a framework to describe, extract, validate, and transform tabula
 - custom checks and formats
 - fully pluggable architecture
 - the included API server
+- more than 1000+ tests
 
 ## Installation
 

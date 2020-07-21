@@ -188,9 +188,13 @@ class Package(Metadata):
         # From source
         if source:
             self.resources.clear()
+            if isinstance(source, str) and os.path.isdir(source):
+                source = f"{source}/*"
             for pattern in source if isinstance(source, list) else [source]:
                 options = {"recursive": True} if "**" in pattern else {}
                 for path in glob.glob(os.path.join(self.basepath, pattern), **options):
+                    if path.endswith("package.json"):
+                        continue
                     self.resources.append({"path": os.path.relpath(path, self.basepath)})
 
         # General
