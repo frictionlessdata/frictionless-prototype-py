@@ -45,7 +45,11 @@ def program_validate(source, *, headers, source_type, json, **options):
         elif isinstance(value, tuple):
             options[key] = list(value)
     source = {"tasks": [{"source": v} for v in source]} if len(source) > 1 else source[0]
-    report = validate(source, source_type=source_type, **options)
+    try:
+        report = validate(source, source_type=source_type, **options)
+    except Exception as exception:
+        click.secho(str(exception))
+        exit(1)
 
     # Json
     if json:

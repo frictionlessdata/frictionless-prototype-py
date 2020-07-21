@@ -1,5 +1,6 @@
 import click
 import simplejson
+from .. import exceptions
 from ..describe import describe
 from .main import program
 
@@ -31,7 +32,11 @@ def program_describe(source, *, source_type, json, **options):
         elif isinstance(value, tuple):
             options[key] = list(value)
     source = list(source) if len(source) > 1 else source[0]
-    metadata = describe(source, source_type=source_type, **options)
+    try:
+        metadata = describe(source, source_type=source_type, **options)
+    except Exception as exception:
+        click.secho(str(exception))
+        exit(1)
     if json:
         return click.secho(simplejson.dumps(metadata, indent=2, ensure_ascii=False))
     if isinstance(source, list):

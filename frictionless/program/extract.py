@@ -33,7 +33,11 @@ def program_extract(source, *, source_type, json, **options):
             options[key] = list(value)
     source = list(source) if len(source) > 1 else source[0]
     process = (lambda row: row.to_dict(json=True)) if json else None
-    data = extract(source, source_type=source_type, process=process, **options)
+    try:
+        data = extract(source, source_type=source_type, process=process, **options)
+    except Exception as exception:
+        click.secho(str(exception))
+        exit(1)
     if data:
         if json:
             return click.secho(simplejson.dumps(data, indent=2, ensure_ascii=False))
