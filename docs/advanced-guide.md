@@ -54,8 +54,8 @@
 
 ### Dataflows In-Detail
 
-> TODO: Running standalone dataflows
+> TODO: Running a standalone dataflows
 
 ### In-Python Manipulations
 
-> TODO: Exampled of data transforms using low-level API
+> TODO: Example of data transforms using low-level API
