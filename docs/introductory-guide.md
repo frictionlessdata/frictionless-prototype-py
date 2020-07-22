@@ -190,7 +190,7 @@ $ frictionless validate countries.resource.yaml
 
 Now it's even worse, but regarding data validation errors, the more, the better, actually. Thanks to the metadata, we were able to reveal some critical errors:
 - the bad data types, i.e. `Ireland` instead of an id
-- the bad relation between `id` and `neighbor_id`: we don't have a country number 5
+- the bad relation between `id` and `neighbor_id`: we don't have a country with id 22
 
 In the next section, we will clean up the data.
 

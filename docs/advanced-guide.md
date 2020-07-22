@@ -32,6 +32,10 @@
 
 > TODO: General Table Query overview and extract examples (pick/skip/limit/offset_fields/rows)
 
+### Row Object
+
+> TODO: The row object in-detail
+
 ## Validating Data
 
 ### Manage Errors
