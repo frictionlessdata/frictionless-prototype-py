@@ -1,4 +1,4 @@
-from frictionless import describe, Resource, Package
+from frictionless import describe, Resource, Package, dialects
 
 
 # General
@@ -48,3 +48,40 @@ def test_describe_package_pattern():
 def test_describe_package_source_type():
     resource = describe("data/table.csv", source_type="package")
     assert isinstance(resource, Package)
+
+
+# Issues
+
+
+def test_describe_blank_cells_issue_7():
+    source = "header1,header2\n1,\n2,\n3,\n"
+    resource = describe(source, scheme="text", format="csv")
+    assert resource.schema == {
+        "fields": [
+            {"name": "header1", "type": "integer"},
+            {"name": "header2", "type": "any"},
+        ]
+    }
+
+
+def test_describe_whitespace_cells_issue_7():
+    source = "header1,header2\n1, \n2, \n3, \n"
+    resource = describe(source, scheme="text", format="csv")
+    assert resource.schema == {
+        "fields": [
+            {"name": "header1", "type": "integer"},
+            {"name": "header2", "type": "string"},
+        ]
+    }
+
+
+def test_describe_whitespace_cells_with_skip_initial_space_issue_7():
+    source = "header1,header2\n1, \n2, \n3, \n"
+    dialect = dialects.CsvDialect(skip_initial_space=True)
+    resource = describe(source, scheme="text", format="csv", dialect=dialect)
+    assert resource.schema == {
+        "fields": [
+            {"name": "header1", "type": "integer"},
+            {"name": "header2", "type": "any"},
+        ]
+    }

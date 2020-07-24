@@ -222,27 +222,32 @@ class Schema(Metadata):
             self.fields = [{"name": name, "type": type or "any"} for name in names]
             return
 
-        # Prepare candidates
+        # Prepare fields
+        fields = []
         candidates = []
+        max_score = [len(sample)] * len(names)
         for index, name in enumerate(names):
             candidates.append([])
             for type in INFER_TYPES:
-                field = Field({"name": name, "type": type}, schema=self)
+                field = Field(name=name, type=type, schema=self)
                 candidates[index].append({"field": field, "score": 0})
+            fields.append(Field(name=name, type="any", schema=self))
 
-        # Prepare fields
-        fields = [None] * len(names)
+        # Infer fields
         for cells in sample:
             for index, name in enumerate(names):
-                if fields[index] is not None:
+                if fields[index].type != "any":
                     continue
                 source = cells[index] if len(cells) > index else None
+                if source in missing_values:
+                    max_score[index] -= 1
+                    continue
                 for candidate in candidates[index]:
                     if candidate["score"] < len(sample) * (confidence - 1):
                         continue
                     target, notes = candidate["field"].read_cell(source)
                     candidate["score"] += 1 if not notes else -1
-                    if candidate["score"] >= len(sample) * confidence:
+                    if candidate["score"] >= max_score[index] * confidence:
                         fields[index] = candidate["field"]
                         break
 
@@ -392,5 +397,4 @@ INFER_TYPES = [
     "boolean",
     "year",
     "string",
-    "any",
 ]
