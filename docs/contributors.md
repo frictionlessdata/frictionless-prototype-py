@@ -4,10 +4,10 @@
 
 This package is a collective effort made by many great people working on various projects. You can click on the pictures below to see their contribution in detail.
 
-## goodtables-py
+## frictionless-py
 
-<a href="https://github.com/frictionlessdata/goodtables-py/graphs/contributors">
-  <img src="https://contributors-img.web.app/image?repo=frictionlessdata/goodtables-py" />
+<a href="https://github.com/frictionlessdata/frictionless-py/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=frictionlessdata/frictionless-py" />
 </a>
 
 ## datapackage-py
