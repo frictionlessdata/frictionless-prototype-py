@@ -162,7 +162,7 @@ This readme gives a high-level overview of the framework. A detailed documentati
 - [Introductory Guide](docs/introductory-guide.md)
 - [Describing Data](docs/describing-data.md)
 - [Extracting Data](docs/extracting-data.md)
-- [Validatiing Data](docs/validating-data.md)
+- [Validating Data](docs/validating-data.md)
 - [Transforming Data](docs/transforming-data.md)
 - [Extension Guide](docs/extension-guide.md)
 - [Contribution Guide](docs/contribution-guide.md)
