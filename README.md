@@ -160,7 +160,10 @@ Now having all this information:
 
 This readme gives a high-level overview of the framework. A detailed documentation is avialable and here is a table of contents:
 - [Introductory Guide](docs/introductory-guide.md)
-- [Advanced Guide](docs/advanced-guide.md)
+- [Describing Data](docs/describing-data.md)
+- [Extracting Data](docs/extracting-data.md)
+- [Validatiing Data](docs/validating-data.md)
+- [Transforming Data](docs/transforming-data.md)
 - [Extension Guide](docs/extension-guide.md)
 - [Contribution Guide](docs/contribution-guide.md)
 - [Using with SQL](docs/using-with-sql.md)
