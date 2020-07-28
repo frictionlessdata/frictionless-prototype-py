@@ -14,8 +14,8 @@ So in other words, "describing data" means creating metadata for your data files
 For a dataset there are even more information can be provided like general dataset purpose, information about data sources, list of authors, and many more. Of course, when there are many tabular files relational rules can be very important. Usually, there are foreign keys ensuring integrity of the dataset, for example, there is some reference table containing country names and other tables using it as a reference. Data in this form is called "normalized data" and it occurs very often in scientific and other kind of research.
 
 Having general understanding of what is "data describing", we can now articulate why it's important:
-- data validation; metadata helps to reveal problems in your data on the early stages of your workflow
-- data publication; metadata provides additional information that your data can't include
+- **data validation**; metadata helps to reveal problems in your data on the early stages of your workflow
+- **data publication**; metadata provides additional information that your data can't include
 
 There are not the only two pros of having metadata but they are two the most important. Please continue reading to learn how Frictionless helps to achieve these advantages describing you data.
 
@@ -415,15 +415,9 @@ To continue learning about data resources please read:
 - [Data Package Spec](https://specs.frictionlessdata.io/data-package/)
 - API Reference: Package
 
-## Using Metadata
+## The Describe Functions
 
-## Inferring Metadata
-
-## Expanding Metadata
-
-## Transforming Metadata
-
-## The describe functions
+The `describe` functions is the main tool to data describing. In many cases, this high-level interface is enough for data exploration and other needs.
 
 Frictionless framework provides 3 different `describe` functions in Python:
 - `describe`: it will detect the source type and return Data Resource or Data Package metadata
@@ -475,3 +469,301 @@ To continue learning about the describe functions please read:
 - API Reference: describe
 - API Reference: describe_resource
 - API Reference: describe_package
+
+## Using Metadata
+
+This documentation contains a great deal of information on how to use metadata and why it's vital for your data. In this article we're going to provide a quick example based on the "Data Resource" section but please read other documents to get the full picture.
+
+Let's get back to this exotic data table:
+
+> data/country-2.csv
+
+```csv
+# Author: the scientist
+id;neighbor_id;name;population
+1;;Britain;67
+2;3;France;67
+3;2;Germany;83
+4;5;Italy;60
+5;4;Spain;47
+```
+
+As we tried before, by default Frictionless can't properly describe this file so we got something like:
+
+```yaml
+$ frictionless describe data/country-2.csv
+# ...
+schema:
+  fields:
+    - name: '# Author: the scientist'
+      type: string
+# ...
+```
+
+Trying to extract the data will fail the same way:
+
+```bash
+$ frictionless extract data/country-2.csv
+[data] data/country-2.csv
+
+# Author: the scientist
+------------------------------
+id;neighbor_id;name;population
+1;;Britain;67
+2;3;France;67
+3;2;Germany;83
+4;5;Italy;60
+5;4;Spain;47
+```
+
+Basically, that's a really important idea - with not metadata many software will not be able to even read this data file, furhtermore, without metadata people can not understand the purpose of this data. Let's now use the `country.resource.yaml` file we created in the "Data Resource" section:
+
+```bash
+$ frictionless extract country.resource.yaml
+[data] country.resource.yaml
+
+  id    neighbor_id  name       population
+----  -------------  -------  ------------
+   1                 Britain            67
+   2              3  France             67
+   3              2  Germany            83
+   4              5  Italy              60
+   5              4  Spain              47
+```
+
+As we can see, it's now fixed. The metadata we'd had saved the day. If we explore this data in Python we can discover that it also correct data types e.g. `id` is Python's integer not string. This fact will allow exporting and sharing this data without any fear.
+
+## Inferring Metadata
+
+Many Frictionless functions infer metadata under the hood as though `describe`, `extract` and many more. On a lower-level it's possible to control this process. Let's create a `Resource`.
+
+```python
+from pprint import pprint
+from frictionless import Resource
+
+resource = Resource(path="data/country-1.csv")
+pprint(resource)
+# {'path': 'data/country-1.csv'}
+```
+
+Frictionless always tries to be as explicit as possible. We didn't provide any metadta except for `type` so we got the expected result. But now, we'd like to `infer` additional metadata:
+
+```python
+resource.infer()
+pprint(resource)
+#{'bytes': 100,
+# 'compression': 'no',
+# 'compressionPath': '',
+# 'dialect': {},
+# 'encoding': 'utf-8',
+# 'format': 'csv',
+# 'hash': '4204f087f328b70c854c03403ab448c4',
+# 'hashing': 'md5',
+# 'name': 'country-1',
+# 'path': 'data/country-1.csv',
+# 'profile': 'tabular-data-resource',
+# 'rows': 5,
+# 'schema': {'fields': [{'name': 'id', 'type': 'integer'},
+#                       {'name': 'neighbor_id', 'type': 'integer'},
+#                       {'name': 'name', 'type': 'string'},
+#                       {'name': 'population', 'type': 'integer'}]},
+# 'scheme': 'file'}
+```
+
+The result is really familiar to us already. We have seen it a lot as an ouput of the `describe` function or command. Basically, that's what this high-level function does under the hood: create a resource and then infer additional metadata.
+
+All main `Metadata` classes have this method with different avialable options but with the same conceptual purpose:
+- `package.infer`
+- `resource.infer`
+- `schema.infer`
+
+## Expanding Metadata
+
+By default, Frictionless never adds default values to metadata, for example:
+
+```python
+from pprint import pprint
+from frictionless import describe
+
+resource = describe("data/country-1.csv")
+pprint(resource.schema)
+# {'fields': [{'name': 'id', 'type': 'integer'},
+#            {'name': 'neighbor_id', 'type': 'integer'},
+#            {'name': 'name', 'type': 'string'},
+#            {'name': 'population', 'type': 'integer'}]}
+```
+
+Under the hood it, for example, still treats empty string as missing values because it's the specs' default. We can make reveal implicit metadata by expanding it:
+
+```python
+resource.schema.expand()
+pprint(resource.schema)
+# {'fields': [{'bareNumber': True,
+#             'format': 'default',
+#             'name': 'id',
+#             'type': 'integer'},
+#            {'bareNumber': True,
+#             'format': 'default',
+#             'name': 'neighbor_id',
+#             'type': 'integer'},
+#            {'format': 'default', 'name': 'name', 'type': 'string'},
+#            {'bareNumber': True,
+#             'format': 'default',
+#             'name': 'population',
+#             'type': 'integer'}],
+# 'missingValues': ['']}
+```
+
+## Transforming Metadata
+
+We have seen it before but let's re-iterate; it's possible to tranform core metadata properties using Python interface:
+
+```python
+from frictionless import Resource
+
+resource = Resource("country.resource.yaml")
+resource.title = "Countries"
+resource.description = "It's a research project"
+resource.dialect.header_rows = [2]
+resource.dialect.delimiter = ";"
+resource.to_yaml("country.resource.yaml")
+```
+
+But not only Python interface is available. Thanks to flexibility of the Frictionless Specs, we can add arbitrary metadata to our descriptor. We use a dictionary operations for it:
+
+```python
+from frictionless import Resource
+
+resource = Resource("country.resource.yaml")
+resource["customKey1"] = "Value1"
+resource["customKey2"] = "Value2"
+resource.to_yaml("country.resource.yaml")
+```
+
+## Validating Metadata
+
+Metadata validity is an important topic so it's recommended to validate your metadata before publishing. For example, let's make it invalid:
+
+```python
+from frictionless import Resource
+
+resource = Resource("country.resource.yaml")
+resource["title"] = 1
+print(resource.metadata_valid)
+# False
+print(resource.metadata_errors)
+# [{'code': 'resource-error',
+#  'description': 'A validation cannot be processed.',
+#  'message': 'The data resource has an error: "1 is not of type \'string\'" at '
+#             '"title" in metadata and at "properties/title/type" in profile',
+#  'name': 'Resource Error',
+#  'note': '"1 is not of type \'string\'" at "title" in metadata and at '
+#          '"properties/title/type" in profile',
+#  'tags': ['#general']}]
+```
+
+Let's fix our resource metadata:
+
+```python
+from frictionless import Resource
+
+resource = Resource("country.resource.yaml")
+resource["title"] = 'Countries'
+print(resource.metadata_valid)
+# False
+```
+
+You need to check `metadata.metadata_valid` only if you change it by hands; the available high-level functions like `validate` does it on their own.
+
+## Advanced Metadata Topics
+
+> TODO: finish this section
+
+### Metadata API Overview
+
+### Metadata Loading/Saving
+
+### Infer Schema Options
+
+A numerous Frictionless function include the Table Scehma inferring stage, for example:
+- `describe`
+- `extract`
+- `validate`
+- `resource.infer`
+- `schema.infer`
+- and others
+
+Let's explore some handy options to customize ths process. All of them are available in some form for all the function above and for different invocation types: in Python, in CLI, or for a REST server.
+
+#### Infer Type
+
+This option allow manually setting all the field types to a given type. It's usefull when you need to skip data casting (setting `any` type) or have everything as a string (setting `string` type):
+
+```yaml
+frictionless describe data/country-1.csv --infer-type string
+# ...
+schema:
+  fields:
+    - name: id
+      type: string
+    - name: neighbor_id
+      type: string
+    - name: name
+      type: string
+    - name: population
+      type: string
+# ...
+```
+
+#### Infer Names
+
+Sometimes you don't want to use existent header row to compose field names. It's possible to provide custom names:
+
+```python
+from frictionless import describe
+
+resource = describe("data/country-1.csv", infer_names=["f1", "f2", "f3", "f4"])
+print(resource.schema.field_names)
+# ['f1', 'f2', 'f3', 'f4']
+```
+
+#### Infer Volume
+
+By default, Frictionless will use first 100 rows to detect field types. This can be customized. The following code will be slower but the result can be more accurate
+
+```python
+from frictionless import describe
+
+resource = describe("data/table1.csv", infer_volume=1000)
+```
+
+#### Infer Confidence
+
+By default, Frictionless uses 0.9 (90%) confidence level for data types detection. It means that it there are 9 integers in a field and one string it will be inferred as an integer. If you want a guarantee that an inferred schema will conform to the data you can set it to 1 (100%):
+
+```python
+from frictionless import describe
+
+resource = describe("data/table1.csv", infer_confidence=1)
+```
+
+#### Infer Missing Values
+
+Missing Values is an important concept in data description. It provides information about what cell values should be consideret as nulls. We can customize the defaults:
+
+```python
+from pprint import pprint
+from frictionless import describe
+
+resource = describe("data/country-1.csv", infer_missing_values=["", "67"])
+pprint(resource.schema.missing_values)
+# ['', '67']
+pprint(resource.read_rows())
+# [Row([('id', 1),('neighbor_id', None),('name', 'Britain'),('population', None)]),
+# Row([('id', 2), ('neighbor_id', 3), ('name', 'France'), ('population', None)]),
+# Row([('id', 3), ('neighbor_id', 2), ('name', 'Germany'), ('population', 83)]),
+# Row([('id', 4), ('neighbor_id', 5), ('name', 'Italy'), ('population', 60)]),
+# Row([('id', 5), ('neighbor_id', 4), ('name', 'Spain'), ('population', 47)])]
+```
+
+As we can see, the textual values equal to "67" are now considered as nulls. Usually it's handy when you have data with values like: '-', 'n/a', and similiar.
