@@ -113,11 +113,12 @@ foreignKeys:
       resource: ''
 ```
 
-They are only a few features of the Table Schema specifications. To continue learning please consult with:
+Later we're going to show how to use the schema we created to ensure validity of your data; in the next few sections we will focus on Data Resource and Data Package metadata.
+
+To continue learning about table schemas please read:
 - [Table Schema Spec](https://specs.frictionlessdata.io/table-schema/)
 - API Reference: Schema
 
-Later we're going to show how to use the schema we created to ensure validity of your data; in the next few sections we will focus on Data Resource and Data Package metadata.
 
 ## Data Resource
 
@@ -232,21 +233,245 @@ Our resource metadata includes the schema metadata we created earlier but also i
 But the most important difference is that resource metadata contains the `path` property. It conceptually distincts Data Resource specification from Table Schema specification because while a Table Schema descriptor can describe a class of data files, a Data Resoure descriptor describes the only one exact data file, `data/country-2.csv` in our case.
 
 Using programming terminolody we could say that:
-- Table Schema descriptor is abstract while
-- Data Resource descriptor is concrete
+- Table Schema descriptor is abstract (for a class of files)
+- Data Resource descriptor is concrete (for an individual file)
 
 We will show the practical difference in the "Using Metadata" section but in the next section we will overview the Data Package specification.
 
+To continue learning about data resources please read:
+- [Data Resource Spec](https://specs.frictionlessdata.io/data-resource/)
+- API Reference: Resource
+
 ## Data Package
 
-> TODO: Desribing datasets (multiple files)
+A Data Package consists of:
+- Metadata that describes the structure and contents of the package
+- Resources such as data files that form the contents of the package
+The Data Package metadata is stored in a “descriptor”. This descriptor is what makes a collection of data a Data Package. The structure of this descriptor is the main content of the specification below.
+
+In addition to this descriptor a data package will include other resources such as data files. The Data Package specification does NOT impose any requirements on their form or structure and can therefore be used for packaging any kind of data.
+
+The data included in the package may be provided as:
+- Files bundled locally with the package descriptor
+- Remote resources, referenced by URL
+- "Inline" data (see below) which is included directly in the descriptor
+
+For this section, we will use following files:
+
+> data/country-3.csv
+
+```csv
+id,capital_id,name,population
+1,1,Britain,67
+2,3,France,67
+3,2,Germany,83
+4,5,Italy,60
+5,4,Spain,47
+```
+
+> data/capital-3.csv
+
+```csv
+id,name
+1,London
+2,Berlin
+3,Paris
+4,Madrid
+5,Rome
+```
+
+First of all, let's describe our package using command-line interface. We did it before for a resource but now we're going to use a glob pattern to indicate that there are multiple files:
+
+```yaml
+$ frictionless describe data/*-3.csv
+[metadata] data/capital-3.csv data/country-3.csv
+
+profile: data-package
+resources:
+  - bytes: 50
+    compression: 'no'
+    compressionPath: ''
+    dialect: {}
+    encoding: utf-8
+    format: csv
+    hash: e7b6592a0a4356ba834e4bf1c8e8c7f8
+    hashing: md5
+    name: capital-3
+    path: data/capital-3.csv
+    profile: tabular-data-resource
+    rows: 5
+    schema:
+      fields:
+        - name: id
+          type: integer
+        - name: name
+          type: string
+    scheme: file
+  - bytes: 100
+    compression: 'no'
+    compressionPath: ''
+    dialect: {}
+    encoding: utf-8
+    format: csv
+    hash: c0558b91523683483f86f63346d06d81
+    hashing: md5
+    name: country-3
+    path: data/country-3.csv
+    profile: tabular-data-resource
+    rows: 5
+    schema:
+      fields:
+        - name: id
+          type: integer
+        - name: capital_id
+          type: integer
+        - name: name
+          type: string
+        - name: population
+          type: integer
+    scheme: file
+```
+
+We have already learned about many concepts that are reflected in this metadata. We can see resources, schemas, fields, and others familiar entities. The difference is that this descriptor has information about multiple files which is the most popular way of sharing data - in datasets. Very often you have not only one data file but also additional data files, some textual documents e.g. PDF, and others. To package all of these files with corresponding metadat we use data packges.
+
+Following the already familiar to the guide's reader pattern, we add some additional metadata:
+
+```python
+from frictionless import describe
+
+package = describe("data/*-3.csv")
+package.title = "Countries and their capitals"
+package.description = "The data was collected as a research project"
+package.get_resource("country-3").name = "country"
+package.get_resource("capital-3").name = "capital"
+package.get_resource("country").schema.foreign_keys.append(
+    {"fields": ["capital_id"], "reference": {"resource": "capital", "fields": ["id"]}}
+)
+package.to_yaml("country.package.yaml")
+```
+
+In this case, we add a relation between to different files connecting `id` and `capital_id`. Also, we provide dataset-level metadata to share to purpose of this dataset. We haven't added individual fields' titles and description but it can be done as it was shown in the "Table Schema" section.
+
+```yaml
+$ cat country.package.json
+title: Countries and their capitals
+description: The data was collected as a research project
+profile: data-package
+resources:
+  - bytes: 100
+    compression: 'no'
+    compressionPath: ''
+    dialect: {}
+    encoding: utf-8
+    format: csv
+    hash: c0558b91523683483f86f63346d06d81
+    hashing: md5
+    name: country
+    path: data/country-3.csv
+    profile: tabular-data-resource
+    rows: 5
+    schema:
+      fields:
+        - name: id
+          type: integer
+        - name: capital_id
+          type: integer
+        - name: name
+          type: string
+        - name: population
+          type: integer
+      foreignKeys:
+        - fields:
+            - capital_id
+          reference:
+            fields:
+              - id
+            resource: capital
+    scheme: file
+  - bytes: 50
+    compression: 'no'
+    compressionPath: ''
+    dialect: {}
+    encoding: utf-8
+    format: csv
+    hash: e7b6592a0a4356ba834e4bf1c8e8c7f8
+    hashing: md5
+    name: capital
+    path: data/capital-3.csv
+    profile: tabular-data-resource
+    rows: 5
+    schema:
+      fields:
+        - name: id
+          type: integer
+        - name: name
+          type: string
+    scheme: file
+```
+
+The main role of Data Package descriptor is describing a dataset; as we can see, it includes previously shown descriptors as though `schema`, `dialect` and `resource`. But it's a mistake to think then that Data Package is the least important specification; actually, it completes the Frictionless Data suite making possible sharing and validating not only individual fiels but complete datasets.
+
+To continue learning about data resources please read:
+- [Data Package Spec](https://specs.frictionlessdata.io/data-package/)
+- API Reference: Package
 
 ## Using Metadata
 
-## Working with Metadata
-
 ## Inferring Metadata
 
-> TODO: Details about describe/infer options like `infer_type` etc
-
 ## Expanding Metadata
+
+## Transforming Metadata
+
+## The describe functions
+
+Frictionless framework provides 3 different `describe` functions in Python:
+- `describe`: it will detect the source type and return Data Resource or Data Package metadata
+- `describe_resoure`: it will always return Data Resource metadata
+- `describe_package`: it will always return Data Package metadata
+
+In command-line there is only 1 command but there is a flag to adjust the behaviour:
+
+```bash
+$ frictionless describe
+$ frictionless describe --source-type resource
+$ frictionless describe --source-type package
+```
+
+For example, if we want a Data Package descriptor for a single file:
+
+```yaml
+$ frictionless describe data/country-1.csv --source-type package
+[metadata] data/country-1.csv
+
+profile: data-package
+resources:
+  - bytes: 100
+    compression: 'no'
+    compressionPath: ''
+    dialect: {}
+    encoding: utf-8
+    format: csv
+    hash: 4204f087f328b70c854c03403ab448c4
+    hashing: md5
+    name: country-1
+    path: data/country-1.csv
+    profile: tabular-data-resource
+    rows: 5
+    schema:
+      fields:
+        - name: id
+          type: integer
+        - name: neighbor_id
+          type: integer
+        - name: name
+          type: string
+        - name: population
+          type: integer
+    scheme: file
+```
+
+To continue learning about the describe functions please read:
+- API Reference: describe
+- API Reference: describe_resource
+- API Reference: describe_package
