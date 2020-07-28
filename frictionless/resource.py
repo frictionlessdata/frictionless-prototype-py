@@ -29,6 +29,8 @@ class Resource(Metadata):
         descriptor=None,
         *,
         name=None,
+        title=None,
+        description=None,
         path=None,
         data=None,
         scheme=None,
@@ -51,6 +53,8 @@ class Resource(Metadata):
 
         # Set attributes
         self.setinitial("name", name)
+        self.setinitial("title", title)
+        self.setinitial("description", description)
         self.setinitial("path", path)
         self.setinitial("data", data)
         self.setinitial("scheme", scheme)
@@ -75,6 +79,14 @@ class Resource(Metadata):
     @Metadata.property
     def name(self):
         return self.get("name", "resource")
+
+    @Metadata.property
+    def title(self):
+        return self.get("title")
+
+    @Metadata.property
+    def description(self):
+        return self.get("description")
 
     # NOTE: should it be memory for inline?
     @Metadata.property

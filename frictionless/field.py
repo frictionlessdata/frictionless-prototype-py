@@ -38,6 +38,8 @@ class Field(Metadata):
         descriptor=None,
         *,
         name=None,
+        title=None,
+        description=None,
         type=None,
         format=None,
         missing_values=None,
@@ -45,6 +47,8 @@ class Field(Metadata):
         schema=None,
     ):
         self.setinitial("name", name)
+        self.setinitial("title", title)
+        self.setinitial("description", description)
         self.setinitial("type", type)
         self.setinitial("format", format)
         self.setinitial("missingValues", missing_values)
@@ -56,6 +60,14 @@ class Field(Metadata):
     @Metadata.property
     def name(self):
         return self.get("name", "field")
+
+    @Metadata.property
+    def title(self):
+        return self.get("title")
+
+    @Metadata.property
+    def description(self):
+        return self.get("description")
 
     @Metadata.property
     def type(self):
