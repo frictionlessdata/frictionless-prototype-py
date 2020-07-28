@@ -39,13 +39,16 @@ class Metadata(helpers.ControlledDict):
 
     def __setattr__(self, name, value):
         if hasattr(self, "_Metadata__Error"):
-            attr = type(self).__dict__.get(name)
-            if attr:
-                write = getattr(attr, "metadata_write", None)
-                if write:
-                    if callable(write):
-                        return callable(self, value)
-                    return setitem(self, stringcase.camelcase(name), value)
+            for Type in type(self).__mro__:
+                if Type is Metadata:
+                    break
+                attr = Type.__dict__.get(name)
+                if attr:
+                    write = getattr(attr, "metadata_write", None)
+                    if write:
+                        if callable(write):
+                            return callable(self, value)
+                        return setitem(self, stringcase.camelcase(name), value)
         if not name.startswith("_"):
             message = f"'{type(self).__name__}' object has no attribute '{name}'"
             raise AttributeError(message)
