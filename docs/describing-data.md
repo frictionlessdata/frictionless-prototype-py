@@ -34,7 +34,7 @@ id,neighbor_id,name,population
 3,2,Germany,83
 4,5,Italy,60
 5,4,Spain,47
-`"
+```
 
 Let's get Table Schema using Frictionless framework:
 
@@ -44,7 +44,7 @@ from frictionless import describe
 resource = describe("data/country.csv")
 schema = resource.schema
 schema.to_yaml("country.schema.yaml")
-`"
+```
 
 The high-level functions of Frictionless operate on dataset and resource levels so we have to use Python a little of Python programming to get schema information. Below we will show how to use a command-line interface for similar tasks.
 
@@ -59,7 +59,7 @@ fields:
     type: string
   - name: population
     type: integer
-`"
+```
 
 As we can see, we were able to get infer basic metadata of our data file but describing data doesn't end here, we can  provide additional information we discussed earlier:
 
@@ -78,7 +78,7 @@ schema.foreign_keys.append(
     {"fields": ["neighbor_id"], "reference": {"resource": "", "fields": ["id"]}}
 )
 schema.to_yaml("country.schema.yaml")
-`"
+```
 
 Let's break it down:
 - we added a title for all the fields
@@ -111,7 +111,7 @@ foreignKeys:
       fields:
         - id
       resource: ''
-`"
+```
 
 Later we're going to show how to use the schema we created to ensure the validity of your data; in the next few sections, we will focus on Data Resource and Data Package metadata.
 
@@ -138,7 +138,7 @@ id;neighbor_id;name;population
 3;2;Germany;83
 4;5;Italy;60
 5;4;Spain;47
-`"
+```
 
 Let's describe it this time using the command-line interface:
 
@@ -163,7 +163,7 @@ schema:
     - name: '# Author: the scientist'
       type: string
 scheme: file
-`"
+```
 
 OK, that's clearly wrong. As we have seen in the "Introductory Guide" Frictionless is capable of inferring some complicated cases' metadata but our table is too weird for it. We need to program it:
 
@@ -175,7 +175,7 @@ resource.dialect.header_rows = [2]
 resource.dialect.delimiter = ";"
 resource.schema = Schema("country.schema.yaml")
 resource.to_yaml("country.resource.yaml")
-`"
+```
 
 So what we are doing here:
 - we set header rows to be row number 2; as humans, we can easily see it
@@ -223,7 +223,7 @@ schema:
           - id
         resource: ''
 scheme: file
-`"
+```
 
 Our resource metadata includes the schema metadata we created earlier but also it has:
 - general information about the file's schema, format, and compression
@@ -267,7 +267,7 @@ id,capital_id,name,population
 3,2,Germany,83
 4,5,Italy,60
 5,4,Spain,47
-`"
+```
 
 > data/capital-3.csv
 
@@ -278,7 +278,7 @@ id,name
 3,Paris
 4,Madrid
 5,Rome
-`"
+```
 
 First of all, let's describe our package using the command-line interface. We did it before for a resource but now we're going to use a glob pattern to indicate that there are multiple files:
 
@@ -330,7 +330,7 @@ resources:
         - name: population
           type: integer
     scheme: file
-`"
+```
 
 We have already learned about many concepts that are reflected in this metadata. We can see resources, schemas, fields, and other familiar entities. The difference is that this descriptor has information about multiple files which is the most popular way of sharing data - in datasets. Very often you have not only one data file but also additional data files, some textual documents e.g. PDF, and others. To package all of these files with the corresponding metadata we use data packages.
 
@@ -348,7 +348,7 @@ package.get_resource("country").schema.foreign_keys.append(
     {"fields": ["capital_id"], "reference": {"resource": "capital", "fields": ["id"]}}
 )
 package.to_yaml("country.package.yaml")
-`"
+```
 
 In this case, we add a relation between different files connecting `id` and `capital_id`. Also, we provide dataset-level metadata to share with the purpose of this dataset. We haven't added individual fields' titles and description but it can be done as it was shown in the "Table Schema" section.
 
@@ -407,7 +407,7 @@ resources:
         - name: name
           type: string
     scheme: file
-`"
+```
 
 The main role of the Data Package descriptor is describing a dataset; as we can see, it includes previously shown descriptors as though `schema`, `dialect`, and `resource`. But it's a mistake to think then that Data Package is the least important specification; actually, it completes the Frictionless Data suite making possible sharing and validating not only individual files but complete datasets.
 
@@ -430,7 +430,7 @@ In command-line, there is only 1 command but there is a flag to adjust the behav
 $ frictionless describe
 $ frictionless describe --source-type resource
 $ frictionless describe --source-type package
-`"
+```
 
 For example, if we want a Data Package descriptor for a single file:
 
@@ -463,7 +463,7 @@ resources:
         - name: population
           type: integer
     scheme: file
-`"
+```
 
 To continue learning about the describe functions please read:
 - API Reference: describe
@@ -486,7 +486,7 @@ id;neighbor_id;name;population
 3;2;Germany;83
 4;5;Italy;60
 5;4;Spain;47
-`"
+```
 
 As we tried before, by default Frictionless can't properly describe this file so we got something like:
 
@@ -498,7 +498,7 @@ schema:
     - name: '# Author: the scientist'
       type: string
 # ...
-`"
+```
 
 Trying to extract the data will fail the same way:
 
@@ -514,7 +514,7 @@ id;neighbor_id;name;population
 3;2;Germany;83
 4;5;Italy;60
 5;4;Spain;47
-`"
+```
 
 Basically, that's a really important idea - with not metadata many software will not be able to even read this data file, furthermore, without metadata people can not understand the purpose of this data. Let's now use the `country.resource.yaml` the file we created in the "Data Resource" section:
 
@@ -529,7 +529,7 @@ $ frictionless extract country.resource.yaml
    3              2  Germany            83
    4              5  Italy              60
    5              4  Spain              47
-`"
+```
 
 As we can see, it's now fixed. The metadata we'd had saved the day. If we explore this data in Python we can discover that it also correct data types e.g. `id` is Python's integer not string. This fact will allow exporting and sharing this data without any fear.
 
@@ -544,7 +544,7 @@ from frictionless import Resource
 resource = Resource(path="data/country-1.csv")
 pprint(resource)
 # {'path': 'data/country-1.csv'}
-`"
+```
 
 Frictionless always tries to be as explicit as possible. We didn't provide any metadta except for `type` so we got the expected result. But now, we'd like to `infer` additional metadata:
 
@@ -568,7 +568,7 @@ pprint(resource)
 #                       {'name': 'name', 'type': 'string'},
 #                       {'name': 'population', 'type': 'integer'}]},
 # 'scheme': 'file'}
-`"
+```
 
 The result is really familiar to us already. We have seen it a lot as an output of the `describe` function or command. Basically, that's what this high-level function does under the hood: create a resource and then infer additional metadata.
 
@@ -591,7 +591,7 @@ pprint(resource.schema)
 #            {'name': 'neighbor_id', 'type': 'integer'},
 #            {'name': 'name', 'type': 'string'},
 #            {'name': 'population', 'type': 'integer'}]}
-`"
+```
 
 Under the hood it, for example, still treats empty string as missing values because it's the specs' default. We can make reveal implicit metadata by expanding it:
 
@@ -612,7 +612,7 @@ pprint(resource.schema)
 #             'name': 'population',
 #             'type': 'integer'}],
 # 'missingValues': ['']}
-`"
+```
 
 ## Transforming Metadata
 
@@ -627,7 +627,7 @@ resource.description = "It's a research project"
 resource.dialect.header_rows = [2]
 resource.dialect.delimiter = ";"
 resource.to_yaml("country.resource.yaml")
-`"
+```
 
 But not only the Python interface is available. Thanks to the flexibility of the Frictionless Specs, we can add arbitrary metadata to our descriptor. We use dictionary operations for it:
 
@@ -638,7 +638,7 @@ resource = Resource("country.resource.yaml")
 resource["customKey1"] = "Value1"
 resource["customKey2"] = "Value2"
 resource.to_yaml("country.resource.yaml")
-`"
+```
 
 ## Validating Metadata
 
@@ -660,7 +660,7 @@ print(resource.metadata_errors)
 #  'note': '"1 is not of type \'string\'" at "title" in metadata and at '
 #          '"properties/title/type" in profile',
 #  'tags': ['#general']}]
-`"
+```
 
 Let's fix our resource metadata:
 
@@ -671,7 +671,7 @@ resource = Resource("country.resource.yaml")
 resource["title"] = 'Countries'
 print(resource.metadata_valid)
 # False
-`"
+```
 
 You need to check `metadata.metadata_valid` only if you change it by hands; the available high-level functions like `validate` do it on their own.
 
@@ -713,7 +713,7 @@ schema:
     - name: population
       type: string
 # ...
-`"
+```
 
 #### Infer Names
 
@@ -725,7 +725,7 @@ from frictionless import describe
 resource = describe("data/country-1.csv", infer_names=["f1", "f2", "f3", "f4"])
 print(resource.schema.field_names)
 # ['f1', 'f2', 'f3', 'f4']
-`"
+```
 
 #### Infer Volume
 
@@ -735,7 +735,7 @@ By default, Frictionless will use the first 100 rows to detect field types. This
 from frictionless import describe
 
 resource = describe("data/table1.csv", infer_volume=1000)
-`"
+```
 
 #### Infer Confidence
 
@@ -745,7 +745,7 @@ By default, Frictionless uses 0.9 (90%) confidence level for data types detectio
 from frictionless import describe
 
 resource = describe("data/table1.csv", infer_confidence=1)
-`"
+```
 
 #### Infer Missing Values
 
@@ -764,6 +764,6 @@ pprint(resource.read_rows())
 # Row([('id', 3), ('neighbor_id', 2), ('name', 'Germany'), ('population', 83)]),
 # Row([('id', 4), ('neighbor_id', 5), ('name', 'Italy'), ('population', 60)]),
 # Row([('id', 5), ('neighbor_id', 4), ('name', 'Spain'), ('population', 47)])]
-`"
+```
 
 As we can see, the textual values equal to "67" are now considered nulls. Usually, it's handy when you have data with values like: '-', 'n/a', and similar.
