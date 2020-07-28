@@ -69,7 +69,9 @@ from frictionless import describe
 
 resource = describe("data/countries.csv", infer_missing_values=["", "n/a"])
 resource.schema.get_field("neighbor_id").type = "integer"
-resource.schema.foreign_keys.append({"fields": ["neighbor_id"], "reference": {"resource": "", "fields": ["id"]}})
+resource.schema.foreign_keys.append(
+    {"fields": ["neighbor_id"], "reference": {"resource": "", "fields": ["id"]}}
+)
 resource.to_yaml("countries.resource.yaml")
 ```
 
