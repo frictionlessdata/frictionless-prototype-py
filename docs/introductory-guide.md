@@ -25,7 +25,7 @@ First of all, we're going to describe our dataset. Frictionless uses powerful [F
 
 Let's describe the `countries` table:
 
-```bash
+```yaml
 $ frictionless describe data/countries.csv
 [metadata] data/countries.csv
 
@@ -75,7 +75,7 @@ resource.to_yaml("countries.resource.yaml")
 
 Let's see what we have created:
 
-```bash
+```yaml
 $ cat countries.resource.yaml
 bytes: 133
 compression: 'no'
@@ -243,7 +243,7 @@ target.to_yaml("countries.resource.yaml")
 
 After running this script our metadata will be:
 
-```bash
+```yaml
 $ cat countries.resource.yaml
 bytes: 91
 compression: 'no'
