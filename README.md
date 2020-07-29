@@ -89,7 +89,7 @@ id,name,,name
 
 Firt of all, let's infer the metadata. We can save and edit it to provide useful information about the table:
 
-```bash
+```yaml
 $ frictionless describe data/invalid.csv
 [metadata] data/invalid.csv
 
