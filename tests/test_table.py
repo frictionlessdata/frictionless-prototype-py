@@ -559,7 +559,7 @@ def test_table_compression_error_invalid_zip():
     assert error.note == "File is not a zip file"
 
 
-@pytest.mark.skipif(sys.version_info < (3, 8), reason='Requires Python3.8+')
+@pytest.mark.skipif(sys.version_info < (3, 8), reason="Requires Python3.8+")
 def test_table_compression_error_invalid_gz():
     source = "id,filename\n\1,dump.tar.gz"
     table = Table(source, scheme="text", format="csv")
