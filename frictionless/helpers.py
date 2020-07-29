@@ -382,6 +382,7 @@ class ControlledList(list):
 # Backports
 
 
+# NOTE: Can be removed for Python3.8+
 class cached_property:
     def __init__(self, func):
         self.func = func

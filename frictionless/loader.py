@@ -89,7 +89,7 @@ class Loader:
         except IOError as exception:
             error = errors.SchemeError(note=str(exception))
             raise exceptions.FrictionlessException(error)
-        except (zipfile.BadZipFile, gzip.BadGzipFile) as exception:
+        except config.COMPRESSION_EXCEPTIONS as exception:
             error = errors.CompressionError(note=str(exception))
             raise exceptions.FrictionlessException(error)
         return byte_stream

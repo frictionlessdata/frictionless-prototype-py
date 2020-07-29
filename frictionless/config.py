@@ -1,6 +1,8 @@
 import io
 import os
 import json
+import gzip
+import zipfile
 
 
 # Helpers
@@ -65,3 +67,14 @@ DEFAULT_HTTP_HEADERS = {
         "Chrome/54.0.2840.87 Safari/537.36"
     )
 }
+
+
+# Backports
+
+
+# NOTE: Can be removed for Python3.8+
+COMPRESSION_EXCEPTIONS = (
+    (zipfile.BadZipFile, gzip.BadGzipFile)
+    if hasattr(gzip, "BadGzipFile")
+    else (zipfile.BadZipFile)
+)

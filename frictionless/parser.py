@@ -1,8 +1,7 @@
-import gzip
-import zipfile
 from .system import system
 from . import exceptions
 from . import errors
+from . import config
 
 
 class Parser:
@@ -112,7 +111,7 @@ class DataStreamWithErrorHandling:
             raise
         except exceptions.FrictionlessException:
             raise
-        except (zipfile.BadZipFile, gzip.BadGzipFile) as exception:
+        except config.COMPRESSION_EXCEPTIONS as exception:
             error = errors.CompressionError(note=str(exception))
             raise exceptions.FrictionlessException(error)
         except UnicodeDecodeError as exception:
