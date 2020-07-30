@@ -9,8 +9,7 @@ LEAD := $(shell head -n 1 LEAD.md)
 all: list
 
 docs:
-	python scripts/errors.py
-	python scripts/notebooks.py
+	python scripts/docs.py
 
 list:
 	@grep '^\.PHONY' Makefile | cut -d' ' -f2- | tr ' ' '\n'
