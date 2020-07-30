@@ -26,7 +26,7 @@ There are not the only two pros of having metadata but they are two the most imp
 
 
 ```
-!pip install frictionless
+! pip install frictionless
 ```
 
 ## Table Schema

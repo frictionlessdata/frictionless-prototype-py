@@ -8,12 +8,12 @@ Extracting data means reading tabular data from some source. We can use various 
 
 
 ```
-!pip install frictionless
+! pip install frictionless
 ```
 
 
 ```
-!cat data/country-3.csv
+! cat data/country-3.csv
 ```
 
     id,capital_id,name,population
@@ -28,7 +28,7 @@ For a starter, we will use the command-line interface:
 
 
 ```
-!frictionless extract data/country-3.csv
+! frictionless extract data/country-3.csv
 ```
 
     [data] data/country-3.csv
@@ -86,7 +86,7 @@ The easiest way is to use a command line-interface. We're going to provide two f
 
 
 ```
-!frictionless extract data/*-3.csv
+! frictionless extract data/*-3.csv
 ```
 
     [data] data/capital-3.csv
@@ -181,7 +181,7 @@ resource.to_yaml('capital.resource.yaml')
 
 
 ```
-!frictionless extract capital.resource.yaml
+! frictionless extract capital.resource.yaml
 ```
 
     [data] capital.resource.yaml
