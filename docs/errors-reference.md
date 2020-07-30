@@ -339,4 +339,3 @@ Tags: `#body #regulation` <br>
 Template: `The row at position {rowPosition} has an error: {note}` <br>
 Description: `The value does not conform to the row constraint.` <br>
 
-

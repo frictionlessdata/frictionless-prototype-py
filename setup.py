@@ -27,8 +27,10 @@ TESTS_REQUIRE = [
     "pytest-cov",
     "responses",
     "coveralls",
+    "nbconvert",
     "ipython",
     "jinja2",
+    "gdown",
     "moto",
 ]
 EXTRAS_REQUIRE = {

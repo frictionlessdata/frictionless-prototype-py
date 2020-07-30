@@ -1,4 +1,4 @@
-.PHONY: all list install format lint readme release templates test version
+.PHONY: all docs list install format lint readme release templates test version
 
 
 PACKAGE := $(shell grep '^PACKAGE =' setup.py | cut -d '"' -f2)
@@ -7,6 +7,10 @@ LEAD := $(shell head -n 1 LEAD.md)
 
 
 all: list
+
+docs:
+	python scripts/errors.py
+	python scripts/notebooks.py
 
 list:
 	@grep '^\.PHONY' Makefile | cut -d' ' -f2- | tr ' ' '\n'
