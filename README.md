@@ -164,6 +164,7 @@ This readme gives a high-level overview of the framework. A detailed documentati
 - [Extracting Data](docs/build/extracting-data/README.md)
 - [Validating Data](docs/build/validating-data/README.md)
 - [Transforming Data](docs/build/transforming-data/README.md)
+- [Schemes Reference](docs/build/schemes-reference/README.md)
 - [Formats Reference](docs/build/formats-reference/README.md)
 - [Errors Reference](docs/build/errors-reference/README.md)
 - [API Reference](docs/build/api-reference/README.md)
