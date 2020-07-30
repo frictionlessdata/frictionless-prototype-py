@@ -83,3 +83,4 @@ tabulator
 jsontableschema
 datapackage
 .mypy_cache
+!docs/build
