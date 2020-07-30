@@ -415,7 +415,7 @@ To continue learning about data resources please read:
 - [Data Package Spec](https://specs.frictionlessdata.io/data-package/)
 - API Reference: Package
 
-## The Describe Functions
+## Describe Functions
 
 The `describe` functions are the main tool for data describing. In many cases, this high-level interface is enough for data exploration and other needs.
 
