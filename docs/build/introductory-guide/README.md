@@ -9,13 +9,13 @@ Let's say we have a few raw data files. It's been just collected by the data res
 
 
 ```
-!pip install frictionless
+! pip install frictionless
 ```
 
 
 ```
-!wget -q -O countries.csv https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/countries.csv
-!cat countries.csv
+! wget -q -O countries.csv https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/countries.csv
+! cat countries.csv
 ```
 
     # clean this data!
@@ -95,7 +95,6 @@ resource.schema.foreign_keys.append(
     {"fields": ["neighbor_id"], "reference": {"resource": "", "fields": ["id"]}}
 )
 resource.to_yaml("countries.resource.yaml")
-
 ```
 
 Let's see what we have created:
@@ -104,7 +103,6 @@ Let's see what we have created:
 
 ```
 ! cat countries.resource.yaml
-
 ```
 
     bytes: 136
@@ -155,7 +153,6 @@ It's time to try extracting our data as a table. As a first naive attempt, we wi
 
 ```
 ! frictionless extract countries.csv
-
 ```
 
     [data] countries.csv
@@ -180,7 +177,6 @@ Let's use the metadata we save to try extracting data with the help of Frictionl
 
 ```
 ! frictionless extract countries.resource.yaml
-
 ```
 
     [data] countries.resource.yaml

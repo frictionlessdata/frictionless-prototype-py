@@ -11,27 +11,20 @@ all: list
 docs:
 	python scripts/docs.py
 
-list:
-	@grep '^\.PHONY' Makefile | cut -d' ' -f2- | tr ' ' '\n'
+format:
+	black $(PACKAGE) tests
 
 install:
 	pip install --upgrade -e .[aws,bigquery,ckan,dataflows,elastic,gsheet,html,ods,pandas,server,spss,sql,tsv,dev]
 	test -f '.git/hooks/pre-commit' || cp .gitverify .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
-
-format:
-	black $(PACKAGE) tests
 
 lint:
 	black $(PACKAGE) tests --check
 	pylama $(PACKAGE) tests
 	# mypy $(PACKAGE) --ignore-missing-imports
 
-readme:
-	pip install md-toc
-	pip install referencer
-	referencer $(PACKAGE) README.md --in-place
-	md_toc -p README.md github --header-levels 3
-	sed -i '/(#$(PACKAGE)-py)/,+2d' README.md
+list:
+	@grep '^\.PHONY' Makefile | cut -d' ' -f2- | tr ' ' '\n'
 
 release:
 	git checkout master && git pull origin && git fetch -p
