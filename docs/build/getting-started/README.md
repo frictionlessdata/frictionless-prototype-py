@@ -4,7 +4,7 @@
 
 
 
-Frictionless is a framework to describe, extract, validate, and transform tabular data. It supports a great deal of data sources and formats, as well as provides popular platforms integrations. The framework is powered by the lightweight yet comprehensive [Frictionless Data Specifications](https://specs.frictionlessdata.io/).
+Let's get started with Frictionless! We will how how to install and use the framwork. The simple example below will showcase the framework's basic functionality.
 
 
 ## Installation
@@ -17,7 +17,7 @@ Frictionless is a framework to describe, extract, validate, and transform tabula
 
 ```
 ! pip install frictionless
-# pip install frictionless[sql]  - to install a core plugin
+# pip install frictionless[sql] - to install a core plugin
 ```
 
 

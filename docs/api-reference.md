@@ -1,3 +1,3 @@
 # API Reference
 
-> TODO: Putting the full API Referece here
+> This section is work-in-progress

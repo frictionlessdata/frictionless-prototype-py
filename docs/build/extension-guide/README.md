@@ -1,3 +1,3 @@
 # Extension Guide
 
-> TODO: How to write plugins for Frictionless
+> This section is work-in-progress

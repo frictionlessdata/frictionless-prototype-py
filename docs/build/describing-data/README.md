@@ -851,9 +851,12 @@ You need to check `metadata.metadata_valid` only if you change it by hands; the 
 
 
 ## Mastering Metadata
-> TODO: finish this *section*
+
+> This section is work-in-progress
 
 ## Provided Classes
+
+> This section is work-in-progress
 
 ## Infer Options
 
