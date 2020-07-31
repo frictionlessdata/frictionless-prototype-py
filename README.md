@@ -8,14 +8,14 @@
 
 Frictionless is a framework to describe, extract, validate, and transform tabular data. It supports a great deal of data sources and formats, as well as provides popular platforms integrations. The framework is powered by the lightweight yet comprehensive [Frictionless Data Specifications](https://specs.frictionlessdata.io/).
 
-## Features
+## Purpose
 
 - **Describe your data**: You can infer, edit and save metadata of your data tables. It's a first step for ensuring data quality and usability. Frictionless metadata includes general information about your data like textual description, as well as, field types and other tabular data details.
 - **Extract your data**: You can read your data using a unified tabular interface. Data quality and consistency are guaranteed by a schema. Frictionless supports various file protocols like HTTP, FTP, and S3 and data formats like CSV, XLS, JSON, SQL, and others.
 - **Validate your data**: You can validate data tables, resources, and datasets. Frictionless generates a unified validation report, as well as supports a lot of options to customize the validation process.
 - **Transform your data**: You can clean, reshape, and transfer your data tables and datasets. Frictionless provides a pipeline capability and a lower-level interface to work with the data.
 
----
+## Features
 
 - powerfull Python framework
 - convinient command-line interface
@@ -27,7 +27,7 @@ Frictionless is a framework to describe, extract, validate, and transform tabula
 - the included API server
 - more than 1000+ tests
 
----
+## Example
 
 ```bash
 # What it looks like
@@ -35,15 +35,15 @@ $ frictionless validate data/invalid.csv
 [invalid] data/invalid.csv
 
   row    field  code              message
------  -------  ----------------  ------------------------------------------------------------------------------------------------
+-----  -------  ----------------  -------------------------------------------------------
              3  blank-header      Header in field at position "3" is blank
-             4  duplicate-header  Header "name" in field at position "4" is duplicated to header in another field: at position "2"
-    2        3  missing-cell      Row at position "2" has a missing cell in field "field3" at position "3"
-    2        4  missing-cell      Row at position "2" has a missing cell in field "name2" at position "4"
-    3        3  missing-cell      Row at position "3" has a missing cell in field "field3" at position "3"
-    3        4  missing-cell      Row at position "3" has a missing cell in field "name2" at position "4"
-    4           blank-row         Row at position "4" is completely blank
-    5        5  extra-cell        Row at position "5" has an extra value in field at position "5"
+             4  duplicate-header  Header "name" in field at position "4" is duplicated
+    2        3  missing-cell      Row "2" has a missing cell in field "field3"
+    2        4  missing-cell      Row "2" has a missing cell in field "name2"
+    3        3  missing-cell      Row "3" has a missing cell in field "field3"
+    3        4  missing-cell      Row "3" has a missing cell in field "name2"
+    4           blank-row         Row "4" is completely blank
+    5        5  extra-cell        Row "5" has an extra value in field  "5"
 ```
 
 ## Documentation
