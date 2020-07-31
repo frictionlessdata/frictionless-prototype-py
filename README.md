@@ -29,7 +29,7 @@ Frictionless is a framework to describe, extract, validate, and transform tabula
 ## Documentation
 
 - [Getting Started](docs/build/getting-started/README.md)
-- [Introductory Guide](docs/build/introductory-guide/README.md)
+- [Introduction Guide](docs/build/introduction-guide/README.md)
 - [Describing Data](docs/build/describing-data/README.md)
 - [Extracting Data](docs/build/extracting-data/README.md)
 - [Validating Data](docs/build/validating-data/README.md)

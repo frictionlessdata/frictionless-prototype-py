@@ -1,4 +1,4 @@
-# Introductory Guide
+# Introduction Guide
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1HGXJa7BWyEgoGZLkC6tKt2DMqgeHibEY)
 
