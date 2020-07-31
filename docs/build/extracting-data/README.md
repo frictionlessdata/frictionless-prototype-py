@@ -531,6 +531,85 @@ table.close()
      Row([('id', 5), ('name', 'Rome')])]
 
 
+**Table's Headers**
+
+Header management is a responsibility of "Table Dialect" which will be described below but Table accept a special `headers` argument that plays a role of a high-level helper in setting different header options.
+
+
+It accepts a `False` values indicating that there is no header row:
+
+
+```
+from frictionless import Table
+
+with Table('capital-3.csv', headers=False) as table:
+    pprint(table.headers)
+    pprint(table.read_rows())
+```
+
+    []
+    [Row([('field1', 'id'), ('field2', 'name')]),
+     Row([('field1', '1'), ('field2', 'London')]),
+     Row([('field1', '2'), ('field2', 'Berlin')]),
+     Row([('field1', '3'), ('field2', 'Paris')]),
+     Row([('field1', '4'), ('field2', 'Madrid')]),
+     Row([('field1', '5'), ('field2', 'Rome')])]
+
+
+
+It accepts an integer indicating the header row number:
+
+
+```
+from frictionless import Table
+
+with Table('capital-3.csv', headers=2) as table:
+    pprint(table.headers)
+    pprint(table.read_rows())
+```
+
+    ['1', 'London']
+    [Row([('1', 2), ('London', 'Berlin')]),
+     Row([('1', 3), ('London', 'Paris')]),
+     Row([('1', 4), ('London', 'Madrid')]),
+     Row([('1', 5), ('London', 'Rome')])]
+
+
+It accepts a list of integers indicating a multiline header row numbers:
+
+
+```
+from frictionless import Table
+
+with Table('capital-3.csv', headers=[1,2,3]) as table:
+    pprint(table.headers)
+    pprint(table.read_rows())
+```
+
+    ['id 1 2', 'name London Berlin']
+    [Row([('id 1 2', 3), ('name London Berlin', 'Paris')]),
+     Row([('id 1 2', 4), ('name London Berlin', 'Madrid')]),
+     Row([('id 1 2', 5), ('name London Berlin', 'Rome')])]
+
+
+It accepts a pair containing a list of integers indicating a multiline header row numbers and a string indicating a joiner for a concatenate operation:
+
+
+
+```
+from frictionless import Table
+
+with Table('capital-3.csv', headers=[[1,2,3], '/']) as table:
+    pprint(table.headers)
+    pprint(table.read_rows())
+```
+
+    ['id/1/2', 'name/London/Berlin']
+    [Row([('id/1/2', 3), ('name/London/Berlin', 'Paris')]),
+     Row([('id/1/2', 4), ('name/London/Berlin', 'Madrid')]),
+     Row([('id/1/2', 5), ('name/London/Berlin', 'Rome')])]
+
+
 ## File Details
 
 Let's overview the details we can specify for a file. Usually you don't need to provide those details as Frictionless is capable to infer it on its own. Although, there are situation when you need to specify it manually. The following example will use the `Table` class but the same options can be used for the `extract` and `extract_table` functions.
@@ -677,7 +756,7 @@ Exact parameters depend on schemes and can be found in the Schemes Reference. Fo
 
 **Detect Encoding**
 
-It's a function that can be provided to adjust the encoding detection:
+It's a function that can be provided to adjust the encoding detection. This function accept a data sample and return a detected encoding:
 
 
 ```
@@ -715,22 +794,252 @@ with Table(source, scheme='text', format='csv', dialect=dialect) as table:
     [Row([('header1', 'value1'), ('header2', 'value2')])]
 
 
-There are a great deal of options available for different dialect that can be found in "Formats Reference". We will list the properties that can be used with every dialect:
+There is a great deal of options available for different dialect that can be found in "Formats Reference". We will list the properties that can be used with every dialect:
 
 **Header**
 
+It's a boolean flag wich deaults to `True` indicating whether the data has a header row or not. In the following example the header row will be treated as a data row:
+
+
+```
+from frictionless import Table, dialects
+
+dialect = dialects.Dialect(header=False)
+with Table('capital-3.csv', dialect=dialect) as table:
+  pprint(table.headers)
+  pprint(table.read_rows())
+```
+
+    []
+    [Row([('field1', 'id'), ('field2', 'name')]),
+     Row([('field1', '1'), ('field2', 'London')]),
+     Row([('field1', '2'), ('field2', 'Berlin')]),
+     Row([('field1', '3'), ('field2', 'Paris')]),
+     Row([('field1', '4'), ('field2', 'Madrid')]),
+     Row([('field1', '5'), ('field2', 'Rome')])]
+
+
 **Header Rows**
 
+If header is `True` which is default, this parameters indicates where to find the header row or header rows for a multiline header. Let's see on example how the first two data rows can be treated as a part of a header:
+
+
+```
+from frictionless import Table, dialects
+
+dialect = dialects.Dialect(header_rows=[1, 2, 3])
+with Table('capital-3.csv', dialect=dialect) as table:
+  pprint(table.headers)
+  pprint(table.read_rows())
+```
+
+    ['id 1 2', 'name London Berlin']
+    [Row([('id 1 2', 3), ('name London Berlin', 'Paris')]),
+     Row([('id 1 2', 4), ('name London Berlin', 'Madrid')]),
+     Row([('id 1 2', 5), ('name London Berlin', 'Rome')])]
+
+
 **Header Join**
+
+If there are multiple header rows which is managed by `header_rows` parameter, we can set a string to be a separator for a header's cell join operation. Usually it's very handy for some "fancy" Excel files. For the sake of simplicity, we will show on a CSV file:
+
+
+```
+from frictionless import Table, dialects
+
+dialect = dialects.Dialect(header_rows=[1, 2, 3], header_join='/')
+with Table('capital-3.csv', dialect=dialect) as table:
+  pprint(table.headers)
+  pprint(table.read_rows())
+```
+
+    ['id/1/2', 'name/London/Berlin']
+    [Row([('id/1/2', 3), ('name/London/Berlin', 'Paris')]),
+     Row([('id/1/2', 4), ('name/London/Berlin', 'Madrid')]),
+     Row([('id/1/2', 5), ('name/London/Berlin', 'Rome')])]
+
 
 Further reading:
 - Formats Reference
 
 ## Table Query
 
-## Table Schema
+Using header management described in the "Table Dialect" section we can have a basic skipping rows ability e.g. if we set `dialect.header_rows=[2]` we will skip the first row but it's very limited. There is a much more powerful interface called Table Queries to indicate where exactly to get tabular data from a file. We will use a simple file looking like a matrix:
+
+
+```
+! wget -q -O matrix.csv https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/matrix.csv
+! cat matrix.csv
+```
+
+    f1,f2,f3,f4
+    11,12,13,14
+    21,22,23,24
+    31,32,33,34
+    41,42,43,44
+
+
+**Pick/Skip Fields**
+
+We can pick and skip arbitrary fields based on a header row. These options accept a list of field numbers, a list of values or a regex to match. All the queries below do the same thing for this file:
+
+
+```
+from frictionless import extract, Query
+
+print(extract('matrix.csv', query=Query(pick_fields=[2, 3])))
+print(extract('matrix.csv', query=Query(skip_fields=[1, 4])))
+print(extract('matrix.csv', query=Query(pick_fields=['f2', 'f3'])))
+print(extract('matrix.csv', query=Query(skip_fields=['f1', 'f4'])))
+print(extract('matrix.csv', query=Query(pick_fields=['<regex>f[23]'])))
+print(extract('matrix.csv', query=Query(skip_fields=['<regex>f[14]'])))
+```
+
+    [Row([('f2', 12), ('f3', 13)]), Row([('f2', 22), ('f3', 23)]), Row([('f2', 32), ('f3', 33)]), Row([('f2', 42), ('f3', 43)])]
+    [Row([('f2', 12), ('f3', 13)]), Row([('f2', 22), ('f3', 23)]), Row([('f2', 32), ('f3', 33)]), Row([('f2', 42), ('f3', 43)])]
+    [Row([('f2', 12), ('f3', 13)]), Row([('f2', 22), ('f3', 23)]), Row([('f2', 32), ('f3', 33)]), Row([('f2', 42), ('f3', 43)])]
+    [Row([('f2', 12), ('f3', 13)]), Row([('f2', 22), ('f3', 23)]), Row([('f2', 32), ('f3', 33)]), Row([('f2', 42), ('f3', 43)])]
+    [Row([('f2', 12), ('f3', 13)]), Row([('f2', 22), ('f3', 23)]), Row([('f2', 32), ('f3', 33)]), Row([('f2', 42), ('f3', 43)])]
+    [Row([('f2', 12), ('f3', 13)]), Row([('f2', 22), ('f3', 23)]), Row([('f2', 32), ('f3', 33)]), Row([('f2', 42), ('f3', 43)])]
+
+
+**Limit/Offset Fields**
+
+There are two options that provide an ability to limit amount of fields similiar to SQL's directives:
+
+
+```
+from frictionless import extract, Query
+
+print(extract('matrix.csv', query=Query(limit_fields=2)))
+print(extract('matrix.csv', query=Query(offset_fields=2)))
+```
+
+    [Row([('f1', 11), ('f2', 12)]), Row([('f1', 21), ('f2', 22)]), Row([('f1', 31), ('f2', 32)]), Row([('f1', 41), ('f2', 42)])]
+    [Row([('f3', 13), ('f4', 14)]), Row([('f3', 23), ('f4', 24)]), Row([('f3', 33), ('f4', 34)]), Row([('f3', 43), ('f4', 44)])]
+
+
+**Pick/Skip Rows**
+
+It's alike the field counterparts but it will be compared to the first cell of a row. All the queries below do the same thing for this file but take into account that when picking we need to also pick a header row. In addition, there is special value `<blank>` that matches a row if it's competely blank:
+
+
+```
+from frictionless import extract, Query
+
+print(extract('matrix.csv', query=Query(pick_rows=[1, 3, 4])))
+print(extract('matrix.csv', query=Query(skip_rows=[2, 5])))
+print(extract('matrix.csv', query=Query(pick_rows=['f1', '21', '31'])))
+print(extract('matrix.csv', query=Query(skip_rows=['11', '41'])))
+print(extract('matrix.csv', query=Query(pick_rows=['<regex>(f1|[23]1)'])))
+print(extract('matrix.csv', query=Query(skip_rows=['<regex>[14]1'])))
+print(extract('matrix.csv', query=Query(pick_rows=['<blank>'])))
+```
+
+    [Row([('f1', 21), ('f2', 22), ('f3', 23), ('f4', 24)]), Row([('f1', 31), ('f2', 32), ('f3', 33), ('f4', 34)])]
+    [Row([('f1', 21), ('f2', 22), ('f3', 23), ('f4', 24)]), Row([('f1', 31), ('f2', 32), ('f3', 33), ('f4', 34)])]
+    [Row([('f1', 21), ('f2', 22), ('f3', 23), ('f4', 24)]), Row([('f1', 31), ('f2', 32), ('f3', 33), ('f4', 34)])]
+    [Row([('f1', 21), ('f2', 22), ('f3', 23), ('f4', 24)]), Row([('f1', 31), ('f2', 32), ('f3', 33), ('f4', 34)])]
+    [Row([('f1', 21), ('f2', 22), ('f3', 23), ('f4', 24)]), Row([('f1', 31), ('f2', 32), ('f3', 33), ('f4', 34)])]
+    [Row([('f1', 21), ('f2', 22), ('f3', 23), ('f4', 24)]), Row([('f1', 31), ('f2', 32), ('f3', 33), ('f4', 34)])]
+    []
+
+
+**Limit/Offset Rows**
+
+It's a quite popular option used to limit amount of rows to read:
+
+
+```
+from frictionless import extract, Query
+
+print(extract('matrix.csv', query=Query(limit_rows=2)))
+print(extract('matrix.csv', query=Query(offset_rows=2)))
+```
+
+    [Row([('f1', 11), ('f2', 12), ('f3', 13), ('f4', 14)]), Row([('f1', 21), ('f2', 22), ('f3', 23), ('f4', 24)])]
+    [Row([('f1', 31), ('f2', 32), ('f3', 33), ('f4', 34)]), Row([('f1', 41), ('f2', 42), ('f3', 43), ('f4', 44)])]
+
+
+## Schema Options
+
+By default, a schema for a table is inferred under the hood but we can also pass it explicetely.
+
+**Schema**
+
+The most common way is providing a schema argument to the Table constructor. For example, let's make the `id` field be a string instead of an integer:
+
+
+```
+from frictionless import Table, Schema, Field
+
+schema = Schema(fields=[Field(name='id', type='string'), Field(name='name', type='string')])
+with Table('capital-3.csv', schema=schema) as table:
+  pprint(table.schema)
+  pprint(table.read_rows())
+```
+
+    {'fields': [{'name': 'id', 'type': 'string'},
+                {'name': 'name', 'type': 'string'}]}
+    [Row([('id', '1'), ('name', 'London')]),
+     Row([('id', '2'), ('name', 'Berlin')]),
+     Row([('id', '3'), ('name', 'Paris')]),
+     Row([('id', '4'), ('name', 'Madrid')]),
+     Row([('id', '5'), ('name', 'Rome')])]
+
+
+**Sync Schema**
+
+There is a way to sync provided schema based on a header row's field order. It's very useful when you have a schema that represents only a subset of the table's fields:
+
+
+```
+from frictionless import Table, Schema, Field
+
+# Note the order of the fields
+schema = Schema(fields=[Field(name='name', type='string'), Field(name='id', type='string')])
+with Table('capital-3.csv', schema=schema, sync_schema=True) as table:
+  pprint(table.schema)
+  pprint(table.read_rows())
+```
+
+    {'fields': [{'name': 'id', 'type': 'string'},
+                {'name': 'name', 'type': 'string'}]}
+    [Row([('id', '1'), ('name', 'London')]),
+     Row([('id', '2'), ('name', 'Berlin')]),
+     Row([('id', '3'), ('name', 'Paris')]),
+     Row([('id', '4'), ('name', 'Madrid')]),
+     Row([('id', '5'), ('name', 'Rome')])]
+
+
+**Patch Schema**
+
+Sometimes we just want to update only a few fields or some schema's properties without providing a brand new schema. For example, the two examples above can be simplified as:
+
+
+```
+from frictionless import Table
+
+with Table('capital-3.csv', patch_schema={'fields': {'id': {'type': 'string'}}}) as table:
+  pprint(table.schema)
+  pprint(table.read_rows())
+```
+
+    {'fields': [{'name': 'id', 'type': 'string'},
+                {'name': 'name', 'type': 'string'}]}
+    [Row([('id', '1'), ('name', 'London')]),
+     Row([('id', '2'), ('name', 'Berlin')]),
+     Row([('id', '3'), ('name', 'Paris')]),
+     Row([('id', '4'), ('name', 'Madrid')]),
+     Row([('id', '5'), ('name', 'Rome')])]
+
 
 ## Headers Object
 
+> This section is work-in-progress
+
+
 
 ## Row Object
+
+> This section is work-in-progress
