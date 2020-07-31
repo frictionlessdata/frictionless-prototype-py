@@ -4,14 +4,14 @@
 
 
 
-## Dataflows Integration
+## Validate functions
 
-> TODO: How to run dataflows pipelines
+### Validating Schema
 
-## Dataflows In-Detail
+### Validating Resource
 
-> TODO: Running a standalone dataflows
+### Validating Package
 
-## In-Python Manipulations
+### Validating Inquiry
 
-> TODO: Examples of data transforms using low-level API
+### Validating Table

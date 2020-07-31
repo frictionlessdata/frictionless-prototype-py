@@ -4,13 +4,22 @@
 
 
 
+> Transform functionality is a work-in-progress
+
+## Transform Function
+
 ## Dataflows Integration
 
 > TODO: How to run dataflows pipelines
 
+
+
+
 ## Dataflows In-Detail
 
 > TODO: Running a standalone dataflows
+
+
 
 ## In-Python Manipulations
 

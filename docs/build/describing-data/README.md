@@ -15,6 +15,14 @@ So, in other words, "describing data" means creating metadata for your data file
 - data relations e.g., identifiers connection
 - and others
 
+
+
+
+```
+! pip install frictionless
+```
+
+
 For a dataset, there is even more information that can be provided like general dataset purpose, information about data sources, list of authors, and many more. Of course, when there are many tabular files, relational rules can be very important. Usually, there are foreign keys ensuring the integrity of the dataset; for example, there is some reference table containing country names and other tables using it as a reference. Data in this form is called "normalized data" and it occurs very often in scientific and another kind of research.
 
 Having a general understanding of what is "data describing", we can now articulate why it's important:
@@ -23,13 +31,68 @@ Having a general understanding of what is "data describing", we can now articula
 
 There are not the only two pros of having metadata but they are two the most important. Please continue reading to learn how Frictionless helps to achieve these advantages describing your data.
 
+## Describe Functions
+
+The `describe` functions are the main tool for data describing. In many cases, this high-level interface is enough for data exploration and other needs.
+
+The frictionless framework provides 3 different `describe` functions in Python:
+- `describe`: it will detect the source type and return Data Resource or Data Package metadata
+- `describe_resoure`: it will always return Data Resource metadata
+- `describe_package`: it will always return Data Package metadata
+
+In command-line, there is only 1 command but there is a flag to adjust the behavior:
+
+```bash
+$ frictionless describe
+$ frictionless describe --source-type resource
+$ frictionless describe --source-type package
+```
+
+For example, if we want a Data Package descriptor for a single file:
+
 
 
 ```
-! pip install frictionless
+! wget -q -O table.csv https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/table.csv
+! cat table.csv
 ```
 
-## Table Schema
+    id,name
+    1,english
+    2,中国人
+
+
+
+```
+! frictionless describe table.csv --source-type package
+```
+
+    [metadata] table.csv
+
+    profile: data-package
+    resources:
+      - bytes: 30
+        compression: 'no'
+        compressionPath: ''
+        dialect: {}
+        encoding: utf-8
+        format: csv
+        hash: 6c2c61dd9b0e9c6876139a449ed87933
+        hashing: md5
+        name: table
+        path: table.csv
+        profile: tabular-data-resource
+        rows: 2
+        schema:
+          fields:
+            - name: id
+              type: integer
+            - name: name
+              type: string
+        scheme: file
+
+
+### Describing Schema
 
 Table Schema is a specification for providing a "schema" (similar to a database schema) for tabular data. This information includes the expected type of each value in a column ("string", "number", "date", etc.), constraints on the value ("this string can only be at most 10 characters long"), and the expected format of the data ("this field should only contain strings that look like email addresses"). Table Schema can also specify relations between tables.
 
@@ -148,7 +211,7 @@ To continue learning about table schemas please read:
 - API Reference: Schema
 
 
-## Data Resource
+### Describing Resource
 
 The Data Resource format describes a data resource such as an individual file or table.
 The essence of a Data Resource is a locator for the data it describes.
@@ -286,7 +349,7 @@ To continue learning about data resources please read:
 - API Reference: Resource
 
 
-## Data Package
+### Describing Package
 
 A Data Package consists of:
 - Metadata that describes the structure and contents of the package
@@ -475,66 +538,6 @@ The main role of the Data Package descriptor is describing a dataset; as we can 
 To continue learning about data resources please read:
 - [Data Package Spec](https://specs.frictionlessdata.io/data-package/)
 - API Reference: Package
-
-
-## Describe Functions
-
-The `describe` functions are the main tool for data describing. In many cases, this high-level interface is enough for data exploration and other needs.
-
-The frictionless framework provides 3 different `describe` functions in Python:
-- `describe`: it will detect the source type and return Data Resource or Data Package metadata
-- `describe_resoure`: it will always return Data Resource metadata
-- `describe_package`: it will always return Data Package metadata
-
-In command-line, there is only 1 command but there is a flag to adjust the behavior:
-
-```bash
-$ frictionless describe
-$ frictionless describe --source-type resource
-$ frictionless describe --source-type package
-```
-
-For example, if we want a Data Package descriptor for a single file:
-
-
-
-```
-! frictionless describe country-1.csv --source-type package
-```
-
-    [metadata] country-1.csv
-
-    profile: data-package
-    resources:
-      - bytes: 100
-        compression: 'no'
-        compressionPath: ''
-        dialect: {}
-        encoding: utf-8
-        format: csv
-        hash: 4204f087f328b70c854c03403ab448c4
-        hashing: md5
-        name: country-1
-        path: country-1.csv
-        profile: tabular-data-resource
-        rows: 5
-        schema:
-          fields:
-            - name: id
-              type: integer
-            - name: neighbor_id
-              type: integer
-            - name: name
-              type: string
-            - name: population
-              type: integer
-        scheme: file
-
-
-To continue learning about the describe functions please read:
-- API Reference: describe
-- API Reference: describe_resource
-- API Reference: describe_package
 
 
 ## Using Metadata
@@ -847,13 +850,12 @@ print(resource.metadata_valid)
 You need to check `metadata.metadata_valid` only if you change it by hands; the available high-level functions like `validate` do it on their own.
 
 
-## Metadata API Overview
+## Mastering Metadata
 > TODO: finish this *section*
 
-## Metadata Loading/Saving
-> TODO: finish this section
+## Provided Classes
 
-## Infer Schema Options
+## Infer Options
 
 A numerous Frictionless function includes the Table Schema inferring stage, for example:
 - `describe`
@@ -866,8 +868,7 @@ A numerous Frictionless function includes the Table Schema inferring stage, for 
 Let's explore some handy options to customize the process. All of them are available in some form for all the functions above and for different invocation types: in Python, in CLI, or for a REST server.
 
 
-
-#### Infer Type
+**Infer Type**
 
 This option allows manually setting all the field types to a given type. It's useful when you need to skip datacasting (setting `any` type) or have everything as a string (setting `string` type):
 
@@ -904,7 +905,7 @@ This option allows manually setting all the field types to a given type. It's us
     scheme: file
 
 
-#### Infer Names
+**Infer Names**
 
 Sometimes you don't want to use existent header row to compose field names. It's possible to provide custom names:
 
@@ -920,7 +921,7 @@ print(resource.schema.field_names)
     ['f1', 'f2', 'f3', 'f4']
 
 
-#### Infer Volume
+**Infer Volume**
 
 By default, Frictionless will use the first 100 rows to detect field types. This can be customized. The following code will be slower but the result can be more accurate
 
@@ -932,7 +933,7 @@ from frictionless import describe
 resource = describe("country-1.csv", infer_volume=1000)
 ```
 
-#### Infer Confidence
+**Infer Confidence**
 
 By default, Frictionless uses 0.9 (90%) confidence level for data types detection. It means that it there are 9 integers in a field and one string it will be inferred as an integer. If you want a guarantee that an inferred schema will conform to the data you can set it to 1 (100%):
 
@@ -944,7 +945,7 @@ from frictionless import describe
 resource = describe("country-1.csv", infer_confidence=1)
 ```
 
-#### Infer Missing Values
+**Infer Missing Values**
 
 Missing Values is an important concept in data description. It provides information about what cell values should be considered as nulls. We can customize the defaults:
 

@@ -58,7 +58,7 @@ def convert_python(name):
 # Main
 
 if __name__ == "__main__":
-    for path in os.listdir("docs"):
+    for path in sorted(os.listdir("docs")):
         if os.path.isfile(os.path.join("docs", path)):
             name, format = os.path.splitext(path)
             if format == ".md":
