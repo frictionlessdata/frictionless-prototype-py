@@ -17,27 +17,26 @@ Frictionless is a framework to describe, extract, validate, and transform tabula
 
 ## Features
 
-- powerfull Python framework
-- convinient command-line interface
-- low memory consumption for data of any size
-- reasonable performance on big data
-- support for compressed files
-- custom checks and formats
-- fully pluggable architecture
-- the included API server
-- more than 1000+ tests
+- Powerfull Python framework
+- Convinient command-line interface
+- Low memory consumption for data of any size
+- Reasonable performance on big data
+- Support for compressed files
+- Custom checks and formats
+- Fully pluggable architecture
+- The included API server
+- More than 1000+ tests
 
 ## Example
 
 ```bash
-# What it looks like
 $ frictionless validate data/invalid.csv
 [invalid] data/invalid.csv
 
   row    field  code              message
------  -------  ----------------  -------------------------------------------------------
+-----  -------  ----------------  --------------------------------------------
              3  blank-header      Header in field at position "3" is blank
-             4  duplicate-header  Header "name" in field at position "4" is duplicated
+             4  duplicate-header  Header "name" in field "4" is duplicated
     2        3  missing-cell      Row "2" has a missing cell in field "field3"
     2        4  missing-cell      Row "2" has a missing cell in field "name2"
     3        3  missing-cell      Row "3" has a missing cell in field "field3"
