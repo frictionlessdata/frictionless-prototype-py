@@ -59,7 +59,8 @@ def convert_python(name):
 
 if __name__ == "__main__":
     for path in sorted(os.listdir("docs")):
-        if os.path.isfile(os.path.join("docs", path)):
+        fullpath = os.path.join("docs", path)
+        if os.path.isfile(fullpath):
             name, format = os.path.splitext(path)
             if format == ".md":
                 convert_markdown(name)
@@ -67,4 +68,6 @@ if __name__ == "__main__":
                 convert_notebook(name)
             elif format == ".py":
                 convert_python(name)
-            print(f"Converted: {name}")
+            print(f"Converted: {fullpath}")
+    shutil.copy("README.md", os.path.join("docs", "build", "README.md"))
+    print(f"Converted: README.md")
