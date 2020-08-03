@@ -17,6 +17,7 @@ def describe_resource(
     compression_path=None,
     control=None,
     dialect=None,
+    query=None,
     # Schema
     infer_type=None,
     infer_names=None,
@@ -40,6 +41,7 @@ def describe_resource(
         compression_path=compression_path,
         control=control,
         dialect=dialect,
+        query=query,
         # Schema
         infer_type=infer_type,
         infer_names=infer_names,
