@@ -493,7 +493,7 @@ class TruncatedValueError(CellError):
 class BlacklistedValueError(CellError):
     code = "blacklisted-value"
     name = "Blacklisted Value"
-    tags = ["#body", "#policy"]
+    tags = ["#body", "#regulation"]
     template = "The cell {cell} in row at position {rowPosition} and field {fieldName} at position {fieldPosition} has an error: {note}"
     description = "The value is blacklisted."
 
@@ -501,7 +501,7 @@ class BlacklistedValueError(CellError):
 class SequentialValueError(CellError):
     code = "sequential-value"
     name = "Sequential Value"
-    tags = ["#body", "#policy"]
+    tags = ["#body", "#regulation"]
     template = "The cell {cell} in row at position {rowPosition} and field {fieldName} at position {fieldPosition} has an error: {note}"
     description = "The value is not sequential."
 
@@ -509,6 +509,6 @@ class SequentialValueError(CellError):
 class RowConstraintError(RowError):
     code = "row-constraint"
     name = "Row Constraint"
-    tags = ["#body", "#policy"]
+    tags = ["#body", "#regulation"]
     template = "The row at position {rowPosition} has an error: {note}"
     description = "The value does not conform to the row constraint."
