@@ -75,8 +75,7 @@ pprint(rows)
      Row([('id', 5), ('capital_id', 4), ('name', 'Spain'), ('population', 47)])]
 
 
-
-## Extract functions
+## Extract Functions
 
 The high-level interface for extracting data provided by Frictionless is a set of `extract` functions:
 - `extract`: it will detect the source type and extract data accordingly
@@ -233,6 +232,28 @@ pprint(rows)
 
 
 We got in idential result but it's important to understand that on the table level we need to provide all the metadata options separately while a resource incapsulate all these metadata. Please check the `extract_table` API Referenec as it has a lot of options. We're going to discuss some of the below.
+
+## Extraction Options
+
+All the `extract` fuction accept the only one common argument:
+- `process`: it's a function getting a row object and returning whatever is needed as an ouput of the data extraction e.g. `lambda row: row.to_dict()`
+
+
+**Package/Resource**
+
+These `extract` functions doesn't accept any additional arguments.
+
+**Table**
+
+We will take a loot at all the `extract_table` options in the sections below. As an overview, it accepts:
+- File Details
+- File Control
+- Table Dialect
+- Table Query
+- Header Options
+- Schema Options
+- Integrity Options
+- Infer Options (see "Describing Data")
 
 ## Using Package
 
@@ -531,85 +552,6 @@ table.close()
      Row([('id', 5), ('name', 'Rome')])]
 
 
-**Table's Headers**
-
-Header management is a responsibility of "Table Dialect" which will be described below but Table accept a special `headers` argument that plays a role of a high-level helper in setting different header options.
-
-
-It accepts a `False` values indicating that there is no header row:
-
-
-```
-from frictionless import Table
-
-with Table('capital-3.csv', headers=False) as table:
-    pprint(table.headers)
-    pprint(table.read_rows())
-```
-
-    []
-    [Row([('field1', 'id'), ('field2', 'name')]),
-     Row([('field1', '1'), ('field2', 'London')]),
-     Row([('field1', '2'), ('field2', 'Berlin')]),
-     Row([('field1', '3'), ('field2', 'Paris')]),
-     Row([('field1', '4'), ('field2', 'Madrid')]),
-     Row([('field1', '5'), ('field2', 'Rome')])]
-
-
-
-It accepts an integer indicating the header row number:
-
-
-```
-from frictionless import Table
-
-with Table('capital-3.csv', headers=2) as table:
-    pprint(table.headers)
-    pprint(table.read_rows())
-```
-
-    ['1', 'London']
-    [Row([('1', 2), ('London', 'Berlin')]),
-     Row([('1', 3), ('London', 'Paris')]),
-     Row([('1', 4), ('London', 'Madrid')]),
-     Row([('1', 5), ('London', 'Rome')])]
-
-
-It accepts a list of integers indicating a multiline header row numbers:
-
-
-```
-from frictionless import Table
-
-with Table('capital-3.csv', headers=[1,2,3]) as table:
-    pprint(table.headers)
-    pprint(table.read_rows())
-```
-
-    ['id 1 2', 'name London Berlin']
-    [Row([('id 1 2', 3), ('name London Berlin', 'Paris')]),
-     Row([('id 1 2', 4), ('name London Berlin', 'Madrid')]),
-     Row([('id 1 2', 5), ('name London Berlin', 'Rome')])]
-
-
-It accepts a pair containing a list of integers indicating a multiline header row numbers and a string indicating a joiner for a concatenate operation:
-
-
-
-```
-from frictionless import Table
-
-with Table('capital-3.csv', headers=[[1,2,3], '/']) as table:
-    pprint(table.headers)
-    pprint(table.read_rows())
-```
-
-    ['id/1/2', 'name/London/Berlin']
-    [Row([('id/1/2', 3), ('name/London/Berlin', 'Paris')]),
-     Row([('id/1/2', 4), ('name/London/Berlin', 'Madrid')]),
-     Row([('id/1/2', 5), ('name/London/Berlin', 'Rome')])]
-
-
 ## File Details
 
 Let's overview the details we can specify for a file. Usually you don't need to provide those details as Frictionless is capable to infer it on its own. Although, there are situation when you need to specify it manually. The following example will use the `Table` class but the same options can be used for the `extract` and `extract_table` functions.
@@ -752,7 +694,7 @@ with Table(source, control=control) as table:
     [Row([('id', 1), ('name', 'english')]), Row([('id', 2), ('name', '中国人')])]
 
 
-Exact parameters depend on schemes and can be found in the Schemes Reference. For example, the Remote Control provides `http_timeout`, `http_session`, and others but there is only one option available for all controls:
+Exact parameters depend on schemes and can be found in the "Schemes Reference". For example, the Remote Control provides `http_timeout`, `http_session`, and others but there is only one option available for all controls:
 
 **Detect Encoding**
 
@@ -777,7 +719,7 @@ Further reading:
 
 ## Table Dialect
 
-The Dialect is similiar to Control but it affects the way the parser works. Let's use the CSV Dialect to adjust the delimiter configuration:
+The Dialect adjust the way tabular parsers work. The concept is similiar to the Control above. Let's use the CSV Dialect to adjust the delimiter configuration:
 
 
 ```
@@ -881,7 +823,7 @@ Using header management described in the "Table Dialect" section we can have a b
 
 **Pick/Skip Fields**
 
-We can pick and skip arbitrary fields based on a header row. These options accept a list of field numbers, a list of values or a regex to match. All the queries below do the same thing for this file:
+We can pick and skip arbitrary fields based on a header row. These options accept a list of field numbers, a list of strings or a regex to match. All the queries below do the same thing for this file:
 
 
 ```
@@ -961,6 +903,85 @@ print(extract('matrix.csv', query=Query(offset_rows=2)))
     [Row([('f1', 31), ('f2', 32), ('f3', 33), ('f4', 34)]), Row([('f1', 41), ('f2', 42), ('f3', 43), ('f4', 44)])]
 
 
+## Header Options
+
+Header management is a responsibility of "Table Dialect" which will be described below but Table accept a special `headers` argument that plays a role of a high-level helper in setting different header options.
+
+
+It accepts a `False` values indicating that there is no header row:
+
+
+```
+from frictionless import Table
+
+with Table('capital-3.csv', headers=False) as table:
+    pprint(table.headers)
+    pprint(table.read_rows())
+```
+
+    []
+    [Row([('field1', 'id'), ('field2', 'name')]),
+     Row([('field1', '1'), ('field2', 'London')]),
+     Row([('field1', '2'), ('field2', 'Berlin')]),
+     Row([('field1', '3'), ('field2', 'Paris')]),
+     Row([('field1', '4'), ('field2', 'Madrid')]),
+     Row([('field1', '5'), ('field2', 'Rome')])]
+
+
+
+It accepts an integer indicating the header row number:
+
+
+```
+from frictionless import Table
+
+with Table('capital-3.csv', headers=2) as table:
+    pprint(table.headers)
+    pprint(table.read_rows())
+```
+
+    ['1', 'London']
+    [Row([('1', 2), ('London', 'Berlin')]),
+     Row([('1', 3), ('London', 'Paris')]),
+     Row([('1', 4), ('London', 'Madrid')]),
+     Row([('1', 5), ('London', 'Rome')])]
+
+
+It accepts a list of integers indicating a multiline header row numbers:
+
+
+```
+from frictionless import Table
+
+with Table('capital-3.csv', headers=[1,2,3]) as table:
+    pprint(table.headers)
+    pprint(table.read_rows())
+```
+
+    ['id 1 2', 'name London Berlin']
+    [Row([('id 1 2', 3), ('name London Berlin', 'Paris')]),
+     Row([('id 1 2', 4), ('name London Berlin', 'Madrid')]),
+     Row([('id 1 2', 5), ('name London Berlin', 'Rome')])]
+
+
+It accepts a pair containing a list of integers indicating a multiline header row numbers and a string indicating a joiner for a concatenate operation:
+
+
+
+```
+from frictionless import Table
+
+with Table('capital-3.csv', headers=[[1,2,3], '/']) as table:
+    pprint(table.headers)
+    pprint(table.read_rows())
+```
+
+    ['id/1/2', 'name/London/Berlin']
+    [Row([('id/1/2', 3), ('name/London/Berlin', 'Paris')]),
+     Row([('id/1/2', 4), ('name/London/Berlin', 'Madrid')]),
+     Row([('id/1/2', 5), ('name/London/Berlin', 'Rome')])]
+
+
 ## Schema Options
 
 By default, a schema for a table is inferred under the hood but we can also pass it explicetely.
@@ -1033,6 +1054,17 @@ with Table('capital-3.csv', patch_schema={'fields': {'id': {'type': 'string'}}})
      Row([('id', '4'), ('name', 'Madrid')]),
      Row([('id', '5'), ('name', 'Rome')])]
 
+
+## Integrity Options
+
+> This section is work-in-progress
+
+Exctraction function and classes accepts only one integrity option:
+
+
+**Lookup**
+
+The lookup is a special object providing relational information in cases when it's not impossible to extract. For example, the Package is capable to get a lookup object from its resource while a table object needs it to be provided.
 
 ## Headers Object
 

@@ -8,7 +8,7 @@ What does "describing data" mean?
 
 Frictionless is a project based on the [Frictionless Data Specifications](https://specs.frictionlessdata.io/). It's a set of patterns for creating metadata, including Data Package (for datasets), Data Resource (for files), and Table Schema (for tables).
 
-So, in other words, "describing data" means creating metadata for your data files. The reason for having metadata is simple: usually, data files themselves are not capable of providing enough information. For example, if you have a data table in a CSV format, it misses a few critical pieces of information:
+In other words, "describing data" means creating metadata for your data files. The reason for having metadata is simple: usually, data files themselves are not capable of providing enough information. For example, if you have a data table in a CSV format, it misses a few critical pieces of information:
 - meaning of the fields e.g., what the `size` field means; is it clothes size or file size
 - data types information e.g., is this field a string or an integer
 - data constraints e.g., the minimum temperature for your measurements
@@ -540,7 +540,27 @@ To continue learning about data resources please read:
 - API Reference: Package
 
 
-## Using Metadata
+## Description Options
+
+The `desribe` functions above share the only one common argument:
+- `expand`: whether to expand output metadata or not (see "Expanding Metadata")
+
+
+**Package**
+
+The `describe_package` doesn't accept any additional options.
+
+**Resource**
+
+With the `describe_resource` function you can use as options:
+- File Details (see "Extracting Data")
+- File Control (see "Extracting Data")
+- Table Dialect (see "Extracting Data")
+- Table Query (see "Extracting Data")
+- Header Options (see "Extracting Data")
+- Infer Options
+
+##  Metadata Purpose
 
 This documentation contains a great deal of information on how to use metadata and why it's vital for your data. In this article, we're going to provide a quick example based on the "Data Resource" section but please read other documents to get the full picture.
 
@@ -631,6 +651,20 @@ Basically, that's a really important idea - with not metadata many software will
 
 As we can see, it's now fixed. The metadata we'd had saved the day. If we explore this data in Python we can discover that it also correct data types e.g. `id` is Python's integer not string. This fact will allow exporting and sharing this data without any fear.
 
+
+## Metadata Classes
+
+> This section is work-in-progress
+
+- Package
+- Resource
+- Schema
+- Field
+- Dialect
+- Control
+- Report
+- Error
+- etc
 
 ## Inferring Metadata
 
@@ -854,21 +888,9 @@ You need to check `metadata.metadata_valid` only if you change it by hands; the 
 
 > This section is work-in-progress
 
-## Provided Classes
-
-> This section is work-in-progress
-
 ## Infer Options
 
-A numerous Frictionless function includes the Table Schema inferring stage, for example:
-- `describe`
-- `extract`
-- `validate`
-- `resource.infer`
-- `schema.infer`
-- and others
-
-Let's explore some handy options to customize the process. All of them are available in some form for all the functions above and for different invocation types: in Python, in CLI, or for a REST server.
+Let's explore some handy options to customize the infer process. All of them are available in some form for all the functions above and for different invocation types: in Python, in CLI, or for a REST server.
 
 
 **Infer Type**
