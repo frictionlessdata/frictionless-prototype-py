@@ -57,6 +57,7 @@ $ frictionless validate data/invalid.csv
 - [Formats Reference](docs/build/formats-reference/README.md)
 - [Errors Reference](docs/build/errors-reference/README.md)
 - [API Reference](docs/build/api-reference/README.md)
+- [Migration Guide](docs/build/migration-guide/README.md)
 - [Extension Guide](docs/build/extension-guide/README.md)
 - [Contribution Guide](docs/build/contribution-guide/README.md)
 - [Contributors](docs/build/contributors/README.md)
