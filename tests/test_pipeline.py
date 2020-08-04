@@ -10,7 +10,7 @@ def test_pipeline(tmpdir):
     # Write
     pipeline = Pipeline(
         {
-            "type": "dataflows",
+            "type": "package",
             "steps": [
                 {"type": "load", "spec": {"loadSource": "data/table.csv"}},
                 {"type": "set_type", "spec": {"name": "id", "type": "string"}},

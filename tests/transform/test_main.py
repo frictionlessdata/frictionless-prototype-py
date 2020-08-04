@@ -10,7 +10,7 @@ def test_ensure_dir(tmpdir):
     # Write
     transform(
         {
-            "type": "dataflows",
+            "type": "package",
             "steps": [
                 {"type": "load", "spec": {"loadSource": "data/table.csv"}},
                 {"type": "set_type", "spec": {"name": "id", "type": "string"}},

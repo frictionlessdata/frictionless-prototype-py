@@ -1,5 +1,5 @@
 name: pipeline
-type: dataflows
+type: package
 steps:
   - type: load
     spec:

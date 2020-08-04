@@ -47,8 +47,8 @@ class Pipeline(Metadata):
     def run(self):
 
         # Check type
-        if self.type != "dataflows":
-            error = errors.Error(note='For now, the only supported type is "dataflows"')
+        if self.type != "package":
+            error = errors.Error(note='For now, the only supported type is "package"')
             raise exceptions.FrictionlessException(error)
 
         # Import dataflows
