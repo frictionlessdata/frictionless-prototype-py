@@ -1,8 +1,5 @@
-from ..pipeline import Pipeline
+from .package import transform_package
 
 
 def transform(source):
-
-    # Run pipeline
-    pipeline = Pipeline(source)
-    pipeline.run()
+    return transform_package(source)
