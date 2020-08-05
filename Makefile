@@ -1,4 +1,4 @@
-.PHONY: all docs list install format lint readme release github test version
+.PHONY: all docs install format lint release test version
 
 
 PACKAGE := $(shell grep '^PACKAGE =' setup.py | cut -d '"' -f2)
@@ -6,18 +6,18 @@ VERSION := $(shell head -n 1 $(PACKAGE)/assets/VERSION)
 LEAD := $(shell head -n 1 LEAD.md)
 
 
-all: list
+all:
+	@grep '^\.PHONY' Makefile | cut -d' ' -f2- | tr ' ' '\n'
 
 docs:
 	python scripts/docs.py
+	sed -i -E "s/@(\w*)/@$(LEAD)/" .github/issue_template.md
+	sed -i -E "s/@(\w*)/@$(LEAD)/" .github/pull_request_template.md
+	wget -q -O CODE_OF_CONDUCT.md https://raw.githubusercontent.com/frictionlessdata/website/master/site/code-of-conduct/README.md
+	cp docs/contribution-guide.md CONTRIBUTING.md
 
 format:
 	black $(PACKAGE) tests
-
-github:
-	sed -i -E "s/@(\w*)/@$(LEAD)/" .github/issue_template.md
-	sed -i -E "s/@(\w*)/@$(LEAD)/" .github/pull_request_template.md
-	wget -q -O .github/code_of_conduct.md https://raw.githubusercontent.com/frictionlessdata/website/master/site/code-of-conduct/README.md
 
 install:
 	pip install --upgrade -e .[aws,bigquery,ckan,dataflows,elastic,gsheet,html,ods,pandas,server,spss,sql,tsv,dev]
@@ -27,9 +27,6 @@ lint:
 	black $(PACKAGE) tests --check
 	pylama $(PACKAGE) tests
 	# mypy $(PACKAGE) --ignore-missing-imports
-
-list:
-	@grep '^\.PHONY' Makefile | cut -d' ' -f2- | tr ' ' '\n'
 
 release:
 	git checkout master && git pull origin && git fetch -p
