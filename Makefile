@@ -13,7 +13,6 @@ docs:
 	python scripts/docs.py
 	sed -i -E "s/@(\w*)/@$(LEAD)/" .github/issue_template.md
 	sed -i -E "s/@(\w*)/@$(LEAD)/" .github/pull_request_template.md
-	wget -q -O CODE_OF_CONDUCT.md https://raw.githubusercontent.com/frictionlessdata/website/master/site/code-of-conduct/README.md
 	cp docs/contribution-guide.md CONTRIBUTING.md
 
 format:
@@ -38,7 +37,6 @@ release:
 test:
 	make lint
 	pytest --cov ${PACKAGE} --cov-report term-missing --cov-fail-under 50
-
 
 version:
 	@echo $(VERSION)
