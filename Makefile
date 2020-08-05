@@ -1,4 +1,4 @@
-.PHONY: all docs list install format lint readme release templates test version
+.PHONY: all docs list install format lint readme release github test version
 
 
 PACKAGE := $(shell grep '^PACKAGE =' setup.py | cut -d '"' -f2)
@@ -13,6 +13,11 @@ docs:
 
 format:
 	black $(PACKAGE) tests
+
+github:
+	sed -i -E "s/@(\w*)/@$(LEAD)/" .github/issue_template.md
+	sed -i -E "s/@(\w*)/@$(LEAD)/" .github/pull_request_template.md
+	wget -q -O .github/code_of_conduct.md https://raw.githubusercontent.com/frictionlessdata/website/master/site/code-of-conduct/README.md
 
 install:
 	pip install --upgrade -e .[aws,bigquery,ckan,dataflows,elastic,gsheet,html,ods,pandas,server,spss,sql,tsv,dev]
@@ -32,10 +37,6 @@ release:
 	@echo "\nReleasing v$(VERSION) in 10 seconds. Press <CTRL+C> to abort\n" && sleep 10
 	git commit -a -m 'v$(VERSION)' && git tag -a v$(VERSION) -m 'v$(VERSION)'
 	git push --follow-tags
-
-templates:
-	sed -i -E "s/@(\w*)/@$(LEAD)/" .github/issue_template.md
-	sed -i -E "s/@(\w*)/@$(LEAD)/" .github/pull_request_template.md
 
 test:
 	make lint
