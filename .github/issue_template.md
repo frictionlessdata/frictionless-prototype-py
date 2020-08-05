@@ -1,4 +1,6 @@
 ---
+name: Tracking issue
+about: Use this template for tracking new issues
 assignees: roll
 ---
 

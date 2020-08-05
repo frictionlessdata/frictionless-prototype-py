@@ -1,4 +1,6 @@
 ---
+name: Tracking pull requests
+about: Use this template for tracking new pull requests
 assignees: roll
 ---
 
