@@ -13,8 +13,9 @@ class File(Metadata)
 
 File representation
 
-> **[PUBLIC API]**
-> `from frictionless import File`
+API      | Usage
+-------- | --------
+Public   | `from frictionless import File`
 
 Under the hood, File uses available loaders so it can open from local, remote,
 and any other supported schemes. The File class inherits from the Metadata class
