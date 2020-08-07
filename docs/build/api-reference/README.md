@@ -1,14 +1,326 @@
 <a name="frictionless"></a>
-# frictionless
+# API Reference
 
 <a name="frictionless.file"></a>
-# frictionless.file
+## frictionless.file
+
+<a name="frictionless.file.File"></a>
+### File
+
+```python
+class File(Metadata)
+```
+
+File representation
+
+> **[PUBLIC API]**
+> `from frictionless import File`
+
+Under the hood, File uses available loaders so it can open from local, remote,
+and any other supported schemes. The File class inherits from the Metadata class
+all the metadata's functionality
+
+
+```python
+from frictionless import File
+
+with File('data/text.txt') as file:
+    file.read_text()
+```
+
+**Arguments**:
+
+- `source` _any_ - file source
+- `scheme?` _str_ - file scheme
+- `format?` _str_ - file format
+- `hashing?` _str_ - file hashing
+- `encoding?` _str_ - file encoding
+- `compression?` _str_ - file compression
+- `compression_path?` _str_ - file compression path
+- `control?` _dict_ - file control
+- `dialect?` _dict_ - file dialect
+- `query?` _dict_ - table query
+- `newline?` _str_ - python newline e.g. '\n',
+- `stats?` _{hash: str, bytes: int, rows: int}_ - stats object
+  
+
+**Raises**:
+
+- `FrictionlessException` - if there is a metadata validation error
+
+<a name="frictionless.file.File.path"></a>
+#### path
+
+```python
+ | @property
+ | path()
+```
+
+**Returns**:
+
+- `str` - file path
+
+<a name="frictionless.file.File.source"></a>
+#### source
+
+```python
+ | @Metadata.property
+ | source()
+```
+
+**Returns**:
+
+- `any` - file source
+
+<a name="frictionless.file.File.scheme"></a>
+#### scheme
+
+```python
+ | @Metadata.property
+ | scheme()
+```
+
+**Returns**:
+
+- `str?` - file scheme
+
+<a name="frictionless.file.File.format"></a>
+#### format
+
+```python
+ | @Metadata.property
+ | format()
+```
+
+**Returns**:
+
+- `str?` - file format
+
+<a name="frictionless.file.File.hashing"></a>
+#### hashing
+
+```python
+ | @Metadata.property
+ | hashing()
+```
+
+**Returns**:
+
+- `str?` - file hashing
+
+<a name="frictionless.file.File.encoding"></a>
+#### encoding
+
+```python
+ | @Metadata.property
+ | encoding()
+```
+
+**Returns**:
+
+- `str?` - file encoding
+
+<a name="frictionless.file.File.compression"></a>
+#### compression
+
+```python
+ | @Metadata.property
+ | compression()
+```
+
+**Returns**:
+
+- `str?` - file compression
+
+<a name="frictionless.file.File.compression_path"></a>
+#### compression\_path
+
+```python
+ | @Metadata.property
+ | compression_path()
+```
+
+**Returns**:
+
+- `str?` - file compression path
+
+<a name="frictionless.file.File.control"></a>
+#### control
+
+```python
+ | @Metadata.property
+ | control()
+```
+
+**Returns**:
+
+- `Control?` - file control
+
+<a name="frictionless.file.File.dialect"></a>
+#### dialect
+
+```python
+ | @Metadata.property
+ | dialect()
+```
+
+**Returns**:
+
+- `Dialect?` - file dialect
+
+<a name="frictionless.file.File.query"></a>
+#### query
+
+```python
+ | @Metadata.property
+ | query()
+```
+
+**Returns**:
+
+- `Query?` - table query
+
+<a name="frictionless.file.File.newline"></a>
+#### newline
+
+```python
+ | @Metadata.property
+ | newline()
+```
+
+**Returns**:
+
+- `str?` - file newline
+
+<a name="frictionless.file.File.stats"></a>
+#### stats
+
+```python
+ | @Metadata.property
+ | stats()
+```
+
+**Returns**:
+
+- `dict` - file stats
+
+<a name="frictionless.file.File.byte_stream"></a>
+#### byte\_stream
+
+```python
+ | @Metadata.property(cache=False)
+ | byte_stream()
+```
+
+File byte stream
+
+The stream is available after opening the file
+
+**Returns**:
+
+- `io.ByteStream` - file byte stream
+
+<a name="frictionless.file.File.text_stream"></a>
+#### text\_stream
+
+```python
+ | @Metadata.property(cache=False)
+ | text_stream()
+```
+
+File text stream
+
+The stream is available after opening the file
+
+**Returns**:
+
+- `io.TextStream` - file text stream
+
+<a name="frictionless.file.File.expand"></a>
+#### expand
+
+```python
+ | expand()
+```
+
+Expand metadata
+
+<a name="frictionless.file.File.open"></a>
+#### open
+
+```python
+ | open()
+```
+
+Open the file as "io.open" does
+
+<a name="frictionless.file.File.close"></a>
+#### close
+
+```python
+ | close()
+```
+
+Open the file as "filelike.close" does
+
+<a name="frictionless.file.File.closed"></a>
+#### closed
+
+```python
+ | @property
+ | closed()
+```
+
+Whether the file is closed
+
+**Returns**:
+
+- `bool` - if closed
+
+<a name="frictionless.file.File.read_bytes"></a>
+#### read\_bytes
+
+```python
+ | read_bytes()
+```
+
+Read bytes from the file
+
+**Returns**:
+
+- `bytes` - file bytes
+
+<a name="frictionless.file.File.read_text"></a>
+#### read\_text
+
+```python
+ | read_text()
+```
+
+Read bytes from the file
+
+**Returns**:
+
+- `str` - file text
+
+<a name="frictionless.file.File.write"></a>
+#### write
+
+```python
+ | write(target)
+```
+
+Write the file to the target
+
+**Arguments**:
+
+- `target` _str_ - target path
 
 <a name="frictionless.pipeline"></a>
-# frictionless.pipeline
+## frictionless.pipeline
 
 <a name="frictionless.pipeline.Pipeline"></a>
-## Pipeline Objects
+### Pipeline
 
 ```python
 class Pipeline(Metadata)
@@ -17,10 +329,10 @@ class Pipeline(Metadata)
 Pipeline representation
 
 <a name="frictionless.table"></a>
-# frictionless.table
+## frictionless.table
 
 <a name="frictionless.table.Table"></a>
-## Table Objects
+### Table
 
 ```python
 class Table()
@@ -381,7 +693,7 @@ __Returns__
 
 Opens the stream for reading.
 
-# Raises:
+## Raises:
 TabulatorException: if an error
 
 <a name="frictionless.table.Table.close"></a>
@@ -394,10 +706,10 @@ TabulatorException: if an error
 Closes the stream.
 
 <a name="frictionless.row"></a>
-# frictionless.row
+## frictionless.row
 
 <a name="frictionless.row.Row"></a>
-## Row Objects
+### Row
 
 ```python
 class Row(OrderedDict)
@@ -414,25 +726,25 @@ __Arguments__
     row_number
 
 <a name="frictionless.checks"></a>
-# frictionless.checks
+## frictionless.checks
 
 <a name="frictionless.checks.checksum"></a>
-# frictionless.checks.checksum
+## frictionless.checks.checksum
 
 <a name="frictionless.checks.regulation"></a>
-# frictionless.checks.regulation
+## frictionless.checks.regulation
 
 <a name="frictionless.checks.baseline"></a>
-# frictionless.checks.baseline
+## frictionless.checks.baseline
 
 <a name="frictionless.checks.heuristic"></a>
-# frictionless.checks.heuristic
+## frictionless.checks.heuristic
 
 <a name="frictionless.package"></a>
-# frictionless.package
+## frictionless.package
 
 <a name="frictionless.package.Package"></a>
-## Package Objects
+### Package
 
 ```python
 class Package(Metadata)
@@ -563,10 +875,10 @@ Expand the package
 It will add default values to the package.
 
 <a name="frictionless.plugin"></a>
-# frictionless.plugin
+## frictionless.plugin
 
 <a name="frictionless.plugin.Plugin"></a>
-## Plugin Objects
+### Plugin
 
 ```python
 class Plugin()
@@ -575,34 +887,34 @@ class Plugin()
 Plugin representation
 
 <a name="frictionless.program"></a>
-# frictionless.program
+## frictionless.program
 
 <a name="frictionless.program.main"></a>
-# frictionless.program.main
+## frictionless.program.main
 
 <a name="frictionless.program.validate"></a>
-# frictionless.program.validate
+## frictionless.program.validate
 
 <a name="frictionless.program.transform"></a>
-# frictionless.program.transform
+## frictionless.program.transform
 
 <a name="frictionless.program.describe"></a>
-# frictionless.program.describe
+## frictionless.program.describe
 
 <a name="frictionless.program.api"></a>
-# frictionless.program.api
+## frictionless.program.api
 
 <a name="frictionless.program.extract"></a>
-# frictionless.program.extract
+## frictionless.program.extract
 
 <a name="frictionless.type"></a>
-# frictionless.type
+## frictionless.type
 
 <a name="frictionless.metadata"></a>
-# frictionless.metadata
+## frictionless.metadata
 
 <a name="frictionless.metadata.Metadata"></a>
-## Metadata Objects
+### Metadata
 
 ```python
 class Metadata(helpers.ControlledDict)
@@ -619,10 +931,10 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.field"></a>
-# frictionless.field
+## frictionless.field
 
 <a name="frictionless.field.Field"></a>
-## Field Objects
+### Field
 
 ```python
 class Field(Metadata)
@@ -728,10 +1040,10 @@ __Returns__
 `any/None`: processed cell or None if an error
 
 <a name="frictionless.headers"></a>
-# frictionless.headers
+## frictionless.headers
 
 <a name="frictionless.headers.Headers"></a>
-## Headers Objects
+### Headers
 
 ```python
 class Headers(list)
@@ -746,10 +1058,10 @@ __Arguments__
     field_positions
 
 <a name="frictionless.query"></a>
-# frictionless.query
+## frictionless.query
 
 <a name="frictionless.query.Query"></a>
-## Query Objects
+### Query
 
 ```python
 class Query(Metadata)
@@ -758,10 +1070,10 @@ class Query(Metadata)
 Query representation
 
 <a name="frictionless.system"></a>
-# frictionless.system
+## frictionless.system
 
 <a name="frictionless.system.System"></a>
-## System Objects
+### System
 
 ```python
 class System()
@@ -770,13 +1082,13 @@ class System()
 System representation
 
 <a name="frictionless.helpers"></a>
-# frictionless.helpers
+## frictionless.helpers
 
 <a name="frictionless.inquiry"></a>
-# frictionless.inquiry
+## frictionless.inquiry
 
 <a name="frictionless.inquiry.Inquiry"></a>
-## Inquiry Objects
+### Inquiry
 
 ```python
 class Inquiry(Metadata)
@@ -794,16 +1106,16 @@ Inquiry representation.
 - `FrictionlessException` - raise any error that occurs during the process
 
 <a name="frictionless.config"></a>
-# frictionless.config
+## frictionless.config
 
 <a name="frictionless.plugins"></a>
-# frictionless.plugins
+## frictionless.plugins
 
 <a name="frictionless.plugins.gsheet"></a>
-# frictionless.plugins.gsheet
+## frictionless.plugins.gsheet
 
 <a name="frictionless.plugins.gsheet.GsheetDialect"></a>
-## GsheetDialect Objects
+### GsheetDialect
 
 ```python
 class GsheetDialect(Dialect)
@@ -820,25 +1132,25 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.plugins.dataflows"></a>
-# frictionless.plugins.dataflows
+## frictionless.plugins.dataflows
 
 <a name="frictionless.plugins.pandas"></a>
-# frictionless.plugins.pandas
+## frictionless.plugins.pandas
 
 <a name="frictionless.plugins.spss"></a>
-# frictionless.plugins.spss
+## frictionless.plugins.spss
 
 <a name="frictionless.plugins.elastic"></a>
-# frictionless.plugins.elastic
+## frictionless.plugins.elastic
 
 <a name="frictionless.plugins.bigquery"></a>
-# frictionless.plugins.bigquery
+## frictionless.plugins.bigquery
 
 <a name="frictionless.plugins.ods"></a>
-# frictionless.plugins.ods
+## frictionless.plugins.ods
 
 <a name="frictionless.plugins.ods.OdsDialect"></a>
-## OdsDialect Objects
+### OdsDialect
 
 ```python
 class OdsDialect(Dialect)
@@ -856,10 +1168,10 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.plugins.html"></a>
-# frictionless.plugins.html
+## frictionless.plugins.html
 
 <a name="frictionless.plugins.html.HtmlDialect"></a>
-## HtmlDialect Objects
+### HtmlDialect
 
 ```python
 class HtmlDialect(Dialect)
@@ -877,10 +1189,10 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.plugins.tsv"></a>
-# frictionless.plugins.tsv
+## frictionless.plugins.tsv
 
 <a name="frictionless.plugins.tsv.TsvDialect"></a>
-## TsvDialect Objects
+### TsvDialect
 
 ```python
 class TsvDialect(Dialect)
@@ -897,10 +1209,10 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.plugins.sql"></a>
-# frictionless.plugins.sql
+## frictionless.plugins.sql
 
 <a name="frictionless.plugins.sql.SqlDialect"></a>
-## SqlDialect Objects
+### SqlDialect
 
 ```python
 class SqlDialect(Dialect)
@@ -919,16 +1231,16 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.plugins.ckan"></a>
-# frictionless.plugins.ckan
+## frictionless.plugins.ckan
 
 <a name="frictionless.plugins.server"></a>
-# frictionless.plugins.server
+## frictionless.plugins.server
 
 <a name="frictionless.plugins.aws"></a>
-# frictionless.plugins.aws
+## frictionless.plugins.aws
 
 <a name="frictionless.plugins.aws.S3Control"></a>
-## S3Control Objects
+### S3Control
 
 ```python
 class S3Control(Control)
@@ -947,10 +1259,10 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.parsers"></a>
-# frictionless.parsers
+## frictionless.parsers
 
 <a name="frictionless.parsers.excel"></a>
-# frictionless.parsers.excel
+## frictionless.parsers.excel
 
 <a name="frictionless.parsers.excel.convert_excel_date_format_string"></a>
 #### convert\_excel\_date\_format\_string
@@ -974,34 +1286,34 @@ A basic attempt to convert excel number_format to a number string
 The important goal here is to get proper amount of rounding
 
 <a name="frictionless.parsers.csv"></a>
-# frictionless.parsers.csv
+## frictionless.parsers.csv
 
 <a name="frictionless.parsers.json"></a>
-# frictionless.parsers.json
+## frictionless.parsers.json
 
 <a name="frictionless.parsers.inline"></a>
-# frictionless.parsers.inline
+## frictionless.parsers.inline
 
 <a name="frictionless.extract"></a>
-# frictionless.extract
+## frictionless.extract
 
 <a name="frictionless.extract.main"></a>
-# frictionless.extract.main
+## frictionless.extract.main
 
 <a name="frictionless.extract.table"></a>
-# frictionless.extract.table
+## frictionless.extract.table
 
 <a name="frictionless.extract.package"></a>
-# frictionless.extract.package
+## frictionless.extract.package
 
 <a name="frictionless.extract.resource"></a>
-# frictionless.extract.resource
+## frictionless.extract.resource
 
 <a name="frictionless.errors"></a>
-# frictionless.errors
+## frictionless.errors
 
 <a name="frictionless.errors.Error"></a>
-## Error Objects
+### Error
 
 ```python
 class Error(Metadata)
@@ -1020,7 +1332,7 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.errors.HeaderError"></a>
-## HeaderError Objects
+### HeaderError
 
 ```python
 class HeaderError(Error)
@@ -1044,7 +1356,7 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.errors.RowError"></a>
-## RowError Objects
+### RowError
 
 ```python
 class RowError(Error)
@@ -1065,7 +1377,7 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.errors.CellError"></a>
-## CellError Objects
+### CellError
 
 ```python
 class CellError(RowError)
@@ -1091,25 +1403,25 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.describe"></a>
-# frictionless.describe
+## frictionless.describe
 
 <a name="frictionless.describe.main"></a>
-# frictionless.describe.main
+## frictionless.describe.main
 
 <a name="frictionless.describe.package"></a>
-# frictionless.describe.package
+## frictionless.describe.package
 
 <a name="frictionless.describe.schema"></a>
-# frictionless.describe.schema
+## frictionless.describe.schema
 
 <a name="frictionless.describe.resource"></a>
-# frictionless.describe.resource
+## frictionless.describe.resource
 
 <a name="frictionless.schema"></a>
-# frictionless.schema
+## frictionless.schema
 
 <a name="frictionless.schema.Schema"></a>
-## Schema Objects
+### Schema
 
 ```python
 class Schema(Metadata)
@@ -1307,10 +1619,10 @@ __Arguments__
     confidence
 
 <a name="frictionless.check"></a>
-# frictionless.check
+## frictionless.check
 
 <a name="frictionless.check.Check"></a>
-## Check Objects
+### Check
 
 ```python
 class Check(Metadata)
@@ -1327,13 +1639,13 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.resource"></a>
-# frictionless.resource
+## frictionless.resource
 
 <a name="frictionless.exceptions"></a>
-# frictionless.exceptions
+## frictionless.exceptions
 
 <a name="frictionless.exceptions.FrictionlessException"></a>
-## FrictionlessException Objects
+### FrictionlessException
 
 ```python
 class FrictionlessException(Exception)
@@ -1346,22 +1658,22 @@ __Arguments__
     error
 
 <a name="frictionless.transform"></a>
-# frictionless.transform
+## frictionless.transform
 
 <a name="frictionless.transform.main"></a>
-# frictionless.transform.main
+## frictionless.transform.main
 
 <a name="frictionless.transform.package"></a>
-# frictionless.transform.package
+## frictionless.transform.package
 
 <a name="frictionless.transform.resource"></a>
-# frictionless.transform.resource
+## frictionless.transform.resource
 
 <a name="frictionless.parser"></a>
-# frictionless.parser
+## frictionless.parser
 
 <a name="frictionless.parser.Parser"></a>
-## Parser Objects
+### Parser
 
 ```python
 class Parser()
@@ -1378,10 +1690,10 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.report"></a>
-# frictionless.report
+## frictionless.report
 
 <a name="frictionless.report.Report"></a>
-## Report Objects
+### Report
 
 ```python
 class Report(Metadata)
@@ -1414,7 +1726,7 @@ __Arguments__
     spec
 
 <a name="frictionless.report.ReportTable"></a>
-## ReportTable Objects
+### ReportTable
 
 ```python
 class ReportTable(Metadata)
@@ -1467,10 +1779,10 @@ __Arguments__
     spec
 
 <a name="frictionless.dialects"></a>
-# frictionless.dialects
+## frictionless.dialects
 
 <a name="frictionless.dialects.Dialect"></a>
-## Dialect Objects
+### Dialect
 
 ```python
 class Dialect(Metadata)
@@ -1488,7 +1800,7 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.dialects.CsvDialect"></a>
-## CsvDialect Objects
+### CsvDialect
 
 ```python
 class CsvDialect(Dialect)
@@ -1514,7 +1826,7 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.dialects.ExcelDialect"></a>
-## ExcelDialect Objects
+### ExcelDialect
 
 ```python
 class ExcelDialect(Dialect)
@@ -1536,7 +1848,7 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.dialects.InlineDialect"></a>
-## InlineDialect Objects
+### InlineDialect
 
 ```python
 class InlineDialect(Dialect)
@@ -1554,7 +1866,7 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.dialects.JsonDialect"></a>
-## JsonDialect Objects
+### JsonDialect
 
 ```python
 class JsonDialect(Dialect)
@@ -1573,13 +1885,13 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.__main__"></a>
-# frictionless.\_\_main\_\_
+## frictionless.\_\_main\_\_
 
 <a name="frictionless.server"></a>
-# frictionless.server
+## frictionless.server
 
 <a name="frictionless.server.Server"></a>
-## Server Objects
+### Server
 
 ```python
 class Server()
@@ -1588,58 +1900,58 @@ class Server()
 Server representation
 
 <a name="frictionless.types"></a>
-# frictionless.types
+## frictionless.types
 
 <a name="frictionless.types.yearmonth"></a>
-# frictionless.types.yearmonth
+## frictionless.types.yearmonth
 
 <a name="frictionless.types.datetime"></a>
-# frictionless.types.datetime
+## frictionless.types.datetime
 
 <a name="frictionless.types.date"></a>
-# frictionless.types.date
+## frictionless.types.date
 
 <a name="frictionless.types.string"></a>
-# frictionless.types.string
+## frictionless.types.string
 
 <a name="frictionless.types.object"></a>
-# frictionless.types.object
+## frictionless.types.object
 
 <a name="frictionless.types.geojson"></a>
-# frictionless.types.geojson
+## frictionless.types.geojson
 
 <a name="frictionless.types.year"></a>
-# frictionless.types.year
+## frictionless.types.year
 
 <a name="frictionless.types.integer"></a>
-# frictionless.types.integer
+## frictionless.types.integer
 
 <a name="frictionless.types.time"></a>
-# frictionless.types.time
+## frictionless.types.time
 
 <a name="frictionless.types.geopoint"></a>
-# frictionless.types.geopoint
+## frictionless.types.geopoint
 
 <a name="frictionless.types.array"></a>
-# frictionless.types.array
+## frictionless.types.array
 
 <a name="frictionless.types.boolean"></a>
-# frictionless.types.boolean
+## frictionless.types.boolean
 
 <a name="frictionless.types.any"></a>
-# frictionless.types.any
+## frictionless.types.any
 
 <a name="frictionless.types.duration"></a>
-# frictionless.types.duration
+## frictionless.types.duration
 
 <a name="frictionless.types.number"></a>
-# frictionless.types.number
+## frictionless.types.number
 
 <a name="frictionless.loader"></a>
-# frictionless.loader
+## frictionless.loader
 
 <a name="frictionless.loader.Loader"></a>
-## Loader Objects
+### Loader
 
 ```python
 class Loader()
@@ -1682,13 +1994,13 @@ __Returns__
 `TextIO`: I/O stream
 
 <a name="frictionless.validate"></a>
-# frictionless.validate
+## frictionless.validate
 
 <a name="frictionless.validate.main"></a>
-# frictionless.validate.main
+## frictionless.validate.main
 
 <a name="frictionless.validate.table"></a>
-# frictionless.validate.table
+## frictionless.validate.table
 
 <a name="frictionless.validate.table.validate_table"></a>
 #### validate\_table
@@ -1744,7 +2056,7 @@ __Returns__
     Report
 
 <a name="frictionless.validate.package"></a>
-# frictionless.validate.package
+## frictionless.validate.package
 
 <a name="frictionless.validate.package.validate_package"></a>
 #### validate\_package
@@ -1757,7 +2069,7 @@ validate_package(source, basepath=None, noinfer=False, **options)
 Validate package
 
 <a name="frictionless.validate.inquiry"></a>
-# frictionless.validate.inquiry
+## frictionless.validate.inquiry
 
 <a name="frictionless.validate.inquiry.validate_inquiry"></a>
 #### validate\_inquiry
@@ -1770,7 +2082,7 @@ validate_inquiry(source)
 Validate inquiry
 
 <a name="frictionless.validate.schema"></a>
-# frictionless.validate.schema
+## frictionless.validate.schema
 
 <a name="frictionless.validate.schema.validate_schema"></a>
 #### validate\_schema
@@ -1783,7 +2095,7 @@ validate_schema(source)
 Validate schema
 
 <a name="frictionless.validate.resource"></a>
-# frictionless.validate.resource
+## frictionless.validate.resource
 
 <a name="frictionless.validate.resource.validate_resource"></a>
 #### validate\_resource
@@ -1796,10 +2108,10 @@ validate_resource(source, basepath=None, noinfer=False, lookup=None, **options)
 Validate resource
 
 <a name="frictionless.controls"></a>
-# frictionless.controls
+## frictionless.controls
 
 <a name="frictionless.controls.Control"></a>
-## Control Objects
+### Control
 
 ```python
 class Control(Metadata)
@@ -1817,7 +2129,7 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.controls.LocalControl"></a>
-## LocalControl Objects
+### LocalControl
 
 ```python
 class LocalControl(Control)
@@ -1834,7 +2146,7 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.controls.RemoteControl"></a>
-## RemoteControl Objects
+### RemoteControl
 
 ```python
 class RemoteControl(Control)
@@ -1855,7 +2167,7 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.controls.StreamControl"></a>
-## StreamControl Objects
+### StreamControl
 
 ```python
 class StreamControl(Control)
@@ -1872,7 +2184,7 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.controls.TextControl"></a>
-## TextControl Objects
+### TextControl
 
 ```python
 class TextControl(Control)
@@ -1889,17 +2201,17 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.loaders"></a>
-# frictionless.loaders
+## frictionless.loaders
 
 <a name="frictionless.loaders.remote"></a>
-# frictionless.loaders.remote
+## frictionless.loaders.remote
 
 <a name="frictionless.loaders.stream"></a>
-# frictionless.loaders.stream
+## frictionless.loaders.stream
 
 <a name="frictionless.loaders.text"></a>
-# frictionless.loaders.text
+## frictionless.loaders.text
 
 <a name="frictionless.loaders.local"></a>
-# frictionless.loaders.local
+## frictionless.loaders.local
 
