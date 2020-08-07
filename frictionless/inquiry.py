@@ -6,10 +6,10 @@ from . import config
 class Inquiry(Metadata):
     """Inquiry representation.
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): schema descriptor
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """

@@ -25,6 +25,7 @@ TESTS_REQUIRE = [
     "pylama",
     "pytest",
     "pytest-cov",
+    "pydoc-markdown",
     "responses",
     "coveralls",
     "nbconvert",
