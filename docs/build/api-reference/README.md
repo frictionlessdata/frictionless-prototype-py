@@ -819,13 +819,158 @@ class Row(OrderedDict)
 
 Row representation
 
-__Arguments__
+API      | Usage
+-------- | --------
+Public   | `from frictionless import Table`
 
-    cells
-    fields
-    field_positions
-    row_position
-    row_number
+This object is returned by `extract`, `table.read_rows`, and other functions.
+
+
+```python
+rows = extract("data/table.csv")
+for row in rows:
+    # work with the Row
+```
+
+**Arguments**:
+
+- `cells` _any[]_ - array of cells
+- `schema` _Schema_ - table schema
+- `field_positions` _int[]_ - table field positions
+- `row_position` _int_ - row position from 1
+- `row_number` _int_ - row number from 1
+
+<a name="frictionless.row.Row.schema"></a>
+#### <big>schema</big>
+
+```python
+ | @cached_property
+ | schema()
+```
+
+**Returns**:
+
+- `Schema` - table schema
+
+<a name="frictionless.row.Row.field_positions"></a>
+#### <big>field\_positions</big>
+
+```python
+ | @cached_property
+ | field_positions()
+```
+
+**Returns**:
+
+- `int[]` - table field positions
+
+<a name="frictionless.row.Row.row_position"></a>
+#### <big>row\_position</big>
+
+```python
+ | @cached_property
+ | row_position()
+```
+
+**Returns**:
+
+- `int` - row position from 1
+
+<a name="frictionless.row.Row.row_number"></a>
+#### <big>row\_number</big>
+
+```python
+ | @cached_property
+ | row_number()
+```
+
+**Returns**:
+
+- `int` - row number from 1
+
+<a name="frictionless.row.Row.blank_cells"></a>
+#### <big>blank\_cells</big>
+
+```python
+ | @cached_property
+ | blank_cells()
+```
+
+A mapping indexed by a field name with blank cells before parsing
+
+**Returns**:
+
+- `dict` - row blank cells
+
+<a name="frictionless.row.Row.error_cells"></a>
+#### <big>error\_cells</big>
+
+```python
+ | @cached_property
+ | error_cells()
+```
+
+A mapping indexed by a field name with error cells before parsing
+
+**Returns**:
+
+- `dict` - row error cells
+
+<a name="frictionless.row.Row.errors"></a>
+#### <big>errors</big>
+
+```python
+ | @cached_property
+ | errors()
+```
+
+**Returns**:
+
+- `Error[]` - row errors
+
+<a name="frictionless.row.Row.valid"></a>
+#### <big>valid</big>
+
+```python
+ | @cached_property
+ | valid()
+```
+
+**Returns**:
+
+- `bool` - if row valid
+
+<a name="frictionless.row.Row.to_dict"></a>
+#### <big>to\_dict</big>
+
+```python
+ | to_dict(*, json=False)
+```
+
+**Arguments**:
+
+- `json` _bool_ - make data types compatible with JSON format
+  
+
+**Returns**:
+
+- `dict` - a row as a dictionary
+
+<a name="frictionless.row.Row.to_list"></a>
+#### <big>to\_list</big>
+
+```python
+ | to_list(*, json=False)
+```
+
+**Arguments**:
+
+- `json` _bool_ - make data types compatible with JSON format
+  
+
+**Returns**:
+
+- `dict` - a row as a list
 
 <a name="frictionless.checks"></a>
 ## frictionless.checks

@@ -8,12 +8,24 @@ from . import errors
 class Row(OrderedDict):
     """Row representation
 
-    # Arguments
-        cells
-        fields
-        field_positions
-        row_position
-        row_number
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import Table`
+
+    This object is returned by `extract`, `table.read_rows`, and other functions.
+
+    ```python
+    rows = extract("data/table.csv")
+    for row in rows:
+        # work with the Row
+    ```
+
+    Parameters:
+        cells (any[]): array of cells
+        schema (Schema): table schema
+        field_positions (int[]): table field positions
+        row_position (int): row position from 1
+        row_number (int): row number from 1
 
     """
 
@@ -127,39 +139,80 @@ class Row(OrderedDict):
 
     @cached_property
     def schema(self):
+        """
+        Returns:
+            Schema: table schema
+        """
         return self.__schema
 
     @cached_property
     def field_positions(self):
+        """
+        Returns:
+            int[]: table field positions
+        """
         return self.__field_positions
 
     @cached_property
     def row_position(self):
+        """
+        Returns:
+            int: row position from 1
+        """
         return self.__row_position
 
     @cached_property
     def row_number(self):
+        """
+        Returns:
+            int: row number from 1
+        """
         return self.__row_number
 
     @cached_property
     def blank_cells(self):
+        """A mapping indexed by a field name with blank cells before parsing
+
+        Returns:
+            dict: row blank cells
+        """
         return self.__blank_cells
 
     @cached_property
     def error_cells(self):
+        """A mapping indexed by a field name with error cells before parsing
+
+        Returns:
+            dict: row error cells
+        """
         return self.__error_cells
 
     @cached_property
     def errors(self):
+        """
+        Returns:
+            Error[]: row errors
+        """
         return self.__errors
 
     @cached_property
     def valid(self):
+        """
+        Returns:
+            bool: if row valid
+        """
         return not self.__errors
 
     # Import/Export
 
     def to_dict(self, *, json=False):
+        """
+        Parameters:
+            json (bool): make data types compatible with JSON format
+
+        Returns:
+            dict: a row as a dictionary
+        """
         if json:
             result = {}
             for field in self.__schema.fields:
@@ -171,6 +224,13 @@ class Row(OrderedDict):
         return dict(self)
 
     def to_list(self, *, json=False):
+        """
+        Parameters:
+            json (bool): make data types compatible with JSON format
+
+        Returns:
+            dict: a row as a list
+        """
         if json:
             result = []
             for field in self.__schema.fields:
