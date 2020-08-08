@@ -8,6 +8,8 @@ from . import errors
 from . import config
 
 
+# NOTE: Consider plugins priority
+# NOTE: Consider an ability to register plugins dynamically
 class System:
     """System representation
     """
@@ -153,7 +155,6 @@ class System:
 
     # Plugins
 
-    # Consider plugins priority
     @cached_property
     def plugins(self):
         modules = OrderedDict()

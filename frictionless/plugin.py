@@ -5,6 +5,12 @@ class Plugin:
     def create_check(self, name, *, descriptor=None):
         pass
 
+    def create_control(self, file, *, descriptor):
+        pass
+
+    def create_dialect(self, file, *, descriptor):
+        pass
+
     def create_loader(self, file):
         pass
 
