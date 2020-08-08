@@ -39,7 +39,7 @@ with File('data/text.txt') as file:
 - `compression?` _str_ - file compression
 - `compression_path?` _str_ - file compression path
 - `control?` _dict_ - file control
-- `dialect?` _dict_ - file dialect
+- `dialect?` _dict_ - table dialect
 - `query?` _dict_ - table query
 - `newline?` _str_ - python newline e.g. '\n',
 - `stats?` _{hash: str, bytes: int, rows: int}_ - stats object
@@ -167,7 +167,7 @@ with File('data/text.txt') as file:
 
 **Returns**:
 
-- `Dialect?` - file dialect
+- `Dialect?` - table dialect
 
 <a name="frictionless.file.File.query"></a>
 #### <big>query</big>
@@ -262,7 +262,7 @@ Open the file as "io.open" does
  | close()
 ```
 
-Open the file as "filelike.close" does
+Close the file as "filelike.close" does
 
 <a name="frictionless.file.File.closed"></a>
 #### <big>closed</big>
@@ -417,108 +417,99 @@ class Table()
 
 Table representation
 
-This is the main `tabulator` class. It loads a data source, and allows you
-to stream its parsed contents.
+API      | Usage
+-------- | --------
+Public   | `from frictionless import Table`
 
-__Arguments__
+This class is at heart of the whole Frictionless framwork.
+It loads a data source, and allows you to stream its parsed contents.
 
 
-- __source__ (`str`):
-        Path to file as ``<scheme>\\://path/to/file.<format>``.
-        If not explicitly set, the scheme (file, http, ...) and
-        format (csv, xls, ...) are inferred from the source string.
+```python
+with Table("data/table.csv") as table:
+    assert table.headers == ["id", "name"]
+    assert table.read_rows() == [
+        {'id': 1, 'name': 'english'},
+        {'id': 2, 'name': '中国人'},
+    ]
+```
 
-- __headers__ (`Union[int, List[int], List[str]], optional`):
-        Either a row
-        number or list of row numbers (in case of multi-line headers) to be
-        considered as headers (rows start counting at 1), or the actual
-        headers defined a list of strings. If not set, all rows will be
-        treated as containing values.
+**Arguments**:
 
-- __scheme__ (`str, optional`):
-        Scheme for loading the file (file, http, ...).
-        If not set, it'll be inferred from `source`.
-
-- __format__ (`str, optional`):
-        File source's format (csv, xls, ...). If not
-        set, it'll be inferred from `source`. inferred
-
-- __encoding__ (`str, optional`):
-        Source encoding. If not set, it'll be inferred.
-
-- __compression__ (`str, optional`):
-        Source file compression (zip, ...). If not set, it'll be inferred.
-
-- __pick_rows__ (`List[Union[int, str, dict]], optional`):
-        The same as `skip_rows` but it's for picking rows instead of skipping.
-
-- __skip_rows__ (`List[Union[int, str, dict]], optional`):
-        List of row numbers, strings and regex patterns as dicts to skip.
-        If a string, it'll skip rows that their first cells begin with it e.g. '#' and '//'.
-        To skip only completely blank rows use `{'type'\\: 'preset', 'value'\\: 'blank'}`
-        To provide a regex pattern use  `{'type'\\: 'regex', 'value'\\: '^#'}`
-        For example\\: `skip_rows=[1, '# comment', {'type'\\: 'regex', 'value'\\: '^# (regex|comment)'}]`
-
-- __pick_fields__ (`List[Union[int, str]], optional`):
-        When passed, ignores all columns with headers
-        that the given list DOES NOT include
-
-- __skip_fields__ (`List[Union[int, str]], optional`):
-        When passed, ignores all columns with headers
-        that the given list includes. If it contains an empty string it will skip
-        empty headers
-
-- __sample_size__ (`int, optional`):
-        Controls the number of sample rows used to
-        infer properties from the data (headers, encoding, etc.). Set to
-        ``0`` to disable sampling, in which case nothing will be inferred
-        from the data. Defaults to ``config.DEFAULT_SAMPLE_SIZE``.
-
-- __allow_html__ (`bool, optional`):
-        Allow the file source to be an HTML page.
-        If False, raises ``exceptions.FormatError`` if the loaded file is
-        an HTML page. Defaults to False.
-
-- __multiline_headers_joiner__ (`str, optional`):
-        When passed, it's used to join multiline headers
-        as `<passed-value>.join(header1_1, header1_2)`
-        Defaults to ' ' (space).
-
-- __multiline_headers_duplicates__ (`bool, optional`):
-        By default tabulator will exclude a cell of a miltilne header from joining
-        if it's exactly the same as the previous seen value in this field.
-        Enabling this option will force duplicates inclusion
-        Defaults to False.
-
-- __hashing_algorithm__ (`func, optional`):
-- __It supports__: md5, sha1, sha256, sha512
-        Defaults to sha256
-
-- __force_strings__ (`bool, optional`):
-        When True, casts all data to strings.
-        Defaults to False.
-
-- __post_parse__ (`List[function], optional`):
-        List of generator functions that
-        receives a list of rows and headers, processes them, and yields
-        them (or not). Useful to pre-process the data. Defaults to None.
-
-- __custom_loaders__ (`dict, optional`):
-        Dictionary with keys as scheme names,
-        and values as their respective ``Loader`` class implementations.
-        Defaults to None.
-
-- __custom_parsers__ (`dict, optional`):
-        Dictionary with keys as format names,
-        and values as their respective ``Parser`` class implementations.
-        Defaults to None.
-
-- __custom_loaders__ (`dict, optional`):
-        Dictionary with keys as writer format
-        names, and values as their respective ``Writer`` class
-        implementations. Defaults to None.
-
-- __**options (Any, optional)__: Extra options passed to the loaders and parsers.
+  
+- `source` _any_ - Source of the file; can be in various forms.
+  Usually, it's a string as `<scheme>://path/to/file.<format>`.
+  It also can be, for example, an array of data arrays/dictionaries.
+  
+- `headers?` _int|int[]|[int[], str]_ - Either a row
+  number or list of row numbers (in case of multi-line headers) to be
+  considered as headers (rows start counting at 1), or a pair
+  where the first element is header rows and the second the
+  header joiner.  It defaults to 1.
+  
+- `scheme?` _str_ - Scheme for loading the file (file, http, ...).
+  If not set, it'll be inferred from `source`.
+  
+- `format?` _str_ - File source's format (csv, xls, ...).
+  If not set, it'll be inferred from `source`.
+  
+- `encoding?` _str_ - An algorithm to hash data.
+  It defaults to 'md5'.
+  
+- `encoding?` _str_ - Source encoding.
+  If not set, it'll be inferred from `source`.
+  
+- `compression?` _str_ - Source file compression (zip, ...).
+  If not set, it'll be inferred from `source`.
+  
+- `compression_path?` _str_ - A path within the compressed file.
+  It defaults to the first file in the archive.
+  
+- `control?` _dict|Control_ - File control.
+  For more infromation, please check the Control documentation.
+  
+- `query?` _dict|Query_ - Table query.
+  For more infromation, please check the Query documentation.
+  
+- `dialect?` _dict|Dialect_ - Table dialect.
+  For more infromation, please check the Dialect documentation.
+  
+- `schema?` _dict|Schema_ - Table schema.
+  For more infromation, please check the Schema documentation.
+  
+- `sync_schema?` _bool_ - Whether to sync the schema.
+  If it sets to `True` the provided schema will be mapped to
+  the inferred schema. It means that, for example, you can
+  provide a subset of fileds to be applied on top of the inferred
+  fields or the provided schema can have different order of fields.
+  
+- `patch_schema?` _dict_ - A dictionary to be used as an inferred schema patch.
+  The form of this dictionary should follow the Schema descriptor form
+  except for the `fields` property which should be a mapping with the
+  key named after a field name and the values being a field patch.
+  For more information, please check "Extracting Data" guide.
+  
+- `infer_type?` _str_ - Enforce all the inferred types to be this type.
+  For more information, please check "Describing  Data" guide.
+  
+- `infer_names?` _str[]_ - Enforce all the inferred fields to have provided names.
+  For more information, please check "Describing  Data" guide.
+  
+- `infer_volume?` _int_ - The amount of rows to be extracted as a samle.
+  For more information, please check "Describing  Data" guide.
+  It defaults to 100
+  
+- `infer_confidence?` _float_ - A number from 0 to 1 setting the infer confidence.
+  If  1 the data is guaranteed to be valid against the inferred schema.
+  For more information, please check "Describing  Data" guide.
+  It defaults to 0.9
+  
+- `infer_missing_values?` _str[]_ - String to be considered as missing values.
+  For more information, please check "Describing  Data" guide.
+  It defaults to `['']`
+  
+- `lookup?` _dict_ - The lookup is a special object providing relational information.
+  For more information, please check "Extracting  Data" guide.
 
 <a name="frictionless.table.Table.path"></a>
 #### <big>path</big>
@@ -528,11 +519,9 @@ __Arguments__
  | path()
 ```
 
-Path
+**Returns**:
 
-__Returns__
-
-`any`: stream path
+- `str` - file path
 
 <a name="frictionless.table.Table.source"></a>
 #### <big>source</big>
@@ -542,11 +531,9 @@ __Returns__
  | source()
 ```
 
-Source
+**Returns**:
 
-__Returns__
-
-`any`: stream source
+- `any` - file source
 
 <a name="frictionless.table.Table.scheme"></a>
 #### <big>scheme</big>
@@ -556,11 +543,9 @@ __Returns__
  | scheme()
 ```
 
-Path's scheme
+**Returns**:
 
-__Returns__
-
-`str`: scheme
+- `str?` - file scheme
 
 <a name="frictionless.table.Table.format"></a>
 #### <big>format</big>
@@ -570,11 +555,9 @@ __Returns__
  | format()
 ```
 
-Path's format
+**Returns**:
 
-__Returns__
-
-`str`: format
+- `str?` - file format
 
 <a name="frictionless.table.Table.hashing"></a>
 #### <big>hashing</big>
@@ -584,11 +567,9 @@ __Returns__
  | hashing()
 ```
 
-Stream's encoding
+**Returns**:
 
-__Returns__
-
-`str`: encoding
+- `str?` - file hashing
 
 <a name="frictionless.table.Table.encoding"></a>
 #### <big>encoding</big>
@@ -598,11 +579,9 @@ __Returns__
  | encoding()
 ```
 
-Stream's encoding
+**Returns**:
 
-__Returns__
-
-`str`: encoding
+- `str?` - file encoding
 
 <a name="frictionless.table.Table.compression"></a>
 #### <big>compression</big>
@@ -612,11 +591,9 @@ __Returns__
  | compression()
 ```
 
-Stream's compression ("no" if no compression)
+**Returns**:
 
-__Returns__
-
-`str`: compression
+- `str?` - file compression
 
 <a name="frictionless.table.Table.compression_path"></a>
 #### <big>compression\_path</big>
@@ -626,11 +603,9 @@ __Returns__
  | compression_path()
 ```
 
-Stream's compression path
+**Returns**:
 
-__Returns__
-
-`str`: compression
+- `str?` - file compression path
 
 <a name="frictionless.table.Table.control"></a>
 #### <big>control</big>
@@ -640,25 +615,9 @@ __Returns__
  | control()
 ```
 
-Control (if available)
+**Returns**:
 
-__Returns__
-
-`dict/None`: dialect
-
-<a name="frictionless.table.Table.dialect"></a>
-#### <big>dialect</big>
-
-```python
- | @property
- | dialect()
-```
-
-Dialect
-
-__Returns__
-
-`dict/None`: dialect
+- `Control?` - file control
 
 <a name="frictionless.table.Table.query"></a>
 #### <big>query</big>
@@ -668,11 +627,21 @@ __Returns__
  | query()
 ```
 
-Query
+**Returns**:
 
-__Returns__
+- `Query?` - table query
 
-`dict/None`: query
+<a name="frictionless.table.Table.dialect"></a>
+#### <big>dialect</big>
+
+```python
+ | @property
+ | dialect()
+```
+
+**Returns**:
+
+- `Dialect?` - table dialect
 
 <a name="frictionless.table.Table.schema"></a>
 #### <big>schema</big>
@@ -682,11 +651,9 @@ __Returns__
  | schema()
 ```
 
-Schema
+**Returns**:
 
-__Returns__
-
-`str[]/None`: schema
+- `Schema?` - table schema
 
 <a name="frictionless.table.Table.headers"></a>
 #### <big>headers</big>
@@ -696,11 +663,9 @@ __Returns__
  | headers()
 ```
 
-Headers
+**Returns**:
 
-__Returns__
-
-`str[]/None`: headers if available
+- `str[]?` - table headers
 
 <a name="frictionless.table.Table.sample"></a>
 #### <big>sample</big>
@@ -710,42 +675,14 @@ __Returns__
  | sample()
 ```
 
-Returns the stream's rows used as sample.
+Tables's rows used as sample.
 
 These sample rows are used internally to infer characteristics of the
-source file (e.g. encoding, headers, ...).
+source file (e.g. schema, ...).
 
-__Returns__
+**Returns**:
 
-`list[]`: sample
-
-<a name="frictionless.table.Table.data_stream"></a>
-#### <big>data\_stream</big>
-
-```python
- | @property
- | data_stream()
-```
-
-Data stream
-
-__Returns__
-
-`str[]/None`: data_stream
-
-<a name="frictionless.table.Table.row_stream"></a>
-#### <big>row\_stream</big>
-
-```python
- | @property
- | row_stream()
-```
-
-Row stream
-
-__Returns__
-
-`str[]/None`: row_stream
+- `list[]?` - table sample
 
 <a name="frictionless.table.Table.stats"></a>
 #### <big>stats</big>
@@ -755,11 +692,44 @@ __Returns__
  | stats()
 ```
 
-Returns stats
+Table stats
 
-__Returns__
+The stats object has:
+- hash: str - hashing sum
+- bytes: int - number of bytes
+- rows: int - number of rows
 
-`int/None`: BYTE count
+**Returns**:
+
+- `dict?` - table stats
+
+<a name="frictionless.table.Table.data_stream"></a>
+#### <big>data\_stream</big>
+
+```python
+ | @property
+ | data_stream()
+```
+
+Data stream in form of a generator of data arrays
+
+**Yields**:
+
+- `any[][]?` - data stream
+
+<a name="frictionless.table.Table.row_stream"></a>
+#### <big>row\_stream</big>
+
+```python
+ | @property
+ | row_stream()
+```
+
+Row stream in form of a generator of Row objects
+
+**Yields**:
+
+- `Row[][]?` - row stream
 
 <a name="frictionless.table.Table.open"></a>
 #### <big>open</big>
@@ -768,10 +738,11 @@ __Returns__
  | open()
 ```
 
-Opens the stream for reading.
+Open the table as "io.open" does
 
-## Raises:
-TabulatorException: if an error
+**Raises**:
+
+- `FrictionlessException` - any exception that occurs
 
 <a name="frictionless.table.Table.close"></a>
 #### <big>close</big>
@@ -780,7 +751,61 @@ TabulatorException: if an error
  | close()
 ```
 
-Closes the stream.
+Close the table as "filelike.close" does
+
+<a name="frictionless.table.Table.closed"></a>
+#### <big>closed</big>
+
+```python
+ | @property
+ | closed()
+```
+
+Whether the table is closed
+
+**Returns**:
+
+- `bool` - if closed
+
+<a name="frictionless.table.Table.read_data"></a>
+#### <big>read\_data</big>
+
+```python
+ | read_data()
+```
+
+Read data stream into memory
+
+**Returns**:
+
+- `any[][]` - table data
+
+<a name="frictionless.table.Table.read_rows"></a>
+#### <big>read\_rows</big>
+
+```python
+ | read_rows()
+```
+
+Read row stream into memory
+
+**Returns**:
+
+- `Row[][]` - table rows
+
+<a name="frictionless.table.Table.write"></a>
+#### <big>write</big>
+
+```python
+ | write(target, *, scheme=None, format=None, hashing=None, encoding=None, compression=None, compression_path=None, control=None, dialect=None)
+```
+
+Write the table to the target
+
+**Arguments**:
+
+- `target` _str_ - target path
+- `**options` - subset of Table's constructor options
 
 <a name="frictionless.row"></a>
 ## frictionless.row

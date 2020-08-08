@@ -37,6 +37,7 @@ class Pipeline(Metadata):
         name? (str): pipeline name
         type? (str): pipeline type
         steps? (dict[]): pipeline steps
+
     """
 
     metadata_Error = errors.PipelineError

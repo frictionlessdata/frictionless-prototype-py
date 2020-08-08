@@ -16,107 +16,97 @@ from . import config
 class Table:
     """Table representation
 
-    This is the main `tabulator` class. It loads a data source, and allows you
-    to stream its parsed contents.
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import Table`
 
-    # Arguments
+    This class is at heart of the whole Frictionless framwork.
+    It loads a data source, and allows you to stream its parsed contents.
 
-        source (str):
-            Path to file as ``<scheme>\\://path/to/file.<format>``.
-            If not explicitly set, the scheme (file, http, ...) and
-            format (csv, xls, ...) are inferred from the source string.
+    ```python
+    with Table("data/table.csv") as table:
+        assert table.headers == ["id", "name"]
+        assert table.read_rows() == [
+            {'id': 1, 'name': 'english'},
+            {'id': 2, 'name': '中国人'},
+        ]
+    ```
 
-        headers (Union[int, List[int], List[str]], optional):
-            Either a row
+    Parameters:
+
+        source (any): Source of the file; can be in various forms.
+            Usually, it's a string as `<scheme>://path/to/file.<format>`.
+            It also can be, for example, an array of data arrays/dictionaries.
+
+        headers? (int|int[]|[int[], str]): Either a row
             number or list of row numbers (in case of multi-line headers) to be
-            considered as headers (rows start counting at 1), or the actual
-            headers defined a list of strings. If not set, all rows will be
-            treated as containing values.
+            considered as headers (rows start counting at 1), or a pair
+            where the first element is header rows and the second the
+            header joiner.  It defaults to 1.
 
-        scheme (str, optional):
-            Scheme for loading the file (file, http, ...).
+        scheme? (str): Scheme for loading the file (file, http, ...).
             If not set, it'll be inferred from `source`.
 
-        format (str, optional):
-            File source's format (csv, xls, ...). If not
-            set, it'll be inferred from `source`. inferred
+        format? (str): File source's format (csv, xls, ...).
+            If not set, it'll be inferred from `source`.
 
-        encoding (str, optional):
-            Source encoding. If not set, it'll be inferred.
+        encoding? (str): An algorithm to hash data.
+            It defaults to 'md5'.
 
-        compression (str, optional):
-            Source file compression (zip, ...). If not set, it'll be inferred.
+        encoding? (str): Source encoding.
+            If not set, it'll be inferred from `source`.
 
-        pick_rows (List[Union[int, str, dict]], optional):
-            The same as `skip_rows` but it's for picking rows instead of skipping.
+        compression? (str): Source file compression (zip, ...).
+            If not set, it'll be inferred from `source`.
 
-        skip_rows (List[Union[int, str, dict]], optional):
-            List of row numbers, strings and regex patterns as dicts to skip.
-            If a string, it'll skip rows that their first cells begin with it e.g. '#' and '//'.
-            To skip only completely blank rows use `{'type'\\: 'preset', 'value'\\: 'blank'}`
-            To provide a regex pattern use  `{'type'\\: 'regex', 'value'\\: '^#'}`
-            For example\\: `skip_rows=[1, '# comment', {'type'\\: 'regex', 'value'\\: '^# (regex|comment)'}]`
+        compression_path? (str): A path within the compressed file.
+            It defaults to the first file in the archive.
 
-        pick_fields (List[Union[int, str]], optional):
-            When passed, ignores all columns with headers
-            that the given list DOES NOT include
+        control? (dict|Control): File control.
+            For more infromation, please check the Control documentation.
 
-        skip_fields (List[Union[int, str]], optional):
-            When passed, ignores all columns with headers
-            that the given list includes. If it contains an empty string it will skip
-            empty headers
+        query? (dict|Query): Table query.
+            For more infromation, please check the Query documentation.
 
-        sample_size (int, optional):
-            Controls the number of sample rows used to
-            infer properties from the data (headers, encoding, etc.). Set to
-            ``0`` to disable sampling, in which case nothing will be inferred
-            from the data. Defaults to ``config.DEFAULT_SAMPLE_SIZE``.
+        dialect? (dict|Dialect): Table dialect.
+            For more infromation, please check the Dialect documentation.
 
-        allow_html (bool, optional):
-            Allow the file source to be an HTML page.
-            If False, raises ``exceptions.FormatError`` if the loaded file is
-            an HTML page. Defaults to False.
+        schema? (dict|Schema): Table schema.
+            For more infromation, please check the Schema documentation.
 
-        multiline_headers_joiner (str, optional):
-            When passed, it's used to join multiline headers
-            as `<passed-value>.join(header1_1, header1_2)`
-            Defaults to ' ' (space).
+        sync_schema? (bool): Whether to sync the schema.
+            If it sets to `True` the provided schema will be mapped to
+            the inferred schema. It means that, for example, you can
+            provide a subset of fileds to be applied on top of the inferred
+            fields or the provided schema can have different order of fields.
 
-        multiline_headers_duplicates (bool, optional):
-            By default tabulator will exclude a cell of a miltilne header from joining
-            if it's exactly the same as the previous seen value in this field.
-            Enabling this option will force duplicates inclusion
-            Defaults to False.
+        patch_schema? (dict): A dictionary to be used as an inferred schema patch.
+            The form of this dictionary should follow the Schema descriptor form
+            except for the `fields` property which should be a mapping with the
+            key named after a field name and the values being a field patch.
+            For more information, please check "Extracting Data" guide.
 
-        hashing_algorithm (func, optional):
-            It supports: md5, sha1, sha256, sha512
-            Defaults to sha256
+        infer_type? (str): Enforce all the inferred types to be this type.
+            For more information, please check "Describing  Data" guide.
 
-        force_strings (bool, optional):
-            When True, casts all data to strings.
-            Defaults to False.
+        infer_names? (str[]): Enforce all the inferred fields to have provided names.
+            For more information, please check "Describing  Data" guide.
 
-        post_parse (List[function], optional):
-            List of generator functions that
-            receives a list of rows and headers, processes them, and yields
-            them (or not). Useful to pre-process the data. Defaults to None.
+        infer_volume? (int): The amount of rows to be extracted as a samle.
+            For more information, please check "Describing  Data" guide.
+            It defaults to 100
 
-        custom_loaders (dict, optional):
-            Dictionary with keys as scheme names,
-            and values as their respective ``Loader`` class implementations.
-            Defaults to None.
+        infer_confidence? (float): A number from 0 to 1 setting the infer confidence.
+            If  1 the data is guaranteed to be valid against the inferred schema.
+            For more information, please check "Describing  Data" guide.
+            It defaults to 0.9
 
-        custom_parsers (dict, optional):
-            Dictionary with keys as format names,
-            and values as their respective ``Parser`` class implementations.
-            Defaults to None.
+        infer_missing_values? (str[]): String to be considered as missing values.
+            For more information, please check "Describing  Data" guide.
+            It defaults to `['']`
 
-        custom_loaders (dict, optional):
-            Dictionary with keys as writer format
-            names, and values as their respective ``Writer`` class
-            implementations. Defaults to None.
-
-        **options (Any, optional): Extra options passed to the loaders and parsers.
+        lookup? (dict): The lookup is a special object providing relational information.
+            For more information, please check "Extracting  Data" guide.
 
     """
 
@@ -217,185 +207,161 @@ class Table:
 
     @property
     def path(self):
-        """Path
-
-        # Returns
-            any: stream path
-
+        """
+        Returns:
+            str: file path
         """
         return self.__file.path
 
     @property
     def source(self):
-        """Source
-
-        # Returns
-            any: stream source
-
+        """
+        Returns:
+            any: file source
         """
         return self.__file.source
 
     @property
     def scheme(self):
-        """Path's scheme
-
-        # Returns
-            str: scheme
-
+        """
+        Returns:
+            str?: file scheme
         """
         return self.__file.scheme
 
     @property
     def format(self):
-        """Path's format
-
-        # Returns
-            str: format
-
+        """
+        Returns:
+            str?: file format
         """
         return self.__file.format
 
     @property
     def hashing(self):
-        """Stream's encoding
-
-        # Returns
-            str: encoding
-
+        """
+        Returns:
+            str?: file hashing
         """
         return self.__file.hashing
 
     @property
     def encoding(self):
-        """Stream's encoding
-
-        # Returns
-            str: encoding
-
+        """
+        Returns:
+            str?: file encoding
         """
         return self.__file.encoding
 
     @property
     def compression(self):
-        """Stream's compression ("no" if no compression)
-
-        # Returns
-            str: compression
-
+        """
+        Returns:
+            str?: file compression
         """
         return self.__file.compression
 
     @property
     def compression_path(self):
-        """Stream's compression path
-
-        # Returns
-            str: compression
-
+        """
+        Returns:
+            str?: file compression path
         """
         return self.__file.compression_path
 
     @property
     def control(self):
-        """Control (if available)
-
-        # Returns
-            dict/None: dialect
-
+        """
+        Returns:
+            Control?: file control
         """
         return self.__file.control
 
     @property
-    def dialect(self):
-        """Dialect
-
-        # Returns
-            dict/None: dialect
-
-        """
-        return self.__file.dialect
-
-    @property
     def query(self):
-        """Query
-
-        # Returns
-            dict/None: query
-
+        """
+        Returns:
+            Query?: table query
         """
         return self.__file.query
 
     @property
+    def dialect(self):
+        """
+        Returns:
+            Dialect?: table dialect
+        """
+        return self.__file.dialect
+
+    @property
     def schema(self):
-        """Schema
-
-        # Returns
-            str[]/None: schema
-
+        """
+        Returns:
+            Schema?: table schema
         """
         return self.__schema
 
     @property
     def headers(self):
-        """Headers
-
-        # Returns
-            str[]/None: headers if available
-
+        """
+        Returns:
+            str[]?: table headers
         """
         return self.__headers
 
     @property
     def sample(self):
-        """Returns the stream's rows used as sample.
+        """Tables's rows used as sample.
 
         These sample rows are used internally to infer characteristics of the
-        source file (e.g. encoding, headers, ...).
+        source file (e.g. schema, ...).
 
-        # Returns
-            list[]: sample
+        Returns:
+            list[]?: table sample
 
         """
         return self.__sample
 
     @property
+    def stats(self):
+        """Table stats
+
+        The stats object has:
+            - hash: str - hashing sum
+            - bytes: int - number of bytes
+            - rows: int - number of rows
+
+        Returns:
+            dict?: table stats
+
+        """
+        return self.__file.stats
+
+    @property
     def data_stream(self):
-        """Data stream
+        """Data stream in form of a generator of data arrays
 
-        # Returns
-            str[]/None: data_stream
-
+        Yields:
+            any[][]?: data stream
         """
         return self.__data_stream
 
     @property
     def row_stream(self):
-        """Row stream
+        """Row stream in form of a generator of Row objects
 
-        # Returns
-            str[]/None: row_stream
-
+        Yields:
+            Row[][]?: row stream
         """
         return self.__row_stream
-
-    @property
-    def stats(self):
-        """Returns stats
-
-        # Returns
-            int/None: BYTE count
-
-        """
-        return self.__file.stats
 
     # Open/Close
 
     def open(self):
-        """Opens the stream for reading.
+        """Open the table as "io.open" does
 
-        # Raises:
-            TabulatorException: if an error
-
+        Raises:
+            FrictionlessException: any exception that occurs
         """
         self.close()
         if self.__file.query.metadata_errors:
@@ -423,7 +389,7 @@ class Table:
             raise
 
     def close(self):
-        """Closes the stream.
+        """Close the table as "filelike.close" does
         """
         if self.__parser:
             self.__parser.close()
@@ -431,11 +397,21 @@ class Table:
 
     @property
     def closed(self):
+        """Whether the table is closed
+
+        Returns:
+            bool: if closed
+        """
         return self.__parser is None
 
     # Read
 
     def read_data(self):
+        """Read data stream into memory
+
+        Returns:
+            any[][]: table data
+        """
         self.__read_data_stream_raise_closed()
         return list(self.__data_stream)
 
@@ -673,6 +649,11 @@ class Table:
             raise exceptions.FrictionlessException(errors.Error(note=note))
 
     def read_rows(self):
+        """Read row stream into memory
+
+        Returns:
+            Row[][]: table rows
+        """
         self.__read_row_stream_raise_closed()
         return list(self.__row_stream)
 
@@ -777,6 +758,12 @@ class Table:
         control=None,
         dialect=None,
     ):
+        """Write the table to the target
+
+        Parameters:
+            target (str): target path
+            **options: subset of Table's constructor options
+        """
 
         # Create file
         file = File(

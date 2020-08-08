@@ -37,13 +37,14 @@ class File(Metadata):
         compression? (str): file compression
         compression_path? (str): file compression path
         control? (dict): file control
-        dialect? (dict): file dialect
+        dialect? (dict): table dialect
         query? (dict): table query
         newline? (str): python newline e.g. '\n',
         stats? ({hash: str, bytes: int, rows: int}): stats object
 
     Raises:
         FrictionlessException: if there is a metadata validation error
+
     """
 
     metadata_strict = True
@@ -214,7 +215,7 @@ class File(Metadata):
     def dialect(self):
         """
         Returns:
-            Dialect?: file dialect
+            Dialect?: table dialect
         """
         dialect = self.get("dialect")
         if dialect is None:
