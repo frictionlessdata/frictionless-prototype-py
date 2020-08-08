@@ -13,7 +13,7 @@ Here is a list of available hooks that you can implement in your plugin:
 - `create_server`
 
 To create a plugin you need:
-- create a module called `frictionless-<name>` available in PYTHONPATH
+- create a module called `frictionless_<name>` available in PYTHONPATH
 - subclass the Plugin class and override one of the methods above
 
 Please consult with "API Reference" for in-detail infromation about the Plugin interface and how these methods can be implemented.
