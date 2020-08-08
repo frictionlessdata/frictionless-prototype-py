@@ -50,7 +50,7 @@ with File('data/text.txt') as file:
 - `FrictionlessException` - if there is a metadata validation error
 
 <a name="frictionless.file.File.path"></a>
-#### path
+#### <big>path</big>
 
 ```python
  | @property
@@ -62,7 +62,7 @@ with File('data/text.txt') as file:
 - `str` - file path
 
 <a name="frictionless.file.File.source"></a>
-#### source
+#### <big>source</big>
 
 ```python
  | @Metadata.property
@@ -74,7 +74,7 @@ with File('data/text.txt') as file:
 - `any` - file source
 
 <a name="frictionless.file.File.scheme"></a>
-#### scheme
+#### <big>scheme</big>
 
 ```python
  | @Metadata.property
@@ -86,7 +86,7 @@ with File('data/text.txt') as file:
 - `str?` - file scheme
 
 <a name="frictionless.file.File.format"></a>
-#### format
+#### <big>format</big>
 
 ```python
  | @Metadata.property
@@ -98,7 +98,7 @@ with File('data/text.txt') as file:
 - `str?` - file format
 
 <a name="frictionless.file.File.hashing"></a>
-#### hashing
+#### <big>hashing</big>
 
 ```python
  | @Metadata.property
@@ -110,7 +110,7 @@ with File('data/text.txt') as file:
 - `str?` - file hashing
 
 <a name="frictionless.file.File.encoding"></a>
-#### encoding
+#### <big>encoding</big>
 
 ```python
  | @Metadata.property
@@ -122,7 +122,7 @@ with File('data/text.txt') as file:
 - `str?` - file encoding
 
 <a name="frictionless.file.File.compression"></a>
-#### compression
+#### <big>compression</big>
 
 ```python
  | @Metadata.property
@@ -134,7 +134,7 @@ with File('data/text.txt') as file:
 - `str?` - file compression
 
 <a name="frictionless.file.File.compression_path"></a>
-#### compression\_path
+#### <big>compression\_path</big>
 
 ```python
  | @Metadata.property
@@ -146,7 +146,7 @@ with File('data/text.txt') as file:
 - `str?` - file compression path
 
 <a name="frictionless.file.File.control"></a>
-#### control
+#### <big>control</big>
 
 ```python
  | @Metadata.property
@@ -158,7 +158,7 @@ with File('data/text.txt') as file:
 - `Control?` - file control
 
 <a name="frictionless.file.File.dialect"></a>
-#### dialect
+#### <big>dialect</big>
 
 ```python
  | @Metadata.property
@@ -170,7 +170,7 @@ with File('data/text.txt') as file:
 - `Dialect?` - file dialect
 
 <a name="frictionless.file.File.query"></a>
-#### query
+#### <big>query</big>
 
 ```python
  | @Metadata.property
@@ -182,7 +182,7 @@ with File('data/text.txt') as file:
 - `Query?` - table query
 
 <a name="frictionless.file.File.newline"></a>
-#### newline
+#### <big>newline</big>
 
 ```python
  | @Metadata.property
@@ -194,7 +194,7 @@ with File('data/text.txt') as file:
 - `str?` - file newline
 
 <a name="frictionless.file.File.stats"></a>
-#### stats
+#### <big>stats</big>
 
 ```python
  | @Metadata.property
@@ -206,7 +206,7 @@ with File('data/text.txt') as file:
 - `dict` - file stats
 
 <a name="frictionless.file.File.byte_stream"></a>
-#### byte\_stream
+#### <big>byte\_stream</big>
 
 ```python
  | @Metadata.property(cache=False)
@@ -222,7 +222,7 @@ The stream is available after opening the file
 - `io.ByteStream` - file byte stream
 
 <a name="frictionless.file.File.text_stream"></a>
-#### text\_stream
+#### <big>text\_stream</big>
 
 ```python
  | @Metadata.property(cache=False)
@@ -238,7 +238,7 @@ The stream is available after opening the file
 - `io.TextStream` - file text stream
 
 <a name="frictionless.file.File.expand"></a>
-#### expand
+#### <big>expand</big>
 
 ```python
  | expand()
@@ -247,7 +247,7 @@ The stream is available after opening the file
 Expand metadata
 
 <a name="frictionless.file.File.open"></a>
-#### open
+#### <big>open</big>
 
 ```python
  | open()
@@ -256,7 +256,7 @@ Expand metadata
 Open the file as "io.open" does
 
 <a name="frictionless.file.File.close"></a>
-#### close
+#### <big>close</big>
 
 ```python
  | close()
@@ -265,7 +265,7 @@ Open the file as "io.open" does
 Open the file as "filelike.close" does
 
 <a name="frictionless.file.File.closed"></a>
-#### closed
+#### <big>closed</big>
 
 ```python
  | @property
@@ -279,7 +279,7 @@ Whether the file is closed
 - `bool` - if closed
 
 <a name="frictionless.file.File.read_bytes"></a>
-#### read\_bytes
+#### <big>read\_bytes</big>
 
 ```python
  | read_bytes()
@@ -292,7 +292,7 @@ Read bytes from the file
 - `bytes` - file bytes
 
 <a name="frictionless.file.File.read_text"></a>
-#### read\_text
+#### <big>read\_text</big>
 
 ```python
  | read_text()
@@ -305,7 +305,7 @@ Read bytes from the file
 - `str` - file text
 
 <a name="frictionless.file.File.write"></a>
-#### write
+#### <big>write</big>
 
 ```python
  | write(target)
@@ -328,6 +328,82 @@ class Pipeline(Metadata)
 ```
 
 Pipeline representation
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import Pipeline`
+
+For now, only the `package` type is supported where `steps` should
+conform to the `dataflows`s processors. The File class inherits
+from the Metadata class all the metadata's functionality
+
+
+
+```python
+pipeline = Pipeline(
+    {
+        "type": "package",
+        "steps": [
+            {"type": "load", "spec": {"loadSource": "data/table.csv"}},
+            {"type": "set_type", "spec": {"name": "id", "type": "string"}},
+            {"type": "dump_to_path", "spec": {"outPath": tmpdir}},
+        ],
+    }
+)
+pipeline.run()
+```
+
+**Arguments**:
+
+- `descriptor` _str|dict_ - pipeline descriptor
+- `name?` _str_ - pipeline name
+- `type?` _str_ - pipeline type
+- `steps?` _dict[]_ - pipeline steps
+
+<a name="frictionless.pipeline.Pipeline.name"></a>
+#### <big>name</big>
+
+```python
+ | @Metadata.property
+ | name()
+```
+
+**Returns**:
+
+- `str?` - pipeline name
+
+<a name="frictionless.pipeline.Pipeline.type"></a>
+#### <big>type</big>
+
+```python
+ | @Metadata.property
+ | type()
+```
+
+**Returns**:
+
+- `str?` - pipeline type
+
+<a name="frictionless.pipeline.Pipeline.steps"></a>
+#### <big>steps</big>
+
+```python
+ | @Metadata.property
+ | steps()
+```
+
+**Returns**:
+
+- `dict[]?` - pipeline steps
+
+<a name="frictionless.pipeline.Pipeline.run"></a>
+#### <big>run</big>
+
+```python
+ | run()
+```
+
+Run the pipeline
 
 <a name="frictionless.table"></a>
 ## frictionless.table
@@ -445,7 +521,7 @@ __Arguments__
 - __**options (Any, optional)__: Extra options passed to the loaders and parsers.
 
 <a name="frictionless.table.Table.path"></a>
-#### path
+#### <big>path</big>
 
 ```python
  | @property
@@ -459,7 +535,7 @@ __Returns__
 `any`: stream path
 
 <a name="frictionless.table.Table.source"></a>
-#### source
+#### <big>source</big>
 
 ```python
  | @property
@@ -473,7 +549,7 @@ __Returns__
 `any`: stream source
 
 <a name="frictionless.table.Table.scheme"></a>
-#### scheme
+#### <big>scheme</big>
 
 ```python
  | @property
@@ -487,7 +563,7 @@ __Returns__
 `str`: scheme
 
 <a name="frictionless.table.Table.format"></a>
-#### format
+#### <big>format</big>
 
 ```python
  | @property
@@ -501,7 +577,7 @@ __Returns__
 `str`: format
 
 <a name="frictionless.table.Table.hashing"></a>
-#### hashing
+#### <big>hashing</big>
 
 ```python
  | @property
@@ -515,7 +591,7 @@ __Returns__
 `str`: encoding
 
 <a name="frictionless.table.Table.encoding"></a>
-#### encoding
+#### <big>encoding</big>
 
 ```python
  | @property
@@ -529,7 +605,7 @@ __Returns__
 `str`: encoding
 
 <a name="frictionless.table.Table.compression"></a>
-#### compression
+#### <big>compression</big>
 
 ```python
  | @property
@@ -543,7 +619,7 @@ __Returns__
 `str`: compression
 
 <a name="frictionless.table.Table.compression_path"></a>
-#### compression\_path
+#### <big>compression\_path</big>
 
 ```python
  | @property
@@ -557,7 +633,7 @@ __Returns__
 `str`: compression
 
 <a name="frictionless.table.Table.control"></a>
-#### control
+#### <big>control</big>
 
 ```python
  | @property
@@ -571,7 +647,7 @@ __Returns__
 `dict/None`: dialect
 
 <a name="frictionless.table.Table.dialect"></a>
-#### dialect
+#### <big>dialect</big>
 
 ```python
  | @property
@@ -585,7 +661,7 @@ __Returns__
 `dict/None`: dialect
 
 <a name="frictionless.table.Table.query"></a>
-#### query
+#### <big>query</big>
 
 ```python
  | @property
@@ -599,7 +675,7 @@ __Returns__
 `dict/None`: query
 
 <a name="frictionless.table.Table.schema"></a>
-#### schema
+#### <big>schema</big>
 
 ```python
  | @property
@@ -613,7 +689,7 @@ __Returns__
 `str[]/None`: schema
 
 <a name="frictionless.table.Table.headers"></a>
-#### headers
+#### <big>headers</big>
 
 ```python
  | @property
@@ -627,7 +703,7 @@ __Returns__
 `str[]/None`: headers if available
 
 <a name="frictionless.table.Table.sample"></a>
-#### sample
+#### <big>sample</big>
 
 ```python
  | @property
@@ -644,7 +720,7 @@ __Returns__
 `list[]`: sample
 
 <a name="frictionless.table.Table.data_stream"></a>
-#### data\_stream
+#### <big>data\_stream</big>
 
 ```python
  | @property
@@ -658,7 +734,7 @@ __Returns__
 `str[]/None`: data_stream
 
 <a name="frictionless.table.Table.row_stream"></a>
-#### row\_stream
+#### <big>row\_stream</big>
 
 ```python
  | @property
@@ -672,7 +748,7 @@ __Returns__
 `str[]/None`: row_stream
 
 <a name="frictionless.table.Table.stats"></a>
-#### stats
+#### <big>stats</big>
 
 ```python
  | @property
@@ -686,7 +762,7 @@ __Returns__
 `int/None`: BYTE count
 
 <a name="frictionless.table.Table.open"></a>
-#### open
+#### <big>open</big>
 
 ```python
  | open()
@@ -698,7 +774,7 @@ Opens the stream for reading.
 TabulatorException: if an error
 
 <a name="frictionless.table.Table.close"></a>
-#### close
+#### <big>close</big>
 
 ```python
  | close()
@@ -765,7 +841,7 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.package.Package.resources"></a>
-#### resources
+#### <big>resources</big>
 
 ```python
  | @Metadata.property
@@ -779,7 +855,7 @@ __Returns__
 `Resource[]`: an array of resource instances
 
 <a name="frictionless.package.Package.resource_names"></a>
-#### resource\_names
+#### <big>resource\_names</big>
 
 ```python
  | @Metadata.property(write=False)
@@ -793,7 +869,7 @@ __Returns__
 `str[]`: an array of resource names
 
 <a name="frictionless.package.Package.add_resource"></a>
-#### add\_resource
+#### <big>add\_resource</big>
 
 ```python
  | add_resource(descriptor)
@@ -812,7 +888,7 @@ __Returns__
 `Resource/None`: added `Resource` instance or `None` if not added
 
 <a name="frictionless.package.Package.get_resource"></a>
-#### get\_resource
+#### <big>get\_resource</big>
 
 ```python
  | get_resource(name)
@@ -829,7 +905,7 @@ __Returns__
 `Resource/None`: `Resource` instance or `None` if not found
 
 <a name="frictionless.package.Package.has_resource"></a>
-#### has\_resource
+#### <big>has\_resource</big>
 
 ```python
  | has_resource(name)
@@ -846,7 +922,7 @@ __Returns__
 `bool`: whether there is the resource
 
 <a name="frictionless.package.Package.remove_resource"></a>
-#### remove\_resource
+#### <big>remove\_resource</big>
 
 ```python
  | remove_resource(name)
@@ -865,7 +941,7 @@ __Returns__
 `Resource/None`: removed `Resource` instances or `None` if not found
 
 <a name="frictionless.package.Package.expand"></a>
-#### expand
+#### <big>expand</big>
 
 ```python
  | expand()
@@ -959,7 +1035,7 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.field.Field.read_cell"></a>
-#### read\_cell
+#### <big>read\_cell</big>
 
 ```python
  | read_cell(cell)
@@ -976,7 +1052,7 @@ __Returns__
 `(any, OrderedDict)`: processed cell and dict of notes
 
 <a name="frictionless.field.Field.read_cell_cast"></a>
-#### read\_cell\_cast
+#### <big>read\_cell\_cast</big>
 
 ```python
  | read_cell_cast(cell)
@@ -993,7 +1069,7 @@ __Returns__
 `any/None`: processed cell or None if an error
 
 <a name="frictionless.field.Field.read_cell_checks"></a>
-#### read\_cell\_checks
+#### <big>read\_cell\_checks</big>
 
 ```python
  | @Metadata.property(write=False)
@@ -1007,7 +1083,7 @@ __Returns__
 `OrderedDict`: dictionlary of check function by a constraint name
 
 <a name="frictionless.field.Field.write_cell"></a>
-#### write\_cell
+#### <big>write\_cell</big>
 
 ```python
  | write_cell(cell)
@@ -1024,7 +1100,7 @@ __Returns__
 `(any, OrderedDict)`: processed cell and dict of notes
 
 <a name="frictionless.field.Field.write_cell_cast"></a>
-#### write\_cell\_cast
+#### <big>write\_cell\_cast</big>
 
 ```python
  | write_cell_cast(cell)
@@ -1266,7 +1342,7 @@ __Raises__
 ## frictionless.parsers.excel
 
 <a name="frictionless.parsers.excel.convert_excel_date_format_string"></a>
-#### convert\_excel\_date\_format\_string
+#### <big>convert\_excel\_date\_format\_string</big>
 
 ```python
 convert_excel_date_format_string(excel_date)
@@ -1276,7 +1352,7 @@ Created using documentation here:
 https://support.office.com/en-us/article/review-guidelines-for-customizing-a-number-format-c0a1d1fa-d3f4-4018-96b7-9c9354dd99f5
 
 <a name="frictionless.parsers.excel.convert_excel_number_format_string"></a>
-#### convert\_excel\_number\_format\_string
+#### <big>convert\_excel\_number\_format\_string</big>
 
 ```python
 convert_excel_number_format_string(excel_number, value)
@@ -1444,7 +1520,7 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.schema.Schema.fields"></a>
-#### fields
+#### <big>fields</big>
 
 ```python
  | @Metadata.property
@@ -1458,7 +1534,7 @@ __Returns__
 `Field[]`: an array of field instances
 
 <a name="frictionless.schema.Schema.field_names"></a>
-#### field\_names
+#### <big>field\_names</big>
 
 ```python
  | @Metadata.property(write=False)
@@ -1472,7 +1548,7 @@ __Returns__
 `str[]`: an array of field names
 
 <a name="frictionless.schema.Schema.add_field"></a>
-#### add\_field
+#### <big>add\_field</big>
 
 ```python
  | add_field(descriptor)
@@ -1491,7 +1567,7 @@ __Returns__
 `Field/None`: added `Field` instance or `None` if not added
 
 <a name="frictionless.schema.Schema.get_field"></a>
-#### get\_field
+#### <big>get\_field</big>
 
 ```python
  | get_field(name)
@@ -1508,7 +1584,7 @@ __Returns__
 `Field/None`: `Field` instance or `None` if not found
 
 <a name="frictionless.schema.Schema.has_field"></a>
-#### has\_field
+#### <big>has\_field</big>
 
 ```python
  | has_field(name)
@@ -1525,7 +1601,7 @@ __Returns__
 `bool`: whether there is the field
 
 <a name="frictionless.schema.Schema.remove_field"></a>
-#### remove\_field
+#### <big>remove\_field</big>
 
 ```python
  | remove_field(name)
@@ -1544,7 +1620,7 @@ __Returns__
 `Field/None`: removed `Field` instances or `None` if not found
 
 <a name="frictionless.schema.Schema.expand"></a>
-#### expand
+#### <big>expand</big>
 
 ```python
  | expand()
@@ -1555,7 +1631,7 @@ Expand the schema
 It will add default values to the schema.
 
 <a name="frictionless.schema.Schema.infer"></a>
-#### infer
+#### <big>infer</big>
 
 ```python
  | infer(sample, *, type=None, names=None, confidence=config.DEFAULT_INFER_CONFIDENCE, missing_values=config.DEFAULT_MISSING_VALUES)
@@ -1570,7 +1646,7 @@ __Arguments__
     confidence
 
 <a name="frictionless.schema.Schema.read_data"></a>
-#### read\_data
+#### <big>read\_data</big>
 
 ```python
  | read_data(cells)
@@ -1587,7 +1663,7 @@ __Returns__
 `any[]`: list of processed cells
 
 <a name="frictionless.schema.Schema.write_data"></a>
-#### write\_data
+#### <big>write\_data</big>
 
 ```python
  | write_data(cells, *, native_types=[])
@@ -1604,7 +1680,7 @@ __Returns__
 `any[]`: list of processed cells
 
 <a name="frictionless.schema.Schema.from_sample"></a>
-#### from\_sample
+#### <big>from\_sample</big>
 
 ```python
  | @staticmethod
@@ -1714,7 +1790,7 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.report.Report.flatten"></a>
-#### flatten
+#### <big>flatten</big>
 
 ```python
  | flatten(spec)
@@ -1767,7 +1843,7 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.report.ReportTable.flatten"></a>
-#### flatten
+#### <big>flatten</big>
 
 ```python
  | flatten(spec)
@@ -1969,7 +2045,7 @@ __Raises__
 - `FrictionlessException`: raise any error that occurs during the process
 
 <a name="frictionless.loader.Loader.read_byte_stream"></a>
-#### read\_byte\_stream
+#### <big>read\_byte\_stream</big>
 
 ```python
  | read_byte_stream()
@@ -1982,7 +2058,7 @@ __Returns__
 `BinaryIO`: I/O stream
 
 <a name="frictionless.loader.Loader.read_text_stream"></a>
-#### read\_text\_stream
+#### <big>read\_text\_stream</big>
 
 ```python
  | read_text_stream()
@@ -2004,7 +2080,7 @@ __Returns__
 ## frictionless.validate.table
 
 <a name="frictionless.validate.table.validate_table"></a>
-#### validate\_table
+#### <big>validate\_table</big>
 
 ```python
 @Report.from_validate
@@ -2060,7 +2136,7 @@ __Returns__
 ## frictionless.validate.package
 
 <a name="frictionless.validate.package.validate_package"></a>
-#### validate\_package
+#### <big>validate\_package</big>
 
 ```python
 @Report.from_validate
@@ -2073,7 +2149,7 @@ Validate package
 ## frictionless.validate.inquiry
 
 <a name="frictionless.validate.inquiry.validate_inquiry"></a>
-#### validate\_inquiry
+#### <big>validate\_inquiry</big>
 
 ```python
 @Report.from_validate
@@ -2086,7 +2162,7 @@ Validate inquiry
 ## frictionless.validate.schema
 
 <a name="frictionless.validate.schema.validate_schema"></a>
-#### validate\_schema
+#### <big>validate\_schema</big>
 
 ```python
 @Report.from_validate
@@ -2099,7 +2175,7 @@ Validate schema
 ## frictionless.validate.resource
 
 <a name="frictionless.validate.resource.validate_resource"></a>
-#### validate\_resource
+#### <big>validate\_resource</big>
 
 ```python
 @Report.from_validate

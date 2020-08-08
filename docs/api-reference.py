@@ -12,4 +12,5 @@ with open(target_md, "wt") as file:
         line = re.sub(r"^# ", "## ", line)
         line = re.sub(r"^## frictionless$", "# API Reference", line)
         line = re.sub(r" Objects$", "", line)
+        line = re.sub(r"^#### (.*)$", "#### <big>\\1</big>", line)
         file.write(line)

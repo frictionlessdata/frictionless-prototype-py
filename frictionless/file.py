@@ -303,7 +303,7 @@ class File(Metadata):
             raise
 
     def close(self):
-        """Open the file as "filelike.close" does
+        """Close the file as "filelike.close" does
         """
         if self.__loader:
             self.__loader.close()
