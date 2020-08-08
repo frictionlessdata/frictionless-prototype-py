@@ -35,8 +35,9 @@ There are not the only two pros of having metadata but they are two the most imp
 
 The `describe` functions are the main tool for data describing. In many cases, this high-level interface is enough for data exploration and other needs.
 
-The frictionless framework provides 3 different `describe` functions in Python:
+The frictionless framework provides 4 different `describe` functions in Python:
 - `describe`: it will detect the source type and return Data Resource or Data Package metadata
+- `describe_schema`: it will always return Table Schema metadata
 - `describe_resoure`: it will always return Data Resource metadata
 - `describe_package`: it will always return Data Package metadata
 
@@ -44,6 +45,7 @@ In command-line, there is only 1 command but there is a flag to adjust the behav
 
 ```bash
 $ frictionless describe
+$ frictionless describe --source-type schema
 $ frictionless describe --source-type resource
 $ frictionless describe --source-type package
 ```
@@ -118,10 +120,9 @@ Let's get Table Schema using Frictionless framework:
 
 
 ```
-from frictionless import describe
+from frictionless import describe_schema
 
-resource = describe("country-1.csv")
-schema = resource.schema
+schema = describe_schema("country-1.csv")
 schema.to_yaml("country.schema-simple.yaml")
 ```
 
@@ -149,10 +150,9 @@ As we can see, we were able to get infer basic metadata of our data file but des
 
 
 ```
-from frictionless import describe
+from frictionless import describe_schema
 
-resource = describe("country-1.csv")
-schema = resource.schema
+schema = describe_schema("country-1.csv")
 schema.get_field("id").title = "Identifier"
 schema.get_field("neighbor_id").title = "Identifier of the neighbor"
 schema.get_field("name").title = "Name of the country"
@@ -163,7 +163,6 @@ schema.foreign_keys.append(
     {"fields": ["neighbor_id"], "reference": {"resource": "", "fields": ["id"]}}
 )
 schema.to_yaml("country.schema.yaml")
-
 ```
 
 
@@ -269,9 +268,9 @@ OK, that's clearly wrong. As we have seen in the "Introductory Guide" Frictionle
 
 
 ```
-from frictionless import describe, Schema
+from frictionless import describe_resource, Schema
 
-resource = describe("country-2.csv")
+resource = describe_resource("country-2.csv")
 resource.dialect.header_rows = [2]
 resource.dialect.delimiter = ";"
 resource.schema = Schema("country.schema.yaml")
@@ -457,9 +456,9 @@ Following the already familiar to the guide's reader pattern, we add some additi
 
 
 ```
-from frictionless import describe
+from frictionless import describe_package
 
-package = describe("*-3.csv")
+package = describe_package("*-3.csv")
 package.title = "Countries and their capitals"
 package.description = "The data was collected as a research project"
 package.get_resource("country-3").name = "country"

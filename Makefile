@@ -1,4 +1,4 @@
-.PHONY: all docs install format lint release test version
+.PHONY: all docs install format lint release test
 
 
 PACKAGE := $(shell grep '^PACKAGE =' setup.py | cut -d '"' -f2)
@@ -37,6 +37,3 @@ release:
 test:
 	make lint
 	pytest --cov ${PACKAGE} --cov-report term-missing --cov-fail-under 50
-
-version:
-	@echo $(VERSION)
