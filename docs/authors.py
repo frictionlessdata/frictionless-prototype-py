@@ -1,4 +1,4 @@
 from frictionless import helpers
 
 
-helpers.copy_file("AUTHORS.md", ("docs", "build", "authors", "README.md"))
+helpers.copy_file("AUTHORS.md", ("docs", "target", "authors", "README.md"))

@@ -6,8 +6,8 @@ from frictionless import errors
 # General
 
 
-source = os.path.join("docs", "assets", "errors-reference.md")
-target_dir = os.path.join("docs", "build", "errors-reference")
+source = os.path.join("docs", "source", "errors-reference.md")
+target_dir = os.path.join("docs", "target", "errors-reference")
 target = os.path.join(target_dir, "README.md")
 with open(source) as file:
     template = Template(file.read())

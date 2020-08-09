@@ -10,15 +10,15 @@ from urllib.parse import urlparse
 
 def convert_markdown(name):
     source = os.path.join("docs", f"{name}.md")
-    target = os.path.join("docs", "build", name)
-    target_md = os.path.join("docs", "build", name, "README.md")
+    target = os.path.join("docs", "target", name)
+    target_md = os.path.join("docs", "target", name, "README.md")
     os.makedirs(target, exist_ok=True)
     shutil.copy(source, target_md)
 
 
 def convert_notebook(name):
     source = os.path.join("docs", f"{name}.nb")
-    target = os.path.join("docs", "build", name)
+    target = os.path.join("docs", "target", name)
     target_md = os.path.join(target, "README.md")
     target_py = os.path.join(target, "README.ipynb")
     pathlib.Path(target).mkdir(parents=True, exist_ok=True)
@@ -69,5 +69,5 @@ if __name__ == "__main__":
             elif format == ".py":
                 convert_python(name)
             print(f"Converted: {fullpath}")
-    shutil.copy("README.md", os.path.join("docs", "build", "README.md"))
+    shutil.copy("README.md", os.path.join("docs", "target", "README.md"))
     print(f"Converted: README.md")
