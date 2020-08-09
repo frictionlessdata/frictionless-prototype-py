@@ -1,6 +1,12 @@
 # Extension Guide
 
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1yj_1Nk8RwMTV2QZ-0RR_cbKN6aQQ5jAb)
+
+
+
 Frictionless is built on top of a powerful plugins system which is used internally and allows to extend the framework.
+
+
 
 ## Plugin Interface
 
@@ -17,6 +23,8 @@ To create a plugin you need:
 - subclass the Plugin class and override one of the methods above
 
 Please consult with "API Reference" for in-detail infromation about the Plugin interface and how these methods can be implemented.
+
+
 
 ## Plugin Example
 

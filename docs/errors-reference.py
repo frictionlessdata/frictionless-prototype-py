@@ -13,6 +13,6 @@ with open(source) as file:
     template = Template(file.read())
     Errors = [item for item in vars(errors).values() if hasattr(item, "code")]
     document = template.render(Errors=Errors)
-os.makedirs(target_dir)
+os.makedirs(target_dir, exist_ok=True)
 with open(target, "wt") as file:
     file.write(document)
