@@ -6,23 +6,21 @@ We use Github as a code and issues hosting platform. To report a bug or propose 
 
 ## Docs Contribution
 
-We use a mixed documentation system as it's generated from:
-- Google Colab [notebooks](https://drive.google.com/drive/folders/1boOu13YdhGkPOYiKe6KBkRmkYaaBbcsH?usp=sharing)
-- markdown documents in the `docs` directory
-- source code using some scripts
+We use a mixed documentation system as the docs are generated from:
+- notebooks containing high-level guides stored in [Google Colab](https://drive.google.com/drive/folders/1boOu13YdhGkPOYiKe6KBkRmkYaaBbcsH?usp=sharing)
+- scripts using source code and markdown documents in the root
+- markdown documents stored in the `docs` directory
 
-The simplest way to contribute is leaving comments on a Google Colab document from the directory mentioned above. You don't need to setup a development environment for it and it's the fastest way. If you'd like to work with text files you can contribute to:
-- `docs` directory cotaining sources for the documentation
-- `docs/build` directory containing the built documentation
+The simplest way to contribute to the guides is leaving comments on a Google Colab document from the directory mentioned above. You don't need to setup a development environment for it and it's the fastest way. If you'd like to work with text files you can contribute to the `docs/build` directory containing the built documentation. It's OK to propose changes to generated files in the `docs/build` directory as we will move the changes to the corresponding Google Colab.
 
-It's OK to propose changes to generated files in the `docs/build` directory as we will move the changes to the corresponding Google Colab.
+To contribute to others types of documentation please check to the corresponding `docs/name.ext` file to understand the source of an article. Most of documents outside of Google Colab are stored in the root directory of the repository.
 
 ### Building Process
 
 In the `docs` directory we have 3 types of documentation sources:
-- `*.md` - markdown documents which will be just copied to the `docs/build`
 - `*.nb` - links to corresponding Google Colab guides to download and convert
-- `*.py` - scripts to generate, e.g. corresponding references
+- `*.py` - scripts to generate, e.g. corresponding references, or copy files
+- `*.md` - markdown documents which will be just copied to the `docs/build`
 
 You can run `make docs` to build documentation after you have setup a development environment as it's described in the next section.
 
