@@ -110,6 +110,15 @@ def move_file(source, target):
     shutil.move(source, target)
 
 
+def copy_file(source, target):
+    if isinstance(source, (tuple, list)):
+        source = os.path.join(*source)
+    if isinstance(target, (tuple, list)):
+        target = os.path.join(*target)
+    ensure_dir(target)
+    shutil.copy(source, target)
+
+
 def is_remote_path(path):
     return urlparse(path).scheme in config.REMOTE_SCHEMES
 
