@@ -38,7 +38,7 @@ The `describe` functions are the main tool for data describing. In many cases, t
 The frictionless framework provides 4 different `describe` functions in Python:
 - `describe`: it will detect the source type and return Data Resource or Data Package metadata
 - `describe_schema`: it will always return Table Schema metadata
-- `describe_resoure`: it will always return Data Resource metadata
+- `describe_resource`: it will always return Data Resource metadata
 - `describe_package`: it will always return Data Package metadata
 
 In command-line, there is only 1 command but there is a flag to adjust the behavior:
@@ -541,7 +541,7 @@ To continue learning about data resources please read:
 
 ## Description Options
 
-The `desribe` functions above share the only one common argument:
+The `describe` functions above share the only one common argument:
 - `expand`: whether to expand output metadata or not (see "Expanding Metadata")
 
 
@@ -682,7 +682,7 @@ pprint(resource)
     {'path': 'country-1.csv'}
 
 
-Frictionless always tries to be as explicit as possible. We didn't provide any metadta except for `type` so we got the expected result. But now, we'd like to `infer` additional metadata:
+Frictionless always tries to be as explicit as possible. We didn't provide any metadata except for `type` so we got the expected result. But now, we'd like to `infer` additional metadata:
 
 
 ```

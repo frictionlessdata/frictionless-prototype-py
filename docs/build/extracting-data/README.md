@@ -210,11 +210,11 @@ resource.to_yaml('capital.resource.yaml')
        5  Rome
 
 
-So what's happened? We set textual representation of the number "3" to be a missing value. It was done only for the presentational purpose because it's difenitely not a missing value. On the ohter hand, it demostrated how metadata can be used.
+So what's happened? We set textual representation of the number "3" to be a missing value. It was done only for the presentational purpose because it's definitely not a missing value. On the other hand, it demonstrated how metadata can be used.
 
 ### Extracting Table
 
-While the package and resource concepts contain both data and metadata, a table is solely data. Because of this fact we can provide much more options to the `extract_table` function. Most of this options are incapsulated into the resource descriptor as we saw with the `missingValues` example above. We will reproduce it:
+While the package and resource concepts contain both data and metadata, a table is solely data. Because of this fact we can provide much more options to the `extract_table` function. Most of this options are encapsulated into the resource descriptor as we saw with the `missingValues` example above. We will reproduce it:
 
 
 ```
@@ -231,7 +231,7 @@ pprint(rows)
      Row([('id', 5), ('name', 'Rome')])]
 
 
-We got in idential result but it's important to understand that on the table level we need to provide all the metadata options separately while a resource incapsulate all these metadata. Please check the `extract_table` API Referenec as it has a lot of options. We're going to discuss some of the below.
+We got an identical result but it's important to understand that on the table level we need to provide all the metadata options separately while a resource encapsulate all these metadata. Please check the `extract_table` API Reference as it has a lot of options. We're going to discuss some of the below.
 
 ## Extraction Options
 
