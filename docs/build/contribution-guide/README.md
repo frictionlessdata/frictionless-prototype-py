@@ -8,7 +8,7 @@ We use Github as a code and issues hosting platform. To report a bug or propose 
 
 We use a mixed documentation system as the docs are generated from:
 - notebooks containing high-level guides stored in [Google Colab](https://drive.google.com/drive/folders/1boOu13YdhGkPOYiKe6KBkRmkYaaBbcsH?usp=sharing)
-- scripts using source code and markdown documents in the root
+- scripts consuming source code and markdown documents
 - markdown documents stored in the `docs` directory
 
 The simplest way to contribute to the guides is leaving comments on a Google Colab document from the directory mentioned above. You don't need to setup a development environment for it and it's the fastest way. If you'd like to work with text files you can contribute to the `docs/build` directory containing the built documentation. It's OK to propose changes to generated files in the `docs/build` directory as we will move the changes to the corresponding Google Colab.
