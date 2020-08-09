@@ -7,11 +7,12 @@ from frictionless import errors
 
 
 source = os.path.join("docs", "assets", "errors-reference.md")
-target = os.path.join("docs", "build", "errors-reference")
-target_md = os.path.join(target, "README.md")
+target_dir = os.path.join("docs", "build", "errors-reference")
+target = os.path.join(target_dir, "README.md")
 with open(source) as file:
     template = Template(file.read())
     Errors = [item for item in vars(errors).values() if hasattr(item, "code")]
     document = template.render(Errors=Errors)
-with open(target_md, "wt") as file:
+os.makedirs(target_dir)
+with open(target, "wt") as file:
     file.write(document)

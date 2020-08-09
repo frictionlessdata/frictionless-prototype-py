@@ -65,6 +65,6 @@ Of course, it's possible and recommended to run underlaying commands like `pytes
 To release a new version:
 - check that you have push access to the `master` branch
 - update `frictionless/assets/VERSION` following the SemVer standard
-- add changes to `docs/changelog.md` if it's not a patch release and `make docs`
+- add changes to `CHANGELOG.md` if it's not a patch release (major or micro)
 - run `make release` which create a release commit and tag and push it to Github
 - an actual release will happen on the Travis CI platform after running the tests
