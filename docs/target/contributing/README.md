@@ -61,7 +61,7 @@ Then you can run various make commands:
 
 Of course, it's possible and recommended to run underlaying commands like `pytest` or `pylama` to speed up the development process.
 
-## Releasing to PyPi
+## Release Process
 
 To release a new version:
 - check that you have push access to the `master` branch
