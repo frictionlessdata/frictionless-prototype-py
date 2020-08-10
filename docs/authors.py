@@ -1,4 +1,4 @@
-from frictionless import helpers
+from scripts import docs
 
 
-helpers.copy_file("AUTHORS.md", ("docs", "target", "authors", "README.md"))
+docs.from_markdown(source="AUTHORS.md", target="authors")

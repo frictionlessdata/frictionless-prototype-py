@@ -1,31 +1,39 @@
 import os
 import gdown
 import shutil
-import pathlib
+import subprocess
 from urllib.parse import urlparse
+
+
+SOURCE_DIR = os.path.join("docs", "source")
+TARGET_DIR = os.path.join("docs", "target")
 
 
 # Converters
 
 
-def convert_markdown(name):
-    source = os.path.join("docs", f"{name}.md")
-    target = os.path.join("docs", "target", name)
-    target_md = os.path.join("docs", "target", name, "README.md")
-    os.makedirs(target, exist_ok=True)
+def from_markdown(source, target):
+    if isinstance(source, (tuple, list)):
+        source = os.path.join(*source)
+    target_dir = os.path.join(TARGET_DIR, target)
+    target_md = os.path.join(target_dir, "README.md")
+    os.makedirs(target_dir, exist_ok=True)
     shutil.copy(source, target_md)
 
 
-def convert_notebook(name):
-    source = os.path.join("docs", f"{name}.nb")
-    target = os.path.join("docs", "target", name)
-    target_md = os.path.join(target, "README.md")
-    target_py = os.path.join(target, "README.ipynb")
-    pathlib.Path(target).mkdir(parents=True, exist_ok=True)
-    link = open(source).read().strip()
-    url = f"https://drive.google.com/uc?id={os.path.split(urlparse(link).path)[-1]}"
+def from_notebook(source, target):
+    target_dir = os.path.join(TARGET_DIR, target)
+    target_md = os.path.join(target_dir, "README.md")
+    target_py = os.path.join(target_dir, "README.ipynb")
+    os.makedirs(target_dir, exist_ok=True)
+    url = f"https://drive.google.com/uc?id={os.path.split(urlparse(source).path)[-1]}"
     gdown.download(url, target_py, quiet=True)
-    os.system(f"python3 -m nbconvert --to markdown {target_py} --log-level 0")
+    command = f"python3 -m json.tool {target_py} > {target_py}_tmp"
+    subprocess.run(command, shell=True, check=True)
+    command = f"mv {target_py}_tmp {target_py}"
+    subprocess.run(command, shell=True, check=True)
+    command = f"python3 -m nbconvert --to markdown {target_py} --log-level 0"
+    subprocess.run(command, shell=True, check=True)
     lines = []
     opening = True
     with open(target_md) as file:
@@ -35,7 +43,7 @@ def convert_notebook(name):
             line = line.rstrip()
             if index == 1:
                 lines.append(
-                    f"\n[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)]({link})\n\n"
+                    f"\n[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)]({source})\n\n"
                 )
             if line.startswith("```"):
                 if opening:
@@ -50,24 +58,11 @@ def convert_notebook(name):
         file.write("\n".join(lines))
 
 
-def convert_python(name):
-    source = os.path.join("docs", f"{name}.py")
-    os.system(f"python3 {source}")
-
-
 # Main
 
 if __name__ == "__main__":
     for path in sorted(os.listdir("docs")):
         fullpath = os.path.join("docs", path)
         if os.path.isfile(fullpath):
-            name, format = os.path.splitext(path)
-            if format == ".md":
-                convert_markdown(name)
-            elif format == ".nb":
-                convert_notebook(name)
-            elif format == ".py":
-                convert_python(name)
-            print(f"Converted: {fullpath}")
-    shutil.copy("README.md", os.path.join("docs", "target", "README.md"))
-    print(f"Converted: README.md")
+            subprocess.run(f"python3 {fullpath}", shell=True, check=True)
+            print(f"Executed: {fullpath}")

@@ -1,4 +1,4 @@
-from frictionless import helpers
+from scripts import docs
 
 
-helpers.copy_file("CHANGELOG.md", ("docs", "target", "changelog", "README.md"))
+docs.from_markdown(source="CHANGELOG.md", target="changelog")

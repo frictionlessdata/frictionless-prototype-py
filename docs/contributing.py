@@ -1,4 +1,4 @@
-from frictionless import helpers
+from scripts import docs
 
 
-helpers.copy_file("CONTRIBUTING.md", ("docs", "target", "contributing", "README.md"))
+docs.from_markdown(source="CONTRIBUTING.md", target="contributing")
