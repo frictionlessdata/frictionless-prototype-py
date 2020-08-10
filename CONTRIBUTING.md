@@ -10,7 +10,7 @@ We use a flexible documentation system as the docs are generated from:
 - notebooks containing high-level guides stored in [Google Colab](https://drive.google.com/drive/folders/1boOu13YdhGkPOYiKe6KBkRmkYaaBbcsH?usp=sharing)
 - source code and markdown documents within the repository
 
-The simplest way to contribute to the guides is leaving comments on a Google Colab document from the directory mentioned above. If you'd like to work with text files you can contribute to the `docs/build` directory containing the built documentation. It's OK to propose changes to generated files in the `docs/build` directory as we will move the changes to the corresponding Google Colab.
+The simplest way to contribute to the guides is leaving comments on a Google Colab document from the directory mentioned above. If you'd like to work with text files you can contribute to the `docs/target` directory containing the built documentation. It's OK to propose changes to generated files in the `docs/target` directory as we will move the changes to the corresponding Google Colab.
 
 To contribute to others types of documentation please check to the corresponding `docs/name.py` file to understand the source of a document. Most of documents outside of Google Colab are stored in the root directory of the repository; other documents are generated from the source code i.e. references.
 
