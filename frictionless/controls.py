@@ -8,11 +8,11 @@ from . import config
 class Control(Metadata):
     """Control representation
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): descriptor
         detectEncoding? (func): detectEncoding
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
@@ -51,10 +51,10 @@ class Control(Metadata):
 class LocalControl(Control):
     """Local control representation
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): descriptor
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
@@ -69,14 +69,14 @@ class LocalControl(Control):
 class RemoteControl(Control):
     """Remote control representation
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): descriptor
         http_session? (any): http_session
         http_preload? (bool): http_preload
         http_timeout? (int): http_timeout
         detectEncoding? (func): detectEncoding
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
@@ -133,10 +133,10 @@ class RemoteControl(Control):
 class StreamControl(Control):
     """Stream control representation
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): descriptor
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
@@ -151,10 +151,10 @@ class StreamControl(Control):
 class TextControl(Control):
     """Text control representation
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): descriptor
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
