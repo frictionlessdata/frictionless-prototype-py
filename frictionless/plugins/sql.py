@@ -79,12 +79,12 @@ class SqlParser(Parser):
 class SqlDialect(Dialect):
     """Sql dialect representation
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): descriptor
         table (str): table
         order_by? (str): order_by
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """

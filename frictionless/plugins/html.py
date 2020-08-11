@@ -87,11 +87,11 @@ class HtmlParser(Parser):
 class HtmlDialect(Dialect):
     """Html dialect representation
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): descriptor
         selector? (str): selector
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """

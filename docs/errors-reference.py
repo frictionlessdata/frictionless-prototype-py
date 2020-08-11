@@ -4,9 +4,6 @@ from jinja2 import Template
 from frictionless import errors
 
 
-# General
-
-
 source = os.path.join(docs.SOURCE_DIR, "errors-reference.md")
 target_dir = os.path.join(docs.TARGET_DIR, "errors-reference")
 target_md = os.path.join(target_dir, "README.md")

@@ -109,11 +109,11 @@ class OdsParser(Parser):
 class OdsDialect(Dialect):
     """Ods dialect representation
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): descriptor
         sheet? (str): sheet
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """

@@ -3,9 +3,6 @@ from scripts import docs
 from jinja2 import Template
 
 
-# General
-
-
 source = os.path.join(docs.SOURCE_DIR, "schemes-reference.md")
 target_dir = os.path.join(docs.TARGET_DIR, "schemes-reference")
 target_md = os.path.join(target_dir, "README.md")

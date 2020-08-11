@@ -55,10 +55,10 @@ class TsvParser(Parser):
 class TsvDialect(Dialect):
     """Tsv dialect representation
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): descriptor
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """

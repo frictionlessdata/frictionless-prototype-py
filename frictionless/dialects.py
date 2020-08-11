@@ -7,11 +7,11 @@ from . import config
 class Dialect(Metadata):
     """Dialect representation
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): descriptor
         headers? (int|list): headers
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
@@ -66,9 +66,9 @@ class Dialect(Metadata):
 class CsvDialect(Dialect):
     """Csv dialect representation
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): descriptor
-        delimiter? (str): delimiter
+        delimiter? (str): csv delimiter
         line_terminator? (str): line_terminator
         quote_char? (str): quote_char
         double_quote? (bool): double_quote
@@ -78,7 +78,7 @@ class CsvDialect(Dialect):
         comment_char? (str): comment_char
         case_sensitive_header? (bool): case_sensitive_header
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
@@ -199,7 +199,7 @@ class CsvDialect(Dialect):
 class ExcelDialect(Dialect):
     """Excel dialect representation
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): descriptor
         sheet? (int|str): sheet
         workbook_cache? (dict): workbook_cache
@@ -207,7 +207,7 @@ class ExcelDialect(Dialect):
         preserve_formatting? (bool): preserve_formatting
         adjust_floating_point_error? (bool): adjust_floating_point_error
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
@@ -285,11 +285,11 @@ class ExcelDialect(Dialect):
 class InlineDialect(Dialect):
     """Inline dialect representation
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): descriptor
         keyed? (bool): keyed
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
@@ -342,12 +342,12 @@ class InlineDialect(Dialect):
 class JsonDialect(Dialect):
     """Json dialect representation
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): descriptor
         keyed? (bool): keyed
         property? (str): property
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
