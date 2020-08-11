@@ -142,5 +142,5 @@ with frictionless.Table('table.csv') as table:
 - the Table class now always infers `table.schema`
 - `table.read` was replace by `table.read_data/rows`
 - `table.iter` was replaced by `table.data/row_stream`
-- `table.hash/size` was replaced by `table.stats`
+- `table.hash/size` was replaced by the `table.stats` property
 - various changes in the contructor options (see "Extracting Data")
