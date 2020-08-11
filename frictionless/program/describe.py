@@ -25,6 +25,13 @@ from .main import program
 @click.option("--infer-confidence", type=float, help="Infer confidence")
 @click.option("--infer-missing-values", type=str, multiple=True, help="Infer missing")
 def program_describe(source, *, source_type, json, **options):
+    """Describe data
+
+    API      | Usage
+    -------- | --------
+    Public   | `$ frictionless describe`
+
+    """
     for key, value in list(options.items()):
         if not value:
             del options[key]

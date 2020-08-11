@@ -427,8 +427,8 @@ It loads a data source, and allows you to stream its parsed contents.
 
 ```python
 with Table("data/table.csv") as table:
-    assert table.headers == ["id", "name"]
-    assert table.read_rows() == [
+    table.headers == ["id", "name"]
+    table.read_rows() == [
         {'id': 1, 'name': 'english'},
         {'id': 2, 'name': '中国人'},
     ]
@@ -1165,16 +1165,94 @@ class Package(Metadata)
 
 Package representation
 
-__Arguments__
+API      | Usage
+-------- | --------
+Public   | `from frictionless import Package`
 
-- __descriptor? (str|dict)__: package descriptor
 
-- __profile? (str)__: profile
-- __resources? (dict[])__: list of resource descriptors
+```python
+package = Package(resources=[Resource(path="data/table.csv")])
+package.get_resoure('table').read_rows() == [
+    {'id': 1, 'name': 'english'},
+    {'id': 2, 'name': '中国人'},
+]
+```
 
-__Raises__
+**Arguments**:
 
-- `FrictionlessException`: raise any error that occurs during the process
+- `descriptor?` _str|dict_ - package descriptor
+- `name?` _str_ - package name (for machines)
+- `title?` _str_ - package title (for humans)
+- `descriptor?` _str_ - package descriptor
+- `resources?` _dict|Resource[]_ - list of resource descriptors
+- `profile?` _str_ - profile name like 'data-package'
+- `basepath?` _str_ - a basepath of the package
+- `trusted?` _bool_ - don't raise on unsafe paths
+  
+
+**Raises**:
+
+- `FrictionlessException` - raise any error that occurs during the process
+
+<a name="frictionless.package.Package.name"></a>
+#### <big>name</big>
+
+```python
+ | @Metadata.property
+ | name()
+```
+
+**Returns**:
+
+- `str?` - package name
+
+<a name="frictionless.package.Package.title"></a>
+#### <big>title</big>
+
+```python
+ | @Metadata.property
+ | title()
+```
+
+**Returns**:
+
+- `str?` - package title
+
+<a name="frictionless.package.Package.description"></a>
+#### <big>description</big>
+
+```python
+ | @Metadata.property
+ | description()
+```
+
+**Returns**:
+
+- `str?` - package description
+
+<a name="frictionless.package.Package.basepath"></a>
+#### <big>basepath</big>
+
+```python
+ | @Metadata.property(write=False)
+ | basepath()
+```
+
+**Returns**:
+
+- `str` - package basepath
+
+<a name="frictionless.package.Package.profile"></a>
+#### <big>profile</big>
+
+```python
+ | @Metadata.property
+ | profile()
+```
+
+**Returns**:
+
+- `str` - package profile
 
 <a name="frictionless.package.Package.resources"></a>
 #### <big>resources</big>
@@ -1184,11 +1262,9 @@ __Raises__
  | resources()
 ```
 
-Package's resources
+**Returns**:
 
-__Returns__
-
-`Resource[]`: an array of resource instances
+- `Resources[]` - package resource
 
 <a name="frictionless.package.Package.resource_names"></a>
 #### <big>resource\_names</big>
@@ -1198,11 +1274,9 @@ __Returns__
  | resource_names()
 ```
 
-Schema's resource names
+**Returns**:
 
-__Returns__
-
-`str[]`: an array of resource names
+- `str[]` - package resource names
 
 <a name="frictionless.package.Package.add_resource"></a>
 #### <big>add\_resource</big>
@@ -1211,17 +1285,16 @@ __Returns__
  | add_resource(descriptor)
 ```
 
-Add new resource to schema.
+Add new resource to package.
 
-The schema descriptor will be validated with newly added resource descriptor.
+**Arguments**:
 
-__Arguments__
+- `descriptor` _dict_ - resource descriptor
+  
 
-- __descriptor__ (`dict`): resource descriptor
+**Returns**:
 
-__Returns__
-
-`Resource/None`: added `Resource` instance or `None` if not added
+- `Resource/None` - added `Resource` instance or `None` if not added
 
 <a name="frictionless.package.Package.get_resource"></a>
 #### <big>get\_resource</big>
@@ -1232,13 +1305,14 @@ __Returns__
 
 Get resource by name.
 
-__Arguments__
+**Arguments**:
 
-- __name__ (`str`): resource name
+- `name` _str_ - resource name
+  
 
-__Returns__
+**Returns**:
 
-`Resource/None`: `Resource` instance or `None` if not found
+- `Resource/None` - `Resource` instance or `None` if not found
 
 <a name="frictionless.package.Package.has_resource"></a>
 #### <big>has\_resource</big>
@@ -1249,13 +1323,14 @@ __Returns__
 
 Check if a resource is present
 
-__Arguments__
+**Arguments**:
 
-- __name__ (`str`): schema resource name
+- `name` _str_ - schema resource name
+  
 
-__Returns__
+**Returns**:
 
-`bool`: whether there is the resource
+- `bool` - whether there is the resource
 
 <a name="frictionless.package.Package.remove_resource"></a>
 #### <big>remove\_resource</big>
@@ -1266,15 +1341,14 @@ __Returns__
 
 Remove resource by name.
 
-The schema descriptor will be validated after resource descriptor removal.
+**Arguments**:
 
-__Arguments__
+- `name` _str_ - resource name
+  
 
-- __name__ (`str`): resource name
+**Returns**:
 
-__Returns__
-
-`Resource/None`: removed `Resource` instances or `None` if not found
+- `Resource/None` - removed `Resource` instances or `None` if not found
 
 <a name="frictionless.package.Package.expand"></a>
 #### <big>expand</big>
@@ -1283,9 +1357,59 @@ __Returns__
  | expand()
 ```
 
-Expand the package
+Expand metadata
 
 It will add default values to the package.
+
+<a name="frictionless.package.Package.infer"></a>
+#### <big>infer</big>
+
+```python
+ | infer(source=None, *, only_sample=False)
+```
+
+Infer package's attributes
+
+**Arguments**:
+
+- `source` _str|str[]_ - path, list of paths or glob pattern
+- `only_sample?` _bool_ - infer whatever possible but only from the sample
+
+<a name="frictionless.package.Package.to_dict"></a>
+#### <big>to\_dict</big>
+
+```python
+ | to_dict(expand=False)
+```
+
+Convert package to a dict
+
+**Arguments**:
+
+- `expand?` _bool_ - return expanded metadata
+  
+
+**Returns**:
+
+- `dict` - package as a dict
+
+<a name="frictionless.package.Package.to_zip"></a>
+#### <big>to\_zip</big>
+
+```python
+ | to_zip(target)
+```
+
+Save package to a zip
+
+**Arguments**:
+
+- `target` _str_ - target path
+  
+
+**Raises**:
+
+- `FrictionlessException` - on any error
 
 <a name="frictionless.plugin"></a>
 ## frictionless.plugin
@@ -1305,23 +1429,239 @@ Plugin representation
 <a name="frictionless.program.main"></a>
 ## frictionless.program.main
 
+<a name="frictionless.program.main.program"></a>
+#### <big>program</big>
+
+```python
+@click.group(name="frictionless")
+@click.version_option(config.VERSION, message="%(version)s", help="Print version")
+program()
+```
+
+Main program
+
+API      | Usage
+-------- | --------
+Public   | `$ frictionless`
+
 <a name="frictionless.program.validate"></a>
 ## frictionless.program.validate
+
+<a name="frictionless.program.validate.program_validate"></a>
+#### <big>program\_validate</big>
+
+```python
+@program.command(name="validate")
+@click.argument("source", type=click.Path(), nargs=-1, required=True)
+@click.option("--source-type", type=str, help="Source type")
+@click.option("--json", is_flag=True, help="Output report as JSON")
+@click.option("--headers", type=int, multiple=True, help="Headers")
+@click.option("--scheme", type=str, help="File scheme")
+@click.option("--format", type=str, help="File format")
+@click.option("--hashing", type=str, help="File hashing")
+@click.option("--encoding", type=str, help="File encoding")
+@click.option("--compression", type=str, help="File compression")
+@click.option("--compression-path", type=str, help="File compression path")
+@click.option("--schema", type=click.Path(), help="Schema")
+@click.option("--sync-schema", is_flag=True, help="Sync schema")
+@click.option("--infer-type", type=str, help="Infer type")
+@click.option("--infer-names", type=str, multiple=True, help="Infer names")
+@click.option("--infer-sample", type=int, help="Infer sample")
+@click.option("--infer-confidence", type=float, help="Infer confidence")
+@click.option("--infer-missing-values", type=str, multiple=True, help="Infer missing")
+@click.option("--checksum-hash", type=str, help="Expected hash based on hashing option")
+@click.option("--checksum-bytes", type=int, help="Expected size in bytes")
+@click.option("--checksum-rows", type=int, help="Expected size in bytes")
+@click.option("--pick-errors", type=str, multiple=True, help="Pick errors")
+@click.option("--skip-errors", type=str, multiple=True, help="Skip errors")
+@click.option("--limit-errors", type=int, help="Limit errors")
+@click.option("--limit-memory", type=int, help="Limit memory")
+@click.option("--noinfer", type=bool, help="Validate metadata as it is")
+program_validate(source, *, headers, source_type, json, **options)
+```
+
+Validate data
+
+API      | Usage
+-------- | --------
+Public   | `$ frictionless validate`
 
 <a name="frictionless.program.transform"></a>
 ## frictionless.program.transform
 
+<a name="frictionless.program.transform.program_transform"></a>
+#### <big>program\_transform</big>
+
+```python
+@program.command(name="transform")
+@click.argument("source", type=click.Path(), required=True)
+program_transform(source)
+```
+
+Transform data
+
+API      | Usage
+-------- | --------
+Public   | `$ frictionless transform`
+
 <a name="frictionless.program.describe"></a>
 ## frictionless.program.describe
+
+<a name="frictionless.program.describe.program_describe"></a>
+#### <big>program\_describe</big>
+
+```python
+@program.command(name="describe")
+@click.argument("source", type=click.Path(), nargs=-1, required=True)
+@click.option("--source-type", type=str, help="Source type")
+@click.option("--json", is_flag=True, help="Output report as JSON")
+@click.option("--scheme", type=str, help="File scheme")
+@click.option("--format", type=str, help="File format")
+@click.option("--hashing", type=str, help="File hashing")
+@click.option("--encoding", type=str, help="File encoding")
+@click.option("--compression", type=str, help="File compression")
+@click.option("--compression-path", type=str, help="File compression path")
+@click.option("--sync-schema", is_flag=True, help="Sync schema")
+@click.option("--infer-type", type=str, help="Infer type")
+@click.option("--infer-names", type=str, multiple=True, help="Infer names")
+@click.option("--infer-sample", type=int, help="Infer sample")
+@click.option("--infer-confidence", type=float, help="Infer confidence")
+@click.option("--infer-missing-values", type=str, multiple=True, help="Infer missing")
+program_describe(source, *, source_type, json, **options)
+```
+
+Describe data
+
+API      | Usage
+-------- | --------
+Public   | `$ frictionless describe`
 
 <a name="frictionless.program.api"></a>
 ## frictionless.program.api
 
+<a name="frictionless.program.api.program_api"></a>
+#### <big>program\_api</big>
+
+```python
+@program.command(name="api")
+@click.option("--port", type=int, default=config.DEFAULT_SERVER_PORT, help="Server port")
+program_api(port)
+```
+
+Start API
+
+API      | Usage
+-------- | --------
+Public   | `$ frictionless api`
+
 <a name="frictionless.program.extract"></a>
 ## frictionless.program.extract
 
+<a name="frictionless.program.extract.program_extract"></a>
+#### <big>program\_extract</big>
+
+```python
+@program.command(name="extract")
+@click.argument("source", type=click.Path(), nargs=-1, required=True)
+@click.option("--source-type", type=str, help="Source type")
+@click.option("--json", is_flag=True, help="Output report as JSON")
+@click.option("--scheme", type=str, help="File scheme")
+@click.option("--format", type=str, help="File format")
+@click.option("--hashing", type=str, help="File hashing")
+@click.option("--encoding", type=str, help="File encoding")
+@click.option("--compression", type=str, help="File compression")
+@click.option("--compression-path", type=str, help="File compression path")
+@click.option("--sync-schema", is_flag=True, help="Sync schema")
+@click.option("--infer-type", type=str, help="Infer type")
+@click.option("--infer-names", type=str, multiple=True, help="Infer names")
+@click.option("--infer-sample", type=int, help="Infer sample")
+@click.option("--infer-confidence", type=float, help="Infer confidence")
+@click.option("--infer-missing-values", type=str, multiple=True, help="Infer missing")
+program_extract(source, *, source_type, json, **options)
+```
+
+Extract data
+
+API      | Usage
+-------- | --------
+Public   | `$ frictionless extract`
+
 <a name="frictionless.type"></a>
 ## frictionless.type
+
+<a name="frictionless.type.Type"></a>
+### Type
+
+```python
+class Type()
+```
+
+Data type representation
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import Type`
+
+This class is for subclassing.
+
+**Arguments**:
+
+- `field` _Field_ - field
+
+<a name="frictionless.type.Type.supported_constraints"></a>
+#### <big>supported\_constraints</big>
+
+**Returns**:
+
+- `str[]` - a list of supported constraints
+
+<a name="frictionless.type.Type.field"></a>
+#### <big>field</big>
+
+```python
+ | @cached_property
+ | field()
+```
+
+**Returns**:
+
+- `Field` - field
+
+<a name="frictionless.type.Type.read_cell"></a>
+#### <big>read\_cell</big>
+
+```python
+ | read_cell(cell)
+```
+
+Convert cell (read direction)
+
+**Arguments**:
+
+- `cell` _any_ - cell to covert
+  
+
+**Returns**:
+
+- `any` - converted cell
+
+<a name="frictionless.type.Type.write_cell"></a>
+#### <big>write\_cell</big>
+
+```python
+ | write_cell(cell)
+```
+
+Convert cell (write direction)
+
+**Arguments**:
+
+- `cell` _any_ - cell to covert
+  
+
+**Returns**:
+
+- `any` - converted cell
 
 <a name="frictionless.metadata"></a>
 ## frictionless.metadata

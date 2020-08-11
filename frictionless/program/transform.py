@@ -6,6 +6,13 @@ from .main import program
 @program.command(name="transform")
 @click.argument("source", type=click.Path(), required=True)
 def program_transform(source):
+    """Transform data
+
+    API      | Usage
+    -------- | --------
+    Public   | `$ frictionless transform`
+
+    """
     try:
         transform(source)
     except Exception as exception:

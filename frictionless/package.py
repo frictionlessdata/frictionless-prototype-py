@@ -14,13 +14,29 @@ from . import config
 class Package(Metadata):
     """Package representation
 
-    # Arguments
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import Package`
+
+    ```python
+    package = Package(resources=[Resource(path="data/table.csv")])
+    package.get_resoure('table').read_rows() == [
+        {'id': 1, 'name': 'english'},
+        {'id': 2, 'name': '中国人'},
+    ]
+    ```
+
+    Parameters:
         descriptor? (str|dict): package descriptor
+        name? (str): package name (for machines)
+        title? (str): package title (for humans)
+        descriptor? (str): package descriptor
+        resources? (dict|Resource[]): list of resource descriptors
+        profile? (str): profile name like 'data-package'
+        basepath? (str): a basepath of the package
+        trusted? (bool): don't raise on unsafe paths
 
-        profile? (str): profile
-        resources? (dict[]): list of resource descriptors
-
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
@@ -62,58 +78,71 @@ class Package(Metadata):
 
     @Metadata.property
     def name(self):
+        """
+        Returns:
+            str?: package name
+        """
         return self.get("name")
 
     @Metadata.property
     def title(self):
+        """
+        Returns:
+            str?: package title
+        """
         return self.get("title")
 
     @Metadata.property
     def description(self):
+        """
+        Returns:
+            str?: package description
+        """
         return self.get("description")
 
     @Metadata.property(write=False)
     def basepath(self):
+        """
+        Returns:
+            str: package basepath
+        """
         return self.__basepath
 
     @Metadata.property
     def profile(self):
+        """
+        Returns:
+            str: package profile
+        """
         return self.get("profile", config.DEFAULT_PACKAGE_PROFILE)
 
     # Resources
 
     @Metadata.property
     def resources(self):
-        """Package's resources
-
-        # Returns
-            Resource[]: an array of resource instances
-
+        """
+        Returns:
+            Resources[]: package resource
         """
         resources = self.get("resources", [])
         return self.metadata_attach("resources", resources)
 
     @Metadata.property(write=False)
     def resource_names(self):
-        """Schema's resource names
-
-        # Returns
-            str[]: an array of resource names
-
+        """
+        Returns:
+            str[]: package resource names
         """
         return [resource.name for resource in self.resources]
 
     def add_resource(self, descriptor):
-        """ Add new resource to schema.
+        """ Add new resource to package.
 
-        The schema descriptor will be validated with newly added resource descriptor.
-
-        # Arguments
+        Parameters:
             descriptor (dict): resource descriptor
 
-        # Returns
+        Returns:
             Resource/None: added `Resource` instance or `None` if not added
-
         """
         self.setdefault("resources", [])
         self["resources"].append(descriptor)
@@ -122,12 +151,11 @@ class Package(Metadata):
     def get_resource(self, name):
         """Get resource by name.
 
-        # Arguments
+        Parameters:
             name (str): resource name
 
-        # Returns
+        Returns:
            Resource/None: `Resource` instance or `None` if not found
-
         """
         for resource in self.resources:
             if resource.name == name:
@@ -137,12 +165,11 @@ class Package(Metadata):
     def has_resource(self, name):
         """Check if a resource is present
 
-        # Arguments
+        Parameters:
             name (str): schema resource name
 
-        # Returns
+        Returns:
            bool: whether there is the resource
-
         """
         for resource in self.resources:
             if resource.name == name:
@@ -152,14 +179,11 @@ class Package(Metadata):
     def remove_resource(self, name):
         """Remove resource by name.
 
-        The schema descriptor will be validated after resource descriptor removal.
-
-        # Arguments
+        Parameters:
             name (str): resource name
 
-        # Returns
+        Returns:
             Resource/None: removed `Resource` instances or `None` if not found
-
         """
         resource = self.get_resource(name)
         if resource:
@@ -170,10 +194,9 @@ class Package(Metadata):
     # Expand
 
     def expand(self):
-        """Expand the package
+        """Expand metadata
 
         It will add default values to the package.
-
         """
         self.setdefault("resources", [])
         self.setdefault("profile", config.DEFAULT_PACKAGE_PROFILE)
@@ -183,6 +206,12 @@ class Package(Metadata):
     # Infer
 
     def infer(self, source=None, *, only_sample=False):
+        """Infer package's attributes
+
+        Parameters:
+            source (str|str[]): path, list of paths or glob pattern
+            only_sample? (bool): infer whatever possible but only from the sample
+        """
         self.setdefault("profile", config.DEFAULT_PACKAGE_PROFILE)
 
         # From source
@@ -205,6 +234,14 @@ class Package(Metadata):
     # Import/Export
 
     def to_dict(self, expand=False):
+        """Convert package to a dict
+
+        Parameters:
+            expand? (bool): return expanded metadata
+
+        Returns:
+            dict: package as a dict
+        """
         result = super().to_dict()
         if expand:
             result = type(self)(result)
@@ -214,6 +251,14 @@ class Package(Metadata):
 
     # NOTE: support multipart
     def to_zip(self, target):
+        """Save package to a zip
+
+        Parameters:
+            target (str): target path
+
+        Raises:
+            FrictionlessException: on any error
+        """
         try:
             with zipfile.ZipFile(target, "w") as zip:
                 descriptor = self.copy()

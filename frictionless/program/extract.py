@@ -26,6 +26,13 @@ from .main import program
 @click.option("--infer-confidence", type=float, help="Infer confidence")
 @click.option("--infer-missing-values", type=str, multiple=True, help="Infer missing")
 def program_extract(source, *, source_type, json, **options):
+    """Extract data
+
+    API      | Usage
+    -------- | --------
+    Public   | `$ frictionless extract`
+
+    """
     for key, value in list(options.items()):
         if not value:
             del options[key]

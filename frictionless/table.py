@@ -25,8 +25,8 @@ class Table:
 
     ```python
     with Table("data/table.csv") as table:
-        assert table.headers == ["id", "name"]
-        assert table.read_rows() == [
+        table.headers == ["id", "name"]
+        table.read_rows() == [
             {'id': 1, 'name': 'english'},
             {'id': 2, 'name': '中国人'},
         ]

@@ -39,6 +39,13 @@ from .main import program
 # Package/Resource
 @click.option("--noinfer", type=bool, help="Validate metadata as it is")
 def program_validate(source, *, headers, source_type, json, **options):
+    """Validate data
+
+    API      | Usage
+    -------- | --------
+    Public   | `$ frictionless validate`
+
+    """
     for key, value in list(options.items()):
         if not value:
             del options[key]
