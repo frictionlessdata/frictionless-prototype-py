@@ -5,6 +5,18 @@ from ..check import Check
 
 
 class DuplicateRowCheck(Check):
+    """Check for duplicate rows
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import checks`
+    Implicit | `validate(extra_checks=['duplicate-row'])`
+
+    This check can be enabled using the `extra_checks` parameter
+    for the `validate` function.
+
+    """
+
     metadata_profile = {  # type: ignore
         "type": "object",
         "properties": {},
@@ -27,6 +39,24 @@ class DuplicateRowCheck(Check):
 
 
 class DeviatedValueCheck(Check):
+    """Check for deviated values in a field
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import checks`
+    Implicit | `validate(extra_checks=(['deviated-values', {...})])`
+
+    This check can be enabled using the `extra_checks` parameter
+    for the `validate` function.
+
+    Parameters:
+       descriptor (dict): check's descriptor
+       descriptor.fieldName (str): a field name to check
+       descriptor.average? (str): one of `main`, `median` or `mode`
+       descriptor.interval? (str): statistical interval (default: 3)
+
+    """
+
     metadata_profile = {  # type: ignore
         "type": "object",
         "requred": ["fieldName"],
@@ -94,6 +124,18 @@ class DeviatedValueCheck(Check):
 
 
 class TruncatedValueCheck(Check):
+    """Check for possible truncated values
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import checks`
+    Implicit | `validate(extra_checks=(['truncated-value', {...})])`
+
+    This check can be enabled using the `extra_checks` parameter
+    for the `validate` function.
+
+    """
+
     metadata_profile = {  # type: ignore
         "type": "object",
         "properties": {},

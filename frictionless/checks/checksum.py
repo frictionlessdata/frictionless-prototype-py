@@ -3,6 +3,24 @@ from ..check import Check
 
 
 class ChecksumCheck(Check):
+    """Check a table's checksum
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import checks`
+    Implicit | `validate(checksum={...})`
+
+    Ths check is enabled by default if the `checksum` argument
+    is provided for the `validate` function.
+
+    Parameters:
+       descriptor (dict): check's descriptor
+       descriptor.hash? (str): a hash sum of the table's bytes
+       descriptor.bytes? (int): number of bytes
+       descriptor.rows? (int): number of rows
+
+    """
+
     metadata_profile = {  # type: ignore
         "type": "object",
         "additionalProperties": False,

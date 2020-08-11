@@ -978,14 +978,180 @@ A mapping indexed by a field name with error cells before parsing
 <a name="frictionless.checks.checksum"></a>
 ## frictionless.checks.checksum
 
+<a name="frictionless.checks.checksum.ChecksumCheck"></a>
+### ChecksumCheck
+
+```python
+class ChecksumCheck(Check)
+```
+
+Check a table's checksum
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import checks`
+Implicit | `validate(checksum={...})`
+
+Ths check is enabled by default if the `checksum` argument
+is provided for the `validate` function.
+
+**Arguments**:
+
+- `descriptor` _dict_ - check's descriptor
+- `descriptor.hash?` _str_ - a hash sum of the table's bytes
+- `descriptor.bytes?` _int_ - number of bytes
+- `descriptor.rows?` _int_ - number of rows
+
 <a name="frictionless.checks.regulation"></a>
 ## frictionless.checks.regulation
+
+<a name="frictionless.checks.regulation.BlacklistedValueCheck"></a>
+### BlacklistedValueCheck
+
+```python
+class BlacklistedValueCheck(Check)
+```
+
+Check for blacklisted values in a field
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import checks`
+Implicit | `validate(extra_checks=[('backlisted-value', {...})])`
+
+This check can be enabled using the `extra_checks` parameter
+for the `validate` function.
+
+**Arguments**:
+
+- `descriptor` _dict_ - check's descriptor
+- `descriptor.fieldName` _str_ - a field name to look into
+- `descriptor.blacklist` _any[]_ - a list of forbidden values
+
+<a name="frictionless.checks.regulation.SequentialValueCheck"></a>
+### SequentialValueCheck
+
+```python
+class SequentialValueCheck(Check)
+```
+
+Check that a column having sequential values
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import checks`
+Implicit | `validate(extra_checks=[('sequential-value', {...})])`
+
+This check can be enabled using the `extra_checks` parameter
+for the `validate` function.
+
+**Arguments**:
+
+- `descriptor` _dict_ - check's descriptor
+- `descriptor.fieldName` _str_ - a field name to check
+
+<a name="frictionless.checks.regulation.RowConstraintCheck"></a>
+### RowConstraintCheck
+
+```python
+class RowConstraintCheck(Check)
+```
+
+Check that every row satisfies a provided Python expression
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import checks`
+Implicit | `validate(extra_checks=(['row-constraint', {...})])`
+
+This check can be enabled using the `extra_checks` parameter
+for the `validate` function. The syntax for the row constraint
+check can be found here - https://github.com/danthedeckie/simpleeval
+
+**Arguments**:
+
+- `descriptor` _dict_ - check's descriptor
+- `descriptor.constraint` _str_ - a python expression to evaluate against a row
 
 <a name="frictionless.checks.baseline"></a>
 ## frictionless.checks.baseline
 
+<a name="frictionless.checks.baseline.BaselineCheck"></a>
+### BaselineCheck
+
+```python
+class BaselineCheck(Check)
+```
+
+Check a table for basic errors
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import checks`
+Implicit | `validate(...)`
+
+Ths check is enabled by default for any `validate` function run.
+
 <a name="frictionless.checks.heuristic"></a>
 ## frictionless.checks.heuristic
+
+<a name="frictionless.checks.heuristic.DuplicateRowCheck"></a>
+### DuplicateRowCheck
+
+```python
+class DuplicateRowCheck(Check)
+```
+
+Check for duplicate rows
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import checks`
+Implicit | `validate(extra_checks=['duplicate-row'])`
+
+This check can be enabled using the `extra_checks` parameter
+for the `validate` function.
+
+<a name="frictionless.checks.heuristic.DeviatedValueCheck"></a>
+### DeviatedValueCheck
+
+```python
+class DeviatedValueCheck(Check)
+```
+
+Check for deviated values in a field
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import checks`
+Implicit | `validate(extra_checks=(['deviated-values', {...})])`
+
+This check can be enabled using the `extra_checks` parameter
+for the `validate` function.
+
+**Arguments**:
+
+- `descriptor` _dict_ - check's descriptor
+- `descriptor.fieldName` _str_ - a field name to check
+- `descriptor.average?` _str_ - one of `main`, `median` or `mode`
+- `descriptor.interval?` _str_ - statistical interval (default: 3)
+
+<a name="frictionless.checks.heuristic.TruncatedValueCheck"></a>
+### TruncatedValueCheck
+
+```python
+class TruncatedValueCheck(Check)
+```
+
+Check for possible truncated values
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import checks`
+Implicit | `validate(extra_checks=(['truncated-value', {...})])`
+
+This check can be enabled using the `extra_checks` parameter
+for the `validate` function.
 
 <a name="frictionless.package"></a>
 ## frictionless.package
@@ -1405,14 +1571,15 @@ class OdsDialect(Dialect)
 
 Ods dialect representation
 
-__Arguments__
+**Arguments**:
 
-- __descriptor? (str|dict)__: descriptor
-- __sheet? (str)__: sheet
+- `descriptor?` _str|dict_ - descriptor
+- `sheet?` _str_ - sheet
+  
 
-__Raises__
+**Raises**:
 
-- `FrictionlessException`: raise any error that occurs during the process
+- `FrictionlessException` - raise any error that occurs during the process
 
 <a name="frictionless.plugins.html"></a>
 ## frictionless.plugins.html
@@ -1426,14 +1593,15 @@ class HtmlDialect(Dialect)
 
 Html dialect representation
 
-__Arguments__
+**Arguments**:
 
-- __descriptor? (str|dict)__: descriptor
-- __selector? (str)__: selector
+- `descriptor?` _str|dict_ - descriptor
+- `selector?` _str_ - selector
+  
 
-__Raises__
+**Raises**:
 
-- `FrictionlessException`: raise any error that occurs during the process
+- `FrictionlessException` - raise any error that occurs during the process
 
 <a name="frictionless.plugins.tsv"></a>
 ## frictionless.plugins.tsv
@@ -1447,13 +1615,14 @@ class TsvDialect(Dialect)
 
 Tsv dialect representation
 
-__Arguments__
+**Arguments**:
 
-- __descriptor? (str|dict)__: descriptor
+- `descriptor?` _str|dict_ - descriptor
+  
 
-__Raises__
+**Raises**:
 
-- `FrictionlessException`: raise any error that occurs during the process
+- `FrictionlessException` - raise any error that occurs during the process
 
 <a name="frictionless.plugins.sql"></a>
 ## frictionless.plugins.sql
@@ -1467,15 +1636,16 @@ class SqlDialect(Dialect)
 
 Sql dialect representation
 
-__Arguments__
+**Arguments**:
 
-- __descriptor? (str|dict)__: descriptor
-- __table__ (`str`): table
-- __order_by? (str)__: order_by
+- `descriptor?` _str|dict_ - descriptor
+- `table` _str_ - table
+- `order_by?` _str_ - order_by
+  
 
-__Raises__
+**Raises**:
 
-- `FrictionlessException`: raise any error that occurs during the process
+- `FrictionlessException` - raise any error that occurs during the process
 
 <a name="frictionless.plugins.ckan"></a>
 ## frictionless.plugins.ckan
@@ -2037,14 +2207,15 @@ class Dialect(Metadata)
 
 Dialect representation
 
-__Arguments__
+**Arguments**:
 
-- __descriptor? (str|dict)__: descriptor
-- __headers? (int|list)__: headers
+- `descriptor?` _str|dict_ - descriptor
+- `headers?` _int|list_ - headers
+  
 
-__Raises__
+**Raises**:
 
-- `FrictionlessException`: raise any error that occurs during the process
+- `FrictionlessException` - raise any error that occurs during the process
 
 <a name="frictionless.dialects.CsvDialect"></a>
 ### CsvDialect
@@ -2055,22 +2226,23 @@ class CsvDialect(Dialect)
 
 Csv dialect representation
 
-__Arguments__
+**Arguments**:
 
-- __descriptor? (str|dict)__: descriptor
-- __delimiter? (str)__: delimiter
-- __line_terminator? (str)__: line_terminator
-- __quote_char? (str)__: quote_char
-- __double_quote? (bool)__: double_quote
-- __escape_char? (str)__: escape_char
-- __null_sequence? (str)__: null_sequence
-- __skip_initial_space? (bool)__: skip_initial_space
-- __comment_char? (str)__: comment_char
-- __case_sensitive_header? (bool)__: case_sensitive_header
+- `descriptor?` _str|dict_ - descriptor
+- `delimiter?` _str_ - csv delimiter
+- `line_terminator?` _str_ - line_terminator
+- `quote_char?` _str_ - quote_char
+- `double_quote?` _bool_ - double_quote
+- `escape_char?` _str_ - escape_char
+- `null_sequence?` _str_ - null_sequence
+- `skip_initial_space?` _bool_ - skip_initial_space
+- `comment_char?` _str_ - comment_char
+- `case_sensitive_header?` _bool_ - case_sensitive_header
+  
 
-__Raises__
+**Raises**:
 
-- `FrictionlessException`: raise any error that occurs during the process
+- `FrictionlessException` - raise any error that occurs during the process
 
 <a name="frictionless.dialects.ExcelDialect"></a>
 ### ExcelDialect
@@ -2081,18 +2253,19 @@ class ExcelDialect(Dialect)
 
 Excel dialect representation
 
-__Arguments__
+**Arguments**:
 
-- __descriptor? (str|dict)__: descriptor
-- __sheet? (int|str)__: sheet
-- __workbook_cache? (dict)__: workbook_cache
-- __fill_merged_cells? (bool)__: fill_merged_cells
-- __preserve_formatting? (bool)__: preserve_formatting
-- __adjust_floating_point_error? (bool)__: adjust_floating_point_error
+- `descriptor?` _str|dict_ - descriptor
+- `sheet?` _int|str_ - sheet
+- `workbook_cache?` _dict_ - workbook_cache
+- `fill_merged_cells?` _bool_ - fill_merged_cells
+- `preserve_formatting?` _bool_ - preserve_formatting
+- `adjust_floating_point_error?` _bool_ - adjust_floating_point_error
+  
 
-__Raises__
+**Raises**:
 
-- `FrictionlessException`: raise any error that occurs during the process
+- `FrictionlessException` - raise any error that occurs during the process
 
 <a name="frictionless.dialects.InlineDialect"></a>
 ### InlineDialect
@@ -2103,14 +2276,15 @@ class InlineDialect(Dialect)
 
 Inline dialect representation
 
-__Arguments__
+**Arguments**:
 
-- __descriptor? (str|dict)__: descriptor
-- __keyed? (bool)__: keyed
+- `descriptor?` _str|dict_ - descriptor
+- `keyed?` _bool_ - keyed
+  
 
-__Raises__
+**Raises**:
 
-- `FrictionlessException`: raise any error that occurs during the process
+- `FrictionlessException` - raise any error that occurs during the process
 
 <a name="frictionless.dialects.JsonDialect"></a>
 ### JsonDialect
@@ -2121,15 +2295,16 @@ class JsonDialect(Dialect)
 
 Json dialect representation
 
-__Arguments__
+**Arguments**:
 
-- __descriptor? (str|dict)__: descriptor
-- __keyed? (bool)__: keyed
-- __property? (str)__: property
+- `descriptor?` _str|dict_ - descriptor
+- `keyed?` _bool_ - keyed
+- `property?` _str_ - property
+  
 
-__Raises__
+**Raises**:
 
-- `FrictionlessException`: raise any error that occurs during the process
+- `FrictionlessException` - raise any error that occurs during the process
 
 <a name="frictionless.__main__"></a>
 ## frictionless.\_\_main\_\_
@@ -2366,14 +2541,15 @@ class Control(Metadata)
 
 Control representation
 
-__Arguments__
+**Arguments**:
 
-- __descriptor? (str|dict)__: descriptor
-- __detectEncoding? (func)__: detectEncoding
+- `descriptor?` _str|dict_ - descriptor
+- `detectEncoding?` _func_ - detectEncoding
+  
 
-__Raises__
+**Raises**:
 
-- `FrictionlessException`: raise any error that occurs during the process
+- `FrictionlessException` - raise any error that occurs during the process
 
 <a name="frictionless.controls.LocalControl"></a>
 ### LocalControl
@@ -2384,13 +2560,14 @@ class LocalControl(Control)
 
 Local control representation
 
-__Arguments__
+**Arguments**:
 
-- __descriptor? (str|dict)__: descriptor
+- `descriptor?` _str|dict_ - descriptor
+  
 
-__Raises__
+**Raises**:
 
-- `FrictionlessException`: raise any error that occurs during the process
+- `FrictionlessException` - raise any error that occurs during the process
 
 <a name="frictionless.controls.RemoteControl"></a>
 ### RemoteControl
@@ -2401,17 +2578,18 @@ class RemoteControl(Control)
 
 Remote control representation
 
-__Arguments__
+**Arguments**:
 
-- __descriptor? (str|dict)__: descriptor
-- __http_session? (any)__: http_session
-- __http_preload? (bool)__: http_preload
-- __http_timeout? (int)__: http_timeout
-- __detectEncoding? (func)__: detectEncoding
+- `descriptor?` _str|dict_ - descriptor
+- `http_session?` _any_ - http_session
+- `http_preload?` _bool_ - http_preload
+- `http_timeout?` _int_ - http_timeout
+- `detectEncoding?` _func_ - detectEncoding
+  
 
-__Raises__
+**Raises**:
 
-- `FrictionlessException`: raise any error that occurs during the process
+- `FrictionlessException` - raise any error that occurs during the process
 
 <a name="frictionless.controls.StreamControl"></a>
 ### StreamControl
@@ -2422,13 +2600,14 @@ class StreamControl(Control)
 
 Stream control representation
 
-__Arguments__
+**Arguments**:
 
-- __descriptor? (str|dict)__: descriptor
+- `descriptor?` _str|dict_ - descriptor
+  
 
-__Raises__
+**Raises**:
 
-- `FrictionlessException`: raise any error that occurs during the process
+- `FrictionlessException` - raise any error that occurs during the process
 
 <a name="frictionless.controls.TextControl"></a>
 ### TextControl
@@ -2439,13 +2618,14 @@ class TextControl(Control)
 
 Text control representation
 
-__Arguments__
+**Arguments**:
 
-- __descriptor? (str|dict)__: descriptor
+- `descriptor?` _str|dict_ - descriptor
+  
 
-__Raises__
+**Raises**:
 
-- `FrictionlessException`: raise any error that occurs during the process
+- `FrictionlessException` - raise any error that occurs during the process
 
 <a name="frictionless.loaders"></a>
 ## frictionless.loaders

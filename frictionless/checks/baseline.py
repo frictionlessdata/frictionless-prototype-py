@@ -3,6 +3,17 @@ from .. import errors
 
 
 class BaselineCheck(Check):
+    """Check a table for basic errors
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import checks`
+    Implicit | `validate(...)`
+
+    Ths check is enabled by default for any `validate` function run.
+
+    """
+
     metadata_profile = {  # type: ignore
         "type": "object",
         "properties": {},

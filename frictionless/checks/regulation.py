@@ -4,6 +4,23 @@ from ..check import Check
 
 
 class BlacklistedValueCheck(Check):
+    """Check for blacklisted values in a field
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import checks`
+    Implicit | `validate(extra_checks=[('backlisted-value', {...})])`
+
+    This check can be enabled using the `extra_checks` parameter
+    for the `validate` function.
+
+    Parameters:
+       descriptor (dict): check's descriptor
+       descriptor.fieldName (str): a field name to look into
+       descriptor.blacklist (any[]): a list of forbidden values
+
+    """
+
     metadata_profile = {  # type: ignore
         "type": "object",
         "requred": ["fieldName", "blacklist"],
@@ -35,6 +52,22 @@ class BlacklistedValueCheck(Check):
 
 
 class SequentialValueCheck(Check):
+    """Check that a column having sequential values
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import checks`
+    Implicit | `validate(extra_checks=[('sequential-value', {...})])`
+
+    This check can be enabled using the `extra_checks` parameter
+    for the `validate` function.
+
+    Parameters:
+       descriptor (dict): check's descriptor
+       descriptor.fieldName (str): a field name to check
+
+    """
+
     metadata_profile = {  # type: ignore
         "type": "object",
         "requred": ["fieldName"],
@@ -71,6 +104,23 @@ class SequentialValueCheck(Check):
 
 
 class RowConstraintCheck(Check):
+    """Check that every row satisfies a provided Python expression
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import checks`
+    Implicit | `validate(extra_checks=(['row-constraint', {...})])`
+
+    This check can be enabled using the `extra_checks` parameter
+    for the `validate` function. The syntax for the row constraint
+    check can be found here - https://github.com/danthedeckie/simpleeval
+
+    Parameters:
+       descriptor (dict): check's descriptor
+       descriptor.constraint (str): a python expression to evaluate against a row
+
+    """
+
     metadata_profile = {  # type: ignore
         "type": "object",
         "requred": ["constraint"],
