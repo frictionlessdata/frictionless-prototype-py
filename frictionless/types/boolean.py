@@ -3,6 +3,14 @@ from ..type import Type
 
 
 class BooleanType(Type):
+    """Boolean type implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import types`
+
+    """
+
     supported_constraints = [
         "required",
         "enum",

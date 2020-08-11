@@ -4,6 +4,14 @@ from ..loader import Loader
 
 
 class RemoteLoader(Loader):
+    """Remote loader implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import loaders`
+
+    """
+
     remote = True
 
     # Read

@@ -1675,13 +1675,171 @@ class Metadata(helpers.ControlledDict)
 
 Metadata representation
 
-__Arguments__
+API      | Usage
+-------- | --------
+Public   | `from frictionless import Metadata`
 
-- __descriptor? (str|dict)__: schema descriptor
+**Arguments**:
 
-__Raises__
+- `descriptor?` _str|dict_ - metadata descriptor
+  
 
-- `FrictionlessException`: raise any error that occurs during the process
+**Raises**:
+
+- `FrictionlessException` - raise any error that occurs during the process
+
+<a name="frictionless.metadata.Metadata.metadata_valid"></a>
+#### <big>metadata\_valid</big>
+
+```python
+ | @property
+ | metadata_valid()
+```
+
+**Returns**:
+
+- `bool` - whether the metadata is valid
+
+<a name="frictionless.metadata.Metadata.metadata_errors"></a>
+#### <big>metadata\_errors</big>
+
+```python
+ | @property
+ | metadata_errors()
+```
+
+**Returns**:
+
+- `Errors[]` - a list of the metadata errors
+
+<a name="frictionless.metadata.Metadata.setinitial"></a>
+#### <big>setinitial</big>
+
+```python
+ | setinitial(key, value)
+```
+
+Set an initial item in a subclass' constructor
+
+**Arguments**:
+
+- `key` _str_ - key
+- `value` _any_ - value
+
+<a name="frictionless.metadata.Metadata.to_dict"></a>
+#### <big>to\_dict</big>
+
+```python
+ | to_dict()
+```
+
+Convert metadata to a dict
+
+**Returns**:
+
+- `dict` - metadata as a dict
+
+<a name="frictionless.metadata.Metadata.to_json"></a>
+#### <big>to\_json</big>
+
+```python
+ | to_json(target=None)
+```
+
+Save metadata as a json
+
+**Arguments**:
+
+- `target` _str_ - target path
+  
+
+**Raises**:
+
+- `FrictionlessException` - on any error
+
+<a name="frictionless.metadata.Metadata.to_yaml"></a>
+#### <big>to\_yaml</big>
+
+```python
+ | to_yaml(target=None)
+```
+
+Save metadata as a yaml
+
+**Arguments**:
+
+- `target` _str_ - target path
+  
+
+**Raises**:
+
+- `FrictionlessException` - on any error
+
+<a name="frictionless.metadata.Metadata.metadata_attach"></a>
+#### <big>metadata\_attach</big>
+
+```python
+ | metadata_attach(name, value)
+```
+
+Helper method for attaching a value to  the metadata
+
+**Arguments**:
+
+- `name` _str_ - name
+- `value` _any_ - value
+
+<a name="frictionless.metadata.Metadata.metadata_extract"></a>
+#### <big>metadata\_extract</big>
+
+```python
+ | metadata_extract(descriptor)
+```
+
+Helper method called during the metadata extraction
+
+**Arguments**:
+
+- `descriptor` _any_ - descriptor
+
+<a name="frictionless.metadata.Metadata.metadata_process"></a>
+#### <big>metadata\_process</big>
+
+```python
+ | metadata_process()
+```
+
+Helper method called on any metadata change
+
+<a name="frictionless.metadata.Metadata.metadata_validate"></a>
+#### <big>metadata\_validate</big>
+
+```python
+ | metadata_validate(profile=None)
+```
+
+Helper method called on any metadata change
+
+**Arguments**:
+
+- `profile` _dict_ - a profile to validate against of
+
+<a name="frictionless.metadata.Metadata.property"></a>
+#### <big>property</big>
+
+```python
+ | @staticmethod
+ | property(func=None, *, cache=True, reset=True, write=True)
+```
+
+Create a metadata property
+
+**Arguments**:
+
+- `func` _func_ - method
+- `cache?` _bool_ - cache
+- `reset?` _bool_ - reset
+- `write?` _func_ - write
 
 <a name="frictionless.field"></a>
 ## frictionless.field
@@ -2021,35 +2179,92 @@ __Raises__
 <a name="frictionless.parsers.excel"></a>
 ## frictionless.parsers.excel
 
-<a name="frictionless.parsers.excel.convert_excel_date_format_string"></a>
-#### <big>convert\_excel\_date\_format\_string</big>
+<a name="frictionless.parsers.excel.XlsxParser"></a>
+### XlsxParser
 
 ```python
-convert_excel_date_format_string(excel_date)
+class XlsxParser(Parser)
 ```
 
-Created using documentation here:
-https://support.office.com/en-us/article/review-guidelines-for-customizing-a-number-format-c0a1d1fa-d3f4-4018-96b7-9c9354dd99f5
+XLSX parser implementation.
 
-<a name="frictionless.parsers.excel.convert_excel_number_format_string"></a>
-#### <big>convert\_excel\_number\_format\_string</big>
+API      | Usage
+-------- | --------
+Public   | `from frictionless import parsers`
+
+<a name="frictionless.parsers.excel.XlsParser"></a>
+### XlsParser
 
 ```python
-convert_excel_number_format_string(excel_number, value)
+class XlsParser(Parser)
 ```
 
-A basic attempt to convert excel number_format to a number string
+XLS parser implementation.
 
-The important goal here is to get proper amount of rounding
+API      | Usage
+-------- | --------
+Public   | `from frictionless import parsers`
 
 <a name="frictionless.parsers.csv"></a>
 ## frictionless.parsers.csv
 
+<a name="frictionless.parsers.csv.CsvParser"></a>
+### CsvParser
+
+```python
+class CsvParser(Parser)
+```
+
+CSV parser implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import parsers`
+
 <a name="frictionless.parsers.json"></a>
 ## frictionless.parsers.json
 
+<a name="frictionless.parsers.json.JsonParser"></a>
+### JsonParser
+
+```python
+class JsonParser(Parser)
+```
+
+JSON parser implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import parser`
+
+<a name="frictionless.parsers.json.JsonlParser"></a>
+### JsonlParser
+
+```python
+class JsonlParser(Parser)
+```
+
+JSONL parser implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import parsers`
+
 <a name="frictionless.parsers.inline"></a>
 ## frictionless.parsers.inline
+
+<a name="frictionless.parsers.inline.InlineParser"></a>
+### InlineParser
+
+```python
+class InlineParser(Parser)
+```
+
+Inline parser implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import parsers`
 
 <a name="frictionless.extract"></a>
 ## frictionless.extract
@@ -2667,47 +2882,242 @@ Server representation
 <a name="frictionless.types.yearmonth"></a>
 ## frictionless.types.yearmonth
 
+<a name="frictionless.types.yearmonth.YearmonthType"></a>
+### YearmonthType
+
+```python
+class YearmonthType(Type)
+```
+
+Yearmonth type implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import types`
+
 <a name="frictionless.types.datetime"></a>
 ## frictionless.types.datetime
+
+<a name="frictionless.types.datetime.DatetimeType"></a>
+### DatetimeType
+
+```python
+class DatetimeType(Type)
+```
+
+Datetime type implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import types`
 
 <a name="frictionless.types.date"></a>
 ## frictionless.types.date
 
+<a name="frictionless.types.date.DateType"></a>
+### DateType
+
+```python
+class DateType(Type)
+```
+
+Date type implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import types`
+
 <a name="frictionless.types.string"></a>
 ## frictionless.types.string
+
+<a name="frictionless.types.string.StringType"></a>
+### StringType
+
+```python
+class StringType(Type)
+```
+
+String type implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import types`
 
 <a name="frictionless.types.object"></a>
 ## frictionless.types.object
 
+<a name="frictionless.types.object.ObjectType"></a>
+### ObjectType
+
+```python
+class ObjectType(Type)
+```
+
+Object type implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import types`
+
 <a name="frictionless.types.geojson"></a>
 ## frictionless.types.geojson
+
+<a name="frictionless.types.geojson.GeojsonType"></a>
+### GeojsonType
+
+```python
+class GeojsonType(Type)
+```
+
+Geojson type implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import types`
 
 <a name="frictionless.types.year"></a>
 ## frictionless.types.year
 
+<a name="frictionless.types.year.YearType"></a>
+### YearType
+
+```python
+class YearType(Type)
+```
+
+Year type implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import types`
+
 <a name="frictionless.types.integer"></a>
 ## frictionless.types.integer
+
+<a name="frictionless.types.integer.IntegerType"></a>
+### IntegerType
+
+```python
+class IntegerType(Type)
+```
+
+Integer type implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import types`
 
 <a name="frictionless.types.time"></a>
 ## frictionless.types.time
 
+<a name="frictionless.types.time.TimeType"></a>
+### TimeType
+
+```python
+class TimeType(Type)
+```
+
+Time type implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import types`
+
 <a name="frictionless.types.geopoint"></a>
 ## frictionless.types.geopoint
+
+<a name="frictionless.types.geopoint.GeopointType"></a>
+### GeopointType
+
+```python
+class GeopointType(Type)
+```
+
+Geopoint type implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import types`
 
 <a name="frictionless.types.array"></a>
 ## frictionless.types.array
 
+<a name="frictionless.types.array.ArrayType"></a>
+### ArrayType
+
+```python
+class ArrayType(Type)
+```
+
+Array type implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import types`
+
 <a name="frictionless.types.boolean"></a>
 ## frictionless.types.boolean
+
+<a name="frictionless.types.boolean.BooleanType"></a>
+### BooleanType
+
+```python
+class BooleanType(Type)
+```
+
+Boolean type implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import types`
 
 <a name="frictionless.types.any"></a>
 ## frictionless.types.any
 
+<a name="frictionless.types.any.AnyType"></a>
+### AnyType
+
+```python
+class AnyType(Type)
+```
+
+Any type implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import types`
+
 <a name="frictionless.types.duration"></a>
 ## frictionless.types.duration
 
+<a name="frictionless.types.duration.DurationType"></a>
+### DurationType
+
+```python
+class DurationType(Type)
+```
+
+Duration type implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import types`
+
 <a name="frictionless.types.number"></a>
 ## frictionless.types.number
+
+<a name="frictionless.types.number.NumberType"></a>
+### NumberType
+
+```python
+class NumberType(Type)
+```
+
+Number type implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import types`
 
 <a name="frictionless.loader"></a>
 ## frictionless.loader
@@ -2973,12 +3383,64 @@ Text control representation
 <a name="frictionless.loaders.remote"></a>
 ## frictionless.loaders.remote
 
+<a name="frictionless.loaders.remote.RemoteLoader"></a>
+### RemoteLoader
+
+```python
+class RemoteLoader(Loader)
+```
+
+Remote loader implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import loaders`
+
 <a name="frictionless.loaders.stream"></a>
 ## frictionless.loaders.stream
+
+<a name="frictionless.loaders.stream.StreamLoader"></a>
+### StreamLoader
+
+```python
+class StreamLoader(Loader)
+```
+
+Stream loader implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import loaders`
 
 <a name="frictionless.loaders.text"></a>
 ## frictionless.loaders.text
 
+<a name="frictionless.loaders.text.TextLoader"></a>
+### TextLoader
+
+```python
+class TextLoader(Loader)
+```
+
+Text loader implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import loaders`
+
 <a name="frictionless.loaders.local"></a>
 ## frictionless.loaders.local
+
+<a name="frictionless.loaders.local.LocalLoader"></a>
+### LocalLoader
+
+```python
+class LocalLoader(Loader)
+```
+
+Local loader implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import loaders`
 

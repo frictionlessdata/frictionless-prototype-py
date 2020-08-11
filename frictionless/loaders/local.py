@@ -3,6 +3,13 @@ from ..loader import Loader
 
 
 class LocalLoader(Loader):
+    """Local loader implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import loaders`
+
+    """
 
     # Read
 

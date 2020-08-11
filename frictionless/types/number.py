@@ -5,6 +5,14 @@ from ..type import Type
 
 
 class NumberType(Type):
+    """Number type implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import types`
+
+    """
+
     supported_constraints = [
         "required",
         "minimum",

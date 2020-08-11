@@ -3,6 +3,14 @@ from ..type import Type
 
 
 class ArrayType(Type):
+    """Array type implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import types`
+
+    """
+
     supported_constraints = [
         "required",
         "minLength",

@@ -5,6 +5,14 @@ from .. import config
 
 
 class DateType(Type):
+    """Date type implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import types`
+
+    """
+
     supported_constraints = [
         "required",
         "minimum",

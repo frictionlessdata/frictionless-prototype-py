@@ -6,6 +6,14 @@ from .. import errors
 
 
 class InlineParser(Parser):
+    """Inline parser implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import parsers`
+
+    """
+
     loading = False
     native_types = [
         "array",

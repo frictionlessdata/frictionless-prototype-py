@@ -4,6 +4,13 @@ from .. import config
 
 
 class TextLoader(Loader):
+    """Text loader implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import loaders`
+
+    """
 
     # Read
 

@@ -17,10 +17,14 @@ from . import helpers
 class Metadata(helpers.ControlledDict):
     """Metadata representation
 
-    # Arguments
-        descriptor? (str|dict): schema descriptor
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import Metadata`
 
-    # Raises
+    Parameters:
+        descriptor? (str|dict): metadata descriptor
+
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
@@ -68,23 +72,50 @@ class Metadata(helpers.ControlledDict):
 
     @property
     def metadata_valid(self):
+        """
+        Returns:
+            bool: whether the metadata is valid
+        """
         return not len(self.metadata_errors)
 
     @property
     def metadata_errors(self):
+        """
+        Returns:
+            Errors[]: a list of the metadata errors
+        """
         return list(self.metadata_validate())
 
     def setinitial(self, key, value):
+        """Set an initial item in a subclass' constructor
+
+        Parameters:
+            key (str): key
+            value (any): value
+        """
         if value is not None:
             dict.__setitem__(self, key, value)
 
     # Import/Export
 
     def to_dict(self):
+        """Convert metadata to a dict
+
+        Returns:
+            dict: metadata as a dict
+        """
         return self.copy()
 
     # NOTE: improve this code
     def to_json(self, target=None):
+        """Save metadata as a json
+
+        Parameters:
+            target (str): target path
+
+        Raises:
+            FrictionlessException: on any error
+        """
         if not target:
             return json.dumps(self.to_dict(), indent=2, ensure_ascii=False)
         try:
@@ -96,6 +127,14 @@ class Metadata(helpers.ControlledDict):
 
     # NOTE: improve this code
     def to_yaml(self, target=None):
+        """Save metadata as a yaml
+
+        Parameters:
+            target (str): target path
+
+        Raises:
+            FrictionlessException: on any error
+        """
         if not target:
             return yaml.dump(self.to_dict(), Dumper=IndentDumper)
         try:
@@ -108,6 +147,12 @@ class Metadata(helpers.ControlledDict):
     # Metadata
 
     def metadata_attach(self, name, value):
+        """Helper method for attaching a value to  the metadata
+
+        Parameters:
+            name (str): name
+            value (any): value
+        """
         if self.get(name) is not value:
             onchange = partial(metadata_attach, self, name)
             if isinstance(value, dict):
@@ -120,6 +165,11 @@ class Metadata(helpers.ControlledDict):
         return value
 
     def metadata_extract(self, descriptor):
+        """Helper method called during the metadata extraction
+
+        Parameters:
+            descriptor (any): descriptor
+        """
         try:
             if descriptor is None:
                 return {}
@@ -145,9 +195,16 @@ class Metadata(helpers.ControlledDict):
             raise exceptions.FrictionlessException(self.__Error(note=note)) from exception
 
     def metadata_process(self):
+        """Helper method called on any metadata change
+        """
         pass
 
     def metadata_validate(self, profile=None):
+        """Helper method called on any metadata change
+
+        Parameters:
+            profile (dict): a profile to validate against of
+        """
         profile = profile or self.metadata_profile
         if profile:
             validator_class = jsonschema.validators.validator_for(profile)
@@ -164,6 +221,14 @@ class Metadata(helpers.ControlledDict):
 
     @staticmethod
     def property(func=None, *, cache=True, reset=True, write=True):
+        """Create a metadata property
+
+        Parameters:
+            func (func): method
+            cache? (bool): cache
+            reset? (bool): reset
+            write? (func): write
+        """
 
         # Not caching
         if not cache:

@@ -3,6 +3,14 @@ from ..type import Type
 
 
 class YearmonthType(Type):
+    """Yearmonth type implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import types`
+
+    """
+
     supported_constraints = [
         "required",
         "minimum",

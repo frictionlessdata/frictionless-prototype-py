@@ -5,6 +5,14 @@ from ..type import Type
 
 
 class GeojsonType(Type):
+    """Geojson type implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import types`
+
+    """
+
     supported_constraints = [
         "required",
         "enum",

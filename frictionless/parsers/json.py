@@ -10,6 +10,14 @@ from .. import helpers
 
 
 class JsonParser(Parser):
+    """JSON parser implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import parser`
+
+    """
+
     native_types = [
         "array",
         "boolean",
@@ -54,6 +62,14 @@ class JsonParser(Parser):
 
 
 class JsonlParser(Parser):
+    """JSONL parser implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import parsers`
+
+    """
+
     native_types = [
         "array",
         "boolean",

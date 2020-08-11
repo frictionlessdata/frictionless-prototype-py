@@ -4,6 +4,13 @@ from .. import errors
 
 
 class StreamLoader(Loader):
+    """Stream loader implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import loaders`
+
+    """
 
     # Read
 

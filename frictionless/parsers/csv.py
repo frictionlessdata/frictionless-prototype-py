@@ -8,6 +8,14 @@ from .. import helpers
 
 
 class CsvParser(Parser):
+    """CSV parser implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import parsers`
+
+    """
+
     newline = ""
     native_types = [
         "string",

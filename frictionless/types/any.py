@@ -2,6 +2,14 @@ from ..type import Type
 
 
 class AnyType(Type):
+    """Any type implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import types`
+
+    """
+
     supported_constraints = [
         "required",
         "enum",

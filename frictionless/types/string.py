@@ -8,6 +8,14 @@ from ..type import Type
 
 
 class StringType(Type):
+    """String type implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import types`
+
+    """
+
     supported_constraints = [
         "required",
         "minLength",

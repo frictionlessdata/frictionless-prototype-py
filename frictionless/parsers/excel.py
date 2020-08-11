@@ -17,6 +17,14 @@ from .. import errors
 
 
 class XlsxParser(Parser):
+    """XLSX parser implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import parsers`
+
+    """
+
     native_types = [
         "boolean",
         "date",
@@ -128,6 +136,14 @@ class XlsxParser(Parser):
 
 
 class XlsParser(Parser):
+    """XLS parser implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import parsers`
+
+    """
+
     native_types = [
         "boolean",
         "date",
@@ -283,11 +299,9 @@ EXCEL_SECTION_DIVIDER = ";"
 
 
 def convert_excel_date_format_string(excel_date):
-    """
-    Created using documentation here:
-    https://support.office.com/en-us/article/review-guidelines-for-customizing-a-number-format-c0a1d1fa-d3f4-4018-96b7-9c9354dd99f5
+    # Created using documentation here:
+    # https://support.office.com/en-us/article/review-guidelines-for-customizing-a-number-format-c0a1d1fa-d3f4-4018-96b7-9c9354dd99f5
 
-    """
     # The python date string that is being built
     python_date = ""
     # The excel code currently being parsed
@@ -413,11 +427,8 @@ def convert_excel_date_format_string(excel_date):
 
 
 def convert_excel_number_format_string(excel_number, value):
-    """
-    A basic attempt to convert excel number_format to a number string
-
-    The important goal here is to get proper amount of rounding
-    """
+    # A basic attempt to convert excel number_format to a number string
+    # The important goal here is to get proper amount of rounding
     percentage = False
     if excel_number.endswith("%"):
         value = value * 100

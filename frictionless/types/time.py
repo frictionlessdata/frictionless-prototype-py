@@ -5,6 +5,14 @@ from .. import config
 
 
 class TimeType(Type):
+    """Time type implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import types`
+
+    """
+
     supported_constraints = [
         "required",
         "minimum",
