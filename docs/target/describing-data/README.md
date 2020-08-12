@@ -653,17 +653,21 @@ As we can see, it's now fixed. The metadata we'd had saved the day. If we explor
 
 ## Metadata Classes
 
-> This section is work-in-progress
+Frictionless has many classes that is derived from the `Metadata` class. It means that all of them can be treated as a metadata object with getters and setters, `to_json` and `to_yaml` function, and other Metadata's API. See "API Reference" for more information about these classes:
 
 - Package
 - Resource
 - Schema
 - Field
-- Dialect
 - Control
+- Dialect
+- Query
 - Report
+- Pipeline
 - Error
 - etc
+
+
 
 ## Inferring Metadata
 
@@ -885,7 +889,30 @@ You need to check `metadata.metadata_valid` only if you change it by hands; the 
 
 ## Mastering Metadata
 
-> This section is work-in-progress
+Metadata class is under the hood of many of Frictionless' classes. Let's overview main `Metadata` features. For a full reference, please read "API Reference". Let's take a look at the Metadata class which is a `dict` subclass:
+
+```text
+Metadata(dict)
+  metadata_attach
+  metadata_extract
+  metadata_process
+  metadata_validate
+  ---
+  metadata_valid
+  metadata_errors
+  ---
+  to_json
+  to_yaml
+```
+
+This class exists for subclassing and here is important points that will help to work with metadata objects and design and write new metadata classes:
+- to bind default values to a property it's possible to use `metadata_attach` (see e.g. the `Schema` class)
+- during the initialization a descriptor is processed by `metadata_extract`
+- metadata detect any shallow update and call `metadata_process`
+- checking for validity or errors will trigger `metadata_validate`
+- functions exporting to json and yaml are available be default
+- `metadata_profile` can be set to a JSON Schema
+- `metadata_Error` can be set to an Error class
 
 ## Infer Options
 
