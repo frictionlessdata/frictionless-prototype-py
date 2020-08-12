@@ -35,7 +35,7 @@ def from_notebook(source, target):
     command = f"python3 -m nbconvert --to markdown {target_py} --log-level 0"
     subprocess.run(command, shell=True, check=True)
     lines = []
-    opening = True
+    codeblock = []
     with open(target_md) as file:
         for index, line in enumerate(file.read().splitlines()):
             line = line.replace("[0m", "")
@@ -46,11 +46,18 @@ def from_notebook(source, target):
                     f"\n[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)]({source})\n\n"
                 )
             if line.startswith("```"):
-                if opening:
-                    #  line = "```python"
-                    opening = False
+                if not codeblock:
+                    codeblock.append("```python" if line == "```" else line)
                 else:
-                    opening = True
+                    codeblock.append("```")
+                    lines.extend(codeblock)
+                    codeblock = []
+                continue
+            if codeblock:
+                codeblock.append(line)
+                if line.startswith("!"):
+                    codeblock[0] = "```bash"
+                continue
             if "README_files" in line:
                 line = line.replace("README_files", "./README_files")
             lines.append(line)

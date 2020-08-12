@@ -18,7 +18,7 @@ In other words, "describing data" means creating metadata for your data files. T
 
 
 
-```
+```bash
 ! pip install frictionless
 ```
 
@@ -54,7 +54,7 @@ For example, if we want a Data Package descriptor for a single file:
 
 
 
-```
+```bash
 ! wget -q -O table.csv https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/table.csv
 ! cat table.csv
 ```
@@ -65,7 +65,7 @@ For example, if we want a Data Package descriptor for a single file:
 
 
 
-```
+```bash
 ! frictionless describe table.csv --source-type package
 ```
 
@@ -102,7 +102,7 @@ We're going to use this file for this section examples. For this guide, we use s
 
 
 
-```
+```bash
 ! wget -q -O country-1.csv https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/country-1.csv
 ! cat country-1.csv
 ```
@@ -119,7 +119,7 @@ Let's get Table Schema using Frictionless framework:
 
 
 
-```
+```python
 from frictionless import describe_schema
 
 schema = describe_schema("country-1.csv")
@@ -130,7 +130,7 @@ The high-level functions of Frictionless operate on dataset and resource levels 
 
 
 
-```
+```bash
 ! cat country.schema-simple.yaml
 ```
 
@@ -149,7 +149,7 @@ As we can see, we were able to get infer basic metadata of our data file but des
 
 
 
-```
+```python
 from frictionless import describe_schema
 
 schema = describe_schema("country-1.csv")
@@ -174,7 +174,7 @@ Let's break it down:
 
 
 
-```
+```bash
 ! cat country.schema.yaml
 ```
 
@@ -220,7 +220,7 @@ For this section, we will use the file that is slightly more complex to handle. 
 
 
 
-```
+```bash
 ! wget -q -O country-2.csv https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/country-2.csv
 ! cat country-2.csv
 ```
@@ -238,7 +238,7 @@ Let's describe it this time using the command-line interface:
 
 
 
-```
+```bash
 ! frictionless describe country-2.csv
 ```
 
@@ -267,7 +267,7 @@ OK, that's clearly wrong. As we have seen in the "Introductory Guide" Frictionle
 
 
 
-```
+```python
 from frictionless import describe_resource, Schema
 
 resource = describe_resource("country-2.csv")
@@ -284,7 +284,7 @@ So what we are doing here:
 
 
 
-```
+```bash
 ! cat country.resource.yaml
 ```
 
@@ -366,7 +366,7 @@ For this section, we will use the following files:
 
 
 
-```
+```bash
 ! wget -q -O country-3.csv https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/country-3.csv
 ! cat country-3.csv
 ```
@@ -380,7 +380,7 @@ For this section, we will use the following files:
 
 
 
-```
+```bash
 ! wget -q -O capital-3.csv https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/capital-3.csv
 ! cat capital-3.csv
 ```
@@ -397,7 +397,7 @@ First of all, let's describe our package using the command-line interface. We di
 
 
 
-```
+```bash
 ! frictionless describe *-3.csv
 ```
 
@@ -455,7 +455,7 @@ Following the already familiar to the guide's reader pattern, we add some additi
 
 
 
-```
+```python
 from frictionless import describe_package
 
 package = describe_package("*-3.csv")
@@ -473,7 +473,7 @@ In this case, we add a relation between different files connecting `id` and `cap
 
 
 
-```
+```bash
 ! cat country.package.yaml
 ```
 
@@ -567,7 +567,7 @@ Let's get back to this exotic data table:
 
 
 
-```
+```bash
 ! cat country-2.csv
 ```
 
@@ -584,7 +584,7 @@ As we tried before, by default Frictionless can't properly describe this file so
 
 
 
-```
+```bash
 ! frictionless describe country-2.csv
 ```
 
@@ -613,7 +613,7 @@ Trying to extract the data will fail the same way:
 
 
 
-```
+```bash
 ! frictionless extract country-2.csv
 ```
 
@@ -633,7 +633,7 @@ Basically, that's a really important idea - with not metadata many software will
 
 
 
-```
+```bash
 ! frictionless extract country.resource.yaml
 ```
 
@@ -671,7 +671,7 @@ Many Frictionless functions infer metadata under the hood as though `describe`, 
 
 
 
-```
+```python
 from pprint import pprint
 from frictionless import Resource
 
@@ -685,7 +685,7 @@ pprint(resource)
 Frictionless always tries to be as explicit as possible. We didn't provide any metadata except for `type` so we got the expected result. But now, we'd like to `infer` additional metadata:
 
 
-```
+```python
 resource.infer()
 pprint(resource)
 ```
@@ -722,7 +722,7 @@ By default, Frictionless never adds default values to metadata, for example:
 
 
 
-```
+```python
 from pprint import pprint
 from frictionless import describe
 
@@ -740,7 +740,7 @@ Under the hood it, for example, still treats empty string as missing values beca
 
 
 
-```
+```python
 resource.schema.expand()
 pprint(resource.schema)
 ```
@@ -767,7 +767,7 @@ We have seen it before but let's re-iterate; it's possible to transform core met
 
 
 
-```
+```python
 from frictionless import Resource
 
 resource = Resource("country.resource.yaml")
@@ -783,7 +783,7 @@ But not only the Python interface is available. Thanks to the flexibility of the
 
 
 
-```
+```python
 from frictionless import Resource
 
 resource = Resource("country.resource.yaml")
@@ -795,7 +795,7 @@ resource.to_yaml("country.resource.yaml")
 Let's check it out:
 
 
-```
+```bash
 ! cat country.resource.yaml
 ```
 
@@ -852,7 +852,7 @@ Metadata validity is an important topic so it's recommended to validate your met
 
 
 
-```
+```python
 from frictionless import Resource
 
 resource = Resource("country.resource.yaml")
@@ -869,7 +869,7 @@ Let's fix our resource metadata:
 
 
 
-```
+```python
 from frictionless import Resource
 
 resource = Resource("country.resource.yaml")
@@ -898,7 +898,7 @@ This option allows manually setting all the field types to a given type. It's us
 
 
 
-```
+```bash
 ! frictionless describe country-1.csv --infer-type string
 ```
 
@@ -935,7 +935,7 @@ Sometimes you don't want to use existent header row to compose field names. It's
 
 
 
-```
+```python
 from frictionless import describe
 
 resource = describe("country-1.csv", infer_names=["f1", "f2", "f3", "f4"])
@@ -951,7 +951,7 @@ By default, Frictionless will use the first 100 rows to detect field types. This
 
 
 
-```
+```python
 from frictionless import describe
 
 resource = describe("country-1.csv", infer_volume=1000)
@@ -963,7 +963,7 @@ By default, Frictionless uses 0.9 (90%) confidence level for data types detectio
 
 
 
-```
+```python
 from frictionless import describe
 
 resource = describe("country-1.csv", infer_confidence=1)
@@ -975,7 +975,7 @@ Missing Values is an important concept in data description. It provides informat
 
 
 
-```
+```python
 from pprint import pprint
 from frictionless import describe
 

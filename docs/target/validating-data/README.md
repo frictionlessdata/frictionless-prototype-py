@@ -7,12 +7,12 @@
 Tabular data validation is a process of identifying tabular problems that have place in your data for further correction. Let's explore how Frictionless helps to achieve this tasks using an invalid data table example:
 
 
-```
+```bash
 ! pip install frictionless
 ```
 
 
-```
+```bash
 ! wget -q -O capital.csv https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/capital-invalid.csv
 ! cat capital.csv
 ```
@@ -34,7 +34,7 @@ Tabular data validation is a process of identifying tabular problems that have p
 Using the command-line interface we can validate this file. Frictionless provides comprehensive error details so it's self-explanatory. Continue reading to learn the validation process in-details.
 
 
-```
+```bash
 ! frictionless validate capital.csv
 ```
 
@@ -75,7 +75,7 @@ $ frictionless validate --source-type table
 The `validate_schema` function is the only function validating solely metadata. Let's create a invalid table schema:
 
 
-```
+```python
 from frictionless import Schema
 
 schema = Schema()
@@ -86,7 +86,7 @@ schema.to_yaml('invalid.schema.yaml')
 And validate it using the command-line interface:
 
 
-```
+```bash
 ! frictionless validate invalid.schema.yaml
 ```
 
@@ -104,14 +104,14 @@ Schema validation can be very useful when you work with different classes of tab
 As it was shown in the "Describing Data" guide a resource is a container having both metadata and data. We need to create a resource descriptor to validate it:
 
 
-```
+```bash
 ! frictionless describe capital.csv --json > capital.resource.json
 ```
 
 Let's now use the command-line interface to ensure that we are getting the same result as we had withouth using a resource:
 
 
-```
+```bash
 ! frictionless validate capital.resource.json
 ```
 
@@ -129,7 +129,7 @@ Let's now use the command-line interface to ensure that we are getting the same 
 Okay, why do we need to use a resource descriptor if the result is the same? The reason is metadata + data packaging. Let's extend our resoure descriptor:
 
 
-```
+```python
 from frictionless import describe
 
 resource = describe('capital.csv')
@@ -141,7 +141,7 @@ resource.to_yaml('capital.resource.yaml')
 We have added a few bad metrics to our resource descriptor. The validation below reports it in addition to all the errors we had before. This example is showing how concepts like Data Resource can be extremely useful when working with data.
 
 
-```
+```bash
 ! frictionless validate capital.resource.yaml
 ```
 
@@ -163,7 +163,7 @@ We have added a few bad metrics to our resource descriptor. The validation below
 A package is a set of resources + additional metadata. To showcase a package validation we need one more tabular file:
 
 
-```
+```bash
 ! wget -q -O capital-valid.csv https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/capital-3.csv
 ! cat capital-valid.csv
 ```
@@ -179,7 +179,7 @@ A package is a set of resources + additional metadata. To showcase a package val
 Let's describe and validate a package:
 
 
-```
+```bash
 ! frictionless describe capital*.csv --json > capital.package.json
 ! frictionless validate capital.package.json
 ```
@@ -204,7 +204,7 @@ As we can see, the result is pretty straight-forward and expected: we have one i
 The Inquiry gives you an ability to create arbitrary validation jobs containing a set of individual validation taks. Let's create an inquiry that includes an individual file validation and a resource validation:
 
 
-```
+```python
 from frictionless import Inquiry
 
 inquiry = Inquiry({'tasks': [
@@ -217,7 +217,7 @@ inquiry.to_yaml('capital.inquiry.yaml')
 Tasks in the Inquiry accept the same arguments written in camelCase as the corresponding `validate` functions have. As usual, let' run validation:
 
 
-```
+```bash
 ! frictionless validate capital.inquiry.yaml
 ```
 
@@ -240,7 +240,7 @@ At first sight, it's no clear why such a construct exists but when your validati
 All the functions above except for `validate_schema` are just wrappers over the `validate_table` function. Below we will be talking a lot about the table validation so here will just provide a simple example:
 
 
-```
+```bash
 ! frictionless validate capital.csv --pick-errors duplicate-header
 ```
 
@@ -288,7 +288,7 @@ The `validate_table` function accept most of the `describe/extract` function's o
 All the `validate` functions return the Validation Report. It's an unified object containing information about a validation: source details, found error, etc. Let's explore a report:
 
 
-```
+```python
 from pprint import pprint
 from frictionless import validate
 
@@ -342,7 +342,7 @@ pprint(report)
 As we can see, there are a lot of information; you can find its details description in "API Reference". Errors are groupped by tables; for some validation there are can be dozens of tables. Let's use the `report.flatten` function to simplify errors representation:
 
 
-```
+```python
 from frictionless import validate
 
 report = validate('capital.csv', pick_errors=['duplicate-header'])
@@ -359,7 +359,7 @@ pprint(report.flatten(['rowPosition', 'fieldPosition', 'code', 'message']))
 In some situation, an error can't be associated with a table; then it goes to the top-level `report.errors` property:
 
 
-```
+```python
 from frictionless import validate_schema
 
 report = validate_schema('bad.json')
@@ -388,7 +388,7 @@ pprint(report)
 The Error object is at the heart of the validation process. The Report has `report.errors` and `report.tables[].errors` properties that can contain the Error object. Let's explore it:
 
 
-```
+```python
 from frictionless import validate
 
 report = validate('capital.csv', pick_errors=['duplicate-header'])
@@ -412,7 +412,7 @@ print(f'Description: "{error.description}"')
 Above, we have listed universal error properties. Depending on the type of an error there can be additional ones. For example, for our `duplicate-header` error:
 
 
-```
+```python
 from frictionless import validate
 
 report = validate('capital.csv', pick_errors=['duplicate-header'])
@@ -446,7 +446,7 @@ We have already seen a few mentions of error options like `pick_errors`. Let's t
 We can pick or skip errors providing a list of error codes. For example:
 
 
-```
+```python
 from frictionless import validate
 
 report1 = validate('capital.csv', pick_errors=['duplicate-header'])
@@ -465,7 +465,7 @@ pprint(report2.flatten(['rowPosition', 'fieldPosition', 'code']))
 It's also possible to use error tags (for more information please consult with "Errors Reference"):
 
 
-```
+```python
 from frictionless import validate
 
 report1 = validate('capital.csv', pick_errors=['#head'])
@@ -483,7 +483,7 @@ pprint(report2.flatten(['rowPosition', 'fieldPosition', 'code']))
 This option is self-explanatory and can be used when you need to "fail fast" or get a limited amount of errors:
 
 
-```
+```python
 from frictionless import validate
 
 report = validate('capital.csv', limit_errors=1)
@@ -502,7 +502,7 @@ Frictionless is a streaming engine; usually it's possible to validate terrabytes
 Default memory limit is 1000MB. You can adjust it based on your exact use case. For example, if you're running Frictionless as an API server you might reduce the memory usage. If a validation hits the limit it will not raise of fail - it will return a report with a task error:
 
 
-```
+```python
 from frictionless import validate
 
 source = lambda: ([integer] for integer in range(1, 100000000))
@@ -524,7 +524,7 @@ Ther are two check options: `checksum` and `extra_checks`. The first allows to s
 We can provide a hash string, the amount of bytes, and the amount of rows. Frictionless will ensure as a part of a validation that the actual values match the expected ones. Let's show for the hash:
 
 
-```
+```python
 from frictionless import validate
 
 report = validate('capital.csv', checksum={'hash': 'bad'}, pick_errors=['#checksum'])
@@ -537,7 +537,7 @@ print(report.flatten(["code", "note"]))
 The same can be show for the bytes and rows:
 
 
-```
+```python
 from frictionless import validate
 
 report = validate('capital.csv', checksum={'bytes': 10, 'rows': 10}, pick_errors=['#checksum'])
@@ -557,7 +557,7 @@ It's possible to provide a list of extra checks where individual checks are in t
 It's also possible to use a `Check` subclass instead of name which will be shown in the "Custom Checks" section. Let's have a loot at an example:
 
 
-```
+```python
 from frictionless import validate
 
 report = validate('capital.csv', extra_checks=[('sequential-value', {'fieldName': 'id'})])
@@ -579,7 +579,7 @@ See the sections below for a list of available checks.
 By default, Frictionless runs only the Baseline Check but includes vairous smaller checks revealing a great deal of tabular errors. There is a `report.tables[].scope` property to check what exact errors it have been checked for:
 
 
-```
+```python
 from frictionless import validate
 
 report = validate('capital.csv')

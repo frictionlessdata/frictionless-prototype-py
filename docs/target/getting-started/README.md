@@ -15,7 +15,7 @@ Let's get started with Frictionless! We will how how to install and use the fram
 
 
 
-```
+```bash
 ! pip install frictionless
 # pip install frictionless[sql] - to install a core plugin
 ```
@@ -34,12 +34,12 @@ For example, all the examples below do the same thing:
 
 
 
-```
+```bash
 ! wget -q -O invalid.csv https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/invalid.csv
 ```
 
 
-```
+```python
 from frictionless import extract
 
 rows = extract('invalid.csv')
@@ -73,7 +73,7 @@ We will take a very dirty data file:
 
 
 
-```
+```bash
 ! cat invalid.csv
 ```
 
@@ -88,7 +88,7 @@ Firt of all, let's infer the metadata. We can save and edit it to provide useful
 
 
 
-```
+```bash
 ! frictionless describe invalid.csv
 ```
 
@@ -123,7 +123,7 @@ Secondly, we can extract a normalized data. It conforms to the inferred schema f
 
 
 
-```
+```bash
 ! frictionless extract invalid.csv
 ```
 
@@ -141,7 +141,7 @@ Last but not least, let's get a validation report. This report will help us to f
 
 
 
-```
+```bash
 ! frictionless validate invalid.csv
 ```
 

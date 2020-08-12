@@ -7,12 +7,12 @@
 Extracting data means reading tabular data from some source. We can use various customization for this process as though providing a file format, table schema, limiting fields or rows amount, and many more. Let's see on real files:
 
 
-```
+```bash
 ! pip install frictionless
 ```
 
 
-```
+```bash
 ! wget -q -O country-3.csv https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/country-3.csv
 ! cat country-3.csv
 ```
@@ -26,7 +26,7 @@ Extracting data means reading tabular data from some source. We can use various 
 
 
 
-```
+```bash
 ! wget -q -O capital-3.csv https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/capital-3.csv
 ! cat capital-3.csv
 ```
@@ -42,7 +42,7 @@ Extracting data means reading tabular data from some source. We can use various 
 For a starter, we will use the command-line interface:
 
 
-```
+```bash
 ! frictionless extract country-3.csv
 ```
 
@@ -60,7 +60,7 @@ For a starter, we will use the command-line interface:
 The same can be done in Python:
 
 
-```
+```python
 from pprint import pprint
 from frictionless import extract
 
@@ -101,7 +101,7 @@ The `extract` functions always read data in a form of rows (see the object descr
 The easiest way is to use a command line-interface. We're going to provide two files to the `extract` command which will be enough to detect that it's a dataset:
 
 
-```
+```bash
 ! frictionless extract *-3.csv
 ```
 
@@ -129,7 +129,7 @@ The easiest way is to use a command line-interface. We're going to provide two f
 In Python we have can do the same providing a glob for the `extract` function but instead we will use `extract_package` providing a package descriptor:
 
 
-```
+```python
 from frictionless import extract_package
 
 data = extract_package({'resources':[{'path': 'country-3.csv'}, {'path': 'capital-3.csv'}]})
@@ -157,7 +157,7 @@ for path, rows in data.items():
 A resource contains only one file and for extracting a resource we can use the same approach we used above but providing only one file. We will extract data using a metadata descriptor:
 
 
-```
+```python
 from frictionless import extract_resource
 
 rows = extract_resource({'path': 'capital-3.csv'})
@@ -174,7 +174,7 @@ pprint(rows)
 Usually, the code above doesn't really make sense as we can just provide a path to the high-level `extract` function instead of a descriptor to the `extract_resource` function but the power of the descriptor is that it can contain different metadata and be stored on the disc. Let's extend our example:
 
 
-```
+```python
 from frictionless import Resource
 
 resource = Resource(path='capital-3.csv')
@@ -183,7 +183,7 @@ resource.to_yaml('capital.resource.yaml')
 ```
 
 
-```
+```bash
 ! cat capital.resource.yaml
 ```
 
@@ -195,7 +195,7 @@ resource.to_yaml('capital.resource.yaml')
 
 
 
-```
+```bash
 ! frictionless extract capital.resource.yaml
 ```
 
@@ -217,7 +217,7 @@ So what's happened? We set textual representation of the number "3" to be a miss
 While the package and resource concepts contain both data and metadata, a table is solely data. Because of this fact we can provide much more options to the `extract_table` function. Most of this options are encapsulated into the resource descriptor as we saw with the `missingValues` example above. We will reproduce it:
 
 
-```
+```python
 from frictionless import extract_table
 
 rows = extract_table('capital-3.csv', patch_schema={'missingValues': ['', '3']})
@@ -260,14 +260,14 @@ We will take a loot at all the `extract_table` options in the sections below. As
 The Package class is a metadata class which provides an ability to read its contents. First of all, let's create a package descriptor:
 
 
-```
+```bash
 ! frictionless describe *-3.csv --json > country.package.json
 ```
 
 Now, we can open the created descriptor and read the package's resources:
 
 
-```
+```python
 from frictionless import Package
 
 package = Package('country.package.json')
@@ -295,7 +295,7 @@ The package by itself doesn't provide any read functions directly as it's a role
 The Resource class is also a metadata class which provides various read and stream functions. Let's create a resource descriptor:
 
 
-```
+```bash
 ! frictionless describe country-3.csv --json > country.resource.json
 ```
 
@@ -304,7 +304,7 @@ The Resource class is also a metadata class which provides various read and stre
 There are various function helping to explore your resource as checking headers, and other attributes as stats:
 
 
-```
+```python
 from frictionless import Resource
 
 resource = Resource('country.resource.json')
@@ -327,7 +327,7 @@ pprint(resource.read_stats())
 The `extract` functions always read rows into memory; Resource can do the same but it also gives a choice regarding ouput data. It can be `rows`, `data`, `text`, or `bytes`. Let's try reading all of them:
 
 
-```
+```python
 from frictionless import Resource
 
 resource = Resource('country.resource.json')
@@ -362,7 +362,7 @@ pprint(resource.read_rows())
 It's really handy to read all your data into memory but it's not always possible as a file can be really big. For such cases, Frictionless provides streaming functions:
 
 
-```
+```python
 from frictionless import Resource
 
 resource = Resource('country.resource.json')
@@ -396,7 +396,7 @@ First of all, let's take a look at the file details information:
 
 
 
-```
+```python
 from frictionless import Table
 
 with Table('capital-3.csv') as table:
@@ -421,7 +421,7 @@ with Table('capital-3.csv') as table:
 There are much more information available; we will explain some of it later in the the sections below:
 
 
-```
+```python
 from frictionless import Table
 
 with Table('capital-3.csv') as table:
@@ -446,7 +446,7 @@ with Table('capital-3.csv') as table:
 Many of the properties above not only can be read from the existent Table but also can be provided as an option to alter the Table behaviour, for example:
 
 
-```
+```python
 from frictionless import Table
 
 with Table('capital-3.csv', scheme='file', format='csv') as table:
@@ -465,7 +465,7 @@ with Table('capital-3.csv', scheme='file', format='csv') as table:
 There are 2 different types of ouput that Table can produce:
 
 
-```
+```python
 from frictionless import Table
 
 with Table('capital-3.csv') as table:
@@ -493,7 +493,7 @@ The `data` format is just a raw array of arrays similiar to JSON while the `row`
 It was mentioned for Resource and it's the same for Table, we can stream our tabular data. The core difference is that Table is stateful so we use properties instead of the read functions:
 
 
-```
+```python
 from frictionless import Table
 
 with Table('capital-3.csv') as table:
@@ -525,7 +525,7 @@ with Table('capital-3.csv') as table:
 You might probably have noticed that we had to duplicate the `with Table(...)` statement in some example. The reason is that Table is a streaming interface. Once it's read you need to open it again. Let's show it on example:
 
 
-```
+```python
 from frictionless import Table
 
 table = Table('capital-3.csv')
@@ -561,7 +561,7 @@ Let's overview the details we can specify for a file. Usually you don't need to 
 The scheme also know as protocol indicates which loader Frictionless should use to read or write data. It can be `file` (default), `text`, `http`, `https`, `s3`, and others.
 
 
-```
+```python
 from frictionless import Table
 
 with Table('header1,header2\nvalue1,value2.csv', scheme='text') as table:
@@ -578,7 +578,7 @@ with Table('header1,header2\nvalue1,value2.csv', scheme='text') as table:
 The format or as it's also called extension helps Frictionless to choose a proper parser to handle the file. Popular formats are `csv`, `xlsx`, `json` and others
 
 
-```
+```python
 from frictionless import Table
 
 with Table('text://header1,header2\nvalue1,value2.csv', format='csv') as table:
@@ -595,7 +595,7 @@ with Table('text://header1,header2\nvalue1,value2.csv', format='csv') as table:
 The hashing option controls which hashing algorithm should be used for generating the `hash` property. It doesn't affect the `extract` function but can be used with the `Table` class:
 
 
-```
+```python
 from frictionless import Table
 
 with Table('country-3.csv', hashing='sha256') as table:
@@ -613,7 +613,7 @@ with Table('country-3.csv', hashing='sha256') as table:
 Frictionless automatically detects encoding of files but sometimes it can be innacurate. It's possible to provide an encoding manually:
 
 
-```
+```python
 from frictionless import Table
 
 with Table('country-3.csv', encoding='utf-8') as table:
@@ -630,12 +630,12 @@ with Table('country-3.csv', encoding='utf-8') as table:
 It's possible to adjust compression detection by providing the algorithm explicetely. For the example below it's not required as it would be detected anyway:
 
 
-```
+```bash
 ! wget -q -O table.csv.zip https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/table.csv.zip
 ```
 
 
-```
+```python
 from frictionless import Table
 
 with Table('table.csv.zip', compression='zip') as table:
@@ -652,12 +652,12 @@ with Table('table.csv.zip', compression='zip') as table:
 By default, Frictionless uses the first file found in a zip archive. It's possible to adjust this behaviour:
 
 
-```
+```bash
 ! wget -q -O table-multiple-files.zip https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/table-multiple-files.zip
 ```
 
 
-```
+```python
 from frictionless import Table
 
 with Table('table-multiple-files.zip', compression_path='table-reverse.csv') as table:
@@ -680,7 +680,7 @@ Further reading:
 The Control object allows you to manage the loader used by the Table class. In most cases, you don't need to provide any Control settings but sometimes it can be useful:
 
 
-```
+```python
 from frictionless import Table, controls
 
 source = 'https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/table.csv'
@@ -701,7 +701,7 @@ Exact parameters depend on schemes and can be found in the "Schemes Reference". 
 It's a function that can be provided to adjust the encoding detection. This function accept a data sample and return a detected encoding:
 
 
-```
+```python
 from frictionless import Table, controls
 
 control = controls.Control(detect_encoding=lambda sample: "utf-8")
@@ -722,7 +722,7 @@ Further reading:
 The Dialect adjust the way tabular parsers work. The concept is similiar to the Control above. Let's use the CSV Dialect to adjust the delimiter configuration:
 
 
-```
+```python
 from frictionless import Table, dialects
 
 source = 'header1;header2\nvalue1;value2'
@@ -743,7 +743,7 @@ There is a great deal of options available for different dialect that can be fou
 It's a boolean flag wich deaults to `True` indicating whether the data has a header row or not. In the following example the header row will be treated as a data row:
 
 
-```
+```python
 from frictionless import Table, dialects
 
 dialect = dialects.Dialect(header=False)
@@ -766,7 +766,7 @@ with Table('capital-3.csv', dialect=dialect) as table:
 If header is `True` which is default, this parameters indicates where to find the header row or header rows for a multiline header. Let's see on example how the first two data rows can be treated as a part of a header:
 
 
-```
+```python
 from frictionless import Table, dialects
 
 dialect = dialects.Dialect(header_rows=[1, 2, 3])
@@ -786,7 +786,7 @@ with Table('capital-3.csv', dialect=dialect) as table:
 If there are multiple header rows which is managed by `header_rows` parameter, we can set a string to be a separator for a header's cell join operation. Usually it's very handy for some "fancy" Excel files. For the sake of simplicity, we will show on a CSV file:
 
 
-```
+```python
 from frictionless import Table, dialects
 
 dialect = dialects.Dialect(header_rows=[1, 2, 3], header_join='/')
@@ -809,7 +809,7 @@ Further reading:
 Using header management described in the "Table Dialect" section we can have a basic skipping rows ability e.g. if we set `dialect.header_rows=[2]` we will skip the first row but it's very limited. There is a much more powerful interface called Table Queries to indicate where exactly to get tabular data from a file. We will use a simple file looking like a matrix:
 
 
-```
+```bash
 ! wget -q -O matrix.csv https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/matrix.csv
 ! cat matrix.csv
 ```
@@ -826,7 +826,7 @@ Using header management described in the "Table Dialect" section we can have a b
 We can pick and skip arbitrary fields based on a header row. These options accept a list of field numbers, a list of strings or a regex to match. All the queries below do the same thing for this file:
 
 
-```
+```python
 from frictionless import extract, Query
 
 print(extract('matrix.csv', query=Query(pick_fields=[2, 3])))
@@ -850,7 +850,7 @@ print(extract('matrix.csv', query=Query(skip_fields=['<regex>f[14]'])))
 There are two options that provide an ability to limit amount of fields similiar to SQL's directives:
 
 
-```
+```python
 from frictionless import extract, Query
 
 print(extract('matrix.csv', query=Query(limit_fields=2)))
@@ -866,7 +866,7 @@ print(extract('matrix.csv', query=Query(offset_fields=2)))
 It's alike the field counterparts but it will be compared to the first cell of a row. All the queries below do the same thing for this file but take into account that when picking we need to also pick a header row. In addition, there is special value `<blank>` that matches a row if it's competely blank:
 
 
-```
+```python
 from frictionless import extract, Query
 
 print(extract('matrix.csv', query=Query(pick_rows=[1, 3, 4])))
@@ -892,7 +892,7 @@ print(extract('matrix.csv', query=Query(pick_rows=['<blank>'])))
 It's a quite popular option used to limit amount of rows to read:
 
 
-```
+```python
 from frictionless import extract, Query
 
 print(extract('matrix.csv', query=Query(limit_rows=2)))
@@ -911,7 +911,7 @@ Header management is a responsibility of "Table Dialect" which will be described
 It accepts a `False` values indicating that there is no header row:
 
 
-```
+```python
 from frictionless import Table
 
 with Table('capital-3.csv', headers=False) as table:
@@ -932,7 +932,7 @@ with Table('capital-3.csv', headers=False) as table:
 It accepts an integer indicating the header row number:
 
 
-```
+```python
 from frictionless import Table
 
 with Table('capital-3.csv', headers=2) as table:
@@ -950,7 +950,7 @@ with Table('capital-3.csv', headers=2) as table:
 It accepts a list of integers indicating a multiline header row numbers:
 
 
-```
+```python
 from frictionless import Table
 
 with Table('capital-3.csv', headers=[1,2,3]) as table:
@@ -968,7 +968,7 @@ It accepts a pair containing a list of integers indicating a multiline header ro
 
 
 
-```
+```python
 from frictionless import Table
 
 with Table('capital-3.csv', headers=[[1,2,3], '/']) as table:
@@ -991,7 +991,7 @@ By default, a schema for a table is inferred under the hood but we can also pass
 The most common way is providing a schema argument to the Table constructor. For example, let's make the `id` field be a string instead of an integer:
 
 
-```
+```python
 from frictionless import Table, Schema, Field
 
 schema = Schema(fields=[Field(name='id', type='string'), Field(name='name', type='string')])
@@ -1014,7 +1014,7 @@ with Table('capital-3.csv', schema=schema) as table:
 There is a way to sync provided schema based on a header row's field order. It's very useful when you have a schema that represents only a subset of the table's fields:
 
 
-```
+```python
 from frictionless import Table, Schema, Field
 
 # Note the order of the fields
@@ -1038,7 +1038,7 @@ with Table('capital-3.csv', schema=schema, sync_schema=True) as table:
 Sometimes we just want to update only a few fields or some schema's properties without providing a brand new schema. For example, the two examples above can be simplified as:
 
 
-```
+```python
 from frictionless import Table
 
 with Table('capital-3.csv', patch_schema={'fields': {'id': {'type': 'string'}}}) as table:

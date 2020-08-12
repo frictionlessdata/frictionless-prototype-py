@@ -8,12 +8,12 @@ Let's say we have a few raw data files. It's been just collected by the data res
 
 
 
-```
+```bash
 ! pip install frictionless
 ```
 
 
-```
+```bash
 ! wget -q -O countries.csv https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/countries.csv
 ! cat countries.csv
 ```
@@ -42,7 +42,7 @@ Let's describe the `countries` table:
 
 
 
-```
+```bash
 ! frictionless describe countries.csv
 ```
 
@@ -86,7 +86,7 @@ Let's update our metadata and save it to the disc:
 
 
 
-```
+```python
 from frictionless import describe
 
 resource = describe("countries.csv", infer_missing_values=["", "n/a"])
@@ -101,7 +101,7 @@ Let's see what we have created:
 
 
 
-```
+```bash
 ! cat countries.resource.yaml
 ```
 
@@ -151,7 +151,7 @@ It's time to try extracting our data as a table. As a first naive attempt, we wi
 
 
 
-```
+```bash
 ! frictionless extract countries.csv
 ```
 
@@ -175,7 +175,7 @@ Let's use the metadata we save to try extracting data with the help of Frictionl
 
 
 
-```
+```bash
 ! frictionless extract countries.resource.yaml
 ```
 
@@ -199,7 +199,7 @@ Data validation with Frictionless is as easy as describing or extracting data:
 
 
 
-```
+```bash
 ! frictionless validate countries.csv
 ```
 
@@ -217,7 +217,7 @@ Ahh, we had seen that coming. The data is not valid; there are some missing and 
 
 
 
-```
+```bash
 ! frictionless validate countries.resource.yaml
 ```
 
@@ -250,7 +250,7 @@ We will use metadata to fix all the data type problems automatically. The only t
 
 
 
-```
+```python
 from frictionless import Resource, Table
 
 def source():
@@ -272,7 +272,7 @@ Finally, we've got the cleaned version of our data, which can be exported to a d
 
 
 
-```
+```bash
 ! cat countries-cleaned.csv
 ```
 
@@ -286,7 +286,7 @@ We also need to update our metadata file:
 
 
 
-```
+```python
 from frictionless import Resource, describe
 
 source = Resource("countries.resource.yaml")
@@ -299,7 +299,7 @@ After running this script our metadata will be:
 
 
 
-```
+```bash
 ! cat countries-cleaned.resource.yaml
 ```
 
@@ -340,7 +340,7 @@ Basically, that's it; now, we have a valid data file and a corresponding metadat
 
 
 
-```
+```bash
 ! ls -la countries.*
 ```
 

@@ -22,12 +22,12 @@ Of course, it's not only possible to use pipelines to transform data in Friction
 
 
 
-```
+```bash
 ! pip install frictionless[dataflows]
 ```
 
 
-```
+```bash
 ! wget -q -O capital.csv https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/capital-3.csv
 ! cat capital.csv
 ```
@@ -52,7 +52,7 @@ The high-level interface for validating data provided by Frictionless is a set o
 Let's see how we can use a package pipelines to transform data using [DataFlows](http://www.dataflows.org/):
 
 
-```
+```bash
 ! wget -q -O pipeline.yaml https://raw.githubusercontent.com/frictionlessdata/frictionless-py/master/data/pipeline-docs.yaml
 ! cat pipeline.yaml
 ```
@@ -74,14 +74,14 @@ Let's see how we can use a package pipelines to transform data using [DataFlows]
 
 
 
-```
+```bash
 ! frictionless transform pipeline.yaml
 ```
 
 Of course, it's possible to do the same using Python programming:
 
 
-```
+```python
 from frictionless import transform
 
 transform(
@@ -97,7 +97,7 @@ transform(
 ```
 
 
-```
+```bash
 ! ls -la output
 ```
 
@@ -109,7 +109,7 @@ transform(
 
 
 
-```
+```bash
 ! frictionless extract output/datapackage.json
 ```
 
@@ -150,7 +150,7 @@ The `transform_resource` functions doesn't accept any additional arguments.
 On the lowest-level of the transform capabilities we can just use the Table class for whatever manipulations we are interested in. It's just pure Python so you can re-use all your programming skills here. Also, it's important to mention that the approach below is streaming so we can handle very big files. Let's see on an example:
 
 
-```
+```python
 from pprint import pprint
 from frictionless import Table
 
