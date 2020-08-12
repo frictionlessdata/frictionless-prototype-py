@@ -1057,21 +1057,97 @@ with Table('capital-3.csv', patch_schema={'fields': {'id': {'type': 'string'}}})
 
 ## Integrity Options
 
-> This section is work-in-progress
-
 Exctraction function and classes accepts only one integrity option:
 
 
 **Lookup**
 
-The lookup is a special object providing relational information in cases when it's not impossible to extract. For example, the Package is capable to get a lookup object from its resource while a table object needs it to be provided.
+The lookup is a special object providing relational information in cases when it's not impossible to extract. For example, the Package is capable to get a lookup object from its resource while a table object needs it to be provided. Let's see on an example:
+
+
+```python
+from frictionless import Table
+
+source = [["name"], [1], [2], [4]]
+lookup = {"other": {("name",): {(1,), (2,), (3,)}}}
+fk = {"fields": ["name"], "reference": {"fields": ["name"], "resource": "other"}}
+with Table(source, lookup=lookup, patch_schema={"foreignKeys": [fk]}) as table:
+    for row in table:
+        if row.row_number == 3:
+            assert row.valid is False
+            assert row.errors[0].code == "foreign-key-error"
+            continue
+        assert row.valid
+
+```
 
 ## Headers Object
 
-> This section is work-in-progress
+After opening a table or calling `resource.read_headers` you get an access to a `headers` object. It's a list but providing some additional functionality. Let's take a look:
 
 
+
+
+```python
+from frictionless import Table
+
+with Table('capital-3.csv') as table:
+  print(f'Headers: {table.headers}')
+  print(f'Schema: {table.headers.schema}')
+  print(f'Field Positions: {table.headers.field_positions}')
+  print(f'Errors: {table.headers.errors}')
+  print(f'Valid: {table.headers.valid}')
+  print(f'As Dict: {table.headers.to_dict()}') # field name: header cell
+  print(f'As List: {table.headers.to_list()}')
+```
+
+    Headers: ['id', 'name']
+    Schema: {'fields': [{'name': 'id', 'type': 'integer'}, {'name': 'name', 'type': 'string'}]}
+    Field Positions: [1, 2]
+    Errors: []
+    Valid: True
+    As Dict: {'id': 'id', 'name': 'name'}
+    As List: ['id', 'name']
+
+
+The example above covers the case when a header is valid. For a header with tabular errors this information can be much more useful revealing discrepancies, dublicates or missing cells information. Please read "API Reference" for more details.
 
 ## Row Object
 
-> This section is work-in-progress
+The `extract`, `resource.read_rows()`, `table.read_rows()`, and many other functions retunrs or yeilds row objects. It's a `OrderedDict` providing additional API shown below:
+
+
+
+```python
+from frictionless import Table
+
+with Table('capital-3.csv', patch_schema={'missingValues': ['1']}) as table:
+  for row in table:
+    print(f'Row: {row}')
+    print(f'Schema: {row.schema}')
+    print(f'Field Positions: {row.field_positions}')
+    print(f'Row Position: {row.row_position}') # physical line number starting from 1
+    print(f'Row Number: {row.row_number}') # counted row number starting from 1
+    print(f'Blank Cells: {row.blank_cells}')
+    print(f'Error Cells: {row.error_cells}')
+    print(f'Errors: {row.errors}')
+    print(f'Valid: {row.valid}')
+    print(f'As Dict: {row.to_dict(json=False)}')
+    print(f'As List: {row.to_list(json=True)}') # JSON compatible data types
+    break
+```
+
+    Row: Row([('id', None), ('name', 'London')])
+    Schema: {'fields': [{'name': 'id', 'type': 'integer'}, {'name': 'name', 'type': 'string'}], 'missingValues': ['1']}
+    Field Positions: [1, 2]
+    Row Position: 2
+    Row Number: 1
+    Blank Cells: {'id': '1'}
+    Error Cells: {}
+    Errors: []
+    Valid: True
+    As Dict: {'id': None, 'name': 'London'}
+    As List: [None, 'London']
+
+
+As we can see, it provides a lot of information which is especially useful when a row is not valid. Our row is valid but we demostrated how it can preserve data about raw missing values. It also preserves data about all errored cells. Please read "API Reference" for more details.
