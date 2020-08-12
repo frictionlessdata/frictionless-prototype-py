@@ -1,8 +1,12 @@
 class FrictionlessException(Exception):
     """Main Frictionless exception
 
-    # Arguments
-        error
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import exceptions`
+
+    Parameters:
+        error (Error): an underlaying error
 
     """
 
@@ -12,4 +16,8 @@ class FrictionlessException(Exception):
 
     @property
     def error(self):
+        """
+        Returns:
+            Error: error
+        """
         return self.__error

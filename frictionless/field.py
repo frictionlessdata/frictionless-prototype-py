@@ -14,24 +14,25 @@ from . import config
 class Field(Metadata):
     """Field representation
 
-    # Arguments
-        descriptor? (str|dict): field descriptor
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import Field`
 
-        name? (str): name
-        type? (str): type
-        format? (str): format
-        missing_values? (str[]): missing_values
+    Parameters:
+        descriptor? (str|dict): field descriptor
+        name? (str): field name (for machines)
+        title? (str): field title (for humans)
+        descriptor? (str): field descriptor
+        type? (str): field type e.g. `string`
+        format? (str): field format e.g. `default`
+        missing_values? (str[]): missing values
         constraints? (dict): constraints
         schema? (Schema): parent schema object
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
-
-    metadata_Error = errors.FieldError  # type: ignore
-    metadata_profile = config.SCHEMA_PROFILE["properties"]["fields"]["items"]
-    metadata_duplicate = True
 
     def __init__(
         self,
@@ -59,22 +60,42 @@ class Field(Metadata):
 
     @Metadata.property
     def name(self):
+        """
+        Returns:
+            str: name
+        """
         return self.get("name", "field")
 
     @Metadata.property
     def title(self):
+        """
+        Returns:
+            str?: title
+        """
         return self.get("title")
 
     @Metadata.property
     def description(self):
+        """
+        Returns:
+            str?: description
+        """
         return self.get("description")
 
     @Metadata.property
     def type(self):
+        """
+        Returns:
+            str: type
+        """
         return self.get("type", "any")
 
     @Metadata.property
     def format(self):
+        """
+        Returns:
+            str: format
+        """
         format = self.get("format", "default")
         if format.startswith("fmt:"):
             warnings.warn(
@@ -87,6 +108,10 @@ class Field(Metadata):
 
     @Metadata.property
     def missing_values(self):
+        """
+        Returns:
+            str[]: missing values
+        """
         schema = self.__schema
         default = schema.missing_values if schema else copy(config.DEFAULT_MISSING_VALUES)
         missing_values = self.get("missingValues", default)
@@ -94,6 +119,10 @@ class Field(Metadata):
 
     @Metadata.property
     def constraints(self):
+        """
+        Returns:
+            dict: constraints
+        """
         constraints = self.get("constraints", {})
         return self.metadata_attach("constraints", constraints)
 
@@ -101,17 +130,29 @@ class Field(Metadata):
         write=lambda self, value: setitem(self.constraints, "required", value)
     )
     def required(self):
+        """
+        Returns:
+            bool: if field is requried
+        """
         return self.constraints.get("required", False)
 
     # Boolean
 
     @Metadata.property
     def true_values(self):
+        """
+        Returns:
+            str[]: true values
+        """
         true_values = self.get("trueValues", config.DEFAULT_TRUE_VALUES)
         return self.metadata_attach("trueValues", true_values)
 
     @Metadata.property
     def false_values(self):
+        """
+        Returns:
+            str[]: false values
+        """
         false_values = self.get("falseValues", config.DEFAULT_FALSE_VALUES)
         return self.metadata_attach("falseValues", false_values)
 
@@ -119,19 +160,33 @@ class Field(Metadata):
 
     @Metadata.property
     def bare_number(self):
+        """
+        Returns:
+            bool: if a bare number
+        """
         return self.get("bareNumber", config.DEFAULT_BARE_NUMBER)
 
     @Metadata.property
     def decimal_char(self):
+        """
+        Returns:
+            str: decimal char
+        """
         return self.get("decimalChar", config.DEFAULT_DECIMAL_CHAR)
 
     @Metadata.property
     def group_char(self):
+        """
+        Returns:
+            str: group char
+        """
         return self.get("groupChar", config.DEFAULT_GROUP_CHAR)
 
     # Expand
 
     def expand(self):
+        """Expand metadata
+        """
         self.setdefault("name", "field")
         self.setdefault("type", "any")
         self.setdefault("format", "default")
@@ -153,10 +208,10 @@ class Field(Metadata):
     def read_cell(self, cell):
         """Read cell (cast)
 
-        # Arguments
+        Parameters:
             cell (any): cell
 
-        # Returns
+        Returns:
             (any, OrderedDict): processed cell and dict of notes
 
         """
@@ -178,10 +233,10 @@ class Field(Metadata):
     def read_cell_cast(self, cell):
         """Read cell low-level (cast)
 
-        # Arguments
+        Parameters:
             cell (any): cell
 
-        # Returns
+        Returns:
             any/None: processed cell or None if an error
 
         """
@@ -191,7 +246,7 @@ class Field(Metadata):
     def read_cell_checks(self):
         """Read cell low-level (cast)
 
-        # Returns
+        Returns:
             OrderedDict: dictionlary of check function by a constraint name
 
         """
@@ -211,10 +266,10 @@ class Field(Metadata):
     def write_cell(self, cell):
         """Write cell (cast)
 
-        # Arguments
+        Parameters:
             cell (any): cell
 
-        # Returns
+        Returns:
             (any, OrderedDict): processed cell and dict of notes
 
         """
@@ -231,10 +286,10 @@ class Field(Metadata):
     def write_cell_cast(self, cell):
         """Write cell low-level (cast)
 
-        # Arguments
+        Parameters:
             cell (any): cell
 
-        # Returns
+        Returns:
             any/None: processed cell or None if an error
 
         """
@@ -243,6 +298,11 @@ class Field(Metadata):
     # Import/Export
 
     def to_dict(self, expand=False):
+        """Convert field to dict
+
+        Parameters:
+            expand (bool): whether to expand
+        """
         result = super().to_dict()
         if expand:
             result = type(self)(result)
@@ -268,6 +328,12 @@ class Field(Metadata):
             if name not in self.__type.supported_constraints + ["unique"]:
                 note = f'constraint "{name}" is not supported by type "{self.type}"'
                 yield errors.SchemaError(note=note)
+
+    # Metadata
+
+    metadata_Error = errors.FieldError  # type: ignore
+    metadata_profile = config.SCHEMA_PROFILE["properties"]["fields"]["items"]
+    metadata_duplicate = True
 
 
 # Internal

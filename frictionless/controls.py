@@ -8,21 +8,18 @@ from . import config
 class Control(Metadata):
     """Control representation
 
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import controls`
+
     Parameters:
         descriptor? (str|dict): descriptor
-        detectEncoding? (func): detectEncoding
+        detectEncoding? (func):  a function to detect encoding `(sample) -> encoding`
 
     Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
-
-    metadata_Error = errors.ControlError
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {"detectEncoding": {}},
-    }
 
     def __init__(self, descriptor=None, *, detect_encoding=None):
         self.setinitial("detectEncoding", detect_encoding)
@@ -30,6 +27,10 @@ class Control(Metadata):
 
     @Metadata.property
     def detect_encoding(self):
+        """
+        Returns:
+            func: detect encoding function
+        """
         return self.get("detectEncoding", helpers.detect_encoding)
 
     # Expand
@@ -47,6 +48,15 @@ class Control(Metadata):
             result = result.to_dict()
         return result
 
+    # Metadata
+
+    metadata_Error = errors.ControlError
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {"detectEncoding": {}},
+    }
+
 
 class LocalControl(Control):
     """Local control representation
@@ -58,6 +68,8 @@ class LocalControl(Control):
         FrictionlessException: raise any error that occurs during the process
 
     """
+
+    # Metadata
 
     metadata_profile = {  # type: ignore
         "type": "object",
@@ -71,26 +83,14 @@ class RemoteControl(Control):
 
     Parameters:
         descriptor? (str|dict): descriptor
-        http_session? (any): http_session
-        http_preload? (bool): http_preload
-        http_timeout? (int): http_timeout
-        detectEncoding? (func): detectEncoding
+        http_session? (requests.Session): user defined HTTP session
+        http_preload? (bool): don't use HTTP streaming and preload all the data
+        http_timeout? (int): user defined HTTP timeout in minutes
 
     Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
-
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {
-            "httpSession": {},
-            "httpPreload": {"type": "boolean"},
-            "httpTimeout": {"type": "number"},
-            "detectEncoding": {},
-        },
-    }
 
     def __init__(
         self,
@@ -108,6 +108,10 @@ class RemoteControl(Control):
 
     @Metadata.property
     def http_session(self):
+        """
+        Returns:
+            requests.Session: HTTP session
+        """
         http_session = self.get("httpSession")
         if not http_session:
             http_session = requests.Session()
@@ -116,18 +120,41 @@ class RemoteControl(Control):
 
     @Metadata.property
     def http_preload(self):
+        """
+        Returns:
+            bool: if not streaming
+        """
         return self.get("httpPreload", False)
 
     @Metadata.property
     def http_timeout(self):
+        """
+        Returns:
+            int: HTTP timeout in minutes
+        """
         return self.get("httpTimeout", config.DEFAULT_HTTP_TIMEOUT)
 
     # Expand
 
     def expand(self):
+        """Expand metadata
+        """
         super().expand()
         self.setdefault("httpPreload", self.http_preload)
         self.setdefault("httpTimeout", self.http_timeout)
+
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "httpSession": {},
+            "httpPreload": {"type": "boolean"},
+            "httpTimeout": {"type": "number"},
+            "detectEncoding": {},
+        },
+    }
 
 
 class StreamControl(Control):
@@ -140,6 +167,8 @@ class StreamControl(Control):
         FrictionlessException: raise any error that occurs during the process
 
     """
+
+    # Metadata
 
     metadata_profile = {  # type: ignore
         "type": "object",
@@ -158,6 +187,8 @@ class TextControl(Control):
         FrictionlessException: raise any error that occurs during the process
 
     """
+
+    # Metadata
 
     metadata_profile = {  # type: ignore
         "type": "object",

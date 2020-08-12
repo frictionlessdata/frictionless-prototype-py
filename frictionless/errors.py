@@ -5,12 +5,15 @@ from . import exceptions
 class Error(Metadata):
     """Error representation
 
-    # Arguments
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import errors`
+
+    Parameters:
         descriptor? (str|dict): error descriptor
+        note (str): an error note
 
-        note (str): note
-
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
@@ -32,27 +35,34 @@ class Error(Metadata):
 
     @property
     def note(self):
+        """
+        Returns:
+            str: note
+        """
         return self["note"]
 
     @property
     def message(self):
+        """
+        Returns:
+            str: message
+        """
         return self["message"]
 
 
 class HeaderError(Error):
     """Header error representation
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): error descriptor
+        note (str): an error note
+        cells (str[]): header cells
+        cell (str): an errored cell
+        field_name (str): field name
+        field_number (int): field number
+        field_position (int): field position
 
-        note (str): note
-        cells (any[]): cells
-        cell (any): cell
-        field_name (str): field_name
-        field_number (int): field_number
-        field_position (int): field_position
-
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
@@ -85,14 +95,13 @@ class HeaderError(Error):
 class RowError(Error):
     """Row error representation
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): error descriptor
+        note (str): an error note
+        row_number (int): row number
+        row_position (int): row position
 
-        cells (any[]): cells
-        row_number (int): row_number
-        row_position (int): row_position
-
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
@@ -113,6 +122,15 @@ class RowError(Error):
 
     @classmethod
     def from_row(cls, row, *, note):
+        """Create an error from a row
+
+        Parameters:
+            row (Row): row
+            note (str): note
+
+        Returns:
+            RowError: error
+        """
         return cls(
             note=note,
             cells=list(map(str, row.values())),
@@ -124,17 +142,16 @@ class RowError(Error):
 class CellError(RowError):
     """Cell error representation
 
-    # Arguments
+    Parameters:
         descriptor? (str|dict): error descriptor
-
-        note (str): note
-        cells (any[]): cells
-        row_number (int): row_number
-        row_position (int): row_position
-        cell (any): cell
-        field_name (str): field_name
-        field_number (int): field_number
-        field_position (int): field_position
+        note (str): an error note
+        cells (str[]): row cells
+        row_number (int): row number
+        row_position (int): row position
+        cell (str): errored cell
+        field_name (str): field name
+        field_number (int): field number
+        field_position (int): field position
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
@@ -176,6 +193,16 @@ class CellError(RowError):
 
     @classmethod
     def from_row(cls, row, *, note, field_name):
+        """Create and error from a cell
+
+        Parameters:
+            row (Row): row
+            note (str): note
+            field_name (str): field name
+
+        Returns:
+            CellError: error
+        """
         # This algorithm can be optimized by storing more information in a row
         # At the same time, this function should not be called very often
         for field_number, [name, cell] in enumerate(row.items(), start=1):

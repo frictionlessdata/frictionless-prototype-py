@@ -7,14 +7,76 @@ from . import config
 class Dialect(Metadata):
     """Dialect representation
 
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import dialects`
+
     Parameters:
         descriptor? (str|dict): descriptor
-        headers? (int|list): headers
+        header? (bool): whether there is a header row
+        headerRows? (int[]): row numbers of header rows
+        headerJoin? (str): a multiline header joiner
 
     Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
+
+    def __init__(self, descriptor=None, header=None, header_rows=None, header_join=None):
+        self.setinitial("header", header)
+        self.setinitial("headerRows", header_rows)
+        self.setinitial("headerJoin", header_join)
+        super().__init__(descriptor)
+
+    @Metadata.property
+    def header(self):
+        """
+        Returns:
+            bool: if there is a header row
+        """
+        return self.get("header", config.DEFAULT_HEADER)
+
+    @Metadata.property
+    def header_rows(self):
+        """
+        Returns:
+            int[]: header rows
+        """
+        return self.get("headerRows", config.DEFAULT_HEADER_ROWS)
+
+    @Metadata.property
+    def header_join(self):
+        """
+        Returns:
+            str: header joiner
+        """
+        return self.get("headerJoin", config.DEFAULT_HEADER_JOIN)
+
+    # Expand
+
+    def expand(self):
+        """Expand metadata
+        """
+        self.setdefault("header", self.header)
+        self.setdefault("headerRows", self.header_rows)
+        self.setdefault("headerJoin", self.header_join)
+
+    # Import/Export
+
+    def to_dict(self, expand=False):
+        """Conver to a dict
+
+        Parameters:
+            expand (bool): if True call `metadata.expand` for the exported copy
+        """
+        result = super().to_dict()
+        if expand:
+            result = type(self)(result)
+            result.expand()
+            result = result.to_dict()
+        return result
+
+    # Metadata
 
     metadata_Error = errors.DialectError
     metadata_profile = {  # type: ignore
@@ -27,41 +89,6 @@ class Dialect(Metadata):
         },
     }
 
-    def __init__(self, descriptor=None, header=None, header_rows=None, header_join=None):
-        self.setinitial("header", header)
-        self.setinitial("headerRows", header_rows)
-        self.setinitial("headerJoin", header_join)
-        super().__init__(descriptor)
-
-    @Metadata.property
-    def header(self):
-        return self.get("header", config.DEFAULT_HEADER)
-
-    @Metadata.property
-    def header_rows(self):
-        return self.get("headerRows", config.DEFAULT_HEADER_ROWS)
-
-    @Metadata.property
-    def header_join(self):
-        return self.get("headerJoin", config.DEFAULT_HEADER_JOIN)
-
-    # Expand
-
-    def expand(self):
-        self.setdefault("header", self.header)
-        self.setdefault("headerRows", self.header_rows)
-        self.setdefault("headerJoin", self.header_join)
-
-    # Import/Export
-
-    def to_dict(self, expand=False):
-        result = super().to_dict()
-        if expand:
-            result = type(self)(result)
-            result.expand()
-            result = result.to_dict()
-        return result
-
 
 class CsvDialect(Dialect):
     """Csv dialect representation
@@ -69,38 +96,19 @@ class CsvDialect(Dialect):
     Parameters:
         descriptor? (str|dict): descriptor
         delimiter? (str): csv delimiter
-        line_terminator? (str): line_terminator
-        quote_char? (str): quote_char
-        double_quote? (bool): double_quote
-        escape_char? (str): escape_char
-        null_sequence? (str): null_sequence
-        skip_initial_space? (bool): skip_initial_space
-        comment_char? (str): comment_char
-        case_sensitive_header? (bool): case_sensitive_header
+        line_terminator? (str): csv line terminator
+        quote_char? (str): csv quote char
+        double_quote? (bool): csv double quote
+        escape_char? (str): csv escape char
+        null_sequence? (str): csv null sequence
+        skip_initial_space? (bool): csv skip initial space
+        comment_char? (str): csv comment char
+        case_sensitive_header? (bool): csv case sensitive header
 
     Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
-
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {
-            "delimiter": {"type": "string"},
-            "lineTerminator": {"type": "string"},
-            "quoteChar": {"type": "string"},
-            "doubleQuote": {"type": "boolean"},
-            "escapeChar": {"type": "string"},
-            "nullSequence": {"type": "string"},
-            "skipInitialSpace": {"type": "boolean"},
-            "commentChar": {"type": "string"},
-            "caseSensitiveHeader": {"type": "boolean"},
-            "header": {"type": "boolean"},
-            "headerRows": {"type": "array", "items": {"type": "number"}},
-            "headerJoin": {"type": "string"},
-        },
-    }
 
     def __init__(
         self,
@@ -137,43 +145,81 @@ class CsvDialect(Dialect):
 
     @Metadata.property
     def delimiter(self):
+        """
+        Returns:
+            str: delimiter
+        """
         return self.get("delimiter", ",")
 
     @Metadata.property
     def line_terminator(self):
+        """
+        Returns:
+            str: line terminator
+        """
         return self.get("lineTerminator", "\r\n")
 
     @Metadata.property
     def quote_char(self):
+        """
+        Returns:
+            str: quote char
+        """
         return self.get("quoteChar", '"')
 
     @Metadata.property
     def double_quote(self):
+        """
+        Returns:
+            bool: double quote
+        """
         return self.get("doubleQuote", True)
 
     @Metadata.property
     def escape_char(self):
+        """
+        Returns:
+            str?: escape char
+        """
         return self.get("escapeChar")
 
     @Metadata.property
     def null_sequence(self):
+        """
+        Returns:
+            str?: null sequence
+        """
         return self.get("nullSequence")
 
     @Metadata.property
     def skip_initial_space(self):
+        """
+        Returns:
+            bool: if skipping initial space
+        """
         return self.get("skipInitialSpace", False)
 
     @Metadata.property
     def comment_char(self):
+        """
+        Returns:
+            str?: comment char
+        """
         return self.get("commentChar")
 
     @Metadata.property
     def case_sensitive_header(self):
+        """
+        Returns:
+            bool: case sensitive header
+        """
         return self.get("caseSensitiveHeader", False)
 
     # Expand
 
     def expand(self):
+        """Expand metadata
+        """
         super().expand()
         self.setdefault("delimiter", self.delimiter)
         self.setdefault("lineTerminator", self.line_terminator)
@@ -185,6 +231,8 @@ class CsvDialect(Dialect):
     # Import/Export
 
     def to_python(self):
+        """Conver to Python's `csv.Dialect`
+        """
         dialect = csv.excel()
         dialect.delimiter = self.delimiter
         dialect.doublequote = self.double_quote if self.escape_char else True
@@ -195,37 +243,43 @@ class CsvDialect(Dialect):
         dialect.skipinitialspace = self.skip_initial_space
         return dialect
 
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "delimiter": {"type": "string"},
+            "lineTerminator": {"type": "string"},
+            "quoteChar": {"type": "string"},
+            "doubleQuote": {"type": "boolean"},
+            "escapeChar": {"type": "string"},
+            "nullSequence": {"type": "string"},
+            "skipInitialSpace": {"type": "boolean"},
+            "commentChar": {"type": "string"},
+            "caseSensitiveHeader": {"type": "boolean"},
+            "header": {"type": "boolean"},
+            "headerRows": {"type": "array", "items": {"type": "number"}},
+            "headerJoin": {"type": "string"},
+        },
+    }
+
 
 class ExcelDialect(Dialect):
     """Excel dialect representation
 
     Parameters:
         descriptor? (str|dict): descriptor
-        sheet? (int|str): sheet
-        workbook_cache? (dict): workbook_cache
-        fill_merged_cells? (bool): fill_merged_cells
-        preserve_formatting? (bool): preserve_formatting
-        adjust_floating_point_error? (bool): adjust_floating_point_error
+        sheet? (int|str): number from 1 or name of an excel sheet
+        workbook_cache? (dict): workbook cache
+        fill_merged_cells? (bool): whether to fill merged cells
+        preserve_formatting? (bool): whither to preserve formatting
+        adjust_floating_point_error? (bool): whether to adjust floating point error
 
     Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
-
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {
-            "sheet": {"type": ["number", "string"]},
-            "workbookCache": {"type": "object"},
-            "fillMergedCells": {"type": "boolean"},
-            "preserveFormatting": {"type": "boolean"},
-            "adjustFloatingPointError": {"type": "boolean"},
-            "header": {"type": "boolean"},
-            "headerRows": {"type": "array", "items": {"type": "number"}},
-            "headerJoin": {"type": "string"},
-        },
-    }
 
     def __init__(
         self,
@@ -254,32 +308,71 @@ class ExcelDialect(Dialect):
 
     @Metadata.property
     def sheet(self):
+        """
+        Returns:
+            str|int: sheet
+        """
         return self.get("sheet", 1)
 
     @Metadata.property
     def workbook_cache(self):
+        """
+        Returns:
+            dict: workbook cache
+        """
         return self.get("workbookCache")
 
     @Metadata.property
     def fill_merged_cells(self):
+        """
+        Returns:
+            bool: fill merged cells
+        """
         return self.get("fillMergedCells", False)
 
     @Metadata.property
     def preserve_formatting(self):
+        """
+        Returns:
+            bool: preserve formatting
+        """
         return self.get("preserveFormatting", False)
 
     @Metadata.property
     def adjust_floating_point_error(self):
+        """
+        Returns:
+            bool: adjust floating point error
+        """
         return self.get("adjustFloatingPointError", False)
 
     # Expand
 
     def expand(self):
+        """Expand metadata
+        """
         super().expand()
         self.setdefault("sheet", self.sheet)
         self.setdefault("fillMergedCells", self.fill_merged_cells)
         self.setdefault("preserveFormatting", self.preserve_formatting)
         self.setdefault("adjustFloatingPointError", self.adjust_floating_point_error)
+
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "sheet": {"type": ["number", "string"]},
+            "workbookCache": {"type": "object"},
+            "fillMergedCells": {"type": "boolean"},
+            "preserveFormatting": {"type": "boolean"},
+            "adjustFloatingPointError": {"type": "boolean"},
+            "header": {"type": "boolean"},
+            "headerRows": {"type": "array", "items": {"type": "number"}},
+            "headerJoin": {"type": "string"},
+        },
+    }
 
 
 class InlineDialect(Dialect):
@@ -287,7 +380,8 @@ class InlineDialect(Dialect):
 
     Parameters:
         descriptor? (str|dict): descriptor
-        keyed? (bool): keyed
+        keys? (str[]): a list of strings to use as data keys
+        keyed? (bool): whether data rows are keyed
 
     Raises:
         FrictionlessException: raise any error that occurs during the process
@@ -327,15 +421,25 @@ class InlineDialect(Dialect):
 
     @Metadata.property
     def keys(self):
+        """
+        Returns:
+            str[]?: keys
+        """
         return self.get("keys")
 
     @Metadata.property
     def keyed(self):
+        """
+        Returns:
+            bool: keyed
+        """
         return self.get("keyed", False)
 
     # Expand
 
     def expand(self):
+        """Expand metadata
+        """
         self.setdefault("keyed", self.keyed)
 
 
@@ -344,26 +448,14 @@ class JsonDialect(Dialect):
 
     Parameters:
         descriptor? (str|dict): descriptor
-        keyed? (bool): keyed
-        property? (str): property
+        keys? (str[]): a list of strings to use as data keys
+        keyed? (bool): whether data rows are keyed
+        property? (str): a path within JSON to the data
 
     Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
-
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {
-            "keys": {"type": "array"},
-            "keyed": {"type": "boolean"},
-            "property": {"type": "string"},
-            "header": {"type": "boolean"},
-            "headerRows": {"type": "array", "items": {"type": "number"}},
-            "headerJoin": {"type": "string"},
-        },
-    }
 
     def __init__(
         self,
@@ -388,18 +480,47 @@ class JsonDialect(Dialect):
 
     @Metadata.property
     def keys(self):
+        """
+        Returns:
+            str[]?: keys
+        """
         return self.get("keys")
 
     @Metadata.property
     def keyed(self):
+        """
+        Returns:
+            bool: keyed
+        """
         return self.get("keyed", False)
 
     @Metadata.property
     def property(self):
+        """
+        Returns:
+            str?: property
+        """
         return self.get("property")
 
     # Expand
 
     def expand(self):
+        """Expand metadata
+        """
         super().expand()
         self.setdefault("keyed", self.keyed)
+
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "keys": {"type": "array"},
+            "keyed": {"type": "boolean"},
+            "property": {"type": "string"},
+            "header": {"type": "boolean"},
+            "headerRows": {"type": "array", "items": {"type": "number"}},
+            "headerJoin": {"type": "string"},
+        },
+    }
