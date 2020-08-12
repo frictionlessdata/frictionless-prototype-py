@@ -607,26 +607,170 @@ pprint(report.table.scope)
 
 ## Heuristic Checks
 
-> This section is work-in-progress
+There is a group of checks that indicate probable errors. You need to use the `extra_checks` argument of the `validate` function to active one or more of these checks.
 
 
 
 **Duplicate Row**
 
+This check is self-explanatory. You need to take into account that checking for duplicate rows can lean to high memory consumption on big files. Here is an example:
+
+
+```python
+from pprint import pprint
+from frictionless import validate
+
+source = 'header\nvalue\nvalue'
+report = validate(source, scheme='text', format='csv', extra_checks=['duplicate-row'])
+pprint(report.flatten(['code', 'message']))
+```
+
+    [['duplicate-row',
+      'Row at position 3 is duplicated: the same as row at position "2"']]
+
+
 **Deviated Value**
+
+This checks uses the extranal `statistics` package to checks a field for deviations. For example:
+
+
+```python
+    from pprint import pprint
+    from frictionless import validate
+
+    source = [["temperature"], [1], [-2], [7], [0], [1], [2], [5], [-4], [1000], [8], [3]]
+    report = validate(source, extra_checks=[("deviated-value", {"fieldName": "temperature"})])
+    pprint(report.flatten(["code", "message"]))
+
+```
+
+    [['deviated-value',
+      'There is a possible error because the value is deviated: value "1000" in '
+      'row at position "10" and field "temperature" is deviated "[-809.88, '
+      '995.52]"']]
+
 
 **Truncated Value**
 
+Sometime during the explort from a database or another storage, data values can be truncated. This check tries to detect it. Let's explore some trunctation indicators:
+
+
+```python
+from pprint import pprint
+from frictionless import validate
+
+source = [["int", "str"], ["a" * 255, 32767], ["good", 2147483647]]
+report = validate(source, extra_checks=["truncated-value"],)
+pprint(report.flatten(["code", "message"]))
+```
+
+    [['truncated-value',
+      'The cell '
+      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa '
+      'in row at position 2 and field int at position 1 has an error: value  is '
+      'probably truncated'],
+     ['truncated-value',
+      'The cell 32767 in row at position 2 and field str at position 2 has an '
+      'error: value  is probably truncated'],
+     ['truncated-value',
+      'The cell 2147483647 in row at position 3 and field str at position 2 has an '
+      'error: value  is probably truncated']]
+
+
 ## Regulation Checks
 
-> This section is work-in-progress
+In countrary to probably checks, regulation checks gives you an ability to provide additional rules for your data. Use the `extra_checks` argument of the `validate` function to active one or more of these checks.
 
 **Blacklisted Value**
 
+This check ensures that some field doesn't have any blacklisted values. For example:
+
+
+```python
+from pprint import pprint
+from frictionless import validate
+
+source = 'header\nvalue1\nvalue2'
+extra_checks = [('blacklisted-value', {'fieldName': 'header', 'blacklist': ['value2']})]
+report = validate(source, scheme='text', format='csv', extra_checks=extra_checks)
+pprint(report.flatten(['code', 'message']))
+```
+
+    [['blacklisted-value',
+      'The cell value2 in row at position 3 and field header at position 1 has an '
+      'error: blacklisted values are "[\'value2\']"']]
+
+
 **Sequential Value**
+
+This check gives us an opportunity to validate sequential fields like primary keys or other similiar data. It doesn't need to start from 0 or 1. We're providing a field name:
+
+
+```python
+from pprint import pprint
+from frictionless import validate
+
+source = 'header\n2\n3\n5'
+extra_checks = [('sequential-value', {'fieldName': 'header'})]
+report = validate(source, scheme='text', format='csv', extra_checks=extra_checks)
+pprint(report.flatten(['code', 'message']))
+```
+
+    [['sequential-value',
+      'The cell 5 in row at position 4 and field header at position 1 has an '
+      'error: the value is not sequential']]
+
 
 **Row Constraint**
 
+This checks is the most powerful one as it uses the external `simpleeval` package allowing to evalute arbitrary python expressions on data rows. Let's show on an example:
+
+
+```python
+from pprint import pprint
+from frictionless import validate
+
+source = [
+  ["row", "salary", "bonus"],
+  [2, 1000, 200],
+  [3, 2500, 500],
+  [4, 1300, 500],
+  [5, 5000, 1000],
+]
+extra_checks=[("row-constraint", {"constraint": "salary == bonus * 5"})]
+report = validate(source, extra_checks=extra_checks)
+pprint(report.flatten(["code", "message"]))
+```
+
+    [['row-constraint',
+      'The row at position 4 has an error: the row constraint to conform is '
+      '"salary == bonus * 5"']]
+
+
 ## Custom Checks
 
-> This section is work-in-progress
+There are many cases when built-in Frictionless' checks are not enough. It can be a business logic rule or specific quality requirement to the data. With Frictionless it's very easy to use your own custom checks. Let's see on an example:
+
+
+```python
+from pprint import pprint
+from frictionless import validate, errors, Check
+
+# Create check
+class ForbidNumber(Check):
+    def validate_row(self, row):
+        if row['header'] == self['number']:
+          note = f"number {self['number']} is forbidden!"
+          yield errors.CellError.from_row(row, note=note, field_name='header')
+
+# Validate table
+source = 'header\n1\n2\n3'
+extra_checks=[(ForbidNumber, {'number': 2})]
+report = validate(source,  scheme='text', format='csv', extra_checks=extra_checks)
+pprint(report.flatten(["rowPosition", "fieldPosition", "code", "note"]))
+```
+
+    [[3, 1, 'cell-error', 'number 2 is forbidden!']]
+
+
+Usualy, it also makes sense to create a custom error for your custom check. The Check class provides other useful methods like `validate_headers` etc. Please read "API Reference" to learn it in details.
