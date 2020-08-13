@@ -17,7 +17,7 @@ from .main import program
 @click.option("--encoding", type=str, help="File encoding")
 @click.option("--compression", type=str, help="File compression")
 @click.option("--compression-path", type=str, help="File compression path")
-# Schema
+# Table
 @click.option("--sync-schema", is_flag=True, help="Sync schema")
 @click.option("--infer-type", type=str, help="Infer type")
 @click.option("--infer-names", type=str, multiple=True, help="Infer names")

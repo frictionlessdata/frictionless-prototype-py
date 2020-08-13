@@ -3485,14 +3485,147 @@ Create and error from a cell
 <a name="frictionless.describe.main"></a>
 ## frictionless.describe.main
 
+<a name="frictionless.describe.main.describe"></a>
+#### <big>describe</big>
+
+```python
+describe(source, *, source_type=None, **options)
+```
+
+Describe the data source
+
+**Arguments**:
+
+- `source` _any_ - data source
+- `source_type` _str_ - source type - `schema`, `resource` or `package`
+- `**options` _dict_ - options for the underlaying describe function
+  
+
+**Returns**:
+
+- `Package|Resource|Schema` - metadata
+
 <a name="frictionless.describe.package"></a>
 ## frictionless.describe.package
+
+<a name="frictionless.describe.package.describe_package"></a>
+#### <big>describe\_package</big>
+
+```python
+describe_package(source, *, expand=False)
+```
+
+Describe the given source as a package
+
+**Arguments**:
+
+- `source` _any_ - data source
+- `expand?` _bool_ - if `True` it will expand the metadata
+  
+
+**Returns**:
+
+- `Package` - data package
 
 <a name="frictionless.describe.schema"></a>
 ## frictionless.describe.schema
 
+<a name="frictionless.describe.schema.describe_schema"></a>
+#### <big>describe\_schema</big>
+
+```python
+describe_schema(source, **options)
+```
+
+Describe schema of the given source
+
+**Arguments**:
+
+- `source` _any_ - data source
+- `**options` _dict_ - see `describe_resource` options
+  
+
+**Returns**:
+
+- `Schema` - table schema
+
 <a name="frictionless.describe.resource"></a>
 ## frictionless.describe.resource
+
+<a name="frictionless.describe.resource.describe_resource"></a>
+#### <big>describe\_resource</big>
+
+```python
+describe_resource(source, *, scheme=None, format=None, hashing=None, encoding=None, compression=None, compression_path=None, control=None, dialect=None, query=None, headers=None, infer_type=None, infer_names=None, infer_volume=config.DEFAULT_INFER_VOLUME, infer_confidence=config.DEFAULT_INFER_CONFIDENCE, infer_missing_values=config.DEFAULT_MISSING_VALUES, expand=False)
+```
+
+Describe the given source as a resource
+
+**Arguments**:
+
+  
+- `source` _any_ - Source of the file; can be in various forms.
+  Usually, it's a string as `<scheme>://path/to/file.<format>`.
+  It also can be, for example, an array of data arrays/dictionaries.
+  
+- `scheme?` _str_ - Scheme for loading the file (file, http, ...).
+  If not set, it'll be inferred from `source`.
+  
+- `format?` _str_ - File source's format (csv, xls, ...).
+  If not set, it'll be inferred from `source`.
+  
+- `encoding?` _str_ - An algorithm to hash data.
+  It defaults to 'md5'.
+  
+- `encoding?` _str_ - Source encoding.
+  If not set, it'll be inferred from `source`.
+  
+- `compression?` _str_ - Source file compression (zip, ...).
+  If not set, it'll be inferred from `source`.
+  
+- `compression_path?` _str_ - A path within the compressed file.
+  It defaults to the first file in the archive.
+  
+- `control?` _dict|Control_ - File control.
+  For more infromation, please check the Control documentation.
+  
+- `dialect?` _dict|Dialect_ - Table dialect.
+  For more infromation, please check the Dialect documentation.
+  
+- `query?` _dict|Query_ - Table query.
+  For more infromation, please check the Query documentation.
+  
+- `headers?` _int|int[]|[int[], str]_ - Either a row
+  number or list of row numbers (in case of multi-line headers) to be
+  considered as headers (rows start counting at 1), or a pair
+  where the first element is header rows and the second the
+  header joiner.  It defaults to 1.
+  
+- `infer_type?` _str_ - Enforce all the inferred types to be this type.
+  For more information, please check "Describing  Data" guide.
+  
+- `infer_names?` _str[]_ - Enforce all the inferred fields to have provided names.
+  For more information, please check "Describing  Data" guide.
+  
+- `infer_volume?` _int_ - The amount of rows to be extracted as a samle.
+  For more information, please check "Describing  Data" guide.
+  It defaults to 100
+  
+- `infer_confidence?` _float_ - A number from 0 to 1 setting the infer confidence.
+  If  1 the data is guaranteed to be valid against the inferred schema.
+  For more information, please check "Describing  Data" guide.
+  It defaults to 0.9
+  
+- `infer_missing_values?` _str[]_ - String to be considered as missing values.
+  For more information, please check "Describing  Data" guide.
+  It defaults to `['']`
+  
+- `expand?` _bool_ - if `True` it will expand the metadata
+  
+
+**Returns**:
+
+- `Resource` - data resource
 
 <a name="frictionless.schema"></a>
 ## frictionless.schema

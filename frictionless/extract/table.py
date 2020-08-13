@@ -14,9 +14,9 @@ def extract_table(
     compression=None,
     compression_path=None,
     control=None,
+    # Table
     dialect=None,
     query=None,
-    # Schema
     schema=None,
     sync_schema=False,
     patch_schema=False,

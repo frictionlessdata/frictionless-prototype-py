@@ -5,6 +5,16 @@ from importlib import import_module
 
 
 def describe(source, *, source_type=None, **options):
+    """Describe the data source
+
+    Parameters:
+        source (any): data source
+        source_type (str): source type - `schema`, `resource` or `package`
+        **options (dict): options for the underlaying describe function
+
+    Returns:
+        Package|Resource|Schema: metadata
+    """
     module = import_module("frictionless.describe")
 
     # Normalize source
