@@ -160,7 +160,7 @@ There are no options available.
 
 > Type: str
 
-Selector
+Html selector
 
 
 

@@ -3319,6 +3319,10 @@ extract(source, *, source_type=None, process=None, **options)
 
 Extract resource rows into memory
 
+API      | Usage
+-------- | --------
+Public   | `from frictionless import extract`
+
 **Arguments**:
 
 - `source` _dict|str_ - data source
@@ -3342,6 +3346,10 @@ extract_table(source, *, scheme=None, format=None, hashing=None, encoding=None, 
 ```
 
 Extract table rows into memory
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import extract_table`
 
 **Arguments**:
 
@@ -3439,6 +3447,10 @@ extract_package(source, *, process=None)
 
 Extract package rows into memory
 
+API      | Usage
+-------- | --------
+Public   | `from frictionless import extract_package`
+
 **Arguments**:
 
 - `source` _dict|str_ - data resource descriptor
@@ -3460,6 +3472,10 @@ extract_resource(source, *, process=None)
 ```
 
 Extract resource rows into memory
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import extract_resource`
 
 **Arguments**:
 
@@ -3646,6 +3662,10 @@ describe(source, *, source_type=None, **options)
 
 Describe the data source
 
+API      | Usage
+-------- | --------
+Public   | `from frictionless import describe`
+
 **Arguments**:
 
 - `source` _any_ - data source
@@ -3669,6 +3689,10 @@ describe_package(source, *, expand=False)
 
 Describe the given source as a package
 
+API      | Usage
+-------- | --------
+Public   | `from frictionless import describe_package`
+
 **Arguments**:
 
 - `source` _any_ - data source
@@ -3691,6 +3715,10 @@ describe_schema(source, **options)
 
 Describe schema of the given source
 
+API      | Usage
+-------- | --------
+Public   | `from frictionless import describe_schema`
+
 **Arguments**:
 
 - `source` _any_ - data source
@@ -3712,6 +3740,10 @@ describe_resource(source, *, scheme=None, format=None, hashing=None, encoding=No
 ```
 
 Describe the given source as a resource
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import describe_resource`
 
 **Arguments**:
 
@@ -4721,11 +4753,62 @@ Public   | `from frictionless import exceptions`
 <a name="frictionless.transform.main"></a>
 ## frictionless.transform.main
 
+<a name="frictionless.transform.main.transform"></a>
+#### <big>transform</big>
+
+```python
+transform(source)
+```
+
+Transform resource
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import transform`
+
+**Arguments**:
+
+- `source` _any_ - data source
+
 <a name="frictionless.transform.package"></a>
 ## frictionless.transform.package
 
+<a name="frictionless.transform.package.transform_package"></a>
+#### <big>transform\_package</big>
+
+```python
+transform_package(source)
+```
+
+Transform package
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import transform_package`
+
+**Arguments**:
+
+- `source` _any_ - a pipeline descriptor
+
 <a name="frictionless.transform.resource"></a>
 ## frictionless.transform.resource
+
+<a name="frictionless.transform.resource.transform_resource"></a>
+#### <big>transform\_resource</big>
+
+```python
+transform_resource(source)
+```
+
+Transform resource
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import transform_resource`
+
+**Arguments**:
+
+- `source` _any_ - data source
 
 <a name="frictionless.parser"></a>
 ## frictionless.parser
@@ -6290,6 +6373,31 @@ Decode text stream
 <a name="frictionless.validate.main"></a>
 ## frictionless.validate.main
 
+<a name="frictionless.validate.main.validate"></a>
+#### <big>validate</big>
+
+```python
+@Report.from_validate
+validate(source, source_type=None, **options)
+```
+
+Validate resource
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import validate`
+
+**Arguments**:
+
+- `source` _dict|str_ - a data source
+- `source_type` _str_ - source type - inquiry, package, resource, schema or table
+- `**options` _dict_ - options for the underlaying function
+  
+
+**Returns**:
+
+- `Report` - validation report
+
 <a name="frictionless.validate.table"></a>
 ## frictionless.validate.table
 
@@ -6303,48 +6411,98 @@ validate_table(source, *, scheme=None, format=None, hashing=None, encoding=None,
 
 Validate table
 
-__Arguments__
+API      | Usage
+-------- | --------
+Public   | `from frictionless import validate_table`
 
-    source (any)
+**Arguments**:
 
-    scheme? (str)
-    format? (str)
-    hashing? (str)
-    encoding? (str)
-    compression? (str)
-    compression_path? (str)
-    dialect? (dict)
-    control? (dict)
+  
+- `source` _any_ - Source of the file; can be in various forms.
+  Usually, it's a string as `<scheme>://path/to/file.<format>`.
+  It also can be, for example, an array of data arrays/dictionaries.
+  
+- `scheme?` _str_ - Scheme for loading the file (file, http, ...).
+  If not set, it'll be inferred from `source`.
+  
+- `format?` _str_ - File source's format (csv, xls, ...).
+  If not set, it'll be inferred from `source`.
+  
+- `encoding?` _str_ - An algorithm to hash data.
+  It defaults to 'md5'.
+  
+- `encoding?` _str_ - Source encoding.
+  If not set, it'll be inferred from `source`.
+  
+- `compression?` _str_ - Source file compression (zip, ...).
+  If not set, it'll be inferred from `source`.
+  
+- `compression_path?` _str_ - A path within the compressed file.
+  It defaults to the first file in the archive.
+  
+- `control?` _dict|Control_ - File control.
+  For more infromation, please check the Control documentation.
+  
+- `dialect?` _dict|Dialect_ - Table dialect.
+  For more infromation, please check the Dialect documentation.
+  
+- `query?` _dict|Query_ - Table query.
+  For more infromation, please check the Query documentation.
+  
+- `headers?` _int|int[]|[int[], str]_ - Either a row
+  number or list of row numbers (in case of multi-line headers) to be
+  considered as headers (rows start counting at 1), or a pair
+  where the first element is header rows and the second the
+  header joiner.  It defaults to 1.
+  
+- `schema?` _dict|Schema_ - Table schema.
+  For more infromation, please check the Schema documentation.
+  
+- `sync_schema?` _bool_ - Whether to sync the schema.
+  If it sets to `True` the provided schema will be mapped to
+  the inferred schema. It means that, for example, you can
+  provide a subset of fileds to be applied on top of the inferred
+  fields or the provided schema can have different order of fields.
+  
+- `patch_schema?` _dict_ - A dictionary to be used as an inferred schema patch.
+  The form of this dictionary should follow the Schema descriptor form
+  except for the `fields` property which should be a mapping with the
+  key named after a field name and the values being a field patch.
+  For more information, please check "Extracting Data" guide.
+  
+- `infer_type?` _str_ - Enforce all the inferred types to be this type.
+  For more information, please check "Describing  Data" guide.
+  
+- `infer_names?` _str[]_ - Enforce all the inferred fields to have provided names.
+  For more information, please check "Describing  Data" guide.
+  
+- `infer_volume?` _int_ - The amount of rows to be extracted as a samle.
+  For more information, please check "Describing  Data" guide.
+  It defaults to 100
+  
+- `infer_confidence?` _float_ - A number from 0 to 1 setting the infer confidence.
+  If  1 the data is guaranteed to be valid against the inferred schema.
+  For more information, please check "Describing  Data" guide.
+  It defaults to 0.9
+  
+- `infer_missing_values?` _str[]_ - String to be considered as missing values.
+  For more information, please check "Describing  Data" guide.
+  It defaults to `['']`
+  
+- `lookup?` _dict_ - The lookup is a special object providing relational information.
+  For more information, please check "Extracting  Data" guide.
+  
+- `checksum?` _dict_ - a checksum dictionary
+- `extra_checks?` _list_ - a list of extra checks
+  pick_errors? ((str|int)[]): pick errors
+  skip_errors? ((str|int)[]): skip errors
+- `limit_errors?` _int_ - limit errors
+- `limit_memory?` _int_ - limit memory
+  
 
-    headers? (int | int[])
-    pick_fields? ((int | str)[])
-    skip_fields? ((int | str)[])
-    limit_fields? (int)
-    offset_fields? (int)
-    pick_rows? ((int | str)[])
-    skip_rows? ((int | str)[])
-    limit_rows? (int)
-    offset_rows? (int)
+**Returns**:
 
-    schema? (str | dict)
-    sync_schema? (bool)
-    patch_schema? (dict)
-    infer_type? (str)
-    infer_names? (str[])
-    infer_volume? (int)
-    infer_confidence? (float)
-
-    stats? (dict)
-    lookup? (dict)
-
-    pick_errors? (str[])
-    skip_errors? (str[])
-    limit_errors? (int)
-    extra_checks? (list)
-
-__Returns__
-
-    Report
+- `Report` - validation report
 
 <a name="frictionless.validate.package"></a>
 ## frictionless.validate.package
@@ -6359,6 +6517,22 @@ validate_package(source, basepath=None, noinfer=False, **options)
 
 Validate package
 
+API      | Usage
+-------- | --------
+Public   | `from frictionless import validate_package`
+
+**Arguments**:
+
+- `source` _dict|str_ - a package descriptor
+- `basepath?` _str_ - package basepath
+- `noinfer?` _bool_ - don't call `package.infer`
+- `**options` _dict_ - package options
+  
+
+**Returns**:
+
+- `Report` - validation report
+
 <a name="frictionless.validate.inquiry"></a>
 ## frictionless.validate.inquiry
 
@@ -6371,6 +6545,19 @@ validate_inquiry(source)
 ```
 
 Validate inquiry
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import validate_inquiry`
+
+**Arguments**:
+
+- `source` _dict|str_ - an inquiry descriptor
+  
+
+**Returns**:
+
+- `Report` - validation report
 
 <a name="frictionless.validate.schema"></a>
 ## frictionless.validate.schema
@@ -6385,6 +6572,19 @@ validate_schema(source)
 
 Validate schema
 
+API      | Usage
+-------- | --------
+Public   | `from frictionless import validate_schema`
+
+**Arguments**:
+
+- `source` _dict|str_ - a schema descriptor
+  
+
+**Returns**:
+
+- `Report` - validation report
+
 <a name="frictionless.validate.resource"></a>
 ## frictionless.validate.resource
 
@@ -6397,6 +6597,23 @@ validate_resource(source, basepath=None, noinfer=False, lookup=None, **options)
 ```
 
 Validate resource
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import validate_resource`
+
+**Arguments**:
+
+- `source` _dict|str_ - a resource descriptor
+- `basepath?` _str_ - resource basepath
+- `noinfer?` _bool_ - don't call `resource.infer`
+- `lookup?` _dict_ - a lookup object
+- `**options` _dict_ - resource options
+  
+
+**Returns**:
+
+- `Report` - validation report
 
 <a name="frictionless.controls"></a>
 ## frictionless.controls
