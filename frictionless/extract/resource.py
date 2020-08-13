@@ -4,6 +4,10 @@ from ..resource import Resource
 def extract_resource(source, *, process=None):
     """Extract resource rows into memory
 
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import extract_resource`
+
     Parameters:
         source (dict|str): data resource descriptor
         process? (func): a row processor function

@@ -9,6 +9,20 @@ from .. import exceptions
 @Report.from_validate
 def validate_package(source, basepath=None, noinfer=False, **options):
     """Validate package
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import validate_package`
+
+    Parameters:
+        source (dict|str): a package descriptor
+        basepath? (str): package basepath
+        noinfer? (bool): don't call `package.infer`
+        **options (dict): package options
+
+    Returns:
+        Report: validation report
+
     """
 
     # Create state

@@ -9,6 +9,20 @@ from .. import helpers
 
 @Report.from_validate
 def validate(source, source_type=None, **options):
+    """Validate resource
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import validate`
+
+    Parameters:
+        source (dict|str): a data source
+        source_type (str): source type - inquiry, package, resource, schema or table
+        **options (dict): options for the underlaying function
+
+    Returns:
+        Report: validation report
+    """
     module = import_module("frictionless.validate")
 
     # Normalize source

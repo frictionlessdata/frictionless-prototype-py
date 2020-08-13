@@ -5,6 +5,10 @@ from ..package import Package
 def extract_package(source, *, process=None):
     """Extract package rows into memory
 
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import extract_package`
+
     Parameters:
         source (dict|str): data resource descriptor
         process? (func): a row processor function

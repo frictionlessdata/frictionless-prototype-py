@@ -7,6 +7,10 @@ from importlib import import_module
 def describe(source, *, source_type=None, **options):
     """Describe the data source
 
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import describe`
+
     Parameters:
         source (any): data source
         source_type (str): source type - `schema`, `resource` or `package`

@@ -8,6 +8,21 @@ from .. import exceptions
 @Report.from_validate
 def validate_resource(source, basepath=None, noinfer=False, lookup=None, **options):
     """Validate resource
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import validate_resource`
+
+    Parameters:
+        source (dict|str): a resource descriptor
+        basepath? (str): resource basepath
+        noinfer? (bool): don't call `resource.infer`
+        lookup? (dict): a lookup object
+        **options (dict): resource options
+
+    Returns:
+        Report: validation report
+
     """
 
     # Prepare state

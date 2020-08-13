@@ -11,6 +11,17 @@ from .. import exceptions
 @Report.from_validate
 def validate_inquiry(source):
     """Validate inquiry
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import validate_inquiry`
+
+    Parameters:
+        source (dict|str): an inquiry descriptor
+
+    Returns:
+        Report: validation report
+
     """
 
     # Create state

@@ -9,6 +9,10 @@ from .. import helpers
 def extract(source, *, source_type=None, process=None, **options):
     """Extract resource rows into memory
 
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import extract`
+
     Parameters:
         source (dict|str): data source
         source_type (str): source type - package, resource or table

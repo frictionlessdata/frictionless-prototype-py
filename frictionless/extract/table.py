@@ -31,6 +31,10 @@ def extract_table(
 ):
     """Extract table rows into memory
 
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import extract_table`
+
     Parameters:
 
         source (any): Source of the file; can be in various forms.

@@ -7,6 +7,17 @@ from .. import exceptions
 @Report.from_validate
 def validate_schema(source):
     """Validate schema
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import validate_schema`
+
+    Parameters:
+        source (dict|str): a schema descriptor
+
+    Returns:
+        Report: validation report
+
     """
 
     # Create state

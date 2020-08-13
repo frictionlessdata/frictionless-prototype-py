@@ -29,6 +29,10 @@ def describe_resource(
 ):
     """Describe the given source as a resource
 
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import describe_resource`
+
     Parameters:
 
         source (any): Source of the file; can be in various forms.
