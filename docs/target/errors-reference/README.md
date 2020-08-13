@@ -2,7 +2,7 @@
 
 > This work is based on [Data Quality Spec](https://github.com/frictionlessdata/data-quality-spec)
 
-This document provides a full reference of the Frictionless errors.
+This document provides a full reference to the Frictionless errors.
 
 ## Error
 
