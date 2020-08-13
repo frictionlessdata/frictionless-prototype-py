@@ -21,15 +21,6 @@ class ChecksumCheck(Check):
 
     """
 
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {
-            "hash": {"type": "string"},
-            "bytes": {"type": "number"},
-            "rows": {"type": "number"},
-        },
-    }
     possible_Errors = [  # type: ignore
         errors.ChecksumError,
     ]
@@ -59,3 +50,15 @@ class ChecksumCheck(Check):
                 note = 'expected rows count is "%s" and actual is "%s"'
                 note = note % (self["rows"], self.table.stats["rows"])
                 yield errors.ChecksumError(note=note)
+
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "hash": {"type": "string"},
+            "bytes": {"type": "number"},
+            "rows": {"type": "number"},
+        },
+    }

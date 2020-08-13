@@ -17,10 +17,6 @@ class DuplicateRowCheck(Check):
 
     """
 
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "properties": {},
-    }
     possible_Errors = [  # type: ignore
         errors.DuplicateRowError
     ]
@@ -36,6 +32,13 @@ class DuplicateRowCheck(Check):
             note = 'the same as row at position "%s"' % match
             yield errors.DuplicateRowError.from_row(row, note=note)
         self.__memory[hash] = row.row_position
+
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "properties": {},
+    }
 
 
 class DeviatedValueCheck(Check):
@@ -57,15 +60,6 @@ class DeviatedValueCheck(Check):
 
     """
 
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "requred": ["fieldName"],
-        "properties": {
-            "fieldName": {"type": "string"},
-            "average": {"type": ["string", "null"]},
-            "interval": {"type": ["number", "null"]},
-        },
-    }
     possible_Errors = [  # type: ignore
         errors.DeviatedValueError
     ]
@@ -122,6 +116,18 @@ class DeviatedValueCheck(Check):
                 dtl = dtl % (cell, row_position, self.__field_name, minimum, maximum)
                 yield errors.DeviatedValueError(note=dtl)
 
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "requred": ["fieldName"],
+        "properties": {
+            "fieldName": {"type": "string"},
+            "average": {"type": ["string", "null"]},
+            "interval": {"type": ["number", "null"]},
+        },
+    }
+
 
 class TruncatedValueCheck(Check):
     """Check for possible truncated values
@@ -136,10 +142,6 @@ class TruncatedValueCheck(Check):
 
     """
 
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "properties": {},
-    }
     possible_Errors = [  # type: ignore
         errors.TruncatedValueError
     ]
@@ -166,6 +168,13 @@ class TruncatedValueCheck(Check):
                 yield errors.TruncatedValueError.from_row(
                     row, note=note, field_name=field_name
                 )
+
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "properties": {},
+    }
 
 
 # Internal

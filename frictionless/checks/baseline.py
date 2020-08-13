@@ -14,11 +14,6 @@ class BaselineCheck(Check):
 
     """
 
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "properties": {},
-        "additionalProperties": False,
-    }
     possible_Errors = [  # type: ignore
         # table
         errors.DialectError,
@@ -53,3 +48,11 @@ class BaselineCheck(Check):
 
     def validate_row(self, row):
         yield from row.errors
+
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "properties": {},
+        "additionalProperties": False,
+    }

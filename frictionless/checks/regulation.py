@@ -21,11 +21,6 @@ class BlacklistedValueCheck(Check):
 
     """
 
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "requred": ["fieldName", "blacklist"],
-        "properties": {"fieldName": {"type": "string"}, "blacklist": {"type": "array"}},
-    }
     possible_Errors = [  # type: ignore
         errors.BlacklistedValueError
     ]
@@ -50,6 +45,14 @@ class BlacklistedValueCheck(Check):
                 field_name=self.__field_name,
             )
 
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "requred": ["fieldName", "blacklist"],
+        "properties": {"fieldName": {"type": "string"}, "blacklist": {"type": "array"}},
+    }
+
 
 class SequentialValueCheck(Check):
     """Check that a column having sequential values
@@ -68,11 +71,6 @@ class SequentialValueCheck(Check):
 
     """
 
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "requred": ["fieldName"],
-        "properties": {"fieldName": {"type": "string"}},
-    }
     possible_Errors = [  # type: ignore
         errors.SequentialValueError
     ]
@@ -102,6 +100,14 @@ class SequentialValueCheck(Check):
                     row, note="the value is not sequential", field_name=self.__field_name,
                 )
 
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "requred": ["fieldName"],
+        "properties": {"fieldName": {"type": "string"}},
+    }
+
 
 class RowConstraintCheck(Check):
     """Check that every row satisfies a provided Python expression
@@ -121,11 +127,6 @@ class RowConstraintCheck(Check):
 
     """
 
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "requred": ["constraint"],
-        "properties": {"constraint": {"type": "string"}},
-    }
     possible_Errors = [  # type: ignore
         errors.RowConstraintError
     ]
@@ -144,3 +145,11 @@ class RowConstraintCheck(Check):
             yield errors.RowConstraintError.from_row(
                 row, note='the row constraint to conform is "%s"' % self.__constraint,
             )
+
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "requred": ["constraint"],
+        "properties": {"constraint": {"type": "string"}},
+    }
