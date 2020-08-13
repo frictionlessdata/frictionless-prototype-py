@@ -9,15 +9,18 @@ from . import config
 class Schema(Metadata):
     """Schema representation
 
-    # Arguments
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import Schema`
+
+    Parameters:
         descriptor? (str|dict): schema descriptor
-
         fields? (dict[]): list of field descriptors
-        missing_values? (str[]): missing_values
-        primary_key? (str[]): primary_key
-        foreign_keys? (dict[]): foreign_keys
+        missing_values? (str[]): missing values
+        primary_key? (str[]): primary key
+        foreign_keys? (dict[]): foreign keys
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
@@ -39,11 +42,19 @@ class Schema(Metadata):
 
     @Metadata.property
     def missing_values(self):
+        """
+        Returns:
+            str[]: missing values
+        """
         missing_values = self.get("missingValues", copy(config.DEFAULT_MISSING_VALUES))
         return self.metadata_attach("missingValues", missing_values)
 
     @Metadata.property
     def primary_key(self):
+        """
+        Returns:
+            str[]: primary key field names
+        """
         primary_key = self.get("primaryKey", [])
         if not isinstance(primary_key, list):
             primary_key = [primary_key]
@@ -51,6 +62,10 @@ class Schema(Metadata):
 
     @Metadata.property
     def foreign_keys(self):
+        """
+        Returns:
+            dict[]: foreign keys
+        """
         foreign_keys = deepcopy(self.get("foreignKeys", []))
         for index, fk in enumerate(foreign_keys):
             if not isinstance(fk, dict):
@@ -69,22 +84,18 @@ class Schema(Metadata):
 
     @Metadata.property
     def fields(self):
-        """Schema's fields
-
-        # Returns
+        """
+        Returns:
             Field[]: an array of field instances
-
         """
         fields = self.get("fields", [])
         return self.metadata_attach("fields", fields)
 
     @Metadata.property(write=False)
     def field_names(self):
-        """Schema's field names
-
-        # Returns
+        """
+        Returns:
             str[]: an array of field names
-
         """
         return [field.name for field in self.fields]
 
@@ -93,12 +104,11 @@ class Schema(Metadata):
 
         The schema descriptor will be validated with newly added field descriptor.
 
-        # Arguments
+        Parameters:
             descriptor (dict): field descriptor
 
-        # Returns
+        Returns:
             Field/None: added `Field` instance or `None` if not added
-
         """
         self.setdefault("fields", [])
         self["fields"].append(descriptor)
@@ -107,12 +117,11 @@ class Schema(Metadata):
     def get_field(self, name):
         """Get schema's field by name.
 
-        # Arguments
+        Parameters:
             name (str): schema field name
 
-        # Returns
+        Returns:
            Field/None: `Field` instance or `None` if not found
-
         """
         for field in self.fields:
             if field.name == name:
@@ -122,12 +131,11 @@ class Schema(Metadata):
     def has_field(self, name):
         """Check if a field is present
 
-        # Arguments
+        Parameters:
             name (str): schema field name
 
-        # Returns
+        Returns:
            bool: whether there is the field
-
         """
         for field in self.fields:
             if field.name == name:
@@ -139,12 +147,11 @@ class Schema(Metadata):
 
         The schema descriptor will be validated after field descriptor removal.
 
-        # Arguments
+        Parameters:
             name (str): schema field name
 
-        # Returns
+        Returns:
             Field/None: removed `Field` instances or `None` if not found
-
         """
         field = self.get_field(name)
         if field:
@@ -156,9 +163,6 @@ class Schema(Metadata):
 
     def expand(self):
         """Expand the schema
-
-        It will add default values to the schema.
-
         """
         self.setdefault("fields", [])
         self.setdefault("missingValues", config.DEFAULT_MISSING_VALUES)
@@ -178,11 +182,12 @@ class Schema(Metadata):
     ):
         """Infer schema
 
-        # Arguments
-            sample
-            names
-            confidence
-
+        Parameters:
+            sample (any[][]): data sample
+            type? (str): enforce all the field to be the given type
+            names (str[]): enforce field names
+            confidence (float): infer confidence from 0 to 1
+            missing_values (str[]): provide custom missing values
         """
 
         # Missing values
@@ -251,12 +256,11 @@ class Schema(Metadata):
     def read_data(self, cells):
         """Read a list of cells (normalize/cast)
 
-        # Arguments
+        Parameters:
             cells (any[]): list of cells
 
-        # Returns
+        Returns:
             any[]: list of processed cells
-
         """
         result_cells = []
         result_notes = []
@@ -272,12 +276,11 @@ class Schema(Metadata):
     def write_data(self, cells, *, native_types=[]):
         """Write a list of cells (normalize/uncast)
 
-        # Arguments
+        Parameters:
             cells (any[]): list of cells
 
-        # Returns
+        Returns:
             any[]: list of processed cells
-
         """
         result_cells = []
         result_notes = []
@@ -303,11 +306,15 @@ class Schema(Metadata):
     ):
         """Infer schema from sample
 
-        # Arguments
-            sample
-            names
-            confidence
+        Parameters:
+            sample (any[][]): data sample
+            type? (str): enforce all the field to be the given type
+            names (str[]): enforce field names
+            confidence (float): infer confidence from 0 to 1
+            missing_values (str[]): provide custom missing values
 
+        Returns:
+            Schema: schema
         """
         schema = Schema()
         schema.infer(
@@ -320,6 +327,11 @@ class Schema(Metadata):
         return schema
 
     def to_dict(self, expand=False):
+        """Convert resource to dict
+
+        Parameters:
+            expand (bool): whether to expand
+        """
         result = super().to_dict()
         if expand:
             result = type(self)(result)

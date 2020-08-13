@@ -12,6 +12,14 @@ from . import config
 # NOTE: Consider an ability to register plugins dynamically
 class System:
     """System representation
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import system`
+
+    This class provides an ability to make system Frictionless calls.
+    It's available as `frictionless.system` singletone.
+
     """
 
     # Actions
@@ -26,6 +34,15 @@ class System:
     ]
 
     def create_check(self, name, *, descriptor=None):
+        """Create checks
+
+        Parameters:
+            name (str): check name
+            descriptor (dict): check descriptor
+
+        Returns:
+            Check: check
+        """
         check = None
         checks = import_module("frictionless.checks")
         for func in self.methods["create_check"].values():
@@ -52,6 +69,15 @@ class System:
         raise exceptions.FrictionlessException(errors.CheckError(note=note))
 
     def create_control(self, file, *, descriptor):
+        """Create control
+
+        Parameters:
+            file (File): control file
+            descriptor (dict): control descriptor
+
+        Returns:
+            Control: control
+        """
         control = None
         name = file.scheme
         controls = import_module("frictionless.controls")
@@ -70,6 +96,15 @@ class System:
         return controls.Control(descriptor)
 
     def create_dialect(self, file, *, descriptor):
+        """Create dialect
+
+        Parameters:
+            file (File): dialect file
+            descriptor (dict): dialect descriptor
+
+        Returns:
+            Dialect: dialect
+        """
         dialect = None
         name = file.format
         dialects = import_module("frictionless.dialects")
@@ -88,6 +123,14 @@ class System:
         return dialects.Dialect(descriptor)
 
     def create_loader(self, file):
+        """Create loader
+
+        Parameters:
+            file (File): loader file
+
+        Returns:
+            Loader: loader
+        """
         loader = None
         name = file.scheme
         loaders = import_module("frictionless.loaders")
@@ -107,6 +150,14 @@ class System:
         raise exceptions.FrictionlessException(errors.SchemeError(note=note))
 
     def create_parser(self, file):
+        """Create parser
+
+        Parameters:
+            file (File): parser file
+
+        Returns:
+            Parser: parser
+        """
         parser = None
         name = file.format
         parsers = import_module("frictionless.parsers")
@@ -130,6 +181,14 @@ class System:
         raise exceptions.FrictionlessException(errors.FormatError(note=note))
 
     def create_server(self, name):
+        """Create server
+
+        Parameters:
+            name (str): server name
+
+        Returns:
+            Server: server
+        """
         server = None
         for func in self.methods["create_server"].values():
             server = func(name)

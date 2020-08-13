@@ -15,7 +15,7 @@ from .resource import Resource
 from .row import Row
 from .schema import Schema
 from .server import Server
-from .system import System, system
+from .system import system
 from .table import Table
 from .transform import *
 from .type import Type

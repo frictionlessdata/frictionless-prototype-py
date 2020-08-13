@@ -18,6 +18,37 @@ from . import config
 
 
 class Resource(Metadata):
+    """Resource representation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import Resource`
+
+    Parameters:
+        descriptor? (str|dict): report descriptor
+        name? (str): package name (for machines)
+        title? (str): package title (for humans)
+        descriptor? (str): package descriptor
+        path? (str): file path
+        data? (any[][]): array or data arrays
+        scheme? (str): file scheme
+        format? (str): file format
+        hashing? (str): file hashing
+        encoding? (str): file encoding
+        compression? (str): file compression
+        compression_path? (str): file compression path
+        dialect? (dict): table dialect
+        schema? (dict): file schema
+        profile? (str): resource profile
+        basepath? (str): resource basepath
+        trusted? (bool): don't raise on unsage paths
+        package? (Package): resource package
+
+    Raises:
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
     def __init__(
         self,
         descriptor=None,
@@ -72,28 +103,52 @@ class Resource(Metadata):
 
     @Metadata.property
     def name(self):
+        """
+        Returns
+            str: resource name
+        """
         return self.get("name", "resource")
 
     @Metadata.property
     def title(self):
+        """
+        Returns
+            str: resource title
+        """
         return self.get("title")
 
     @Metadata.property
     def description(self):
+        """
+        Returns
+            str: resource description
+        """
         return self.get("description")
 
     # NOTE: should it be memory for inline?
     @Metadata.property
     def path(self):
+        """
+        Returns
+            str?: resource path
+        """
         return self.get("path")
 
     @Metadata.property
     def data(self):
+        """
+        Returns
+            any[][]?: resource data
+        """
         return self.get("data")
 
     # NOTE: rewrite this method
     @Metadata.property(write=False)
     def source(self):
+        """
+        Returns
+            any: data source
+        """
         path = self.path
         if self.inline:
             return self.data
@@ -119,11 +174,19 @@ class Resource(Metadata):
 
     @Metadata.property(write=False)
     def basepath(self):
+        """
+        Returns
+            str: resource basepath
+        """
         return self.__basepath
 
     # NOTE: move this logic to path?
     @Metadata.property(write=False)
     def fullpath(self):
+        """
+        Returns
+            str: resource fullpath
+        """
         if self.inline:
             return "memory"
         if helpers.is_remote_path(self.path):
@@ -132,10 +195,18 @@ class Resource(Metadata):
 
     @Metadata.property(write=False)
     def inline(self):
+        """
+        Returns
+            bool: if resource is inline
+        """
         return "data" in self
 
     @Metadata.property(write=False)
     def tabular(self):
+        """
+        Returns
+            bool: if resource is tabular
+        """
         table = self.to_table()
         try:
             table.open()
@@ -150,40 +221,76 @@ class Resource(Metadata):
 
     @Metadata.property(write=False)
     def remote(self):
+        """
+        Returns
+            bool: if resource is remote
+        """
         if self.inline:
             return False
         return helpers.is_remote_path(self.path[0] if self.multipart else self.path)
 
     @Metadata.property(write=False)
     def multipart(self):
+        """
+        Returns
+            bool: if resource is multipart
+        """
         return bool(self.path and isinstance(self.path, list) and len(self.path) >= 2)
 
     @Metadata.property
     def scheme(self):
+        """
+        Returns
+            str?: resource scheme
+        """
         return self.get("scheme")
 
     @Metadata.property
     def format(self):
+        """
+        Returns
+            str?: resource format
+        """
         return self.get("format")
 
     @Metadata.property
     def hashing(self):
+        """
+        Returns
+            str?: resource hashing
+        """
         return self.get("hashing")
 
     @Metadata.property
     def encoding(self):
+        """
+        Returns
+            str?: resource encoding
+        """
         return self.get("encoding")
 
     @Metadata.property
     def compression(self):
+        """
+        Returns
+            str?: resource compression
+        """
         return self.get("compression")
 
     @Metadata.property
     def compression_path(self):
+        """
+        Returns
+            str?: resource compression path
+        """
         return self.get("compressionPath")
 
     @Metadata.property
     def stats(self):
+        """
+        Returns
+            dict?: resource stats
+        """
         stats = {}
         for name in ["hash", "bytes", "rows"]:
             value = self.get(name)
@@ -195,6 +302,10 @@ class Resource(Metadata):
 
     @Metadata.property
     def dialect(self):
+        """
+        Returns
+            Dialect?: resource dialect
+        """
         dialect = self.get("dialect")
         if dialect is None:
             dialect = self.metadata_attach("dialect", Dialect())
@@ -207,6 +318,10 @@ class Resource(Metadata):
 
     @Metadata.property
     def schema(self):
+        """
+        Returns
+            Schema: resource schema
+        """
         schema = self.get("schema")
         if schema is None:
             schema = self.metadata_attach("schema", Schema())
@@ -219,11 +334,17 @@ class Resource(Metadata):
 
     @Metadata.property
     def profile(self):
+        """
+        Returns
+            str?: resource profile
+        """
         return self.get("profile", config.DEFAULT_RESOURCE_PROFILE)
 
     # Expand
 
     def expand(self):
+        """Expand metadata
+        """
         self.setdefault("profile", config.DEFAULT_RESOURCE_PROFILE)
         if isinstance(self.get("dialect"), Dialect):
             self.dialect.expand()
@@ -234,6 +355,12 @@ class Resource(Metadata):
 
     # NOTE: optimize this logic/don't re-open
     def infer(self, source=None, *, only_sample=False):
+        """Infer metadata
+
+        Parameters:
+            source (str|str[]): path, list of paths or glob pattern
+            only_sample? (bool): infer whatever possible but only from the sample
+        """
         patch = {}
 
         # From source
@@ -282,12 +409,20 @@ class Resource(Metadata):
     # Read
 
     def read_bytes(self):
+        """
+        Returns:
+            bytes: resource bytes
+        """
         byte_stream = self.read_byte_stream()
         bytes = byte_stream.read1(io.DEFAULT_BUFFER_SIZE)
         byte_stream.close()
         return bytes
 
     def read_byte_stream(self):
+        """
+        Returns:
+            io.ByteStream: resource byte stream
+        """
         if self.inline:
             return io.BytesIO(b"")
         file = self.to_file()
@@ -295,6 +430,10 @@ class Resource(Metadata):
         return file.byte_stream
 
     def read_text(self):
+        """
+        Returns:
+            str: resource text
+        """
         text = ""
         text_stream = self.read_text_stream()
         for line in text_stream:
@@ -303,6 +442,10 @@ class Resource(Metadata):
         return text
 
     def read_text_stream(self):
+        """
+        Returns:
+            io.TextStream: resource text stream
+        """
         if self.inline:
             return io.StringIO("")
         file = self.to_file()
@@ -310,33 +453,61 @@ class Resource(Metadata):
         return file.text_stream
 
     def read_data(self):
+        """
+        Returns:
+            any[][]: array of data arrays
+        """
         data = list(self.read_data_stream())
         return data
 
     def read_data_stream(self):
+        """
+        Returns:
+            gen<any[][]>: data stream
+        """
         with self.to_table() as table:
             for cells in table.data_stream:
                 yield cells
 
     def read_rows(self):
+        """
+        Returns
+            Row[]: resource rows
+        """
         rows = list(self.read_row_stream())
         return rows
 
     def read_row_stream(self):
+        """
+        Returns
+            gen<Row[]>: row stream
+        """
         with self.to_table() as table:
             for row in table.row_stream:
                 yield row
 
     def read_header(self):
+        """
+        Returns
+            Header: resource header
+        """
         with self.to_table() as table:
             return table.header
 
     def read_sample(self):
+        """
+        Returns
+            any[][]: resource sample
+        """
         with self.to_table() as table:
             return table.sample
 
     # NOTE: optimize this logic/don't re-open
     def read_stats(self):
+        """
+        Returns
+            dict: resource stats
+        """
 
         # Tabular
         if self.tabular:
@@ -353,6 +524,10 @@ class Resource(Metadata):
             return file.stats
 
     def read_lookup(self):
+        """
+        Returns
+            dict: resource lookup structure
+        """
         lookup = {}
         for fk in self.schema.foreign_keys:
             source_name = fk["reference"]["resource"]
@@ -377,6 +552,11 @@ class Resource(Metadata):
     # Import/Export
 
     def to_dict(self, expand=False):
+        """Convert resource to dict
+
+        Parameters:
+            expand (bool): whether to expand
+        """
         result = super().to_dict()
         if expand:
             result = type(self)(result)
@@ -386,6 +566,14 @@ class Resource(Metadata):
 
     # NOTE: cache lookup?
     def to_table(self, **options):
+        """Convert resource to Table
+
+        Parameters:
+            **options (dict): table options
+
+        Returns:
+            Table: data table
+        """
         options.setdefault("source", self.source)
         options.setdefault("scheme", self.scheme)
         options.setdefault("format", self.format)
@@ -400,6 +588,14 @@ class Resource(Metadata):
         return Table(**options)
 
     def to_file(self, **options):
+        """Convert resource to File
+
+        Parameters:
+            **options (dict): file options
+
+        Returns:
+            File: data file
+        """
         options.setdefault("source", self.source)
         options.setdefault("scheme", self.scheme)
         options.setdefault("format", self.format)
@@ -411,6 +607,14 @@ class Resource(Metadata):
 
     # NOTE: support multipart
     def to_zip(self, target):
+        """Save resource to a zip
+
+        Parameters:
+            target (str): target path
+
+        Raises:
+            FrictionlessException: on any error
+        """
         try:
             with zipfile.ZipFile(target, "w") as zip:
                 descriptor = self.copy()

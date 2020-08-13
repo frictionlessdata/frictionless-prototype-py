@@ -5,6 +5,12 @@ from . import errors
 class Check(Metadata):
     """Check representation.
 
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import Checks`
+
+    It's an interface for writing Frictionless checks.
+
     Parameters:
         descriptor? (str|dict): schema descriptor
 
