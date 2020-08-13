@@ -3310,14 +3310,166 @@ Public   | `from frictionless import parsers`
 <a name="frictionless.extract.main"></a>
 ## frictionless.extract.main
 
+<a name="frictionless.extract.main.extract"></a>
+#### <big>extract</big>
+
+```python
+extract(source, *, source_type=None, process=None, **options)
+```
+
+Extract resource rows into memory
+
+**Arguments**:
+
+- `source` _dict|str_ - data source
+- `source_type` _str_ - source type - package, resource or table
+- `process?` _func_ - a row processor function
+- `**options` _dict_ - options for the underlaying function
+  
+
+**Returns**:
+
+- `Row[]|{path` - Row[]}: rows in a form depending on the source type
+
 <a name="frictionless.extract.table"></a>
 ## frictionless.extract.table
+
+<a name="frictionless.extract.table.extract_table"></a>
+#### <big>extract\_table</big>
+
+```python
+extract_table(source, *, scheme=None, format=None, hashing=None, encoding=None, compression=None, compression_path=None, control=None, dialect=None, query=None, headers=None, schema=None, sync_schema=False, patch_schema=False, infer_type=None, infer_names=None, infer_volume=config.DEFAULT_INFER_VOLUME, infer_confidence=config.DEFAULT_INFER_CONFIDENCE, infer_missing_values=config.DEFAULT_MISSING_VALUES, lookup=None, process=None)
+```
+
+Extract table rows into memory
+
+**Arguments**:
+
+  
+- `source` _any_ - Source of the file; can be in various forms.
+  Usually, it's a string as `<scheme>://path/to/file.<format>`.
+  It also can be, for example, an array of data arrays/dictionaries.
+  
+- `scheme?` _str_ - Scheme for loading the file (file, http, ...).
+  If not set, it'll be inferred from `source`.
+  
+- `format?` _str_ - File source's format (csv, xls, ...).
+  If not set, it'll be inferred from `source`.
+  
+- `encoding?` _str_ - An algorithm to hash data.
+  It defaults to 'md5'.
+  
+- `encoding?` _str_ - Source encoding.
+  If not set, it'll be inferred from `source`.
+  
+- `compression?` _str_ - Source file compression (zip, ...).
+  If not set, it'll be inferred from `source`.
+  
+- `compression_path?` _str_ - A path within the compressed file.
+  It defaults to the first file in the archive.
+  
+- `control?` _dict|Control_ - File control.
+  For more infromation, please check the Control documentation.
+  
+- `dialect?` _dict|Dialect_ - Table dialect.
+  For more infromation, please check the Dialect documentation.
+  
+- `query?` _dict|Query_ - Table query.
+  For more infromation, please check the Query documentation.
+  
+- `headers?` _int|int[]|[int[], str]_ - Either a row
+  number or list of row numbers (in case of multi-line headers) to be
+  considered as headers (rows start counting at 1), or a pair
+  where the first element is header rows and the second the
+  header joiner.  It defaults to 1.
+  
+- `schema?` _dict|Schema_ - Table schema.
+  For more infromation, please check the Schema documentation.
+  
+- `sync_schema?` _bool_ - Whether to sync the schema.
+  If it sets to `True` the provided schema will be mapped to
+  the inferred schema. It means that, for example, you can
+  provide a subset of fileds to be applied on top of the inferred
+  fields or the provided schema can have different order of fields.
+  
+- `patch_schema?` _dict_ - A dictionary to be used as an inferred schema patch.
+  The form of this dictionary should follow the Schema descriptor form
+  except for the `fields` property which should be a mapping with the
+  key named after a field name and the values being a field patch.
+  For more information, please check "Extracting Data" guide.
+  
+- `infer_type?` _str_ - Enforce all the inferred types to be this type.
+  For more information, please check "Describing  Data" guide.
+  
+- `infer_names?` _str[]_ - Enforce all the inferred fields to have provided names.
+  For more information, please check "Describing  Data" guide.
+  
+- `infer_volume?` _int_ - The amount of rows to be extracted as a samle.
+  For more information, please check "Describing  Data" guide.
+  It defaults to 100
+  
+- `infer_confidence?` _float_ - A number from 0 to 1 setting the infer confidence.
+  If  1 the data is guaranteed to be valid against the inferred schema.
+  For more information, please check "Describing  Data" guide.
+  It defaults to 0.9
+  
+- `infer_missing_values?` _str[]_ - String to be considered as missing values.
+  For more information, please check "Describing  Data" guide.
+  It defaults to `['']`
+  
+- `lookup?` _dict_ - The lookup is a special object providing relational information.
+  For more information, please check "Extracting  Data" guide.
+  
+- `process?` _func_ - a row processor function
+  
+
+**Returns**:
+
+- `Row[]` - an array for rows
 
 <a name="frictionless.extract.package"></a>
 ## frictionless.extract.package
 
+<a name="frictionless.extract.package.extract_package"></a>
+#### <big>extract\_package</big>
+
+```python
+extract_package(source, *, process=None)
+```
+
+Extract package rows into memory
+
+**Arguments**:
+
+- `source` _dict|str_ - data resource descriptor
+- `process?` _func_ - a row processor function
+  
+
+**Returns**:
+
+- `{path` - Row[]}: a dictionary of arrays of rows
+
 <a name="frictionless.extract.resource"></a>
 ## frictionless.extract.resource
+
+<a name="frictionless.extract.resource.extract_resource"></a>
+#### <big>extract\_resource</big>
+
+```python
+extract_resource(source, *, process=None)
+```
+
+Extract resource rows into memory
+
+**Arguments**:
+
+- `source` _dict|str_ - data resource descriptor
+- `process?` _func_ - a row processor function
+  
+
+**Returns**:
+
+- `Row[]` - an array of rows
 
 <a name="frictionless.errors"></a>
 ## frictionless.errors

@@ -3,6 +3,16 @@ from ..package import Package
 
 
 def extract_package(source, *, process=None):
+    """Extract package rows into memory
+
+    Parameters:
+        source (dict|str): data resource descriptor
+        process? (func): a row processor function
+
+    Returns:
+        {path: Row[]}: a dictionary of arrays of rows
+
+    """
 
     # Create package
     package = Package(source)

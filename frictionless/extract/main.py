@@ -7,6 +7,17 @@ from .. import helpers
 
 
 def extract(source, *, source_type=None, process=None, **options):
+    """Extract resource rows into memory
+
+    Parameters:
+        source (dict|str): data source
+        source_type (str): source type - package, resource or table
+        process? (func): a row processor function
+        **options (dict): options for the underlaying function
+
+    Returns:
+        Row[]|{path: Row[]}: rows in a form depending on the source type
+    """
     module = import_module("frictionless.extract")
 
     # Normalize source
