@@ -41,14 +41,6 @@ class Package(Metadata):
 
     """
 
-    metadata_duplicate = True
-    metadata_Error = errors.PackageError  # type: ignore
-    metadata_profile = deepcopy(config.PACKAGE_PROFILE)
-    metadata_profile["properties"]["resources"] = {
-        "type": "array",
-        "items": {"type": "object"},
-    }
-
     def __init__(
         self,
         descriptor=None,
@@ -279,6 +271,14 @@ class Package(Metadata):
             raise exceptions.FrictionlessException(error) from exception
 
     # Metadata
+
+    metadata_duplicate = True
+    metadata_Error = errors.PackageError  # type: ignore
+    metadata_profile = deepcopy(config.PACKAGE_PROFILE)
+    metadata_profile["properties"]["resources"] = {
+        "type": "array",
+        "items": {"type": "object"},
+    }
 
     def metadata_process(self):
 

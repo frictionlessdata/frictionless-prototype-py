@@ -18,12 +18,6 @@ from . import config
 
 
 class Resource(Metadata):
-    metadata_duplicate = True
-    metadata_Error = errors.ResourceError
-    metadata_profile = deepcopy(config.RESOURCE_PROFILE)
-    metadata_profile["properties"]["dialect"] = {"type": "object"}
-    metadata_profile["properties"]["schema"] = {"type": "object"}
-
     def __init__(
         self,
         descriptor=None,
@@ -437,6 +431,12 @@ class Resource(Metadata):
             raise exceptions.FrictionlessException(error) from exception
 
     # Metadata
+
+    metadata_duplicate = True
+    metadata_Error = errors.ResourceError
+    metadata_profile = deepcopy(config.RESOURCE_PROFILE)
+    metadata_profile["properties"]["dialect"] = {"type": "object"}
+    metadata_profile["properties"]["schema"] = {"type": "object"}
 
     def metadata_process(self):
 

@@ -8,22 +8,6 @@ class Query(Metadata):
 
     """
 
-    metadata_Error = errors.QueryError
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {
-            "pickFields": {"type": "array"},
-            "skipFields": {"type": "array"},
-            "limitFields": {"type": "number"},
-            "offsetFields": {"type": "number"},
-            "pickRows": {"type": "array"},
-            "skipRows": {"type": "array"},
-            "limitRows": {"type": "number"},
-            "offsetRows": {"type": "number"},
-        },
-    }
-
     def __init__(
         self,
         descriptor=None,
@@ -118,3 +102,21 @@ class Query(Metadata):
             result.expand()
             result = result.to_dict()
         return result
+
+    # Metadata
+
+    metadata_Error = errors.QueryError
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "pickFields": {"type": "array"},
+            "skipFields": {"type": "array"},
+            "limitFields": {"type": "number"},
+            "offsetFields": {"type": "number"},
+            "pickRows": {"type": "array"},
+            "skipRows": {"type": "array"},
+            "limitRows": {"type": "number"},
+            "offsetRows": {"type": "number"},
+        },
+    }

@@ -22,14 +22,6 @@ class Schema(Metadata):
 
     """
 
-    metadata_duplicate = True
-    metadata_Error = errors.SchemaError  # type: ignore
-    metadata_profile = deepcopy(config.SCHEMA_PROFILE)
-    metadata_profile["properties"]["fields"] = {
-        "type": "array",
-        "items": {"type": "object"},
-    }
-
     def __init__(
         self,
         descriptor=None,
@@ -336,6 +328,14 @@ class Schema(Metadata):
         return result
 
     # Metadata
+
+    metadata_duplicate = True
+    metadata_Error = errors.SchemaError  # type: ignore
+    metadata_profile = deepcopy(config.SCHEMA_PROFILE)
+    metadata_profile["properties"]["fields"] = {
+        "type": "array",
+        "items": {"type": "object"},
+    }
 
     def metadata_process(self):
 

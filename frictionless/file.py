@@ -47,34 +47,6 @@ class File(Metadata):
 
     """
 
-    metadata_strict = True
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "required": ["source"],
-        "properties": {
-            "source": {},
-            "scheme": {"type": "string"},
-            "format": {"type": "string"},
-            "hashing": {"type": "string"},
-            "encoding": {"type": "string"},
-            "compression": {"type": "string"},
-            "compressionPath": {"type": "string"},
-            "contorl": {"type": "object"},
-            "dialect": {"type": "object"},
-            "query": {"type": "object"},
-            "newline": {"type": "string"},
-            "stats": {
-                "type": "object",
-                "required": ["hash", "bytes", "rows"],
-                "properties": {
-                    "hash": {"type": "string"},
-                    "bytes": {"type": "number"},
-                    "rows": {"type": "number"},
-                },
-            },
-        },
-    }
-
     def __init__(
         self,
         source,
@@ -360,6 +332,34 @@ class File(Metadata):
         helpers.move_file(file.name, target)
 
     # Metadata
+
+    metadata_strict = True
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "required": ["source"],
+        "properties": {
+            "source": {},
+            "scheme": {"type": "string"},
+            "format": {"type": "string"},
+            "hashing": {"type": "string"},
+            "encoding": {"type": "string"},
+            "compression": {"type": "string"},
+            "compressionPath": {"type": "string"},
+            "contorl": {"type": "object"},
+            "dialect": {"type": "object"},
+            "query": {"type": "object"},
+            "newline": {"type": "string"},
+            "stats": {
+                "type": "object",
+                "required": ["hash", "bytes", "rows"],
+                "properties": {
+                    "hash": {"type": "string"},
+                    "bytes": {"type": "number"},
+                    "rows": {"type": "number"},
+                },
+            },
+        },
+    }
 
     def metadata_process(self):
         super().metadata_process()

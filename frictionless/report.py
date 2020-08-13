@@ -21,14 +21,6 @@ class Report(Metadata):
 
     """
 
-    metadata_strict = True
-    metadata_Error = ReportError
-    metadata_profile = deepcopy(config.REPORT_PROFILE)
-    metadata_profile["properties"]["tables"] = {
-        "type": "array",
-        "items": {"type": "object"},
-    }
-
     def __init__(self, descriptor=None, *, time, errors, tables):
         self["version"] = config.VERSION
         self["time"] = time
@@ -127,6 +119,14 @@ class Report(Metadata):
 
     # Metadata
 
+    metadata_strict = True
+    metadata_Error = ReportError
+    metadata_profile = deepcopy(config.REPORT_PROFILE)
+    metadata_profile["properties"]["tables"] = {
+        "type": "array",
+        "items": {"type": "object"},
+    }
+
     def metadata_validate(self):
         yield from super().metadata_validate()
 
@@ -168,10 +168,6 @@ class ReportTable(Metadata):
         FrictionlessException: raise any error that occurs during the process
 
     """
-
-    metadata_strict = True
-    metadata_Error = ReportError
-    metadata_profile = config.REPORT_PROFILE["properties"]["tables"]["items"]
 
     def __init__(self, descriptor=None, *, time, scope, partial, errors, table):
         # File
@@ -304,3 +300,9 @@ class ReportTable(Metadata):
             result.expand()
             result = result.to_dict()
         return result
+
+    # Metadata
+
+    metadata_strict = True
+    metadata_Error = ReportError
+    metadata_profile = config.REPORT_PROFILE["properties"]["tables"]["items"]

@@ -40,20 +40,6 @@ class Pipeline(Metadata):
 
     """
 
-    metadata_Error = errors.PipelineError
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "required": ["type", "steps"],
-        "properties": {
-            "name": {"type": "string"},
-            "type": {"type": "string"},
-            "steps": {
-                "type": "array",
-                "items": {"type": "object", "required": ["type", "spec"]},
-            },
-        },
-    }
-
     def __init__(self, descriptor=None, *, name=None, type=None, steps=None):
         self.setinitial("name", name)
         self.setinitial("type", type)
@@ -112,3 +98,19 @@ class Pipeline(Metadata):
 
         # Process flow
         flow.process()
+
+    # Metadata
+
+    metadata_Error = errors.PipelineError
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "required": ["type", "steps"],
+        "properties": {
+            "name": {"type": "string"},
+            "type": {"type": "string"},
+            "steps": {
+                "type": "array",
+                "items": {"type": "object", "required": ["type", "spec"]},
+            },
+        },
+    }
