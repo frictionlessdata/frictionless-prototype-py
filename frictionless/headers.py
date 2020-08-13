@@ -3,13 +3,18 @@ from .helpers import cached_property
 from . import errors
 
 
+# NOTE: should it be Header?
 class Headers(list):
     """Headers representation
 
-    # Arguments
-        cells
-        fields
-        field_positions
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import Headers`
+
+    Parameters:
+        cells (any[]): header row cells
+        schema (Schema): table schema
+        field_positions (int[]): field positions
 
     """
 
@@ -117,27 +122,47 @@ class Headers(list):
 
     @cached_property
     def schema(self):
+        """
+        Returns:
+            Schema: table schema
+        """
         return self.__schema
 
     @cached_property
     def field_positions(self):
+        """
+        Returns:
+            int[]: table field positions
+        """
         return self.__field_positions
 
     @cached_property
     def errors(self):
+        """
+        Returns:
+            Error[]: header errors
+        """
         return self.__errors
 
     @cached_property
     def valid(self):
+        """
+        Returns:
+            bool: if header valid
+        """
         return not self.__errors
 
     # Import/Export
 
     def to_dict(self):
+        """Convert to a dict (field name -> header cell)
+        """
         result = {}
         for field, header in zip(self.__schema.fields, self):
             result[field.name] = header
         return result
 
     def to_list(self):
+        """Convert to a list
+        """
         return list(self)
