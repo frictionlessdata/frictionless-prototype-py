@@ -209,7 +209,7 @@ Description: `Based on the schema there should be a header that is missing in th
 Code: `blank-header` <br>
 Tags: `#head #structure` <br>
 Template: `Header in field at position "{fieldPosition}" is blank` <br>
-Description: `A column in the header row is missing a value. Headers should be provided and not be blank.` <br>
+Description: `A column in the header row is missing a value. Header should be provided and not be blank.` <br>
 
 
 ## Duplicate Header
@@ -225,7 +225,7 @@ Description: `Two columns in the header row have the same value. Column names sh
 Code: `non-matching-header` <br>
 Tags: `#head #schema` <br>
 Template: `Header "{cell}" in field {fieldName} at position "{fieldPosition}" does not match the field name in the schema` <br>
-Description: `One of the data source headers does not match the field name defined in the schema.` <br>
+Description: `One of the data source header does not match the field name defined in the schema.` <br>
 
 
 ## Extra Cell

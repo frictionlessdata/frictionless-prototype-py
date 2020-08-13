@@ -319,7 +319,7 @@ pprint(report)
                              'tags': ['#head', '#structure']}],
                  'format': 'csv',
                  'hashing': 'md5',
-                 'headers': ['id', 'name', 'name'],
+                 'header': ['id', 'name', 'name'],
                  'partial': False,
                  'path': 'capital.csv',
                  'query': {},
@@ -332,11 +332,11 @@ pprint(report)
                            'errors': 1,
                            'hash': 'dcdeae358cfd50860c18d953e021f836',
                            'rows': 11},
-                 'time': 0.01,
+                 'time': 0.011,
                  'valid': False}],
-     'time': 0.01,
+     'time': 0.011,
      'valid': False,
-     'version': '0.4.4'}
+     'version': '0.6.0'}
 
 
 As we can see, there are a lot of information; you can find its details description in "API Reference". Errors are groupped by tables; for some validation there are can be dozens of tables. Let's use the `report.flatten` function to simplify errors representation:
@@ -378,9 +378,9 @@ pprint(report)
                  'tags': ['#table', '#schema']}],
      'stats': {'errors': 1, 'tables': 0},
      'tables': [],
-     'time': 0.001,
+     'time': 0.0,
      'valid': False,
-     'version': '0.4.4'}
+     'version': '0.6.0'}
 
 
 ## Validation Errors
@@ -773,4 +773,4 @@ pprint(report.flatten(["rowPosition", "fieldPosition", "code", "note"]))
     [[3, 1, 'cell-error', 'number 2 is forbidden!']]
 
 
-Usualy, it also makes sense to create a custom error for your custom check. The Check class provides other useful methods like `validate_headers` etc. Please read "API Reference" to learn it in details.
+Usualy, it also makes sense to create a custom error for your custom check. The Check class provides other useful methods like `validate_header` etc. Please read "API Reference" to learn it in details.

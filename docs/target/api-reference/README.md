@@ -427,7 +427,7 @@ It loads a data source, and allows you to stream its parsed contents.
 
 ```python
 with Table("data/table.csv") as table:
-    table.headers == ["id", "name"]
+    table.header == ["id", "name"]
     table.read_rows() == [
         {'id': 1, 'name': 'english'},
         {'id': 2, 'name': '中国人'},
@@ -440,12 +440,6 @@ with Table("data/table.csv") as table:
 - `source` _any_ - Source of the file; can be in various forms.
   Usually, it's a string as `<scheme>://path/to/file.<format>`.
   It also can be, for example, an array of data arrays/dictionaries.
-  
-- `headers?` _int|int[]|[int[], str]_ - Either a row
-  number or list of row numbers (in case of multi-line headers) to be
-  considered as headers (rows start counting at 1), or a pair
-  where the first element is header rows and the second the
-  header joiner.  It defaults to 1.
   
 - `scheme?` _str_ - Scheme for loading the file (file, http, ...).
   If not set, it'll be inferred from `source`.
@@ -468,11 +462,17 @@ with Table("data/table.csv") as table:
 - `control?` _dict|Control_ - File control.
   For more infromation, please check the Control documentation.
   
+- `dialect?` _dict|Dialect_ - Table dialect.
+  For more infromation, please check the Dialect documentation.
+  
 - `query?` _dict|Query_ - Table query.
   For more infromation, please check the Query documentation.
   
-- `dialect?` _dict|Dialect_ - Table dialect.
-  For more infromation, please check the Dialect documentation.
+- `headers?` _int|int[]|[int[], str]_ - Either a row
+  number or list of row numbers (in case of multi-line headers) to be
+  considered as headers (rows start counting at 1), or a pair
+  where the first element is header rows and the second the
+  header joiner.  It defaults to 1.
   
 - `schema?` _dict|Schema_ - Table schema.
   For more infromation, please check the Schema documentation.
@@ -655,17 +655,17 @@ with Table("data/table.csv") as table:
 
 - `Schema?` - table schema
 
-<a name="frictionless.table.Table.headers"></a>
-#### <big>headers</big>
+<a name="frictionless.table.Table.header"></a>
+#### <big>header</big>
 
 ```python
  | @property
- | headers()
+ | header()
 ```
 
 **Returns**:
 
-- `str[]?` - table headers
+- `str[]?` - table header
 
 <a name="frictionless.table.Table.sample"></a>
 #### <big>sample</big>
@@ -1455,13 +1455,13 @@ Public   | `$ frictionless`
 @click.argument("source", type=click.Path(), nargs=-1, required=True)
 @click.option("--source-type", type=str, help="Source type")
 @click.option("--json", is_flag=True, help="Output report as JSON")
-@click.option("--headers", type=int, multiple=True, help="Headers")
 @click.option("--scheme", type=str, help="File scheme")
 @click.option("--format", type=str, help="File format")
 @click.option("--hashing", type=str, help="File hashing")
 @click.option("--encoding", type=str, help="File encoding")
 @click.option("--compression", type=str, help="File compression")
 @click.option("--compression-path", type=str, help="File compression path")
+@click.option("--headers", type=int, multiple=True, help="Headers")
 @click.option("--schema", type=click.Path(), help="Schema")
 @click.option("--sync-schema", is_flag=True, help="Sync schema")
 @click.option("--infer-type", type=str, help="Infer type")
@@ -1477,7 +1477,7 @@ Public   | `$ frictionless`
 @click.option("--limit-errors", type=int, help="Limit errors")
 @click.option("--limit-memory", type=int, help="Limit memory")
 @click.option("--noinfer", type=bool, help="Validate metadata as it is")
-program_validate(source, *, headers, source_type, json, **options)
+program_validate(source, *, source_type, json, **options)
 ```
 
 Validate data
@@ -2140,24 +2140,6 @@ Convert field to dict
 
 - `expand` _bool_ - whether to expand
 
-<a name="frictionless.headers"></a>
-## frictionless.headers
-
-<a name="frictionless.headers.Headers"></a>
-### Headers
-
-```python
-class Headers(list)
-```
-
-Headers representation
-
-__Arguments__
-
-    cells
-    fields
-    field_positions
-
 <a name="frictionless.query"></a>
 ## frictionless.query
 
@@ -2208,6 +2190,94 @@ Inquiry representation.
 
 <a name="frictionless.config"></a>
 ## frictionless.config
+
+<a name="frictionless.header"></a>
+## frictionless.header
+
+<a name="frictionless.header.Header"></a>
+### Header
+
+```python
+class Header(list)
+```
+
+Header representation
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import Header`
+
+**Arguments**:
+
+- `cells` _any[]_ - header row cells
+- `schema` _Schema_ - table schema
+- `field_positions` _int[]_ - field positions
+
+<a name="frictionless.header.Header.schema"></a>
+#### <big>schema</big>
+
+```python
+ | @cached_property
+ | schema()
+```
+
+**Returns**:
+
+- `Schema` - table schema
+
+<a name="frictionless.header.Header.field_positions"></a>
+#### <big>field\_positions</big>
+
+```python
+ | @cached_property
+ | field_positions()
+```
+
+**Returns**:
+
+- `int[]` - table field positions
+
+<a name="frictionless.header.Header.errors"></a>
+#### <big>errors</big>
+
+```python
+ | @cached_property
+ | errors()
+```
+
+**Returns**:
+
+- `Error[]` - header errors
+
+<a name="frictionless.header.Header.valid"></a>
+#### <big>valid</big>
+
+```python
+ | @cached_property
+ | valid()
+```
+
+**Returns**:
+
+- `bool` - if header valid
+
+<a name="frictionless.header.Header.to_dict"></a>
+#### <big>to\_dict</big>
+
+```python
+ | to_dict()
+```
+
+Convert to a dict (field name -> header cell)
+
+<a name="frictionless.header.Header.to_list"></a>
+#### <big>to\_list</big>
+
+```python
+ | to_list()
+```
+
+Convert to a list
 
 <a name="frictionless.plugins"></a>
 ## frictionless.plugins
@@ -2933,18 +3003,18 @@ Called to validate the given schema
 
 - `Error` - found errors
 
-<a name="frictionless.check.Check.validate_headers"></a>
-#### <big>validate\_headers</big>
+<a name="frictionless.check.Check.validate_header"></a>
+#### <big>validate\_header</big>
 
 ```python
- | validate_headers(headers)
+ | validate_header(header)
 ```
 
-Called to validate the given headers
+Called to validate the given header
 
 **Arguments**:
 
-- `headers` _Headers_ - table headers
+- `header` _Header_ - table header
   
 
 **Yields**:
@@ -3906,7 +3976,7 @@ __Returns__
 
 ```python
 @Report.from_validate
-validate_table(source, *, headers=None, scheme=None, format=None, hashing=None, encoding=None, compression=None, compression_path=None, control=None, dialect=None, query=None, schema=None, sync_schema=False, patch_schema=False, infer_type=None, infer_names=None, infer_volume=config.DEFAULT_INFER_VOLUME, infer_confidence=config.DEFAULT_INFER_CONFIDENCE, infer_missing_values=config.DEFAULT_MISSING_VALUES, lookup=None, checksum=None, extra_checks=None, pick_errors=None, skip_errors=None, limit_errors=None, limit_memory=config.DEFAULT_LIMIT_MEMORY)
+validate_table(source, *, scheme=None, format=None, hashing=None, encoding=None, compression=None, compression_path=None, control=None, dialect=None, query=None, headers=None, schema=None, sync_schema=False, patch_schema=False, infer_type=None, infer_names=None, infer_volume=config.DEFAULT_INFER_VOLUME, infer_confidence=config.DEFAULT_INFER_CONFIDENCE, infer_missing_values=config.DEFAULT_MISSING_VALUES, lookup=None, checksum=None, extra_checks=None, pick_errors=None, skip_errors=None, limit_errors=None, limit_memory=config.DEFAULT_LIMIT_MEMORY)
 ```
 
 Validate table

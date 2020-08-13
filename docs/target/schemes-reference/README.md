@@ -16,27 +16,21 @@ There are no options available.
 
 #### Http Session
 
-> Type: any
+> Type: requests.Session
 
-Http_session
+User defined http session
 
 #### Http Preload
 
 > Type: bool
 
-Http_preload
+Don't use http streaming and preload all the data
 
 #### Http Timeout
 
 > Type: int
 
-Http_timeout
-
-#### Detect Encoding
-
-> Type: func
-
-Detectencoding
+User defined http timeout in minutes
 
 
 

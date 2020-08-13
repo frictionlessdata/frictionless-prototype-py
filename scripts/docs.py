@@ -28,10 +28,10 @@ def from_notebook(source, target):
     os.makedirs(target_dir, exist_ok=True)
     url = f"https://drive.google.com/uc?id={os.path.split(urlparse(source).path)[-1]}"
     gdown.download(url, target_py, quiet=True)
-    command = f"python3 -m json.tool {target_py} > {target_py}_tmp"
-    subprocess.run(command, shell=True, check=True)
-    command = f"mv {target_py}_tmp {target_py}"
-    subprocess.run(command, shell=True, check=True)
+    #  command = f"python3 -m json.tool {target_py} > {target_py}_tmp"
+    #  subprocess.run(command, shell=True, check=True)
+    #  command = f"mv {target_py}_tmp {target_py}"
+    #  subprocess.run(command, shell=True, check=True)
     command = f"python3 -m nbconvert --to markdown {target_py} --log-level 0"
     subprocess.run(command, shell=True, check=True)
     lines = []

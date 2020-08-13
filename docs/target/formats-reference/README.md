@@ -18,49 +18,49 @@ Csv delimiter
 
 > Type: str
 
-Line_terminator
+Csv line terminator
 
 #### Quote Char
 
 > Type: str
 
-Quote_char
+Csv quote char
 
 #### Double Quote
 
 > Type: bool
 
-Double_quote
+Csv double quote
 
 #### Escape Char
 
 > Type: str
 
-Escape_char
+Csv escape char
 
 #### Null Sequence
 
 > Type: str
 
-Null_sequence
+Csv null sequence
 
 #### Skip Initial Space
 
 > Type: bool
 
-Skip_initial_space
+Csv skip initial space
 
 #### Comment Char
 
 > Type: str
 
-Comment_char
+Csv comment char
 
 #### Case Sensitive Header
 
 > Type: bool
 
-Case_sensitive_header
+Csv case sensitive header
 
 
 
@@ -73,31 +73,31 @@ Case_sensitive_header
 
 > Type: int|str
 
-Sheet
+Number from 1 or name of an excel sheet
 
 #### Workbook Cache
 
 > Type: dict
 
-Workbook_cache
+Workbook cache
 
 #### Fill Merged Cells
 
 > Type: bool
 
-Fill_merged_cells
+Whether to fill merged cells
 
 #### Preserve Formatting
 
 > Type: bool
 
-Preserve_formatting
+Whither to preserve formatting
 
 #### Adjust Floating Point Error
 
 > Type: bool
 
-Adjust_floating_point_error
+Whether to adjust floating point error
 
 
 
@@ -106,11 +106,17 @@ Adjust_floating_point_error
 
 ### Options
 
+#### Keys
+
+> Type: str[]
+
+A list of strings to use as data keys
+
 #### Keyed
 
 > Type: bool
 
-Keyed
+Whether data rows are keyed
 
 
 
@@ -119,17 +125,23 @@ Keyed
 
 ### Options
 
+#### Keys
+
+> Type: str[]
+
+A list of strings to use as data keys
+
 #### Keyed
 
 > Type: bool
 
-Keyed
+Whether data rows are keyed
 
 #### Property
 
 > Type: str
 
-Property
+A path within json to the data
 
 
 
