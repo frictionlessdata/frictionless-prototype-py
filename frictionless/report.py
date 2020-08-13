@@ -10,13 +10,17 @@ from .errors import Error, TaskError, ReportError
 class Report(Metadata):
     """Report representation.
 
-    # Arguments
-        descriptor? (str|dict): schema descriptor
-        time
-        errors
-        tables
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import Report`
 
-    # Raises
+    Parameters:
+        descriptor? (str|dict): report descriptor
+        time (float): validation time
+        errors (Error[]): validation errors
+        tables (ReportTable[]): validation tables
+
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
@@ -35,30 +39,61 @@ class Report(Metadata):
 
     @property
     def version(self):
+        """
+        Returns:
+            str: frictionless version
+        """
         return self["version"]
 
     @property
     def time(self):
+        """
+        Returns:
+            float: validation time
+        """
         return self["time"]
 
     @property
     def valid(self):
+        """
+        Returns:
+            bool: validation result
+        """
         return self["valid"]
 
     @property
     def stats(self):
+        """
+        Returns:
+            dict: validation stats
+        """
         return self["stats"]
 
     @property
     def errors(self):
+        """
+        Returns:
+            Error[]: validation errors
+        """
         return self["errors"]
 
     @property
     def tables(self):
+        """
+        Returns:
+            ReportTable[]: validation tables
+        """
         return self["tables"]
 
     @property
     def table(self):
+        """
+        Returns:
+            ReportTable: validation table (if there is only one)
+
+        Raises:
+            FrictionlessException: if there are more that 1 table
+        """
         if len(self.tables) != 1:
             error = Error(note='The "report.table" is available for single table reports')
             raise exceptions.FrictionlessException(error)
@@ -67,6 +102,8 @@ class Report(Metadata):
     # Expand
 
     def expand(self):
+        """Expand metadata
+        """
         for table in self.tables:
             table.expand()
 
@@ -75,11 +112,12 @@ class Report(Metadata):
     def flatten(self, spec):
         """Flatten the report
 
-        # Arguments
-            spec
+        Parameters
+            spec (any[]): flatten specification
 
+        Returns:
+            any[]: flatten report
         """
-
         result = []
         for error in self.errors:
             context = {}
@@ -96,6 +134,15 @@ class Report(Metadata):
 
     @staticmethod
     def from_validate(validate):
+        """Validate function wrapper
+
+        Parameters:
+            validate (func): validate
+
+        Returns:
+            func: wrapped validate
+        """
+
         @functools.wraps(validate)
         def wrapper(*args, **kwargs):
             timer = helpers.Timer()
@@ -110,6 +157,11 @@ class Report(Metadata):
         return wrapper
 
     def to_dict(self, expand=False):
+        """Convert field to dict
+
+        Parameters:
+            expand (bool): whether to expand
+        """
         result = super().to_dict()
         if expand:
             result = type(self)(result)
@@ -138,31 +190,17 @@ class Report(Metadata):
 class ReportTable(Metadata):
     """Report table representation.
 
-    # Arguments
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import ReportTable`
+
+    Parameters:
         descriptor? (str|dict): schema descriptor
-        time
-        scope
-        partial
-        row_count
-        path
-        scheme
-        format
-        encoding
-        compression
-        headers
-        headers_row
-        headers_joiner
-        pick_fields
-        skip_fields
-        limit_fields
-        offset_fields
-        pick_rows
-        skip_rows
-        limit_rows
-        offset_rows
-        schema
-        dialect
-        errors
+        time (float): validation time
+        scope (str[]): validation scope
+        partial (bool): wehter validation was partial
+        errors (Error[]): validation errors
+        table (Table): validation table
 
     # Raises
         FrictionlessException: raise any error that occurs during the process
@@ -178,9 +216,9 @@ class ReportTable(Metadata):
         self["encoding"] = table.encoding
         self["compression"] = table.compression
         self["compressionPath"] = table.compression_path
+        # Table
         self["dialect"] = table.dialect
         self["query"] = table.query
-        # Table
         self.setinitial("header", table.header)
         self.setinitial("schema", table.schema)
         # Validation
@@ -194,74 +232,149 @@ class ReportTable(Metadata):
 
     @property
     def path(self):
+        """
+        Returns:
+            str: path
+        """
         return self["path"]
 
     @property
     def scheme(self):
+        """
+        Returns:
+            str: scheme
+        """
         return self["scheme"]
 
     @property
     def format(self):
+        """
+        Returns:
+            str: format
+        """
         return self["format"]
 
     @property
     def hashing(self):
+        """
+        Returns:
+            str: hashing
+        """
         return self["hashing"]
 
     @property
     def encoding(self):
+        """
+        Returns:
+            str: encoding
+        """
         return self["encoding"]
 
     @property
     def compression(self):
+        """
+        Returns:
+            str: compression
+        """
         return self["compression"]
 
     @property
     def compression_path(self):
+        """
+        Returns:
+            str: compression path
+        """
         return self["compressionPath"]
 
     @property
     def dialect(self):
+        """
+        Returns:
+            Dialect: dialect
+        """
         return self["dialect"]
 
     @property
     def query(self):
+        """
+        Returns:
+            Query: query
+        """
         return self["query"]
 
     @property
     def header(self):
+        """
+        Returns:
+            Header: header
+        """
         return self["header"]
 
     @property
     def schema(self):
+        """
+        Returns:
+            Schema: schema
+        """
         return self["schema"]
 
     @property
     def time(self):
+        """
+        Returns:
+            float: validation time
+        """
         return self["time"]
 
     @property
     def valid(self):
+        """
+        Returns:
+            bool: validation result
+        """
         return self["valid"]
 
     @property
     def scope(self):
+        """
+        Returns:
+            str[]: validation scope
+        """
         return self["scope"]
 
     @property
     def stats(self):
+        """
+        Returns:
+            dict: validation stats
+        """
         return self["stats"]
 
     @property
     def partial(self):
+        """
+        Returns:
+            bool: if validation partial
+        """
         return self["partial"]
 
     @property
     def errors(self):
+        """
+        Returns:
+            Error[]: validation errors
+        """
         return self["errors"]
 
     @property
     def error(self):
+        """
+        Returns:
+            Error: validation error if there is only one
+
+        Raises:
+            FrictionlessException: if more than one errors
+        """
         if len(self.errors) != 1:
             error = Error(note='The "table.error" is available for single error tables')
             raise exceptions.FrictionlessException(error)
@@ -270,6 +383,8 @@ class ReportTable(Metadata):
     # Expand
 
     def expand(self):
+        """Expand metadata
+        """
         self.dialect.expand()
         if self.schema is not None:
             self.schema.expand()
@@ -277,13 +392,14 @@ class ReportTable(Metadata):
     # Flatten
 
     def flatten(self, spec):
-        """Flatten the report table
+        """Flatten the report
 
-        # Arguments
-            spec
+        Parameters
+            spec (any[]): flatten specification
 
+        Returns:
+            any[]: flatten table report
         """
-
         result = []
         for error in self.errors:
             context = {}
@@ -294,6 +410,11 @@ class ReportTable(Metadata):
     # Import/Export
 
     def to_dict(self, expand=False):
+        """Convert field to dict
+
+        Parameters:
+            expand (bool): whether to expand
+        """
         result = super().to_dict()
         if expand:
             result = type(self)(result)

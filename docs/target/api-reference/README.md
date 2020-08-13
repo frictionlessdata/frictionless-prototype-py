@@ -1423,6 +1423,124 @@ class Plugin()
 
 Plugin representation
 
+API      | Usage
+-------- | --------
+Public   | `from frictionless import Plugin`
+
+It's an interface for writing Frictionless plugins.
+You can implement one or more methods to hook into Frictionless system.
+
+<a name="frictionless.plugin.Plugin.create_check"></a>
+#### <big>create\_check</big>
+
+```python
+ | create_check(name, *, descriptor=None)
+```
+
+Create checks
+
+**Arguments**:
+
+- `name` _str_ - check name
+- `descriptor` _dict_ - check descriptor
+  
+
+**Returns**:
+
+- `Check` - check
+
+<a name="frictionless.plugin.Plugin.create_control"></a>
+#### <big>create\_control</big>
+
+```python
+ | create_control(file, *, descriptor)
+```
+
+Create control
+
+**Arguments**:
+
+- `file` _File_ - control file
+- `descriptor` _dict_ - control descriptor
+  
+
+**Returns**:
+
+- `Control` - control
+
+<a name="frictionless.plugin.Plugin.create_dialect"></a>
+#### <big>create\_dialect</big>
+
+```python
+ | create_dialect(file, *, descriptor)
+```
+
+Create dialect
+
+**Arguments**:
+
+- `file` _File_ - dialect file
+- `descriptor` _dict_ - dialect descriptor
+  
+
+**Returns**:
+
+- `Dialect` - dialect
+
+<a name="frictionless.plugin.Plugin.create_loader"></a>
+#### <big>create\_loader</big>
+
+```python
+ | create_loader(file)
+```
+
+Create loader
+
+**Arguments**:
+
+- `file` _File_ - loader file
+  
+
+**Returns**:
+
+- `Loader` - loader
+
+<a name="frictionless.plugin.Plugin.create_parser"></a>
+#### <big>create\_parser</big>
+
+```python
+ | create_parser(file)
+```
+
+Create parser
+
+**Arguments**:
+
+- `file` _File_ - parser file
+  
+
+**Returns**:
+
+- `Parser` - parser
+
+<a name="frictionless.plugin.Plugin.create_server"></a>
+#### <big>create\_server</big>
+
+```python
+ | create_server(name)
+```
+
+Create server
+
+**Arguments**:
+
+- `name` _str_ - server name
+  
+
+**Returns**:
+
+- `Server` - server
+
 <a name="frictionless.program"></a>
 ## frictionless.program
 
@@ -2151,6 +2269,200 @@ class Query(Metadata)
 ```
 
 Query representation
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless import Query`
+
+**Arguments**:
+
+- `descriptor?` _str|dict_ - query descriptor
+  pick_fields? ((str|int)[]): what fields to pick
+  skip_fields? ((str|int)[]): what fields to skip
+- `limit_fields?` _int_ - amount of fields
+- `offset_fields?` _int_ - from what field to start
+  pick_rows? ((str|int)[]): what rows to pick
+  skip_rows? ((str|int)[]): what rows to skip
+- `limit_rows?` _int_ - amount of rows
+- `offset_rows?` _int_ - from what row to start
+
+<a name="frictionless.query.Query.pick_fields"></a>
+#### <big>pick\_fields</big>
+
+```python
+ | @Metadata.property
+ | pick_fields()
+```
+
+**Returns**:
+
+- `(str|int)[]?` - pick fields
+
+<a name="frictionless.query.Query.skip_fields"></a>
+#### <big>skip\_fields</big>
+
+```python
+ | @Metadata.property
+ | skip_fields()
+```
+
+**Returns**:
+
+- `(str|int)[]?` - skip fields
+
+<a name="frictionless.query.Query.limit_fields"></a>
+#### <big>limit\_fields</big>
+
+```python
+ | @Metadata.property
+ | limit_fields()
+```
+
+**Returns**:
+
+- `int?` - limit fields
+
+<a name="frictionless.query.Query.offset_fields"></a>
+#### <big>offset\_fields</big>
+
+```python
+ | @Metadata.property
+ | offset_fields()
+```
+
+**Returns**:
+
+- `int?` - offset fields
+
+<a name="frictionless.query.Query.pick_rows"></a>
+#### <big>pick\_rows</big>
+
+```python
+ | @Metadata.property
+ | pick_rows()
+```
+
+**Returns**:
+
+- `(str|int)[]?` - pick rows
+
+<a name="frictionless.query.Query.skip_rows"></a>
+#### <big>skip\_rows</big>
+
+```python
+ | @Metadata.property
+ | skip_rows()
+```
+
+**Returns**:
+
+- `(str|int)[]?` - skip rows
+
+<a name="frictionless.query.Query.limit_rows"></a>
+#### <big>limit\_rows</big>
+
+```python
+ | @Metadata.property
+ | limit_rows()
+```
+
+**Returns**:
+
+- `int?` - limit rows
+
+<a name="frictionless.query.Query.offset_rows"></a>
+#### <big>offset\_rows</big>
+
+```python
+ | @Metadata.property
+ | offset_rows()
+```
+
+**Returns**:
+
+- `int?` - offset rows
+
+<a name="frictionless.query.Query.is_field_filtering"></a>
+#### <big>is\_field\_filtering</big>
+
+```python
+ | @Metadata.property(write=False)
+ | is_field_filtering()
+```
+
+**Returns**:
+
+- `bool` - whether there is a field filtering
+
+<a name="frictionless.query.Query.pick_fields_compiled"></a>
+#### <big>pick\_fields\_compiled</big>
+
+```python
+ | @Metadata.property(write=False)
+ | pick_fields_compiled()
+```
+
+**Returns**:
+
+- `re?` - compiled pick fields
+
+<a name="frictionless.query.Query.skip_fields_compiled"></a>
+#### <big>skip\_fields\_compiled</big>
+
+```python
+ | @Metadata.property(write=False)
+ | skip_fields_compiled()
+```
+
+**Returns**:
+
+- `re?` - compiled skip fields
+
+<a name="frictionless.query.Query.pick_rows_compiled"></a>
+#### <big>pick\_rows\_compiled</big>
+
+```python
+ | @Metadata.property(write=False)
+ | pick_rows_compiled()
+```
+
+**Returns**:
+
+- `re?` - compiled pick rows
+
+<a name="frictionless.query.Query.skip_rows_compiled"></a>
+#### <big>skip\_rows\_compiled</big>
+
+```python
+ | @Metadata.property(write=False)
+ | skip_rows_compiled()
+```
+
+**Returns**:
+
+- `re?` - compiled skip fields
+
+<a name="frictionless.query.Query.expand"></a>
+#### <big>expand</big>
+
+```python
+ | expand()
+```
+
+Expand metadata
+
+<a name="frictionless.query.Query.to_dict"></a>
+#### <big>to\_dict</big>
+
+```python
+ | to_dict(expand=False)
+```
+
+Convert query to dict
+
+**Arguments**:
+
+- `expand` _bool_ - whether to expand
 
 <a name="frictionless.system"></a>
 ## frictionless.system
@@ -3286,16 +3598,119 @@ class Report(Metadata)
 
 Report representation.
 
-__Arguments__
+API      | Usage
+-------- | --------
+Public   | `from frictionless import Report`
 
-- __descriptor? (str|dict)__: schema descriptor
-    time
-    errors
-    tables
+**Arguments**:
 
-__Raises__
+- `descriptor?` _str|dict_ - report descriptor
+- `time` _float_ - validation time
+- `errors` _Error[]_ - validation errors
+- `tables` _ReportTable[]_ - validation tables
+  
 
-- `FrictionlessException`: raise any error that occurs during the process
+**Raises**:
+
+- `FrictionlessException` - raise any error that occurs during the process
+
+<a name="frictionless.report.Report.version"></a>
+#### <big>version</big>
+
+```python
+ | @property
+ | version()
+```
+
+**Returns**:
+
+- `str` - frictionless version
+
+<a name="frictionless.report.Report.time"></a>
+#### <big>time</big>
+
+```python
+ | @property
+ | time()
+```
+
+**Returns**:
+
+- `float` - validation time
+
+<a name="frictionless.report.Report.valid"></a>
+#### <big>valid</big>
+
+```python
+ | @property
+ | valid()
+```
+
+**Returns**:
+
+- `bool` - validation result
+
+<a name="frictionless.report.Report.stats"></a>
+#### <big>stats</big>
+
+```python
+ | @property
+ | stats()
+```
+
+**Returns**:
+
+- `dict` - validation stats
+
+<a name="frictionless.report.Report.errors"></a>
+#### <big>errors</big>
+
+```python
+ | @property
+ | errors()
+```
+
+**Returns**:
+
+- `Error[]` - validation errors
+
+<a name="frictionless.report.Report.tables"></a>
+#### <big>tables</big>
+
+```python
+ | @property
+ | tables()
+```
+
+**Returns**:
+
+- `ReportTable[]` - validation tables
+
+<a name="frictionless.report.Report.table"></a>
+#### <big>table</big>
+
+```python
+ | @property
+ | table()
+```
+
+**Returns**:
+
+- `ReportTable` - validation table (if there is only one)
+  
+
+**Raises**:
+
+- `FrictionlessException` - if there are more that 1 table
+
+<a name="frictionless.report.Report.expand"></a>
+#### <big>expand</big>
+
+```python
+ | expand()
+```
+
+Expand metadata
 
 <a name="frictionless.report.Report.flatten"></a>
 #### <big>flatten</big>
@@ -3306,9 +3721,44 @@ __Raises__
 
 Flatten the report
 
-__Arguments__
+Parameters
+spec (any[]): flatten specification
 
-    spec
+**Returns**:
+
+- `any[]` - flatten report
+
+<a name="frictionless.report.Report.from_validate"></a>
+#### <big>from\_validate</big>
+
+```python
+ | @staticmethod
+ | from_validate(validate)
+```
+
+Validate function wrapper
+
+**Arguments**:
+
+- `validate` _func_ - validate
+  
+
+**Returns**:
+
+- `func` - wrapped validate
+
+<a name="frictionless.report.Report.to_dict"></a>
+#### <big>to\_dict</big>
+
+```python
+ | to_dict(expand=False)
+```
+
+Convert field to dict
+
+**Arguments**:
+
+- `expand` _bool_ - whether to expand
 
 <a name="frictionless.report.ReportTable"></a>
 ### ReportTable
@@ -3319,36 +3769,251 @@ class ReportTable(Metadata)
 
 Report table representation.
 
-__Arguments__
+API      | Usage
+-------- | --------
+Public   | `from frictionless import ReportTable`
 
-- __descriptor? (str|dict)__: schema descriptor
-    time
-    scope
-    partial
-    row_count
-    path
-    scheme
-    format
-    encoding
-    compression
-    headers
-    headers_row
-    headers_joiner
-    pick_fields
-    skip_fields
-    limit_fields
-    offset_fields
-    pick_rows
-    skip_rows
-    limit_rows
-    offset_rows
-    schema
-    dialect
-    errors
+**Arguments**:
 
-__Raises__
+- `descriptor?` _str|dict_ - schema descriptor
+- `time` _float_ - validation time
+- `scope` _str[]_ - validation scope
+- `partial` _bool_ - wehter validation was partial
+- `errors` _Error[]_ - validation errors
+- `table` _Table_ - validation table
+  
+  # Raises
+- `FrictionlessException` - raise any error that occurs during the process
 
-- `FrictionlessException`: raise any error that occurs during the process
+<a name="frictionless.report.ReportTable.path"></a>
+#### <big>path</big>
+
+```python
+ | @property
+ | path()
+```
+
+**Returns**:
+
+- `str` - path
+
+<a name="frictionless.report.ReportTable.scheme"></a>
+#### <big>scheme</big>
+
+```python
+ | @property
+ | scheme()
+```
+
+**Returns**:
+
+- `str` - scheme
+
+<a name="frictionless.report.ReportTable.format"></a>
+#### <big>format</big>
+
+```python
+ | @property
+ | format()
+```
+
+**Returns**:
+
+- `str` - format
+
+<a name="frictionless.report.ReportTable.hashing"></a>
+#### <big>hashing</big>
+
+```python
+ | @property
+ | hashing()
+```
+
+**Returns**:
+
+- `str` - hashing
+
+<a name="frictionless.report.ReportTable.encoding"></a>
+#### <big>encoding</big>
+
+```python
+ | @property
+ | encoding()
+```
+
+**Returns**:
+
+- `str` - encoding
+
+<a name="frictionless.report.ReportTable.compression"></a>
+#### <big>compression</big>
+
+```python
+ | @property
+ | compression()
+```
+
+**Returns**:
+
+- `str` - compression
+
+<a name="frictionless.report.ReportTable.compression_path"></a>
+#### <big>compression\_path</big>
+
+```python
+ | @property
+ | compression_path()
+```
+
+**Returns**:
+
+- `str` - compression path
+
+<a name="frictionless.report.ReportTable.dialect"></a>
+#### <big>dialect</big>
+
+```python
+ | @property
+ | dialect()
+```
+
+**Returns**:
+
+- `Dialect` - dialect
+
+<a name="frictionless.report.ReportTable.query"></a>
+#### <big>query</big>
+
+```python
+ | @property
+ | query()
+```
+
+**Returns**:
+
+- `Query` - query
+
+<a name="frictionless.report.ReportTable.header"></a>
+#### <big>header</big>
+
+```python
+ | @property
+ | header()
+```
+
+**Returns**:
+
+- `Header` - header
+
+<a name="frictionless.report.ReportTable.schema"></a>
+#### <big>schema</big>
+
+```python
+ | @property
+ | schema()
+```
+
+**Returns**:
+
+- `Schema` - schema
+
+<a name="frictionless.report.ReportTable.time"></a>
+#### <big>time</big>
+
+```python
+ | @property
+ | time()
+```
+
+**Returns**:
+
+- `float` - validation time
+
+<a name="frictionless.report.ReportTable.valid"></a>
+#### <big>valid</big>
+
+```python
+ | @property
+ | valid()
+```
+
+**Returns**:
+
+- `bool` - validation result
+
+<a name="frictionless.report.ReportTable.scope"></a>
+#### <big>scope</big>
+
+```python
+ | @property
+ | scope()
+```
+
+**Returns**:
+
+- `str[]` - validation scope
+
+<a name="frictionless.report.ReportTable.stats"></a>
+#### <big>stats</big>
+
+```python
+ | @property
+ | stats()
+```
+
+**Returns**:
+
+- `dict` - validation stats
+
+<a name="frictionless.report.ReportTable.partial"></a>
+#### <big>partial</big>
+
+```python
+ | @property
+ | partial()
+```
+
+**Returns**:
+
+- `bool` - if validation partial
+
+<a name="frictionless.report.ReportTable.errors"></a>
+#### <big>errors</big>
+
+```python
+ | @property
+ | errors()
+```
+
+**Returns**:
+
+- `Error[]` - validation errors
+
+<a name="frictionless.report.ReportTable.error"></a>
+#### <big>error</big>
+
+```python
+ | @property
+ | error()
+```
+
+**Returns**:
+
+- `Error` - validation error if there is only one
+  
+
+**Raises**:
+
+- `FrictionlessException` - if more than one errors
+
+<a name="frictionless.report.ReportTable.expand"></a>
+#### <big>expand</big>
+
+```python
+ | expand()
+```
+
+Expand metadata
 
 <a name="frictionless.report.ReportTable.flatten"></a>
 #### <big>flatten</big>
@@ -3357,11 +4022,27 @@ __Raises__
  | flatten(spec)
 ```
 
-Flatten the report table
+Flatten the report
 
-__Arguments__
+Parameters
+spec (any[]): flatten specification
 
-    spec
+**Returns**:
+
+- `any[]` - flatten table report
+
+<a name="frictionless.report.ReportTable.to_dict"></a>
+#### <big>to\_dict</big>
+
+```python
+ | to_dict(expand=False)
+```
+
+Convert field to dict
+
+**Arguments**:
+
+- `expand` _bool_ - whether to expand
 
 <a name="frictionless.dialects"></a>
 ## frictionless.dialects
