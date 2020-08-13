@@ -19,6 +19,10 @@ class Inquiry(Metadata):
 
     @property
     def tasks(self):
+        """
+        Returns:
+            dict[]: tasks
+        """
         return self["tasks"]
 
     # Metadata

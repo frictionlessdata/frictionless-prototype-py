@@ -7,11 +7,12 @@ from . import config
 class Parser:
     """Parser representation
 
-    # Arguments
-        file (File): file
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import Parser`
 
-    # Raises
-        FrictionlessException: raise any error that occurs during the process
+    Parameters:
+        file (File): file
 
     """
 
@@ -36,19 +37,33 @@ class Parser:
 
     @property
     def file(self):
+        """
+        Returns:
+            File: file
+        """
         return self.__file
 
     @property
     def loader(self):
+        """
+        Returns:
+            Loader: loader
+        """
         return self.__loader
 
     @property
     def data_stream(self):
+        """
+        Yields:
+            any[][]: data stream
+        """
         return self.__data_stream
 
     # Open/Close
 
     def open(self):
+        """Open the parser as "io.open" does
+        """
         self.close()
         if self.__file.dialect.metadata_errors:
             error = self.__file.dialect.metadata_errors[0]
@@ -62,34 +77,72 @@ class Parser:
             raise
 
     def close(self):
+        """Close the parser as "filelike.close" does
+        """
         if self.__loader:
             self.__loader.close()
 
     @property
     def closed(self):
+        """Whether the parser is closed
+
+        Returns:
+            bool: if closed
+        """
         return self.__loader is None
 
     # Read
 
     def read_loader(self):
+        """Create and open loader
+
+        Returns:
+            Loader: loader
+        """
         if self.loading:
             loader = system.create_loader(self.file)
             return loader.open()
 
     def read_data_stream(self):
+        """Read data stream
+
+        Returns:
+            gen<any[][]>: data stream
+        """
         data_stream = self.read_data_stream_create()
         data_stream = self.read_data_stream_handle_errors(data_stream)
         return data_stream
 
     def read_data_stream_create(self, loader):
+        """Create data stream from loader
+
+        Parameters:
+            loader (Loader): loader
+
+        Returns:
+            gen<any[][]>: data stream
+        """
         raise NotImplementedError
 
     def read_data_stream_handle_errors(self, data_stream):
+        """Wrap data stream into error handler
+
+        Parameters:
+            gen<any[][]>: data stream
+
+        Returns:
+            gen<any[][]>: data stream
+        """
         return DataStreamWithErrorHandling(data_stream)
 
     # Write
 
     def write(self, row_stream):
+        """Write row stream into the file
+
+        Parameters:
+            gen<Row[]>: row stream
+        """
         raise NotImplementedError
 
 

@@ -2188,6 +2188,18 @@ Inquiry representation.
 
 - `FrictionlessException` - raise any error that occurs during the process
 
+<a name="frictionless.inquiry.Inquiry.tasks"></a>
+#### <big>tasks</big>
+
+```python
+ | @property
+ | tasks()
+```
+
+**Returns**:
+
+- `dict[]` - tasks
+
 <a name="frictionless.config"></a>
 ## frictionless.config
 
@@ -3111,13 +3123,156 @@ class Parser()
 
 Parser representation
 
-__Arguments__
+API      | Usage
+-------- | --------
+Public   | `from frictionless import Parser`
 
-- __file__ (`File`): file
+**Arguments**:
 
-__Raises__
+- `file` _File_ - file
 
-- `FrictionlessException`: raise any error that occurs during the process
+<a name="frictionless.parser.Parser.file"></a>
+#### <big>file</big>
+
+```python
+ | @property
+ | file()
+```
+
+**Returns**:
+
+- `File` - file
+
+<a name="frictionless.parser.Parser.loader"></a>
+#### <big>loader</big>
+
+```python
+ | @property
+ | loader()
+```
+
+**Returns**:
+
+- `Loader` - loader
+
+<a name="frictionless.parser.Parser.data_stream"></a>
+#### <big>data\_stream</big>
+
+```python
+ | @property
+ | data_stream()
+```
+
+**Yields**:
+
+- `any[][]` - data stream
+
+<a name="frictionless.parser.Parser.open"></a>
+#### <big>open</big>
+
+```python
+ | open()
+```
+
+Open the parser as "io.open" does
+
+<a name="frictionless.parser.Parser.close"></a>
+#### <big>close</big>
+
+```python
+ | close()
+```
+
+Close the parser as "filelike.close" does
+
+<a name="frictionless.parser.Parser.closed"></a>
+#### <big>closed</big>
+
+```python
+ | @property
+ | closed()
+```
+
+Whether the parser is closed
+
+**Returns**:
+
+- `bool` - if closed
+
+<a name="frictionless.parser.Parser.read_loader"></a>
+#### <big>read\_loader</big>
+
+```python
+ | read_loader()
+```
+
+Create and open loader
+
+**Returns**:
+
+- `Loader` - loader
+
+<a name="frictionless.parser.Parser.read_data_stream"></a>
+#### <big>read\_data\_stream</big>
+
+```python
+ | read_data_stream()
+```
+
+Read data stream
+
+**Returns**:
+
+- `gen<any[][]>` - data stream
+
+<a name="frictionless.parser.Parser.read_data_stream_create"></a>
+#### <big>read\_data\_stream\_create</big>
+
+```python
+ | read_data_stream_create(loader)
+```
+
+Create data stream from loader
+
+**Arguments**:
+
+- `loader` _Loader_ - loader
+  
+
+**Returns**:
+
+- `gen<any[][]>` - data stream
+
+<a name="frictionless.parser.Parser.read_data_stream_handle_errors"></a>
+#### <big>read\_data\_stream\_handle\_errors</big>
+
+```python
+ | read_data_stream_handle_errors(data_stream)
+```
+
+Wrap data stream into error handler
+
+**Arguments**:
+
+- `gen<any[][]>` - data stream
+  
+
+**Returns**:
+
+- `gen<any[][]>` - data stream
+
+<a name="frictionless.parser.Parser.write"></a>
+#### <big>write</big>
+
+```python
+ | write(row_stream)
+```
+
+Write row stream into the file
+
+**Arguments**:
+
+- `gen<Row[]>` - row stream
 
 <a name="frictionless.report"></a>
 ## frictionless.report
@@ -3928,13 +4083,89 @@ class Loader()
 
 Loader representation
 
-__Arguments__
+API      | Usage
+-------- | --------
+Public   | `from frictionless import Loader`
 
-- __file__ (`File`): file
+**Arguments**:
 
-__Raises__
+- `file` _File_ - file
 
-- `FrictionlessException`: raise any error that occurs during the process
+<a name="frictionless.loader.Loader.file"></a>
+#### <big>file</big>
+
+```python
+ | @property
+ | file()
+```
+
+**Returns**:
+
+- `file` _File_ - file
+
+<a name="frictionless.loader.Loader.byte_stream"></a>
+#### <big>byte\_stream</big>
+
+```python
+ | @property
+ | byte_stream()
+```
+
+File byte stream
+
+The stream is available after opening the loader
+
+**Returns**:
+
+- `io.ByteStream` - file byte stream
+
+<a name="frictionless.loader.Loader.text_stream"></a>
+#### <big>text\_stream</big>
+
+```python
+ | @property
+ | text_stream()
+```
+
+File text stream
+
+The stream is available after opening the loader
+
+**Returns**:
+
+- `io.TextStream` - file text stream
+
+<a name="frictionless.loader.Loader.open"></a>
+#### <big>open</big>
+
+```python
+ | open()
+```
+
+Open the loader as "io.open" does
+
+<a name="frictionless.loader.Loader.close"></a>
+#### <big>close</big>
+
+```python
+ | close()
+```
+
+Close the loader as "filelike.close" does
+
+<a name="frictionless.loader.Loader.closed"></a>
+#### <big>closed</big>
+
+```python
+ | @property
+ | closed()
+```
+
+Whether the loader is closed
+
+**Returns**:
+
+- `bool` - if closed
 
 <a name="frictionless.loader.Loader.read_byte_stream"></a>
 #### <big>read\_byte\_stream</big>
@@ -3943,11 +4174,60 @@ __Raises__
  | read_byte_stream()
 ```
 
+Read bytes stream
+
+**Returns**:
+
+- `io.ByteStream` - file byte stream
+
+<a name="frictionless.loader.Loader.read_byte_stream_create"></a>
+#### <big>read\_byte\_stream\_create</big>
+
+```python
+ | read_byte_stream_create()
+```
+
 Create bytes stream
 
-__Returns__
+**Returns**:
 
-`BinaryIO`: I/O stream
+- `io.ByteStream` - file byte stream
+
+<a name="frictionless.loader.Loader.read_byte_stream_infer_stats"></a>
+#### <big>read\_byte\_stream\_infer\_stats</big>
+
+```python
+ | read_byte_stream_infer_stats(byte_stream)
+```
+
+Infer byte stream stats
+
+**Arguments**:
+
+- `byte_stream` _io.ByteStream_ - file byte stream
+  
+
+**Returns**:
+
+- `io.ByteStream` - file byte stream
+
+<a name="frictionless.loader.Loader.read_byte_stream_decompress"></a>
+#### <big>read\_byte\_stream\_decompress</big>
+
+```python
+ | read_byte_stream_decompress(byte_stream)
+```
+
+Decompress byte stream
+
+**Arguments**:
+
+- `byte_stream` _io.ByteStream_ - file byte stream
+  
+
+**Returns**:
+
+- `io.ByteStream` - file byte stream
 
 <a name="frictionless.loader.Loader.read_text_stream"></a>
 #### <big>read\_text\_stream</big>
@@ -3956,11 +4236,42 @@ __Returns__
  | read_text_stream()
 ```
 
-Create texts stream
+Read text stream
 
-__Returns__
+**Returns**:
 
-`TextIO`: I/O stream
+- `io.TextStream` - file text stream
+
+<a name="frictionless.loader.Loader.read_text_stream_infer_encoding"></a>
+#### <big>read\_text\_stream\_infer\_encoding</big>
+
+```python
+ | read_text_stream_infer_encoding(byte_stream)
+```
+
+Infer text stream encoding
+
+**Arguments**:
+
+- `byte_stream` _io.ByteStream_ - file byte stream
+
+<a name="frictionless.loader.Loader.read_text_stream_decode"></a>
+#### <big>read\_text\_stream\_decode</big>
+
+```python
+ | read_text_stream_decode(byte_stream)
+```
+
+Decode text stream
+
+**Arguments**:
+
+- `byte_stream` _io.ByteStream_ - file byte stream
+  
+
+**Returns**:
+
+- `text_stream` _io.TextStream_ - file text stream
 
 <a name="frictionless.validate"></a>
 ## frictionless.validate

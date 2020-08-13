@@ -13,11 +13,12 @@ from . import config
 class Loader:
     """Loader representation
 
-    # Arguments
-        file (File): file
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless import Loader`
 
-    # Raises
-        FrictionlessException: raise any error that occurs during the process
+    Parameters:
+        file (File): file
 
     """
 
@@ -38,14 +39,32 @@ class Loader:
 
     @property
     def file(self):
+        """
+        Returns:
+            file (File): file
+        """
         return self.__file
 
     @property
     def byte_stream(self):
+        """File byte stream
+
+        The stream is available after opening the loader
+
+        Returns:
+            io.ByteStream: file byte stream
+        """
         return self.__byte_stream
 
     @property
     def text_stream(self):
+        """File text stream
+
+        The stream is available after opening the loader
+
+        Returns:
+            io.TextStream: file text stream
+        """
         if not self.__text_stream:
             self.__text_stream = self.read_text_stream()
         return self.__text_stream
@@ -53,6 +72,8 @@ class Loader:
     # Open/Close
 
     def open(self):
+        """Open the loader as "io.open" does
+        """
         self.close()
         if self.__file.control.metadata_errors:
             error = self.__file.control.metadata_errors[0]
@@ -65,22 +86,28 @@ class Loader:
             raise
 
     def close(self):
+        """Close the loader as "filelike.close" does
+        """
         if self.__byte_stream:
             self.__byte_stream.close()
         self.__byte_stream = None
 
     @property
     def closed(self):
+        """Whether the loader is closed
+
+        Returns:
+            bool: if closed
+        """
         return self.__byte_stream is None
 
     # Read
 
     def read_byte_stream(self):
-        """Create bytes stream
+        """Read bytes stream
 
-        # Returns
-            BinaryIO: I/O stream
-
+        Returns:
+            io.ByteStream: file byte stream
         """
         try:
             byte_stream = self.read_byte_stream_create()
@@ -95,9 +122,22 @@ class Loader:
         return byte_stream
 
     def read_byte_stream_create(self):
+        """Create bytes stream
+
+        Returns:
+            io.ByteStream: file byte stream
+        """
         raise NotImplementedError
 
     def read_byte_stream_infer_stats(self, byte_stream):
+        """Infer byte stream stats
+
+        Parameters:
+            byte_stream (io.ByteStream): file byte stream
+
+        Returns:
+            io.ByteStream: file byte stream
+        """
         if not self.file.stats:
             return byte_stream
         return ByteStreamWithStatsHandling(
@@ -107,6 +147,14 @@ class Loader:
         )
 
     def read_byte_stream_decompress(self, byte_stream):
+        """Decompress byte stream
+
+        Parameters:
+            byte_stream (io.ByteStream): file byte stream
+
+        Returns:
+            io.ByteStream: file byte stream
+        """
         if self.file.compression == "zip":
             # Remote
             if self.remote:
@@ -140,11 +188,10 @@ class Loader:
         raise exceptions.FrictionlessException(errors.CompressionError(note=note))
 
     def read_text_stream(self):
-        """Create texts stream
+        """Read text stream
 
-        # Returns
-            TextIO: I/O stream
-
+        Returns:
+            io.TextStream: file text stream
         """
         try:
             self.read_text_stream_infer_encoding(self.byte_stream)
@@ -154,6 +201,11 @@ class Loader:
         return self.read_text_stream_decode(self.byte_stream)
 
     def read_text_stream_infer_encoding(self, byte_stream):
+        """Infer text stream encoding
+
+        Parameters:
+            byte_stream (io.ByteStream): file byte stream
+        """
         control = self.file.control
         encoding = self.file.get("encoding")
         sample = byte_stream.read(config.DEFAULT_INFER_ENCODING_VOLUME)
@@ -176,6 +228,14 @@ class Loader:
         self.file["encoding"] = encoding
 
     def read_text_stream_decode(self, byte_stream):
+        """Decode text stream
+
+        Parameters:
+            byte_stream (io.ByteStream): file byte stream
+
+        Returns:
+            text_stream (io.TextStream): file text stream
+        """
         return io.TextIOWrapper(
             byte_stream, self.file.encoding, newline=self.file.newline
         )
