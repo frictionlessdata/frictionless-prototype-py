@@ -11,7 +11,7 @@ BASE_URL = "https://raw.githubusercontent.com/okfn/tabulator-py/master/%s"
 
 def test_table_ods():
     with Table("data/table.ods") as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
@@ -19,14 +19,14 @@ def test_table_ods():
 def test_table_ods_remote():
     source = BASE_URL % "data/table.ods"
     with Table(source) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
 def test_table_ods_sheet_by_index():
     dialect = OdsDialect(sheet=1)
     with Table("data/table.ods", dialect=dialect) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
@@ -43,7 +43,7 @@ def test_table_ods_sheet_by_index_not_existent():
 def test_table_ods_sheet_by_name():
     dialect = OdsDialect(sheet="Лист1")
     with Table("data/table.ods", dialect=dialect) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
@@ -61,14 +61,14 @@ def test_table_ods_sheet_by_name_not_existent():
 
 def test_table_ods_with_boolean():
     with Table("data/table-with-booleans.ods") as table:
-        assert table.headers == ["id", "boolean"]
+        assert table.header == ["id", "boolean"]
         assert table.read_data() == [[1, True], [2, False]]
 
 
 def test_table_ods_with_ints_floats_dates():
     source = "data/table-with-ints-floats-dates.ods"
     with Table(source) as table:
-        assert table.headers == ["Int", "Float", "Date", "Datetime"]
+        assert table.header == ["Int", "Float", "Date", "Datetime"]
         assert table.read_data() == [
             [2013, 3.3, datetime(2009, 8, 16).date(), datetime(2009, 8, 16, 5, 43, 21)],
             [1997, 5.6, datetime(2009, 9, 20).date(), datetime(2009, 9, 20, 15, 30, 0)],
@@ -87,5 +87,5 @@ def test_table_write_ods(tmpdir):
     # NOTE: ezodf writer creates more cells than we ask
     query = Query(limit_fields=2, limit_rows=2)
     with Table(target, query=query) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]

@@ -8,7 +8,7 @@ from frictionless import Table, dialects
 def test_table_inline():
     source = [["id", "name"], ["1", "english"], ["2", "中国人"]]
     with Table(source) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
@@ -16,7 +16,7 @@ def test_table_inline_keyed():
     source = [{"id": "1", "name": "english"}, {"id": "2", "name": "中国人"}]
     with Table(source, format="inline") as table:
         assert table.dialect.keyed is True
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
@@ -25,14 +25,14 @@ def test_table_inline_keyed_with_keys_provided():
     dialect = dialects.InlineDialect(keys=["name", "id"])
     with Table(source, format="inline", dialect=dialect) as table:
         assert table.dialect.keyed is True
-        assert table.headers == ["name", "id"]
+        assert table.header == ["name", "id"]
         assert table.read_data() == [["english", "1"], ["中国人", "2"]]
 
 
 def test_table_inline_from_iterator():
     source = iter([["id", "name"], ["1", "english"], ["2", "中国人"]])
     with Table(source) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
@@ -43,7 +43,7 @@ def test_table_inline_from_generator():
         yield ["2", "中国人"]
 
     with Table(generator) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
@@ -54,7 +54,7 @@ def test_table_inline_from_generator_not_callable():
         yield ["2", "中国人"]
 
     with Table(generator()) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
@@ -65,7 +65,7 @@ def test_table_inline_from_ordered_dict():
     ]
     with Table(source) as table:
         assert table.dialect.keyed is True
-        assert table.headers == ["name", "id"]
+        assert table.header == ["name", "id"]
         assert table.read_data() == [["english", "1"], ["中国人", "2"]]
 
 

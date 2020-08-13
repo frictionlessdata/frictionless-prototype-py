@@ -10,7 +10,7 @@ BASE_URL = "https://raw.githubusercontent.com/frictionlessdata/tabulator-py/mast
 @pytest.mark.slow
 def test_table_https():
     with Table(BASE_URL % "data/table.csv") as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 

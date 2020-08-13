@@ -11,7 +11,6 @@ from ..report import Report, ReportTable
 def validate_table(
     source,
     *,
-    headers=None,
     # File
     scheme=None,
     format=None,
@@ -20,9 +19,10 @@ def validate_table(
     compression=None,
     compression_path=None,
     control=None,
+    # Table
     dialect=None,
     query=None,
-    # Schema
+    headers=None,
     schema=None,
     sync_schema=False,
     patch_schema=False,
@@ -106,7 +106,6 @@ def validate_table(
     # Create table
     table = Table(
         source,
-        headers=headers,
         # File
         scheme=scheme,
         format=format,
@@ -115,9 +114,10 @@ def validate_table(
         compression=compression,
         compression_path=compression_path,
         control=control,
+        # Table
         dialect=dialect,
         query=query,
-        # Schema
+        headers=headers,
         schema=schema,
         sync_schema=sync_schema,
         patch_schema=patch_schema,
@@ -157,10 +157,10 @@ def validate_table(
                 for error in check.validate_schema(table.schema):
                     table_errors.append(error)
 
-            # Validate headers
-            if table.headers:
+            # Validate header
+            if table.header:
                 for check in checks:
-                    for error in check.validate_headers(table.headers):
+                    for error in check.validate_header(table.header):
                         table_errors.append(error)
 
             # Validate rows

@@ -33,7 +33,7 @@ def create_descriptor(**options):
     return {stringcase.camelcase(key): value for key, value in options.items()}
 
 
-def stringify_headers(cells):
+def stringify_header(cells):
     return ["" if cell is None else str(cell).strip() for cell in cells]
 
 

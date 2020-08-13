@@ -3,13 +3,12 @@ from .helpers import cached_property
 from . import errors
 
 
-# NOTE: should it be Header?
-class Headers(list):
-    """Headers representation
+class Header(list):
+    """Header representation
 
     API      | Usage
     -------- | --------
-    Public   | `from frictionless import Headers`
+    Public   | `from frictionless import Header`
 
     Parameters:
         cells (any[]): header row cells
@@ -27,7 +26,7 @@ class Headers(list):
         self.__field_positions = field_positions
         self.__errors = []
 
-        # Extra headers
+        # Extra header
         if len(fields) < len(cells):
             iterator = cells[len(fields) :]
             start = max(field_positions[: len(fields)]) + 1
@@ -44,7 +43,7 @@ class Headers(list):
                     )
                 )
 
-        # Missing headers
+        # Missing header
         if len(fields) > len(cells):
             start = len(cells) + 1
             iterator = zip_longest(field_positions[len(cells) :], fields[len(cells) :])
@@ -117,7 +116,7 @@ class Headers(list):
                         )
                     )
 
-        # Save headers
+        # Save header
         super().__init__(cells)
 
     @cached_property

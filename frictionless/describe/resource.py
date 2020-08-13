@@ -7,7 +7,6 @@ from .. import config
 def describe_resource(
     source,
     *,
-    headers=None,
     # File
     scheme=None,
     format=None,
@@ -16,9 +15,10 @@ def describe_resource(
     compression=None,
     compression_path=None,
     control=None,
+    # Table
     dialect=None,
     query=None,
-    # Schema
+    headers=None,
     infer_type=None,
     infer_names=None,
     infer_volume=config.DEFAULT_INFER_VOLUME,
@@ -31,7 +31,6 @@ def describe_resource(
     # Create table
     table = Table(
         source,
-        headers=headers,
         # File
         scheme=scheme,
         format=format,
@@ -40,9 +39,10 @@ def describe_resource(
         compression=compression,
         compression_path=compression_path,
         control=control,
+        # Table
         dialect=dialect,
         query=query,
-        # Schema
+        headers=headers,
         infer_type=infer_type,
         infer_names=infer_names,
         infer_volume=infer_volume,

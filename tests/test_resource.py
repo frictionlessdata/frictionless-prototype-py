@@ -147,7 +147,7 @@ def test_resource_source_path():
         {"id": 1, "name": "english"},
         {"id": 2, "name": "中国人"},
     ]
-    assert resource.read_headers() == ["id", "name"]
+    assert resource.read_header() == ["id", "name"]
     assert resource.read_sample() == [["1", "english"], ["2", "中国人"]]
     assert resource.read_stats() == {
         "hash": "6c2c61dd9b0e9c6876139a449ed87933",
@@ -230,7 +230,7 @@ def test_resource_source_data():
         {"id": 1, "name": "english"},
         {"id": 2, "name": "中国人"},
     ]
-    assert resource.read_headers() == ["id", "name"]
+    assert resource.read_header() == ["id", "name"]
     assert resource.read_sample() == data[1:]
     assert resource.read_stats() == {
         "hash": "",
@@ -642,7 +642,7 @@ def test_resource_to_zip_source_inline(tmpdir):
 def test_resource_to_table():
     resource = Resource(path="data/table.csv")
     with resource.to_table() as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_rows() == [
             {"id": 1, "name": "english"},
             {"id": 2, "name": "中国人"},
@@ -653,7 +653,7 @@ def test_resource_to_table_source_data():
     data = [["id", "name"], ["1", "english"], ["2", "中国人"]]
     resource = Resource(data=data)
     with resource.to_table() as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_rows() == [
             {"id": 1, "name": "english"},
             {"id": 2, "name": "中国人"},
@@ -664,7 +664,7 @@ def test_resource_to_table_source_data():
 def test_resource_to_table_source_remote():
     resource = Resource(path=BASE_URL % "data/table.csv")
     with resource.to_table() as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_rows() == [
             {"id": 1, "name": "english"},
             {"id": 2, "name": "中国人"},

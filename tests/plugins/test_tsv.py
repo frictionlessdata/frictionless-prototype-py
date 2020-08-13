@@ -6,7 +6,7 @@ from frictionless import Table
 
 def test_table_format_tsv():
     with Table("data/table.tsv") as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [
             ["1", "english"],
             ["2", "中国人"],
@@ -23,5 +23,5 @@ def test_table_tsv_write(tmpdir):
     with Table(source) as table:
         table.write(target)
     with Table(target) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]

@@ -154,16 +154,16 @@
             "title": "Query",
             "description": "The tabular query of the table."
           },
+          "header": {
+            "type": "array",
+            "title": "Header",
+            "description": "Table's header.",
+            "items": {"type": "string"}
+          },
           "schema": {
             "type": "object",
             "title": "Schema",
             "description": "A Table Schema Object."
-          },
-          "headers": {
-            "type": "array",
-            "title": "Headers",
-            "description": "List of table's headers.",
-            "items": {"type": "string"}
           },
           "time": {
             "type": "number",

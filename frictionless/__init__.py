@@ -3,7 +3,7 @@ from .describe import *
 from .extract import *
 from .field import Field
 from .file import File
-from .headers import Headers
+from .header import Header
 from .inquiry import Inquiry
 from .metadata import Metadata
 from .package import Package

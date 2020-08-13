@@ -11,8 +11,6 @@ from .main import program
 @click.argument("source", type=click.Path(), nargs=-1, required=True)
 @click.option("--source-type", type=str, help="Source type")
 @click.option("--json", is_flag=True, help="Output report as JSON")
-# Headers
-@click.option("--headers", type=int, multiple=True, help="Headers")
 # File
 @click.option("--scheme", type=str, help="File scheme")
 @click.option("--format", type=str, help="File format")
@@ -20,7 +18,8 @@ from .main import program
 @click.option("--encoding", type=str, help="File encoding")
 @click.option("--compression", type=str, help="File compression")
 @click.option("--compression-path", type=str, help="File compression path")
-# Schema
+# Table
+@click.option("--headers", type=int, multiple=True, help="Headers")
 @click.option("--schema", type=click.Path(), help="Schema")
 @click.option("--sync-schema", is_flag=True, help="Sync schema")
 @click.option("--infer-type", type=str, help="Infer type")
@@ -38,7 +37,7 @@ from .main import program
 @click.option("--limit-memory", type=int, help="Limit memory")
 # Package/Resource
 @click.option("--noinfer", type=bool, help="Validate metadata as it is")
-def program_validate(source, *, headers, source_type, json, **options):
+def program_validate(source, *, source_type, json, **options):
     """Validate data
 
     API      | Usage

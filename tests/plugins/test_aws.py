@@ -25,7 +25,7 @@ def test_table_s3(bucket_name):
 
     # Read
     with Table("s3://%s/table.csv" % bucket_name) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 

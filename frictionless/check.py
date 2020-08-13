@@ -58,11 +58,11 @@ class Check(Metadata):
         """
         yield from []
 
-    def validate_headers(self, headers):
-        """Called to validate the given headers
+    def validate_header(self, header):
+        """Called to validate the given header
 
         Parameters:
-            headers (Headers): table headers
+            header (Header): table header
 
         Yields:
             Error: found errors

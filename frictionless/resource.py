@@ -110,15 +110,15 @@ class Resource(Metadata):
                 note = f'path "{path_item}" is not safe'
                 raise exceptions.FrictionlessException(errors.ResourceError(note=note))
         if self.multipart:
-            drop_headers = False
+            drop_header = False
             if path[0].endswith(".csv"):
                 dialect = dialects.CsvDialect(self.get("dialect"))
                 if dialect.header:
-                    drop_headers = True
+                    drop_header = True
             for index, path_item in enumerate(path):
                 if not helpers.is_remote_path(path_item):
                     path[index] = os.path.join(self.basepath, path_item)
-            return MultipartSource(path, drop_headers=drop_headers)
+            return MultipartSource(path, drop_header=drop_header)
         if not helpers.is_remote_path(path):
             return os.path.join(self.basepath, path)
         return path
@@ -333,9 +333,9 @@ class Resource(Metadata):
             for row in table.row_stream:
                 yield row
 
-    def read_headers(self):
+    def read_header(self):
         with self.to_table() as table:
-            return table.headers
+            return table.header
 
     def read_sample(self):
         with self.to_table() as table:
@@ -468,9 +468,9 @@ class Resource(Metadata):
 
 
 class MultipartSource:
-    def __init__(self, source, *, drop_headers):
+    def __init__(self, source, *, drop_header):
         self.__source = source
-        self.__drop_headers = drop_headers
+        self.__drop_header = drop_header
         self.__line_stream = self.read_line_stream()
 
     def __enter__(self):
@@ -529,6 +529,6 @@ class MultipartSource:
             for line_number, line in enumerate(stream, start=1):
                 if not line.endswith(b"\n"):
                     line += b"\n"
-                if self.__drop_headers and stream_number > 1 and line_number == 1:
+                if self.__drop_header and stream_number > 1 and line_number == 1:
                     continue
                 yield line

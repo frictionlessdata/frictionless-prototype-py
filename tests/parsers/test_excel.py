@@ -12,7 +12,7 @@ BASE_URL = "https://raw.githubusercontent.com/frictionlessdata/tabulator-py/mast
 def test_table_xlsx_table():
     source = io.open("data/table.xlsx", mode="rb")
     with Table(source, format="xlsx") as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [[1.0, "english"], [2.0, "中国人"]]
 
 
@@ -20,7 +20,7 @@ def test_table_xlsx_table():
 def test_table_xlsx_remote():
     source = BASE_URL % "data/table.xlsx"
     with Table(source) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [[1.0, "english"], [2.0, "中国人"]]
 
 
@@ -28,7 +28,7 @@ def test_table_xlsx_sheet_by_index():
     source = "data/sheet2.xlsx"
     dialect = dialects.ExcelDialect(sheet=2)
     with Table(source, dialect=dialect) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [[1.0, "english"], [2.0, "中国人"]]
 
 
@@ -47,7 +47,7 @@ def test_table_xlsx_sheet_by_name():
     source = "data/sheet2.xlsx"
     dialect = dialects.ExcelDialect(sheet="Sheet2")
     with Table(source, dialect=dialect) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [[1.0, "english"], [2.0, "中国人"]]
 
 
@@ -151,14 +151,14 @@ def test_table_xlsx_workbook_cache():
 
 def test_table_local_xls():
     with Table("data/table.xls") as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
 @pytest.mark.slow
 def test_table_remote_xls():
     with Table(BASE_URL % "data/table.xls") as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
@@ -166,7 +166,7 @@ def test_table_xls_sheet_by_index():
     source = "data/sheet2.xls"
     dialect = dialects.ExcelDialect(sheet=2)
     with Table(source, dialect=dialect) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
@@ -182,7 +182,7 @@ def test_table_xls_sheet_by_name():
     source = "data/sheet2.xls"
     dialect = dialects.ExcelDialect(sheet="Sheet2")
     with Table(source, dialect=dialect) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
@@ -209,7 +209,7 @@ def test_table_xls_merged_cells_fill():
 
 def test_table_xls_with_boolean():
     with Table("data/table-with-booleans.xls") as table:
-        assert table.headers == ["id", "boolean"]
+        assert table.header == ["id", "boolean"]
         assert table.read_data() == [[1, True], [2, False]]
 
 
@@ -229,7 +229,7 @@ def test_table_xlsx_merged_cells_fill_boolean():
 def test_table_xls_with_ints_floats_dates():
     source = "data/table-with-ints-floats-dates.xls"
     with Table(source) as table:
-        assert table.headers == ["Int", "Float", "Date"]
+        assert table.header == ["Int", "Float", "Date"]
         assert table.read_data() == [
             [2013, 3.3, datetime(2009, 8, 16)],
             [1997, 5.6, datetime(2009, 9, 20)],
@@ -253,7 +253,7 @@ def test_table_xlsx_write(tmpdir):
     with Table(source) as table:
         table.write(target)
     with Table(target) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
@@ -264,7 +264,7 @@ def test_table_xlsx_write_sheet_name(tmpdir):
     with Table(source) as table:
         table.write(target, dialect=dialect)
     with Table(target, dialect=dialect) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
@@ -274,7 +274,7 @@ def test_table_xls_write(tmpdir):
     with Table(source) as table:
         table.write(target)
     with Table(target) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
@@ -285,5 +285,5 @@ def test_table_xls_write_sheet_name(tmpdir):
     with Table(source) as table:
         table.write(target, dialect=dialect)
     with Table(target, dialect=dialect) as table:
-        assert table.headers == ["id", "name"]
+        assert table.header == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]

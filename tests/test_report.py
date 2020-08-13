@@ -22,13 +22,13 @@ def test_report():
     assert report.table.compression_path == ""
     assert report.table.dialect == {}
     assert report.table.query == {}
+    assert report.table.header == ["id", "name"]
     assert report.table.schema == {
         "fields": [
             {"name": "id", "type": "integer"},
             {"name": "name", "type": "string"},
         ],
     }
-    assert report.table.headers == ["id", "name"]
     assert report.table.time
     assert report.table.valid is True
     assert report.table.scope == [

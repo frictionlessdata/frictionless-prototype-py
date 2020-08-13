@@ -404,7 +404,7 @@ class BlankHeaderError(HeaderError):
     name = "Blank Header"
     tags = ["#head", "#structure"]
     template = 'Header in field at position "{fieldPosition}" is blank'
-    description = "A column in the header row is missing a value. Headers should be provided and not be blank."
+    description = "A column in the header row is missing a value. Header should be provided and not be blank."
 
 
 class DuplicateHeaderError(HeaderError):
@@ -420,7 +420,7 @@ class NonMatchingHeaderError(HeaderError):
     name = "Non-matching Header"
     tags = ["#head", "#schema"]
     template = 'Header "{cell}" in field {fieldName} at position "{fieldPosition}" does not match the field name in the schema'
-    description = "One of the data source headers does not match the field name defined in the schema."
+    description = "One of the data source header does not match the field name defined in the schema."
 
 
 # Body

@@ -48,8 +48,8 @@ class BaselineCheck(Check):
             errors.SchemaError(note="there is no data available")
         ]
 
-    def validate_headers(self, headers):
-        yield from headers.errors
+    def validate_header(self, header):
+        yield from header.errors
 
     def validate_row(self, row):
         yield from row.errors

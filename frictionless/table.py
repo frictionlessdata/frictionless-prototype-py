@@ -2,7 +2,7 @@ import typing
 from pathlib import Path
 from copy import deepcopy
 from itertools import chain
-from .headers import Headers
+from .header import Header
 from .schema import Schema
 from .system import system
 from .file import File
@@ -25,7 +25,7 @@ class Table:
 
     ```python
     with Table("data/table.csv") as table:
-        table.headers == ["id", "name"]
+        table.header == ["id", "name"]
         table.read_rows() == [
             {'id': 1, 'name': 'english'},
             {'id': 2, 'name': '中国人'},
@@ -37,12 +37,6 @@ class Table:
         source (any): Source of the file; can be in various forms.
             Usually, it's a string as `<scheme>://path/to/file.<format>`.
             It also can be, for example, an array of data arrays/dictionaries.
-
-        headers? (int|int[]|[int[], str]): Either a row
-            number or list of row numbers (in case of multi-line headers) to be
-            considered as headers (rows start counting at 1), or a pair
-            where the first element is header rows and the second the
-            header joiner.  It defaults to 1.
 
         scheme? (str): Scheme for loading the file (file, http, ...).
             If not set, it'll be inferred from `source`.
@@ -65,11 +59,17 @@ class Table:
         control? (dict|Control): File control.
             For more infromation, please check the Control documentation.
 
+        dialect? (dict|Dialect): Table dialect.
+            For more infromation, please check the Dialect documentation.
+
         query? (dict|Query): Table query.
             For more infromation, please check the Query documentation.
 
-        dialect? (dict|Dialect): Table dialect.
-            For more infromation, please check the Dialect documentation.
+        headers? (int|int[]|[int[], str]): Either a row
+            number or list of row numbers (in case of multi-line headers) to be
+            considered as headers (rows start counting at 1), or a pair
+            where the first element is header rows and the second the
+            header joiner.  It defaults to 1.
 
         schema? (dict|Schema): Table schema.
             For more infromation, please check the Schema documentation.
@@ -116,7 +116,6 @@ class Table:
         self,
         source,
         *,
-        headers=None,
         # File
         scheme=None,
         format=None,
@@ -125,9 +124,10 @@ class Table:
         compression=None,
         compression_path=None,
         control=None,
+        # Table
         dialect=None,
         query=None,
-        # Schema
+        headers=None,
         schema=None,
         sync_schema=False,
         patch_schema=False,
@@ -160,7 +160,7 @@ class Table:
         self.__parser = None
         self.__sample = None
         self.__schema = None
-        self.__headers = None
+        self.__header = None
         self.__data_stream = None
         self.__row_stream = None
         self.__row_number = None
@@ -302,12 +302,12 @@ class Table:
         return self.__schema
 
     @property
-    def headers(self):
+    def header(self):
         """
         Returns:
-            str[]?: table headers
+            str[]?: table header
         """
-        return self.__headers
+        return self.__header
 
     @property
     def sample(self):
@@ -451,7 +451,7 @@ class Table:
 
         # Create state
         sample = []
-        headers = []
+        header = []
         field_positions = []
         sample_positions = []
         schema = Schema(self.__init_schema)
@@ -488,23 +488,23 @@ class Table:
 
         # Infer table
         row_number = 0
-        headers_data = []
-        headers_ready = False
-        headers_numbers = dialect.header_rows or config.DEFAULT_HEADER_ROWS
+        header_data = []
+        header_ready = False
+        header_numbers = dialect.header_rows or config.DEFAULT_HEADER_ROWS
         iterator = chain(buffer, self.__parser.data_stream)
         for row_position, cells in enumerate(iterator, start=1):
             if self.__read_data_stream_pick_skip_row(row_position, cells):
                 row_number += 1
 
-                # Headers
-                if not headers_ready:
-                    if row_number in headers_numbers:
-                        headers_data.append(helpers.stringify_headers(cells))
-                    if row_number >= max(headers_numbers):
-                        infer = self.__read_data_stream_infer_headers
-                        headers, field_positions = infer(headers_data)
-                        headers_ready = True
-                    if not headers_ready or dialect.header:
+                # Header
+                if not header_ready:
+                    if row_number in header_numbers:
+                        header_data.append(helpers.stringify_header(cells))
+                    if row_number >= max(header_numbers):
+                        infer = self.__read_data_stream_infer_header
+                        header, field_positions = infer(header_data)
+                        header_ready = True
+                    if not header_ready or dialect.header:
                         continue
 
                 # Sample
@@ -518,7 +518,7 @@ class Table:
             schema.infer(
                 sample,
                 type=self.__infer_type,
-                names=self.__infer_names or headers,
+                names=self.__infer_names or header,
                 confidence=self.__infer_confidence,
                 missing_values=self.__infer_missing_values,
             )
@@ -527,7 +527,7 @@ class Table:
         if self.__sync_schema:
             fields = []
             mapping = {field.get("name"): field for field in schema.fields}
-            for name in headers:
+            for name in header:
                 fields.append(mapping.get(name, {"name": name, "type": "any"}))
             schema.fields = fields
 
@@ -549,44 +549,44 @@ class Table:
         self.__schema = schema
         self.__field_positions = field_positions
         self.__sample_positions = sample_positions
-        self.__headers = Headers(headers, schema=schema, field_positions=field_positions)
+        self.__header = Header(header, schema=schema, field_positions=field_positions)
 
-    def __read_data_stream_infer_headers(self, headers_data):
+    def __read_data_stream_infer_header(self, header_data):
         dialect = self.__file.dialect
 
-        # No headers
+        # No header
         if not dialect.header:
-            return [], list(range(1, len(headers_data[0]) + 1))
+            return [], list(range(1, len(header_data[0]) + 1))
 
-        # Get headers
-        headers = []
+        # Get header
+        header = []
         prev_cells = {}
-        for cells in headers_data:
+        for cells in header_data:
             for index, cell in enumerate(cells):
                 if prev_cells.get(index) == cell:
                     continue
                 prev_cells[index] = cell
-                if len(headers) <= index:
-                    headers.append(cell)
+                if len(header) <= index:
+                    header.append(cell)
                     continue
-                headers[index] = dialect.header_join.join([headers[index], cell])
+                header[index] = dialect.header_join.join([header[index], cell])
 
-        # Filter headers
-        filter_headers = []
+        # Filter header
+        filter_header = []
         field_positions = []
         limit = self.__file.query.limit_fields
         offset = self.__file.query.offset_fields or 0
-        for field_position, header in enumerate(headers, start=1):
+        for field_position, header in enumerate(header, start=1):
             if self.__read_data_stream_pick_skip_field(field_position, header):
                 if offset:
                     offset -= 1
                     continue
-                filter_headers.append(header)
+                filter_header.append(header)
                 field_positions.append(field_position)
-                if limit and limit <= len(filter_headers):
+                if limit and limit <= len(filter_header):
                     break
 
-        return filter_headers, field_positions
+        return filter_header, field_positions
 
     def __read_data_stream_pick_skip_field(self, field_position, header):
         match = True

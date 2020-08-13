@@ -185,8 +185,8 @@ class ReportTable(Metadata):
         self["dialect"] = table.dialect
         self["query"] = table.query
         # Table
+        self.setinitial("header", table.header)
         self.setinitial("schema", table.schema)
-        self.setinitial("headers", table.headers)
         # Validation
         self["time"] = time
         self["valid"] = not errors
@@ -233,12 +233,12 @@ class ReportTable(Metadata):
         return self["query"]
 
     @property
-    def schema(self):
-        return self["schema"]
+    def header(self):
+        return self["header"]
 
     @property
-    def headers(self):
-        return self["headers"]
+    def schema(self):
+        return self["schema"]
 
     @property
     def time(self):
