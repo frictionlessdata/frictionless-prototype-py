@@ -6,11 +6,11 @@
 
 > Transform functionality is work-in-progress
 
-Transforming data in Frictionless means modifying a data + metadata set from the state A to the state B. For example, it can be a dirty Excel file we need to transofrm to a cleaned CSV file or a folder of data files we want to update and save as a data package.
+Transforming data in Frictionless means modifying a data + metadata set from the state A to the state B. For example, it can be a dirty Excel file we need to transform to a cleaned CSV file or a folder of data files we want to update and save as a data package.
 
-The most high-level way of transforming data is data pipelines. Frictionless supports two tipes of data pipelines:
+The most high-level way of transforming data is data pipelines. Frictionless supports two types of data pipelines:
 - package pipelines
-- resource pieplines
+- resource pipelines
 
 The package pipelines are powered by [DataFlows](http://www.dataflows.org/),
 a novel and intuitive way of building data processing flows in Python. Frictionless provides an ability to declaratively describe and run DataFlows pipelines.
@@ -134,15 +134,15 @@ This functionality is under construction.
 
 ## Transform Options
 
-For now, the `transorm` function accept only the `source` option which can be a pipeline descriptor or a resource descriptor (not implemented yet).
+For now, the `transorm` function accepts only the `source` option which can be a pipeline descriptor or a resource descriptor (not implemented yet).
 
 **Package**
 
-The `transform_package` functions doesn't accept any additional arguments.
+The `transform_package` functions don't accept any additional arguments.
 
 **Resource**
 
-The `transform_resource` functions doesn't accept any additional arguments.
+The `transform_resource` functions don't accept any additional arguments.
 
 
 ## Using Table

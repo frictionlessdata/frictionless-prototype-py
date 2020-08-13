@@ -143,4 +143,4 @@ with frictionless.Table('table.csv') as table:
 - `table.read` was replace by `table.read_data/rows`
 - `table.iter` was replaced by `table.data/row_stream`
 - `table.hash/size` was replaced by the `table.stats` property
-- various changes in the contructor options (see "Extracting Data")
+- various changes in the constructor options (see "Extracting Data")

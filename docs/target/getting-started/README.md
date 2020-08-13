@@ -4,7 +4,7 @@
 
 
 
-Let's get started with Frictionless! We will how how to install and use the framwork. The simple example below will showcase the framework's basic functionality.
+Let's get started with Frictionless! We will learn how to install and use the framework. The simple example below will showcase the framework's basic functionality.
 
 
 ## Installation
@@ -162,5 +162,5 @@ Last but not least, let's get a validation report. This report will help us to f
 Now having all this information:
 - we can clean up the table to ensure the data quality
 - we can use the metadata to describe and share the dataset
-- we can include the validation into our workflow to guarantee validity
+- we can include the validation into our workflow to guarantee the validity
 - and much more: don't hesitate and read the following documentation!

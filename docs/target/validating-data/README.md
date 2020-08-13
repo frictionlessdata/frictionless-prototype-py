@@ -4,7 +4,7 @@
 
 
 
-Tabular data validation is a process of identifying tabular problems that have place in your data for further correction. Let's explore how Frictionless helps to achieve this tasks using an invalid data table example:
+Tabular data validation is a process of identifying tabular problems that have place in your data for further correction. Let's explore how Frictionless helps to achieve these tasks using an invalid data table example:
 
 
 ```bash
@@ -56,7 +56,7 @@ The high-level interface for validating data provided by Frictionless is a set o
 - `validate_schema`: it validates a schema's metadata
 - `validate_resource`: it validates a resource's data and metadata
 - `validate_package`: it validates a package's data and metadata
-- `validate_inquiery`: it validates a special `Inquiery` object which represents a validation task insruction
+- `validate_inquiery`: it validates a special `Inquiery` object which represents a validation task instruction
 - `validate_table`: it validates a table
 
 In command-line, there is only 1 command but there is a flag to adjust the behavior:
@@ -126,7 +126,7 @@ Let's now use the command-line interface to ensure that we are getting the same 
        12        1  type-error        The cell "x" in row at position "12" and field "id" at position "1" has incompatible type: type is "integer/default"
 
 
-Okay, why do we need to use a resource descriptor if the result is the same? The reason is metadata + data packaging. Let's extend our resoure descriptor:
+Okay, why do we need to use a resource descriptor if the result is the same? The reason is metadata + data packaging. Let's extend our resource descriptor:
 
 
 ```python

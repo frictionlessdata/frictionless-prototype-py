@@ -22,7 +22,7 @@ To create a plugin you need:
 - create a module called `frictionless_<name>` available in PYTHONPATH
 - subclass the Plugin class and override one of the methods above
 
-Please consult with "API Reference" for in-detail infromation about the Plugin interface and how these methods can be implemented.
+Please consult with "API Reference" for in-detail information about the Plugin interface and how these methods can be implemented.
 
 
 
@@ -30,7 +30,7 @@ Please consult with "API Reference" for in-detail infromation about the Plugin i
 
 Let's say we're interested in supporting the `csv2k` format that we have just invented. For simplicity, let's use a format that is exactly the same with CSV.
 
-First of all, we neet to create a `frictionless_csv2k` module containing a Plugin implementation and a Parser implementation but we're going to re-use the CsvParser as our new format is the same:
+First of all, we need to create a `frictionless_csv2k` module containing a Plugin implementation and a Parser implementation but we're going to re-use the CsvParser as our new format is the same:
 
 > frictionless_csv2k.py
 
@@ -55,4 +55,4 @@ rows = extract('data/table.csv2k')
 print(rows)
 ```
 
-This example is over-simplified to show the high-level mechanics but actually writing Frctionless Plugins is really easy. For inspiration you can checks the `frictionless/plugins` directory and learn from real-life examples. Also, in the Frictionless codebase there are many `Check`, `Control`, `Dialect`, `Loader`, `Parser`, and `Server` implementations - you can read their code for better understanding of how to write your own subclass.
+This example is over-simplified to show the high-level mechanics but actually writing Frctionless Plugins is really easy. For inspiration, you can checks the `frictionless/plugins` directory and learn from real-life examples. Also, in the Frictionless codebase there are many `Check`, `Control`, `Dialect`, `Loader`, `Parser`, and `Server` implementations - you can read their code for better understanding of how to write your own subclass.
