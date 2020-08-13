@@ -12,6 +12,14 @@ from .. import helpers
 
 
 class AwsPlugin(Plugin):
+    """Plugin for AWS
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.aws import AwsPlugin`
+
+    """
+
     def create_control(self, file, *, descriptor):
         if file.scheme == "s3":
             return S3Control(descriptor)
@@ -25,6 +33,14 @@ class AwsPlugin(Plugin):
 
 
 class S3Loader(Loader):
+    """S3 loader implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.aws import S3Loader`
+
+    """
+
     remote = True
 
     # Read
@@ -49,20 +65,18 @@ class S3Loader(Loader):
 class S3Control(Control):
     """S3 control representation
 
-    # Arguments
-        descriptor? (str|dict): descriptor
-        endpoint_url? (string): endpoint_url
-        detect_encoding? (string): detect_encoding
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.aws import S3Control`
 
-    # Raises
+    Parameters:
+        descriptor? (str|dict): descriptor
+        endpoint_url? (string): endpoint url
+
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
-
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "properties": {"endpointUrl": {"type": "string"}, "detectEncoding": {}},
-    }
 
     def __init__(self, descriptor=None, endpoint_url=None, detect_encoding=None):
         self.setinitial("endpointUrl", endpoint_url)
@@ -80,7 +94,16 @@ class S3Control(Control):
     # Expand
 
     def expand(self):
+        """Expand metadata
+        """
         self.setdefault("endpointUrl", self.endpoint_url)
+
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "properties": {"endpointUrl": {"type": "string"}, "detectEncoding": {}},
+    }
 
 
 # Internal

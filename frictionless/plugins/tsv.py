@@ -9,6 +9,14 @@ from .. import helpers
 
 
 class TsvPlugin(Plugin):
+    """Plugin for TSV
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.tsv import TsvPlugin`
+
+    """
+
     def create_dialect(self, file, *, descriptor):
         if file.format == "tsv":
             return TsvDialect(descriptor)
@@ -22,6 +30,14 @@ class TsvPlugin(Plugin):
 
 
 class TsvParser(Parser):
+    """TSV parser implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.tsv import TsvParser`
+
+    """
+
     native_types = [
         "string",
     ]
@@ -54,6 +70,10 @@ class TsvParser(Parser):
 
 class TsvDialect(Dialect):
     """Tsv dialect representation
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.tsv import TsvDialect`
 
     Parameters:
         descriptor? (str|dict): descriptor

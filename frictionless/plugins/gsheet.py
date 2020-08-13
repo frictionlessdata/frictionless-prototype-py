@@ -12,6 +12,14 @@ from .. import errors
 
 
 class GsheetPlugin(Plugin):
+    """Plugin for Google Sheets
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.gsheet import GsheetPlugin`
+
+    """
+
     def create_dialect(self, file, *, descriptor):
         if file.format == "gsheet":
             return GsheetDialect(descriptor)
@@ -25,6 +33,14 @@ class GsheetPlugin(Plugin):
 
 
 class GsheetParser(Parser):
+    """Google Sheets parser implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.gsheet import GsheetParser`
+
+    """
+
     loading = False
 
     # Read
@@ -57,10 +73,14 @@ class GsheetParser(Parser):
 class GsheetDialect(Dialect):
     """Gsheet dialect representation
 
-    # Arguments
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.gsheet import GsheetDialect`
+
+    Parameters:
         descriptor? (str|dict): descriptor
 
-    # Raises
+    Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """

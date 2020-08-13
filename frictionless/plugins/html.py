@@ -10,6 +10,14 @@ from .. import helpers
 
 
 class HtmlPlugin(Plugin):
+    """Plugin for HTML
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.html import HtmlPlugin`
+
+    """
+
     def create_dialect(self, file, *, descriptor):
         if file.format == "html":
             return HtmlDialect(descriptor)
@@ -23,6 +31,13 @@ class HtmlPlugin(Plugin):
 
 
 class HtmlParser(Parser):
+    """HTML parser implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.html import HtmlParser`
+
+    """
 
     # Read
 
@@ -87,25 +102,18 @@ class HtmlParser(Parser):
 class HtmlDialect(Dialect):
     """Html dialect representation
 
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.html import HtmlDialect`
+
     Parameters:
         descriptor? (str|dict): descriptor
-        selector? (str): selector
+        selector? (str): HTML selector
 
     Raises:
         FrictionlessException: raise any error that occurs during the process
 
     """
-
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {
-            "selector": {"type": "string"},
-            "header": {"type": "boolean"},
-            "headerRows": {"type": "array", "items": {"type": "number"}},
-            "headerJoin": {"type": "string"},
-        },
-    }
 
     def __init__(
         self,
@@ -126,10 +134,29 @@ class HtmlDialect(Dialect):
 
     @Metadata.property
     def selector(self):
+        """
+        Returns:
+            str: selector
+        """
         return self.get("selector", "table")
 
     # Expand
 
     def expand(self):
+        """Expand metadata
+        """
         super().expand()
         self.setdefault("selector", self.selector)
+
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "selector": {"type": "string"},
+            "header": {"type": "boolean"},
+            "headerRows": {"type": "array", "items": {"type": "number"}},
+            "headerJoin": {"type": "string"},
+        },
+    }

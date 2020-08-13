@@ -2727,6 +2727,32 @@ Convert to a list
 <a name="frictionless.plugins.gsheet"></a>
 ## frictionless.plugins.gsheet
 
+<a name="frictionless.plugins.gsheet.GsheetPlugin"></a>
+### GsheetPlugin
+
+```python
+class GsheetPlugin(Plugin)
+```
+
+Plugin for Google Sheets
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.gsheet import GsheetPlugin`
+
+<a name="frictionless.plugins.gsheet.GsheetParser"></a>
+### GsheetParser
+
+```python
+class GsheetParser(Parser)
+```
+
+Google Sheets parser implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.gsheet import GsheetParser`
+
 <a name="frictionless.plugins.gsheet.GsheetDialect"></a>
 ### GsheetDialect
 
@@ -2736,31 +2762,127 @@ class GsheetDialect(Dialect)
 
 Gsheet dialect representation
 
-__Arguments__
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.gsheet import GsheetDialect`
 
-- __descriptor? (str|dict)__: descriptor
+**Arguments**:
 
-__Raises__
+- `descriptor?` _str|dict_ - descriptor
+  
 
-- `FrictionlessException`: raise any error that occurs during the process
+**Raises**:
+
+- `FrictionlessException` - raise any error that occurs during the process
 
 <a name="frictionless.plugins.dataflows"></a>
 ## frictionless.plugins.dataflows
 
+<a name="frictionless.plugins.dataflows.DataflowsPlugin"></a>
+### DataflowsPlugin
+
+```python
+class DataflowsPlugin(Plugin)
+```
+
+Plugin for Dataflows
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.dataflows import DataflowsPlugin`
+
 <a name="frictionless.plugins.pandas"></a>
 ## frictionless.plugins.pandas
+
+<a name="frictionless.plugins.pandas.PandasPlugin"></a>
+### PandasPlugin
+
+```python
+class PandasPlugin(Plugin)
+```
+
+Plugin for Pandas
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.pandas import PandasPlugin`
 
 <a name="frictionless.plugins.spss"></a>
 ## frictionless.plugins.spss
 
+<a name="frictionless.plugins.spss.SpssPlugin"></a>
+### SpssPlugin
+
+```python
+class SpssPlugin(Plugin)
+```
+
+Plugin for SPSS
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.spss import SpssPlugin`
+
 <a name="frictionless.plugins.elastic"></a>
 ## frictionless.plugins.elastic
+
+<a name="frictionless.plugins.elastic.ElasticPlugin"></a>
+### ElasticPlugin
+
+```python
+class ElasticPlugin(Plugin)
+```
+
+Plugin for ElasticSearch
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.elastic import ElasticPlugin`
 
 <a name="frictionless.plugins.bigquery"></a>
 ## frictionless.plugins.bigquery
 
+<a name="frictionless.plugins.bigquery.BigqueryPlugin"></a>
+### BigqueryPlugin
+
+```python
+class BigqueryPlugin(Plugin)
+```
+
+Plugin for BigQuery
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.bigquery import BigqueryPlugin`
+
 <a name="frictionless.plugins.ods"></a>
 ## frictionless.plugins.ods
+
+<a name="frictionless.plugins.ods.OdsPlugin"></a>
+### OdsPlugin
+
+```python
+class OdsPlugin(Plugin)
+```
+
+Plugin for ODS
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.ods import OdsPlugin`
+
+<a name="frictionless.plugins.ods.OdsParser"></a>
+### OdsParser
+
+```python
+class OdsParser(Parser)
+```
+
+ODS parser implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.ods import OdsParser`
 
 <a name="frictionless.plugins.ods.OdsDialect"></a>
 ### OdsDialect
@@ -2770,6 +2892,10 @@ class OdsDialect(Dialect)
 ```
 
 Ods dialect representation
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.ods import OdsDialect`
 
 **Arguments**:
 
@@ -2781,8 +2907,55 @@ Ods dialect representation
 
 - `FrictionlessException` - raise any error that occurs during the process
 
+<a name="frictionless.plugins.ods.OdsDialect.sheet"></a>
+#### <big>sheet</big>
+
+```python
+ | @Metadata.property
+ | sheet()
+```
+
+**Returns**:
+
+- `int|str` - sheet
+
+<a name="frictionless.plugins.ods.OdsDialect.expand"></a>
+#### <big>expand</big>
+
+```python
+ | expand()
+```
+
+Expand metadata
+
 <a name="frictionless.plugins.html"></a>
 ## frictionless.plugins.html
+
+<a name="frictionless.plugins.html.HtmlPlugin"></a>
+### HtmlPlugin
+
+```python
+class HtmlPlugin(Plugin)
+```
+
+Plugin for HTML
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.html import HtmlPlugin`
+
+<a name="frictionless.plugins.html.HtmlParser"></a>
+### HtmlParser
+
+```python
+class HtmlParser(Parser)
+```
+
+HTML parser implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.html import HtmlParser`
 
 <a name="frictionless.plugins.html.HtmlDialect"></a>
 ### HtmlDialect
@@ -2793,18 +2966,69 @@ class HtmlDialect(Dialect)
 
 Html dialect representation
 
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.html import HtmlDialect`
+
 **Arguments**:
 
 - `descriptor?` _str|dict_ - descriptor
-- `selector?` _str_ - selector
+- `selector?` _str_ - HTML selector
   
 
 **Raises**:
 
 - `FrictionlessException` - raise any error that occurs during the process
 
+<a name="frictionless.plugins.html.HtmlDialect.selector"></a>
+#### <big>selector</big>
+
+```python
+ | @Metadata.property
+ | selector()
+```
+
+**Returns**:
+
+- `str` - selector
+
+<a name="frictionless.plugins.html.HtmlDialect.expand"></a>
+#### <big>expand</big>
+
+```python
+ | expand()
+```
+
+Expand metadata
+
 <a name="frictionless.plugins.tsv"></a>
 ## frictionless.plugins.tsv
+
+<a name="frictionless.plugins.tsv.TsvPlugin"></a>
+### TsvPlugin
+
+```python
+class TsvPlugin(Plugin)
+```
+
+Plugin for TSV
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.tsv import TsvPlugin`
+
+<a name="frictionless.plugins.tsv.TsvParser"></a>
+### TsvParser
+
+```python
+class TsvParser(Parser)
+```
+
+TSV parser implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.tsv import TsvParser`
 
 <a name="frictionless.plugins.tsv.TsvDialect"></a>
 ### TsvDialect
@@ -2814,6 +3038,10 @@ class TsvDialect(Dialect)
 ```
 
 Tsv dialect representation
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.tsv import TsvDialect`
 
 **Arguments**:
 
@@ -2827,6 +3055,32 @@ Tsv dialect representation
 <a name="frictionless.plugins.sql"></a>
 ## frictionless.plugins.sql
 
+<a name="frictionless.plugins.sql.SqlPlugin"></a>
+### SqlPlugin
+
+```python
+class SqlPlugin(Plugin)
+```
+
+Plugin for SQL
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.sql import SqlPlugin`
+
+<a name="frictionless.plugins.sql.SqlParser"></a>
+### SqlParser
+
+```python
+class SqlParser(Parser)
+```
+
+SQL parser implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.sql import SqlParser`
+
 <a name="frictionless.plugins.sql.SqlDialect"></a>
 ### SqlDialect
 
@@ -2835,6 +3089,10 @@ class SqlDialect(Dialect)
 ```
 
 Sql dialect representation
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.sql import SqlDialect`
 
 **Arguments**:
 
@@ -2850,11 +3108,76 @@ Sql dialect representation
 <a name="frictionless.plugins.ckan"></a>
 ## frictionless.plugins.ckan
 
+<a name="frictionless.plugins.ckan.CkanPlugin"></a>
+### CkanPlugin
+
+```python
+class CkanPlugin(Plugin)
+```
+
+Plugin for CKAN
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.bigquery import CkanPlugin`
+
 <a name="frictionless.plugins.server"></a>
 ## frictionless.plugins.server
 
+<a name="frictionless.plugins.server.ServerPlugin"></a>
+### ServerPlugin
+
+```python
+class ServerPlugin(Plugin)
+```
+
+Plugin for Server
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.server import ServerPlugin`
+
+<a name="frictionless.plugins.server.ApiServer"></a>
+### ApiServer
+
+```python
+class ApiServer(Server)
+```
+
+API server implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.server import ApiParser`
+
 <a name="frictionless.plugins.aws"></a>
 ## frictionless.plugins.aws
+
+<a name="frictionless.plugins.aws.AwsPlugin"></a>
+### AwsPlugin
+
+```python
+class AwsPlugin(Plugin)
+```
+
+Plugin for AWS
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.aws import AwsPlugin`
+
+<a name="frictionless.plugins.aws.S3Loader"></a>
+### S3Loader
+
+```python
+class S3Loader(Loader)
+```
+
+S3 loader implementation.
+
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.aws import S3Loader`
 
 <a name="frictionless.plugins.aws.S3Control"></a>
 ### S3Control
@@ -2865,15 +3188,28 @@ class S3Control(Control)
 
 S3 control representation
 
-__Arguments__
+API      | Usage
+-------- | --------
+Public   | `from frictionless.plugins.aws import S3Control`
 
-- __descriptor? (str|dict)__: descriptor
-- __endpoint_url? (string)__: endpoint_url
-- __detect_encoding? (string)__: detect_encoding
+**Arguments**:
 
-__Raises__
+- `descriptor?` _str|dict_ - descriptor
+- `endpoint_url?` _string_ - endpoint url
+  
 
-- `FrictionlessException`: raise any error that occurs during the process
+**Raises**:
+
+- `FrictionlessException` - raise any error that occurs during the process
+
+<a name="frictionless.plugins.aws.S3Control.expand"></a>
+#### <big>expand</big>
+
+```python
+ | expand()
+```
+
+Expand metadata
 
 <a name="frictionless.parsers"></a>
 ## frictionless.parsers

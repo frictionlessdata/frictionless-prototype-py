@@ -13,6 +13,14 @@ from .. import config
 
 
 class ServerPlugin(Plugin):
+    """Plugin for Server
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.server import ServerPlugin`
+
+    """
+
     def create_server(self, name):
         if name == "api":
             return ApiServer()
@@ -22,6 +30,14 @@ class ServerPlugin(Plugin):
 
 
 class ApiServer(Server):
+    """API server implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.server import ApiParser`
+
+    """
+
     def listen(self, *, port):
         app = create_api()
         server = create_server(app, port=port)

@@ -13,6 +13,14 @@ from .. import errors
 
 
 class OdsPlugin(Plugin):
+    """Plugin for ODS
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.ods import OdsPlugin`
+
+    """
+
     def create_dialect(self, file, *, descriptor):
         if file.format == "ods":
             return OdsDialect(descriptor)
@@ -26,6 +34,14 @@ class OdsPlugin(Plugin):
 
 
 class OdsParser(Parser):
+    """ODS parser implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.ods import OdsParser`
+
+    """
+
     native_types = [
         "boolean",
         "date",
@@ -109,6 +125,10 @@ class OdsParser(Parser):
 class OdsDialect(Dialect):
     """Ods dialect representation
 
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.ods import OdsDialect`
+
     Parameters:
         descriptor? (str|dict): descriptor
         sheet? (str): sheet
@@ -117,17 +137,6 @@ class OdsDialect(Dialect):
         FrictionlessException: raise any error that occurs during the process
 
     """
-
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {
-            "sheet": {"type": ["number", "string"]},
-            "header": {"type": "boolean"},
-            "headerRows": {"type": "array", "items": {"type": "number"}},
-            "headerJoin": {"type": "string"},
-        },
-    }
 
     def __init__(
         self,
@@ -148,10 +157,29 @@ class OdsDialect(Dialect):
 
     @Metadata.property
     def sheet(self):
+        """
+        Returns:
+            int|str: sheet
+        """
         return self.get("sheet", 1)
 
     # Expand
 
     def expand(self):
+        """Expand metadata
+        """
         super().expand()
         self.setdefault("sheet", self.sheet)
+
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "sheet": {"type": ["number", "string"]},
+            "header": {"type": "boolean"},
+            "headerRows": {"type": "array", "items": {"type": "number"}},
+            "headerJoin": {"type": "string"},
+        },
+    }

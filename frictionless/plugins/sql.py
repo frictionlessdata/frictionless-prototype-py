@@ -9,6 +9,14 @@ from .. import helpers
 
 
 class SqlPlugin(Plugin):
+    """Plugin for SQL
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.sql import SqlPlugin`
+
+    """
+
     def create_dialect(self, file, *, descriptor):
         if file.scheme in SQL_SCHEMES:
             return SqlDialect(descriptor)
@@ -23,6 +31,14 @@ class SqlPlugin(Plugin):
 
 # NOTE: extend native types (make property as it depends on the database engine)
 class SqlParser(Parser):
+    """SQL parser implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.sql import SqlParser`
+
+    """
+
     loading = False
     native_types = [
         "string",
@@ -79,6 +95,10 @@ class SqlParser(Parser):
 class SqlDialect(Dialect):
     """Sql dialect representation
 
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.sql import SqlDialect`
+
     Parameters:
         descriptor? (str|dict): descriptor
         table (str): table
@@ -88,19 +108,6 @@ class SqlDialect(Dialect):
         FrictionlessException: raise any error that occurs during the process
 
     """
-
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "required": ["table"],
-        "additionalProperties": False,
-        "properties": {
-            "table": {"type": "string"},
-            "order_by": {"type": "string"},
-            "header": {"type": "boolean"},
-            "headerRows": {"type": "array", "items": {"type": "number"}},
-            "headerJoin": {"type": "string"},
-        },
-    }
 
     def __init__(
         self,
@@ -128,6 +135,21 @@ class SqlDialect(Dialect):
     @Metadata.property
     def order_by(self):
         return self.get("order_by")
+
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "required": ["table"],
+        "additionalProperties": False,
+        "properties": {
+            "table": {"type": "string"},
+            "order_by": {"type": "string"},
+            "header": {"type": "boolean"},
+            "headerRows": {"type": "array", "items": {"type": "number"}},
+            "headerJoin": {"type": "string"},
+        },
+    }
 
 
 # Internal
