@@ -726,9 +726,9 @@ class MultipartSource:
     def read_line_stream(self):
         streams = []
         if helpers.is_remote_path(self.__source[0]):
-            streams = [urlopen(chunk) for chunk in self.__source]
+            streams = (urlopen(chunk) for chunk in self.__source)
         else:
-            streams = [io.open(chunk, "rb") for chunk in self.__source]
+            streams = (io.open(chunk, "rb") for chunk in self.__source)
         for stream_number, stream in enumerate(streams, start=1):
             for line_number, line in enumerate(stream, start=1):
                 if not line.endswith(b"\n"):
