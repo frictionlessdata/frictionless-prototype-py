@@ -32,14 +32,15 @@ def extract(source, *, source_type=None, process=None, **options):
     # Detect source type
     # NOTE: move to helpers
     if not source_type:
-        if isinstance(source, list) or glob.has_magic(source):
-            package = Package()
-            package.infer(source)
-            source = package
-        elif os.path.isdir(source):
-            package = Package()
-            package.infer(f"{source}/*")
-            source = package
+        if not callable(source):
+            if isinstance(source, list) or glob.has_magic(source):
+                package = Package()
+                package.infer(source)
+                source = package
+            elif os.path.isdir(source):
+                package = Package()
+                package.infer(f"{source}/*")
+                source = package
         source_type = helpers.detect_source_type(source)
 
     # Extract source
