@@ -1,5 +1,6 @@
 import re
 import sqlalchemy as sa
+from functools import partial
 import sqlalchemy.dialects.postgresql as sapg
 from ..storage import Storage, StorageTable
 from ..metadata import Metadata
@@ -353,12 +354,7 @@ class SqlStorage(Storage):
         note = f'Column type "{name}" is not supported'
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
-    def read_row_stream(self, bucket):
-
-        # Get table and fallbacks
-        table = self.__get_table(bucket)
-        schema = tableschema.Schema(self.describe(bucket))
-        autoincrement = self.__get_autoincrement_for_bucket(bucket)
+    def read_row_stream(self, table):
 
         # Open and close transaction
         with self.__connection.begin():
@@ -367,9 +363,7 @@ class SqlStorage(Storage):
             select = table.select().execution_options(stream_results=True)
             result = select.execute()
             for row in result:
-                row = self.__mapper.restore_row(
-                    row, schema=schema, autoincrement=autoincrement
-                )
+                row = self.__mapper.restore_row(row, schema=table.schema)
                 yield row
 
     # Write
@@ -494,36 +488,24 @@ class SqlStorage(Storage):
 
         """
 
-        # Check update keys
-        if update_keys is not None and len(update_keys) == 0:
-            message = 'Argument "update_keys" cannot be an empty list'
-            raise tableschema.exceptions.StorageError(message)
-
         # Get table and description
         table = self.__get_table(bucket)
-        schema = tableschema.Schema(self.describe(bucket))
-        fallbacks = self.__fallbacks.get(bucket, [])
 
         # Write rows to table
-        convert_row = partial(
-            self.__mapper.convert_row, schema=schema, fallbacks=fallbacks
-        )
-        autoincrement = self.__get_autoincrement_for_bucket(bucket)
-        writer = Writer(
-            table,
-            schema,
-            # Only PostgreSQL supports "returning" so we don't use autoincrement for all
-            autoincrement=autoincrement if self.__dialect in ["postgresql"] else None,
-            update_keys=update_keys,
-            convert_row=convert_row,
-            buffer_size=buffer_size,
-            use_bloom_filter=use_bloom_filter,
-        )
-        with self.__connection.begin():
-            gen = writer.write(rows, keyed=keyed)
-            if as_generator:
-                return gen
-            collections.deque(gen, maxlen=0)
+        convert_row = partial(self.__mapper.convert_row, schema=table.schema)
+        print(convert_row)
+        #  writer = Writer(
+        #  table,
+        #  table.schema,
+        #  # Only PostgreSQL supports "returning" so we don't use autoincrement for all
+        #  autoincrement=autoincrement if self.__dialect in ["postgresql"] else None,
+        #  update_keys=update_keys,
+        #  convert_row=convert_row,
+        #  buffer_size=buffer_size,
+        #  )
+        #  with self.__connection.begin():
+        #  gen = writer.write(rows, keyed=keyed)
+        #  collections.deque(gen, maxlen=0)
 
     # Private
 
