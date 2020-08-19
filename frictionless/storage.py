@@ -2,15 +2,10 @@ class Storage:
     def __init__(self, **options):
         pass
 
-    @property
-    def tables(self):
+    def add_table(self, *tables, force=False, **options):
         pass
 
-    @property
-    def table_names(self):
-        pass
-
-    def add_table(self, *tables, **options):
+    def remove_table(self, *names, ignore=False, **options):
         pass
 
     def get_table(self, name):
@@ -19,7 +14,10 @@ class Storage:
     def has_table(self, name):
         pass
 
-    def remove_table(self, *names, **options):
+    def list_tables(self):
+        pass
+
+    def list_table_names(self):
         pass
 
 

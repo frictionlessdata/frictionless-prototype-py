@@ -281,6 +281,14 @@ class CheckError(Error):
     description = "A validation check cannot be created"
 
 
+class StorageError(Error):
+    code = "storage-error"
+    name = "Storage Error"
+    tags = ["#general"]
+    template = "The storage has an error: {note}"
+    description = "A storage's operation cannot be performed"
+
+
 # Table
 
 
