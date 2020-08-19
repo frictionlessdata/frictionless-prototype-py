@@ -1,11 +1,13 @@
 import re
 import sqlalchemy as sa
 import sqlalchemy.dialects.postgresql as sapg
+from ..storage import Storage, StorageTable
 from ..metadata import Metadata
 from ..dialects import Dialect
-from ..storage import Storage
 from ..plugin import Plugin
 from ..parser import Parser
+from ..schema import Schema
+from ..field import Field
 from .. import exceptions
 from .. import helpers
 from .. import errors
@@ -176,7 +178,7 @@ class SqlStorage(Storage):
 
     # Public
 
-    def __init__(self, engine, *, prefix=""):
+    def __init__(self, *, engine, prefix=""):
 
         # Set attributes
         self.__prefix = prefix
@@ -186,12 +188,12 @@ class SqlStorage(Storage):
 
         # Create metadata and reflect
         self.__add_regex_support()
-        self.__metadata = sa.MetaData(bind=self.__connection, schema=self.__namespace)
+        self.__metadata = sa.MetaData(bind=self.__connection)
         self.__metadata.reflect()
 
     def __repr__(self):
-        template = "Storage <{engine}/{dbschema}>"
-        text = template.format(engine=self.__connection.engine, dbschema=self.__dbschema)
+        template = "Storage <{engine}>"
+        text = template.format(engine=self.__connection.engine)
         return text
 
     # Tables
@@ -249,26 +251,21 @@ class SqlStorage(Storage):
         self.__metadata.clear()
         self.__metadata.reflect()
 
-    def get_table(self, bucket, descriptor=None):
-
-        # Set descriptor
-        if descriptor is not None:
-            self.__descriptors[bucket] = descriptor
-
-        # Get descriptor
-        else:
-            descriptor = self.__descriptors.get(bucket)
-            if descriptor is None:
-                table = self.__get_table(bucket)
-                autoincrement = self.__get_autoincrement_for_bucket(bucket)
-                descriptor = self.__mapper.restore_descriptor(
-                    table.name, table.columns, table.constraints, autoincrement
-                )
-
-        return descriptor
+    def get_table(self, name):
+        table = self.__tables.get(name)
+        if table is None:
+            table = self.read_table(name)
+        return table
 
     def has_table(self, name):
         return name in self.list_table_names()
+
+    def list_tables(self):
+        tables = []
+        for name in self.list_table_names():
+            table = self.get_table(name)
+            tables.append(table)
+        return table
 
     def list_table_names(self):
         names = []
@@ -278,20 +275,57 @@ class SqlStorage(Storage):
                 names.append(name)
         return names
 
-    def list_tables(self):
-        pass
-
     # Read
 
-    def read_table(self):
-        pass
+    def read_table(self, name):
+
+        # Prepare
+        schema = Schema()
+        sql_name = self.read_table_name(name)
+        sql_table = self.__metadata[sql_name]
+
+        # Fields
+        for column in sql_table.columns:
+            field_type = self.read_field_type(column.type)
+            field = Field(name=column.name, type=field_type)
+            if not column.nullable:
+                field.required = True
+            schema.fields.append(field)
+
+        # Primary key
+        for constraint in sql_table.constraints:
+            if not isinstance(constraint, sa.PrimaryKeyConstraint):
+                for column in constraint.columns:
+                    schema.primary_key.append(column.name)
+
+        # Foreign keys
+        if self.__dialect in ["postgresql", "sqlite"]:
+            for constraint in sql_table.constraints:
+                if isinstance(constraint, sa.ForeignKeyConstraint):
+                    resource = ""
+                    own_fields = []
+                    foreign_fields = []
+                    for element in constraint.elements:
+                        own_fields.append(element.parent.name)
+                        if element.column.table.name != sql_name:
+                            resource = self.restore_bucket(element.column.table.name)
+                        foreign_fields.append(element.column.name)
+                    if len(own_fields) == len(foreign_fields) == 1:
+                        own_fields = own_fields.pop()
+                        foreign_fields = foreign_fields.pop()
+                    ref = {"resource": resource, "fields": foreign_fields}
+                    schema.foreign_keys.append({"fields": own_fields, "reference": ref})
+
+        # Create table
+        table = StorageTable(name, schema=schema)
+        return table
 
     def read_table_name(self, name):
         if name.startswith(self.__prefix):
             return name.replace(self.__prefix, "", 1)
         return None
 
-    def read_field_type(self, type):
+    def read_field_type(self, name):
 
         # All dialects
         mapping = {
@@ -311,17 +345,13 @@ class SqlStorage(Storage):
         }
 
         # Get field type
-        field_type = None
         for key, value in mapping.items():
-            if isinstance(type, key):
-                field_type = value
+            if isinstance(name, key):
+                return value
 
-        # Not supported
-        if field_type is None:
-            message = 'Type "%s" is not supported'
-            raise tableschema.exceptions.StorageError(message % type)
-
-        return field_type
+        # Not supported type
+        note = f'Column type "{name}" is not supported'
+        raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
     def read_row_stream(self, bucket):
 
@@ -356,7 +386,7 @@ class SqlStorage(Storage):
         for field in table.schema.fields:
             checks = []
             nullable = not field.required
-            column_type = self.convert_type(field.type)
+            column_type = self.write_field_type(field.type)
             unique = field.constraints.get("unique", False)
             for name, value in field.constraints.items():
                 if name == "minLength":
@@ -438,12 +468,13 @@ class SqlStorage(Storage):
                 }
             )
 
-        # Not supported type
-        if name not in mapping:
-            note = f'Field type "{name}" is not supported'
-            raise exceptions.FrictionlessException(errors.StorageError(note=note))
+        # Return type
+        if name in mapping:
+            return mapping[name]
 
-        return mapping[name]
+        # Not supported type
+        note = f'Field type "{name}" is not supported'
+        raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
     def write_row_stream(self, bucket, rows, update_keys=None, buffer_size=1000):
         """Write to bucket
@@ -495,12 +526,6 @@ class SqlStorage(Storage):
             collections.deque(gen, maxlen=0)
 
     # Private
-
-    def __get_table(self, bucket):
-        table_name = self.__mapper.convert_bucket(bucket)
-        if self.__dbschema:
-            table_name = ".".join((self.__dbschema, table_name))
-        return self.__metadata.tables[table_name]
 
     def __add_regex_support(self):
         # It will fail silently if this function already exists
