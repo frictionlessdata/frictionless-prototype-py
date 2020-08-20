@@ -1,9 +1,6 @@
 import re
-
-# TODO: move to Storage
 import sqlalchemy as sa
 import sqlalchemy.dialects.postgresql as sapg
-from functools import partial
 from ..storage import Storage, StorageTable
 from ..metadata import Metadata
 from ..dialects import Dialect
@@ -167,6 +164,8 @@ class SqlDialect(Dialect):
 # Storage
 
 
+# TODO: move dependencies from the top to here
+# TODO: for now, read/write are oversimplified
 class SqlStorage(Storage):
     """SQL storage representation
 
@@ -176,7 +175,7 @@ class SqlStorage(Storage):
 
     Parameters:
         engine (object): `sqlalchemy` engine
-        prefix (str): prefix for all buckets
+        prefix (str): prefix for all tables
 
     """
 
@@ -209,7 +208,7 @@ class SqlStorage(Storage):
         for table in tables:
             if self.has_table(table.name):
                 if not force:
-                    note = f'Bucket "{table.name}" already exists'
+                    note = f'Table "{table.name}" already exists'
                     raise exceptions.FrictionlessException(errors.StorageError(note=note))
                 self.remove_table(table.name)
 
@@ -239,7 +238,7 @@ class SqlStorage(Storage):
             # Check existent
             if not self.has_table(name):
                 if not ignore:
-                    note = f'Bucket "{name}" does not exist'
+                    note = f'Table "{name}" does not exist'
                     raise exceptions.FrictionlessException(errors.StorageError(note=note))
                 return
 
@@ -358,17 +357,17 @@ class SqlStorage(Storage):
         note = f'Column type "{name}" is not supported'
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
-    def read_row_stream(self, table):
+    def read_data_stream(self, name):
+        sql_table = self.__get_sql_table(name)
 
         # Open and close transaction
         with self.__connection.begin():
             # Streaming could be not working for some backends:
             # http://docs.sqlalchemy.org/en/latest/core/connections.html
-            select = table.select().execution_options(stream_results=True)
+            select = sql_table.select().execution_options(stream_results=True)
             result = select.execute()
-            for row in result:
-                row = self.__mapper.restore_row(row, schema=table.schema)
-                yield row
+            for cells in result:
+                yield cells
 
     # Write
 
@@ -474,18 +473,18 @@ class SqlStorage(Storage):
         note = f'Field type "{name}" is not supported'
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
-    # TODO: for now, it's oversimplified
     def write_row_stream(self, name, row_stream):
         buffer = []
         buffer_size = 1000
         sql_table = self.__get_sql_table(name)
-        for row in row_stream:
-            buffer.append(row)
-            if len(buffer) > buffer_size:
+        with self.__connection.begin():
+            for row in row_stream:
+                buffer.append(row)
+                if len(buffer) > buffer_size:
+                    self.__connection.execute(sql_table.insert().values(buffer))
+                    buffer = []
+            if len(buffer):
                 self.__connection.execute(sql_table.insert().values(buffer))
-                buffer = []
-        if len(buffer):
-            self.__connection.execute(sql_table.insert().values(buffer))
 
     # Private
 
