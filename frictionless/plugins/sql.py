@@ -1,7 +1,9 @@
 import re
+
+# TODO: move to Storage
 import sqlalchemy as sa
-from functools import partial
 import sqlalchemy.dialects.postgresql as sapg
+from functools import partial
 from ..storage import Storage, StorageTable
 from ..metadata import Metadata
 from ..dialects import Dialect
@@ -38,6 +40,7 @@ class SqlPlugin(Plugin):
 # Parser
 
 
+# NOTE: probably we can reuse Storage for read/write here
 # NOTE: extend native types (make property as it depends on the database engine)
 class SqlParser(Parser):
     """SQL parser implementation.
@@ -179,10 +182,11 @@ class SqlStorage(Storage):
 
     # Public
 
-    def __init__(self, *, engine, prefix=""):
+    def __init__(self, *, engine, prefix="", namespace=None):
 
         # Set attributes
         self.__prefix = prefix
+        self.__namespace = namespace
         self.__connection = engine.connect()
         self.__dialect = engine.dialect.name
         self.__tables = {}
@@ -197,7 +201,7 @@ class SqlStorage(Storage):
         text = template.format(engine=self.__connection.engine)
         return text
 
-    # Tables
+    # Definition
 
     def add_table(self, *tables, force=False):
 
@@ -207,7 +211,7 @@ class SqlStorage(Storage):
                 if not force:
                     note = f'Bucket "{table.name}" already exists'
                     raise exceptions.FrictionlessException(errors.StorageError(note=note))
-                self.delete(table.name)
+                self.remove_table(table.name)
 
         # Convert tables
         sql_tables = []
@@ -244,7 +248,7 @@ class SqlStorage(Storage):
                 del self.__tables[name]
 
             # Add table to tables
-            sql_table = self.__metadata.tables[name]
+            sql_table = self.__get_sql_table(name)
             sql_tables.append(sql_table)
 
         # Drop tables, update metadata
@@ -282,8 +286,7 @@ class SqlStorage(Storage):
 
         # Prepare
         schema = Schema()
-        sql_name = self.read_table_name(name)
-        sql_table = self.__metadata[sql_name]
+        sql_table = self.__get_sql_table(name)
 
         # Fields
         for column in sql_table.columns:
@@ -308,8 +311,9 @@ class SqlStorage(Storage):
                     foreign_fields = []
                     for element in constraint.elements:
                         own_fields.append(element.parent.name)
-                        if element.column.table.name != sql_name:
-                            resource = self.restore_bucket(element.column.table.name)
+                        # TODO: review this comparision
+                        if element.column.table.name != sql_table.name:
+                            resource = self.read_table_name(element.column.table.name)
                         foreign_fields.append(element.column.name)
                     if len(own_fields) == len(foreign_fields) == 1:
                         own_fields = own_fields.pop()
@@ -470,44 +474,26 @@ class SqlStorage(Storage):
         note = f'Field type "{name}" is not supported'
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
-    def write_row_stream(self, bucket, rows, update_keys=None, buffer_size=1000):
-        """Write to bucket
-
-        # Arguments
-            keyed (bool):
-                accept keyed rows
-            as_generator (bool):
-                returns generator to provide writing control to the client
-            update_keys (str[]):
-                update instead of inserting if key values match existent rows
-            buffer_size (int=1000):
-                maximum number of rows to try and write to the db in one batch
-            use_bloom_filter (bool=True):
-                should we use a bloom filter to optimize DB update performance
-                (in exchange for some setup time)
-
-        """
-
-        # Get table and description
-        table = self.__get_table(bucket)
-
-        # Write rows to table
-        convert_row = partial(self.__mapper.convert_row, schema=table.schema)
-        print(convert_row)
-        #  writer = Writer(
-        #  table,
-        #  table.schema,
-        #  # Only PostgreSQL supports "returning" so we don't use autoincrement for all
-        #  autoincrement=autoincrement if self.__dialect in ["postgresql"] else None,
-        #  update_keys=update_keys,
-        #  convert_row=convert_row,
-        #  buffer_size=buffer_size,
-        #  )
-        #  with self.__connection.begin():
-        #  gen = writer.write(rows, keyed=keyed)
-        #  collections.deque(gen, maxlen=0)
+    # TODO: for now, it's oversimplified
+    def write_row_stream(self, name, row_stream):
+        buffer = []
+        buffer_size = 1000
+        sql_table = self.__get_sql_table(name)
+        for row in row_stream:
+            buffer.append(row)
+            if len(buffer) > buffer_size:
+                self.__connection.execute(sql_table.insert().values(buffer))
+                buffer = []
+        if len(buffer):
+            self.__connection.execute(sql_table.insert().values(buffer))
 
     # Private
+
+    def __get_sql_table(self, name):
+        sql_name = self.read_table_name(name)
+        if self.__namespace:
+            sql_name = ".".join((self.__namespace, sql_name))
+        return self.__metadata.tables[sql_name]
 
     def __add_regex_support(self):
         # It will fail silently if this function already exists

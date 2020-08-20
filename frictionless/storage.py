@@ -26,6 +26,11 @@ class StorageTable:
         self.__name = name
         self.__schema = schema
 
+    def __repr__(self):
+        template = "StorageTable <{name}>"
+        text = template.format(name=self.__name)
+        return text
+
     @property
     def name(self):
         return self.__name
