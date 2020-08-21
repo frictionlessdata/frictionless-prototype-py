@@ -200,96 +200,36 @@ class SqlStorage(Storage):
         text = template.format(engine=self.__connection.engine)
         return text
 
-    # Definition
+    # Read
 
-    def add_table(self, *tables, force=False):
-
-        # Check existent
-        for table in tables:
-            if self.has_table(table.name):
-                if not force:
-                    note = f'Table "{table.name}" already exists'
-                    raise exceptions.FrictionlessException(errors.StorageError(note=note))
-                self.remove_table(table.name)
-
-        # Convert tables
-        sql_tables = []
-        for table in tables:
-            sql_table = self.write_table(table)
-            sql_tables.append(sql_table)
-
-        # Create tables
-        try:
-            self.__metadata.create_all(tables=sql_tables)
-            for table in tables:
-                self.__tables[table.name] = table
-        except sa.exc.ProgrammingError as exception:
-            if "there is no unique constraint matching given keys" in str(exception):
-                note = "Foreign keys can only reference primary key or unique fields\n%s"
-                error = errors.StorageError(note=note % exception)
-                raise exceptions.FrictionlessException(error) from exception
-
-    def remove_table(self, *names, ignore=False):
-
-        # Iterate
-        sql_tables = []
-        for name in names:
-
-            # Check existent
-            if not self.has_table(name):
-                if not ignore:
-                    note = f'Table "{name}" does not exist'
-                    raise exceptions.FrictionlessException(errors.StorageError(note=note))
-                return
-
-            # Remove from tables
-            if name in self.__tables:
-                del self.__tables[name]
-
-            # Add table to tables
-            sql_table = self.__get_sql_table(name)
-            sql_tables.append(sql_table)
-
-        # Drop tables, update metadata
-        self.__metadata.drop_all(tables=sql_tables)
-        self.__metadata.clear()
-        self.__metadata.reflect()
-
-    def get_table(self, name):
+    def read_table(self, name):
         table = self.__tables.get(name)
         if table is None:
-            table = self.read_table(name)
+            sql_table = self.__get_sql_table(name)
+            table = self.read_table_convert_table(name, sql_table)
         return table
 
-    def has_table(self, name):
-        return name in self.list_table_names()
-
-    def list_tables(self):
+    def read_table_list(self):
         tables = []
-        for name in self.list_table_names():
-            table = self.get_table(name)
+        for name in self.read_table_names():
+            table = self.read_table(name)
             tables.append(table)
-        return table
+        return tables
 
-    def list_table_names(self):
+    def read_table_names(self):
         names = []
-        for table in self.__metadata.sorted_tables:
-            name = self.read_table_name(table.name)
+        for sql_table in self.__metadata.sorted_tables:
+            name = self.read_table_convert_name(sql_table.name)
             if name is not None:
                 names.append(name)
         return names
 
-    # Read
-
-    def read_table(self, name):
-
-        # Prepare
+    def read_table_convert_table(self, name, sql_table):
         schema = Schema()
-        sql_table = self.__get_sql_table(name)
 
         # Fields
         for column in sql_table.columns:
-            field_type = self.read_field_type(column.type)
+            field_type = self.read_table_convert_field_type(column.type)
             field = Field(name=column.name, type=field_type)
             if not column.nullable:
                 field.required = True
@@ -312,7 +252,8 @@ class SqlStorage(Storage):
                         own_fields.append(element.parent.name)
                         # TODO: review this comparision
                         if element.column.table.name != sql_table.name:
-                            resource = self.read_table_name(element.column.table.name)
+                            res_name = element.column.table.name
+                            resource = self.read_table_convert_name(res_name)
                         foreign_fields.append(element.column.name)
                     if len(own_fields) == len(foreign_fields) == 1:
                         own_fields = own_fields.pop()
@@ -324,12 +265,12 @@ class SqlStorage(Storage):
         table = StorageTable(name, schema=schema)
         return table
 
-    def read_table_name(self, name):
+    def read_table_convert_name(self, name):
         if name.startswith(self.__prefix):
             return name.replace(self.__prefix, "", 1)
         return None
 
-    def read_field_type(self, name):
+    def read_table_convert_field_type(self, name):
 
         # All dialects
         mapping = {
@@ -357,7 +298,7 @@ class SqlStorage(Storage):
         note = f'Column type "{name}" is not supported'
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
-    def read_data_stream(self, name):
+    def read_table_data_stream(self, name):
         sql_table = self.__get_sql_table(name)
 
         # Open and close transaction
@@ -371,19 +312,72 @@ class SqlStorage(Storage):
 
     # Write
 
-    def write_table(self, table):
+    def write_table(self, *tables, force=False):
+
+        # Check existent
+        for table in tables:
+            if table.name in self.read_table_names():
+                if not force:
+                    note = f'Table "{table.name}" already exists'
+                    raise exceptions.FrictionlessException(errors.StorageError(note=note))
+                self.remove_table(table.name)
+
+        # Convert tables
+        sql_tables = []
+        for table in tables:
+            sql_table = self.write_table_convert_table(table)
+            sql_tables.append(sql_table)
+
+        # Create tables
+        try:
+            self.__metadata.create_all(tables=sql_tables)
+            for table in tables:
+                self.__tables[table.name] = table
+        except sa.exc.ProgrammingError as exception:
+            if "there is no unique constraint matching given keys" in str(exception):
+                note = "Foreign keys can only reference primary key or unique fields\n%s"
+                error = errors.StorageError(note=note % exception)
+                raise exceptions.FrictionlessException(error) from exception
+
+    def write_table_remove(self, *names, ignore=False):
+
+        # Iterate
+        sql_tables = []
+        for name in names:
+
+            # Check existent
+            if name not in self.read_table_names():
+                if not ignore:
+                    note = f'Table "{name}" does not exist'
+                    raise exceptions.FrictionlessException(errors.StorageError(note=note))
+                return
+
+            # Remove from tables
+            if name in self.__tables:
+                del self.__tables[name]
+
+            # Add table to tables
+            sql_table = self.__get_sql_table(name)
+            sql_tables.append(sql_table)
+
+        # Drop tables, update metadata
+        self.__metadata.drop_all(tables=sql_tables)
+        self.__metadata.clear()
+        self.__metadata.reflect()
+
+    def write_table_convert_table(self, table):
 
         # Prepare
         columns = []
         constraints = []
         column_mapping = {}
-        name = self.write_table_name(table.name)
+        name = self.write_table_convert_name(table.name)
 
         # Fields
         for field in table.schema.fields:
             checks = []
             nullable = not field.required
-            column_type = self.write_field_type(field.type)
+            column_type = self.write_table_convert_field_type(field.type)
             unique = field.constraints.get("unique", False)
             for name, value in field.constraints.items():
                 if name == "minLength":
@@ -420,7 +414,7 @@ class SqlStorage(Storage):
                 resource = fk["reference"]["resource"]
                 foreign_fields = fk["reference"]["fields"]
                 if resource != "":
-                    table_name = self.write_table_name(resource)
+                    table_name = self.write_table_convert_name(resource)
                 composer = lambda field: ".".join([table_name, field])
                 foreign_fields = list(map(composer, foreign_fields))
                 constraint = sa.ForeignKeyConstraint(fields, foreign_fields)
@@ -430,10 +424,10 @@ class SqlStorage(Storage):
         sql_table = sa.Table(name, self.__metadata, *(columns + constraints))
         return sql_table
 
-    def write_table_name(self, name):
+    def write_table_convert_name(self, name):
         return self.__prefix + name
 
-    def write_field_type(self, name):
+    def write_table_convert_field_type(self, name):
 
         # Default dialect
         mapping = {
@@ -473,7 +467,7 @@ class SqlStorage(Storage):
         note = f'Field type "{name}" is not supported'
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
-    def write_row_stream(self, name, row_stream):
+    def write_table_row_stream(self, name, row_stream):
         buffer = []
         buffer_size = 1000
         sql_table = self.__get_sql_table(name)
@@ -489,7 +483,7 @@ class SqlStorage(Storage):
     # Private
 
     def __get_sql_table(self, name):
-        sql_name = self.read_table_name(name)
+        sql_name = self.read_table_convert_name(name)
         if self.__namespace:
             sql_name = ".".join((self.__namespace, sql_name))
         return self.__metadata.tables[sql_name]
