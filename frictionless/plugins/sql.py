@@ -179,8 +179,6 @@ class SqlStorage(Storage):
 
     """
 
-    # Public
-
     def __init__(self, *, engine, prefix="", namespace=None):
 
         # Set attributes
@@ -350,13 +348,13 @@ class SqlStorage(Storage):
                 if not ignore:
                     note = f'Table "{name}" does not exist'
                     raise exceptions.FrictionlessException(errors.StorageError(note=note))
-                return
+                continue
 
             # Remove from tables
             if name in self.__tables:
                 del self.__tables[name]
 
-            # Add table to tables
+            # Add table for removal
             sql_table = self.__get_sql_table(name)
             sql_tables.append(sql_table)
 
