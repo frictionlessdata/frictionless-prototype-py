@@ -195,8 +195,7 @@ class Metadata(helpers.ControlledDict):
             raise exceptions.FrictionlessException(self.__Error(note=note)) from exception
 
     def metadata_process(self):
-        """Helper method called on any metadata change
-        """
+        """Helper method called on any metadata change"""
         pass
 
     def metadata_validate(self, profile=None):

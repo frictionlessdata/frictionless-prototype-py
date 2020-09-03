@@ -143,8 +143,7 @@ class HtmlDialect(Dialect):
     # Expand
 
     def expand(self):
-        """Expand metadata
-        """
+        """Expand metadata"""
         super().expand()
         self.setdefault("selector", self.selector)
 

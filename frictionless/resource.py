@@ -343,8 +343,7 @@ class Resource(Metadata):
     # Expand
 
     def expand(self):
-        """Expand metadata
-        """
+        """Expand metadata"""
         self.setdefault("profile", config.DEFAULT_RESOURCE_PROFILE)
         if isinstance(self.get("dialect"), Dialect):
             self.dialect.expand()

@@ -128,7 +128,7 @@ class Package(Metadata):
         return [resource.name for resource in self.resources]
 
     def add_resource(self, descriptor):
-        """ Add new resource to package.
+        """Add new resource to package.
 
         Parameters:
             descriptor (dict): resource descriptor

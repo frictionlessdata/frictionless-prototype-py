@@ -100,7 +100,7 @@ class Schema(Metadata):
         return [field.name for field in self.fields]
 
     def add_field(self, descriptor):
-        """ Add new field to schema.
+        """Add new field to schema.
 
         The schema descriptor will be validated with newly added field descriptor.
 
@@ -162,8 +162,7 @@ class Schema(Metadata):
     # Expand
 
     def expand(self):
-        """Expand the schema
-        """
+        """Expand the schema"""
         self.setdefault("fields", [])
         self.setdefault("missingValues", config.DEFAULT_MISSING_VALUES)
         for field in self.fields:

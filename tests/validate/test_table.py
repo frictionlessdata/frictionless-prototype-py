@@ -856,7 +856,10 @@ def test_validate_primary_key_error():
 
 
 def test_validate_primary_key_and_unique_error():
-    report = validate("data/unique-field.csv", schema="data/unique-field.json",)
+    report = validate(
+        "data/unique-field.csv",
+        schema="data/unique-field.json",
+    )
     assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
         [10, 1, "unique-error"],
         [10, None, "primary-key-error"],

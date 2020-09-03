@@ -36,7 +36,10 @@ def test_field_defaults():
 def test_field_read_cell():
     field = Field(DESCRIPTOR)
     assert field.read_cell("1") == (1, None)
-    assert field.read_cell("string") == (None, {"type": 'type is "integer/default"'},)
+    assert field.read_cell("string") == (
+        None,
+        {"type": 'type is "integer/default"'},
+    )
     assert field.read_cell("-") == (None, {"required": 'constraint "required" is "True"'})
 
 

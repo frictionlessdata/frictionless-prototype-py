@@ -158,8 +158,7 @@ class Query(Metadata):
     # Expand
 
     def expand(self):
-        """Expand metadata
-        """
+        """Expand metadata"""
         pass
 
     # Import/Export

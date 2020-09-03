@@ -16,6 +16,5 @@ class Server:
         raise NotImplementedError()
 
     def stop(self):
-        """Stop the server
-        """
+        """Stop the server"""
         raise NotImplementedError()

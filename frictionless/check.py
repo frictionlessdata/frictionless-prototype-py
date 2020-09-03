@@ -41,8 +41,7 @@ class Check(Metadata):
         self.__table = table
 
     def prepare(self):
-        """Called before validation
-        """
+        """Called before validation"""
         pass
 
     def validate_task(self):

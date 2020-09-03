@@ -185,8 +185,7 @@ class Field(Metadata):
     # Expand
 
     def expand(self):
-        """Expand metadata
-        """
+        """Expand metadata"""
         self.setdefault("name", "field")
         self.setdefault("type", "any")
         self.setdefault("format", "default")

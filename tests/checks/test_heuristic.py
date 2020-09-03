@@ -78,7 +78,10 @@ def test_validate_deviated_value_non_existent_field():
         ["row", "name"],
         [2, "Alex"],
     ]
-    report = validate(source, extra_checks=[("deviated-value", {"fieldName": "bad"})],)
+    report = validate(
+        source,
+        extra_checks=[("deviated-value", {"fieldName": "bad"})],
+    )
     assert report.flatten(["code", "note"]) == [
         ["task-error", 'deviated value check requires field "bad" to exist'],
     ]
@@ -90,7 +93,8 @@ def test_validate_deviated_value_incorrect_average():
         [2, "Alex"],
     ]
     report = validate(
-        source, extra_checks=[("deviated-value", {"fieldName": "row", "average": "bad"})],
+        source,
+        extra_checks=[("deviated-value", {"fieldName": "row", "average": "bad"})],
     )
     assert report.flatten(["code", "note"]) == [
         [
@@ -109,7 +113,10 @@ def test_validate_truncated_values():
         ["a" * 255, 32767],
         ["good", 2147483647],
     ]
-    report = validate(source, extra_checks=["truncated-value"],)
+    report = validate(
+        source,
+        extra_checks=["truncated-value"],
+    )
     assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
         [2, 1, "truncated-value"],
         [2, 2, "truncated-value"],
@@ -123,5 +130,8 @@ def test_validate_truncated_values_close_to_errors():
         ["a" * 254, 32766],
         ["good", 2147483646],
     ]
-    report = validate(source, extra_checks=["truncated-value"],)
+    report = validate(
+        source,
+        extra_checks=["truncated-value"],
+    )
     assert report.flatten(["rowPosition", "fieldPosition", "code"]) == []
