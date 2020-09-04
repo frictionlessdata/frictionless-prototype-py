@@ -264,7 +264,9 @@ class Package(Metadata):
                     if not helpers.is_safe_path(resource.path):
                         continue
                     zip.write(resource.source, resource.path)
-                descriptor = json.dumps(descriptor, indent=2, ensure_ascii=False, cls=encoder_class)
+                descriptor = json.dumps(
+                    descriptor, indent=2, ensure_ascii=False, cls=encoder_class
+                )
                 zip.writestr("datapackage.json", descriptor)
         except Exception as exception:
             error = errors.PackageError(note=str(exception))

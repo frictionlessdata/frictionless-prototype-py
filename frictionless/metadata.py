@@ -117,10 +117,14 @@ class Metadata(helpers.ControlledDict):
             FrictionlessException: on any error
         """
         if not target:
-            return json.dumps(self.to_dict(), indent=2, ensure_ascii=False, cls=encoder_class)
+            return json.dumps(
+                self.to_dict(), indent=2, ensure_ascii=False, cls=encoder_class
+            )
         try:
             with tempfile.NamedTemporaryFile("wt", delete=False) as file:
-                json.dump(self.to_dict(), file, indent=2, ensure_ascii=False, cls=encoder_class)
+                json.dump(
+                    self.to_dict(), file, indent=2, ensure_ascii=False, cls=encoder_class
+                )
             helpers.move_file(file.name, target)
         except Exception as exc:
             raise exceptions.FrictionlessException(self.__Error(note=str(exc))) from exc
