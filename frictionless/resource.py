@@ -605,7 +605,7 @@ class Resource(Metadata):
         return File(**options)
 
     # NOTE: support multipart
-    def to_zip(self, target):
+    def to_zip(self, target, encoder_class=None):
         """Save resource to a zip
 
         Parameters:
@@ -627,7 +627,7 @@ class Resource(Metadata):
                     if not helpers.is_safe_path(resource.path):
                         continue
                     zip.write(resource.source, resource.path)
-                descriptor = json.dumps(descriptor, indent=2, ensure_ascii=False)
+                descriptor = json.dumps(descriptor, indent=2, ensure_ascii=False, cls=encoder_class)
                 zip.writestr("dataresource.json", descriptor)
         except (IOError, zipfile.BadZipfile, zipfile.LargeZipFile) as exception:
             error = errors.ResourceError(note=str(exception))
