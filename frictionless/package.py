@@ -242,7 +242,7 @@ class Package(Metadata):
         return result
 
     # NOTE: support multipart
-    def to_zip(self, target):
+    def to_zip(self, target, encoder_class=None):
         """Save package to a zip
 
         Parameters:
@@ -264,7 +264,9 @@ class Package(Metadata):
                     if not helpers.is_safe_path(resource.path):
                         continue
                     zip.write(resource.source, resource.path)
-                descriptor = json.dumps(descriptor, indent=2, ensure_ascii=False)
+                descriptor = json.dumps(
+                    descriptor, indent=2, ensure_ascii=False, cls=encoder_class
+                )
                 zip.writestr("datapackage.json", descriptor)
         except Exception as exception:
             error = errors.PackageError(note=str(exception))
