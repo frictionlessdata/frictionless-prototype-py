@@ -215,8 +215,7 @@ class XlsParser(Parser):
                     for xlo, xhi, ylo, yhi in sheet.merged_cells:
                         if x in range(xlo, xhi) and y in range(ylo, yhi):
                             value = type_value(
-                                sheet.cell(xlo, ylo).ctype,
-                                sheet.cell_value(xlo, ylo),
+                                sheet.cell(xlo, ylo).ctype, sheet.cell_value(xlo, ylo),
                             )
                 cells.append(value)
             yield cells

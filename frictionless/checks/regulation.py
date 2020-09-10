@@ -93,9 +93,7 @@ class SequentialValueCheck(Check):
             except Exception:
                 self.__exited = True
                 yield errors.SequentialValueError.from_row(
-                    row,
-                    note="the value is not sequential",
-                    field_name=self.__field_name,
+                    row, note="the value is not sequential", field_name=self.__field_name,
                 )
 
     # Metadata
@@ -139,8 +137,7 @@ class RowConstraintCheck(Check):
             assert simpleeval.simple_eval(self.__constraint, names=row)
         except Exception:
             yield errors.RowConstraintError.from_row(
-                row,
-                note='the row constraint to conform is "%s"' % self.__constraint,
+                row, note='the row constraint to conform is "%s"' % self.__constraint,
             )
 
     # Metadata

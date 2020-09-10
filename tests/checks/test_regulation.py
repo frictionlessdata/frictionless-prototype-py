@@ -58,10 +58,7 @@ def test_validate_blacklisted_value_many_rules_with_non_existent_field():
         source,
         extra_checks=[
             ("blacklisted-value", {"fieldName": "row", "blacklist": [10]}),
-            (
-                "blacklisted-value",
-                {"fieldName": "bad", "blacklist": ["mistake"]},
-            ),
+            ("blacklisted-value", {"fieldName": "bad", "blacklist": ["mistake"]},),
         ],
     )
     assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
@@ -127,8 +124,7 @@ def test_validate_row_constraint():
         [6],
     ]
     report = validate(
-        source,
-        extra_checks=[("row-constraint", {"constraint": "salary == bonus * 5"})],
+        source, extra_checks=[("row-constraint", {"constraint": "salary == bonus * 5"})],
     )
     assert report.flatten(["rowPosition", "fieldPosition", "code"]) == [
         [4, None, "row-constraint"],
