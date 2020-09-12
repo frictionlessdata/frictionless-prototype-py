@@ -41,7 +41,7 @@ def program_describe(source, *, source_type, json, **options):
     try:
         metadata = describe(source, source_type=source_type, **options)
     except Exception as exception:
-        click.secho(str(exception))
+        click.secho(str(exception), err=True)
         exit(1)
     if json:
         return click.secho(simplejson.dumps(metadata, indent=2, ensure_ascii=False))

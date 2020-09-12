@@ -54,7 +54,7 @@ def program_validate(source, *, source_type, json, **options):
     try:
         report = validate(source, source_type=source_type, **options)
     except Exception as exception:
-        click.secho(str(exception))
+        click.secho(str(exception), err=True)
         exit(1)
 
     # Json

@@ -43,7 +43,7 @@ def program_extract(source, *, source_type, json, **options):
     try:
         data = extract(source, source_type=source_type, process=process, **options)
     except Exception as exception:
-        click.secho(str(exception))
+        click.secho(str(exception), err=True)
         exit(1)
     if data:
         if json:
