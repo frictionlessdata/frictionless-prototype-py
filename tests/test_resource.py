@@ -377,6 +377,7 @@ def test_resource_schema_source_data():
     ]
 
 
+@pytest.mark.slow
 def test_resource_schema_source_remote():
     descriptor = {
         "name": "name",

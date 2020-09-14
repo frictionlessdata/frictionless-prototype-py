@@ -154,14 +154,12 @@ class Header(list):
     # Import/Export
 
     def to_dict(self):
-        """Convert to a dict (field name -> header cell)
-        """
+        """Convert to a dict (field name -> header cell)"""
         result = {}
         for field, header in zip(self.__schema.fields, self):
             result[field.name] = header
         return result
 
     def to_list(self):
-        """Convert to a list
-        """
+        """Convert to a list"""
         return list(self)

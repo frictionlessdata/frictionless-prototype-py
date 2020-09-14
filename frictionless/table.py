@@ -389,8 +389,7 @@ class Table:
             raise
 
     def close(self):
-        """Close the table as "filelike.close" does
-        """
+        """Close the table as "filelike.close" does"""
         if self.__parser:
             self.__parser.close()
             self.__parser = None

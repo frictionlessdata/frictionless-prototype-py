@@ -137,8 +137,7 @@ class RemoteControl(Control):
     # Expand
 
     def expand(self):
-        """Expand metadata
-        """
+        """Expand metadata"""
         super().expand()
         self.setdefault("httpPreload", self.http_preload)
         self.setdefault("httpTimeout", self.http_timeout)

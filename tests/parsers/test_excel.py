@@ -140,6 +140,7 @@ def test_table_xlsx_preserve_formatting_number_multicode():
         assert table.read_data() == [["4.5"], ["-9.032"], ["15.8"]]
 
 
+@pytest.mark.slow
 def test_table_xlsx_workbook_cache():
     source = BASE_URL % "data/special/sheets.xlsx"
     for sheet in ["Sheet1", "Sheet2", "Sheet3"]:

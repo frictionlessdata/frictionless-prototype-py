@@ -250,8 +250,7 @@ class File(Metadata):
     # Expand
 
     def expand(self):
-        """Expand metadata
-        """
+        """Expand metadata"""
         self.setdefault("scheme", self.scheme)
         self.setdefault("format", self.format)
         self.setdefault("hashing", self.hashing)
@@ -262,8 +261,7 @@ class File(Metadata):
     # Open/close
 
     def open(self):
-        """Open the file as "io.open" does
-        """
+        """Open the file as "io.open" does"""
         self.close()
         try:
             self.stats = {"hash": "", "bytes": 0, "rows": 0}
@@ -276,8 +274,7 @@ class File(Metadata):
             raise
 
     def close(self):
-        """Close the file as "filelike.close" does
-        """
+        """Close the file as "filelike.close" does"""
         if self.__loader:
             self.__loader.close()
         self.__loader = None

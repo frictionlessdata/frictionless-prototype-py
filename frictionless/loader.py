@@ -72,8 +72,7 @@ class Loader:
     # Open/Close
 
     def open(self):
-        """Open the loader as "io.open" does
-        """
+        """Open the loader as "io.open" does"""
         self.close()
         if self.__file.control.metadata_errors:
             error = self.__file.control.metadata_errors[0]
@@ -86,8 +85,7 @@ class Loader:
             raise
 
     def close(self):
-        """Close the loader as "filelike.close" does
-        """
+        """Close the loader as "filelike.close" does"""
         if self.__byte_stream:
             self.__byte_stream.close()
         self.__byte_stream = None

@@ -166,8 +166,7 @@ class OdsDialect(Dialect):
     # Expand
 
     def expand(self):
-        """Expand metadata
-        """
+        """Expand metadata"""
         super().expand()
         self.setdefault("sheet", self.sheet)
 

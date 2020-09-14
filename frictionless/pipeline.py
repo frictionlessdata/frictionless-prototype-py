@@ -74,8 +74,7 @@ class Pipeline(Metadata):
 
     # NOTE: rebase on the plugin system
     def run(self):
-        """Run the pipeline
-        """
+        """Run the pipeline"""
 
         # Check type
         if self.type != "package":

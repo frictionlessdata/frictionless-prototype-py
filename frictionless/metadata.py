@@ -107,7 +107,7 @@ class Metadata(helpers.ControlledDict):
         return self.copy()
 
     # NOTE: improve this code
-    def to_json(self, target=None):
+    def to_json(self, target=None, encoder_class=None):
         """Save metadata as a json
 
         Parameters:
@@ -117,10 +117,14 @@ class Metadata(helpers.ControlledDict):
             FrictionlessException: on any error
         """
         if not target:
-            return json.dumps(self.to_dict(), indent=2, ensure_ascii=False)
+            return json.dumps(
+                self.to_dict(), indent=2, ensure_ascii=False, cls=encoder_class
+            )
         try:
             with tempfile.NamedTemporaryFile("wt", delete=False) as file:
-                json.dump(self.to_dict(), file, indent=2, ensure_ascii=False)
+                json.dump(
+                    self.to_dict(), file, indent=2, ensure_ascii=False, cls=encoder_class
+                )
             helpers.move_file(file.name, target)
         except Exception as exc:
             raise exceptions.FrictionlessException(self.__Error(note=str(exc))) from exc
@@ -195,8 +199,7 @@ class Metadata(helpers.ControlledDict):
             raise exceptions.FrictionlessException(self.__Error(note=note)) from exception
 
     def metadata_process(self):
-        """Helper method called on any metadata change
-        """
+        """Helper method called on any metadata change"""
         pass
 
     def metadata_validate(self, profile=None):

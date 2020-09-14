@@ -34,7 +34,9 @@ def validate(source, source_type=None, **options):
     # NOTE: move to helpers
     if not source_type:
         if source and isinstance(source, list) and isinstance(source[0], str):
-            package = Package()
+            basepath = options.pop("basepath", None)
+            trusted = options.pop("trusted", False)
+            package = Package(basepath=basepath, trusted=trusted)
             package.infer(source)
             source = package
             source_type = "package"

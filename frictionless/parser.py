@@ -62,8 +62,7 @@ class Parser:
     # Open/Close
 
     def open(self):
-        """Open the parser as "io.open" does
-        """
+        """Open the parser as "io.open" does"""
         self.close()
         if self.__file.dialect.metadata_errors:
             error = self.__file.dialect.metadata_errors[0]
@@ -77,8 +76,7 @@ class Parser:
             raise
 
     def close(self):
-        """Close the parser as "filelike.close" does
-        """
+        """Close the parser as "filelike.close" does"""
         if self.__loader:
             self.__loader.close()
 

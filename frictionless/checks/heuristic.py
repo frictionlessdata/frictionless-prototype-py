@@ -17,9 +17,7 @@ class DuplicateRowCheck(Check):
 
     """
 
-    possible_Errors = [  # type: ignore
-        errors.DuplicateRowError
-    ]
+    possible_Errors = [errors.DuplicateRowError]  # type: ignore
 
     def prepare(self):
         self.__memory = {}
@@ -60,9 +58,7 @@ class DeviatedValueCheck(Check):
 
     """
 
-    possible_Errors = [  # type: ignore
-        errors.DeviatedValueError
-    ]
+    possible_Errors = [errors.DeviatedValueError]  # type: ignore
 
     def prepare(self):
         self.__exited = False
@@ -142,9 +138,7 @@ class TruncatedValueCheck(Check):
 
     """
 
-    possible_Errors = [  # type: ignore
-        errors.TruncatedValueError
-    ]
+    possible_Errors = [errors.TruncatedValueError]  # type: ignore
 
     def validate_row(self, row):
         for field_name, cell in row.items():

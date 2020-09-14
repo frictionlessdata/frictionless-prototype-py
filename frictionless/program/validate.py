@@ -36,6 +36,8 @@ from .main import program
 @click.option("--limit-errors", type=int, help="Limit errors")
 @click.option("--limit-memory", type=int, help="Limit memory")
 # Package/Resource
+@click.option("--basepath", type=str, help="Package basepath")
+@click.option("--trusted", is_flag=True, help="Allow unsafe paths")
 @click.option("--noinfer", type=bool, help="Validate metadata as it is")
 def program_validate(source, *, source_type, json, **options):
     """Validate data
@@ -54,7 +56,7 @@ def program_validate(source, *, source_type, json, **options):
     try:
         report = validate(source, source_type=source_type, **options)
     except Exception as exception:
-        click.secho(str(exception))
+        click.secho(str(exception), err=True)
         exit(1)
 
     # Json

@@ -21,9 +21,7 @@ class BlacklistedValueCheck(Check):
 
     """
 
-    possible_Errors = [  # type: ignore
-        errors.BlacklistedValueError
-    ]
+    possible_Errors = [errors.BlacklistedValueError]  # type: ignore
 
     def prepare(self):
         self.__field_name = self["fieldName"]
@@ -71,9 +69,7 @@ class SequentialValueCheck(Check):
 
     """
 
-    possible_Errors = [  # type: ignore
-        errors.SequentialValueError
-    ]
+    possible_Errors = [errors.SequentialValueError]  # type: ignore
 
     def prepare(self):
         self.__cursor = None
@@ -97,7 +93,9 @@ class SequentialValueCheck(Check):
             except Exception:
                 self.__exited = True
                 yield errors.SequentialValueError.from_row(
-                    row, note="the value is not sequential", field_name=self.__field_name,
+                    row,
+                    note="the value is not sequential",
+                    field_name=self.__field_name,
                 )
 
     # Metadata
@@ -127,9 +125,7 @@ class RowConstraintCheck(Check):
 
     """
 
-    possible_Errors = [  # type: ignore
-        errors.RowConstraintError
-    ]
+    possible_Errors = [errors.RowConstraintError]  # type: ignore
 
     def prepare(self):
         self.__constraint = self["constraint"]
@@ -143,7 +139,8 @@ class RowConstraintCheck(Check):
             assert simpleeval.simple_eval(self.__constraint, names=row)
         except Exception:
             yield errors.RowConstraintError.from_row(
-                row, note='the row constraint to conform is "%s"' % self.__constraint,
+                row,
+                note='the row constraint to conform is "%s"' % self.__constraint,
             )
 
     # Metadata

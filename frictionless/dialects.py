@@ -55,8 +55,7 @@ class Dialect(Metadata):
     # Expand
 
     def expand(self):
-        """Expand metadata
-        """
+        """Expand metadata"""
         self.setdefault("header", self.header)
         self.setdefault("headerRows", self.header_rows)
         self.setdefault("headerJoin", self.header_join)
@@ -218,8 +217,7 @@ class CsvDialect(Dialect):
     # Expand
 
     def expand(self):
-        """Expand metadata
-        """
+        """Expand metadata"""
         super().expand()
         self.setdefault("delimiter", self.delimiter)
         self.setdefault("lineTerminator", self.line_terminator)
@@ -231,8 +229,7 @@ class CsvDialect(Dialect):
     # Import/Export
 
     def to_python(self):
-        """Conver to Python's `csv.Dialect`
-        """
+        """Conver to Python's `csv.Dialect`"""
         dialect = csv.excel()
         dialect.delimiter = self.delimiter
         dialect.doublequote = self.double_quote if self.escape_char else True
@@ -349,8 +346,7 @@ class ExcelDialect(Dialect):
     # Expand
 
     def expand(self):
-        """Expand metadata
-        """
+        """Expand metadata"""
         super().expand()
         self.setdefault("sheet", self.sheet)
         self.setdefault("fillMergedCells", self.fill_merged_cells)
@@ -438,8 +434,7 @@ class InlineDialect(Dialect):
     # Expand
 
     def expand(self):
-        """Expand metadata
-        """
+        """Expand metadata"""
         self.setdefault("keyed", self.keyed)
 
 
@@ -505,8 +500,7 @@ class JsonDialect(Dialect):
     # Expand
 
     def expand(self):
-        """Expand metadata
-        """
+        """Expand metadata"""
         super().expand()
         self.setdefault("keyed", self.keyed)
 

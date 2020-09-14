@@ -24,6 +24,9 @@ from .main import program
 @click.option("--infer-sample", type=int, help="Infer sample")
 @click.option("--infer-confidence", type=float, help="Infer confidence")
 @click.option("--infer-missing-values", type=str, multiple=True, help="Infer missing")
+# Package/Resource
+@click.option("--basepath", type=str, help="Package basepath")
+@click.option("--trusted", is_flag=True, help="Allow unsafe paths")
 def program_describe(source, *, source_type, json, **options):
     """Describe data
 
@@ -41,7 +44,7 @@ def program_describe(source, *, source_type, json, **options):
     try:
         metadata = describe(source, source_type=source_type, **options)
     except Exception as exception:
-        click.secho(str(exception))
+        click.secho(str(exception), err=True)
         exit(1)
     if json:
         return click.secho(simplejson.dumps(metadata, indent=2, ensure_ascii=False))

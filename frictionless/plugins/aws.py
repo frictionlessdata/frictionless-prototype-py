@@ -94,8 +94,7 @@ class S3Control(Control):
     # Expand
 
     def expand(self):
-        """Expand metadata
-        """
+        """Expand metadata"""
         self.setdefault("endpointUrl", self.endpoint_url)
 
     # Metadata

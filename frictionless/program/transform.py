@@ -16,5 +16,5 @@ def program_transform(source):
     try:
         transform(source)
     except Exception as exception:
-        click.secho(str(exception))
+        click.secho(str(exception), err=True)
         exit(1)

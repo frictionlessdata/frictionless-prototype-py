@@ -102,8 +102,7 @@ class Report(Metadata):
     # Expand
 
     def expand(self):
-        """Expand metadata
-        """
+        """Expand metadata"""
         for table in self.tables:
             table.expand()
 
@@ -383,8 +382,7 @@ class ReportTable(Metadata):
     # Expand
 
     def expand(self):
-        """Expand metadata
-        """
+        """Expand metadata"""
         self.dialect.expand()
         if self.schema is not None:
             self.schema.expand()
