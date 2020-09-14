@@ -33,8 +33,7 @@ class CkanPlugin(Plugin):
 
 # TODO: move dependencies from the top to here
 class CkanStorage(Storage):
-    """Ckan storage implementation
-    """
+    """Ckan storage implementation"""
 
     def __init__(self, base_url, dataset_id=None, api_key=None):
         base_path = "/api/3/action"
@@ -251,8 +250,7 @@ class CkanStorage(Storage):
     # Private
 
     def __get_resource_ids_for_dataset(self, dataset_id):
-        """Get a list of resource ids for the passed dataset id.
-        """
+        """Get a list of resource ids for the passed dataset id."""
         package_show_url = "{}/package_show".format(self.__base_endpoint)
         response = self.__make_ckan_request(package_show_url, params=dict(id=dataset_id))
         dataset = response["result"]

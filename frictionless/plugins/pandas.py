@@ -33,8 +33,7 @@ class PandasPlugin(Plugin):
 
 # TODO: move dependencies from the top to here
 class PandasStorage(Storage):
-    """Pandas storage implementation
-    """
+    """Pandas storage implementation"""
 
     def __init__(self, dataframes=None):
         self.__dataframes = dataframes or collections.OrderedDict()

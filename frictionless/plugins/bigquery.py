@@ -34,8 +34,7 @@ class BigqueryPlugin(Plugin):
 
 # TODO: move dependencies from the top to here
 class BigqueryStorage(Storage):
-    """BigQuery storage implementation
-    """
+    """BigQuery storage implementation"""
 
     def __init__(self, service, project, dataset, prefix=""):
         self.__service = service
@@ -83,7 +82,9 @@ class BigqueryStorage(Storage):
             response = (
                 self.__service.tables()
                 .get(
-                    projectId=self.__project, datasetId=self.__dataset, tableId=table_id,
+                    projectId=self.__project,
+                    datasetId=self.__dataset,
+                    tableId=table_id,
                 )
                 .execute()
             )
@@ -229,8 +230,7 @@ class BigqueryStorage(Storage):
         return (converted_descriptor, fallbacks)
 
     def write_table_convert_field_type(self, type):
-        """Convert type to BigQuery
-        """
+        """Convert type to BigQuery"""
 
         # Mapping
         mapping = {

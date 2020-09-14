@@ -31,8 +31,7 @@ class SpssPlugin(Plugin):
 
 # TODO: move dependencies from the top to here
 class SpssStorage(Storage):
-    """SPSS storage implementation
-    """
+    """SPSS storage implementation"""
 
     def __init__(self, *, basepath):
         self.__tables = {}

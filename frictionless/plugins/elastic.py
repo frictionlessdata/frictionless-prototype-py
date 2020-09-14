@@ -37,8 +37,7 @@ class ElasticPlugin(Plugin):
 
 # TODO: move dependencies from the top to here
 class Storage(object):
-    """Elastic storage implementation
-    """
+    """Elastic storage implementation"""
 
     def __init__(self, es=None):
         # Use the passed `es` or create a new Elasticsearch instance
@@ -151,8 +150,7 @@ class Storage(object):
             )
 
     def write_table_convert(self, descriptor, mapping_generator_cls=None):
-        """Convert descriptor to ElasticSearch Mapping.
-        """
+        """Convert descriptor to ElasticSearch Mapping."""
 
         if mapping_generator_cls is None:
             mapping_generator_cls = MappingGenerator
