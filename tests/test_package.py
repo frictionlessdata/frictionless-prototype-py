@@ -123,6 +123,7 @@ def test_package_from_zip():
     ]
 
 
+@pytest.mark.slow
 def test_package_from_zip_remote():
     package = Package(BASE_URL % "data/package.zip")
     assert package.name == "testing"

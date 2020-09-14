@@ -1,3 +1,3 @@
 #!/bin/sh
 
-make lint && pytest -x -m 'not slow'
+make check
