@@ -4,26 +4,26 @@ class Storage:
 
     # Delete
 
-    def delete_resource(self, name, *, ignore=False, **options):
+    def delete_package(self, names, *, ignore=False, **options):
         pass
 
-    def delete_package(self, names, *, ignore=False, **options):
+    def delete_resource(self, name, *, ignore=False, **options):
         pass
 
     # Read
 
-    def read_resource(self, name, **options):
+    def read_package(self, **options):
         pass
 
-    def read_package(self, **options):
+    def read_resource(self, name, **options):
         pass
 
     # Write
 
-    def write_resource(self, resource, *, force=False, **options):
+    def write_package(self, package, *, force=False, **options):
         pass
 
-    def write_package(self, package, *, force=False, **options):
+    def write_resource(self, resource, *, force=False, **options):
         pass
 
 

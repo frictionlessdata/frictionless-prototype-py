@@ -1,9 +1,11 @@
 import re
 import sqlalchemy as sa
 import sqlalchemy.dialects.postgresql as sapg
-from ..storage import Storage, StorageTable
 from ..metadata import Metadata
 from ..dialects import Dialect
+from ..resource import Resource
+from ..storage import Storage
+from ..package import Package
 from ..plugin import Plugin
 from ..parser import Parser
 from ..schema import Schema
@@ -186,10 +188,14 @@ class SqlStorage(Storage):
         self.__namespace = namespace
         self.__connection = engine.connect()
         self.__dialect = engine.dialect.name
-        self.__tables = {}
+        self.__resources = {}
+
+        # Add regex support
+        # It will fail silently if this function already exists
+        if self.__dialect == "sqlite":
+            self.__connection.connection.create_function("REGEXP", 2, regexp)
 
         # Create metadata and reflect
-        self.__add_regex_support()
         self.__metadata = sa.MetaData(bind=self.__connection)
         self.__metadata.reflect()
 
@@ -198,31 +204,79 @@ class SqlStorage(Storage):
         text = template.format(engine=self.__connection.engine)
         return text
 
+    # Delete
+
+    def delete_package(self, names, *, ignore=False):
+
+        # Iterate
+        sql_tables = []
+        for name in names:
+
+            # Check existent
+            if name not in self.read_resource_names():
+                if not ignore:
+                    note = f'Table "{name}" does not exist'
+                    raise exceptions.FrictionlessException(errors.StorageError(note=note))
+                continue
+
+            # Remove from tables
+            if name in self.__tables:
+                del self.__tables[name]
+
+            # Add table for removal
+            sql_table = self.read_sql_table(name)
+            sql_tables.append(sql_table)
+
+        # Drop tables, update metadata
+        self.__metadata.drop_all(tables=sql_tables)
+        self.__metadata.clear()
+        self.__metadata.reflect()
+
+    def delete_resource(self, name, *, ignore=False):
+        return self.delete_package([name], ignore=ignore)
+
     # Read
 
-    def read_table(self, name):
-        table = self.__tables.get(name)
-        if table is None:
-            sql_table = self.__get_sql_table(name)
-            table = self.read_table_convert_table(name, sql_table)
-        return table
+    def read_package(self):
+        package = Package()
+        for name in self.read_resource_names():
+            resource = self.read_resource(name)
+            package.resources.append(resource)
+        return package
 
-    def read_table_list(self):
-        tables = []
-        for name in self.read_table_names():
-            table = self.read_table(name)
-            tables.append(table)
-        return tables
+    def read_resource(self, name):
+        resource = self.__resources.get(name)
+        if resource is None:
+            sql_table = self.read_sql_table(name)
+            schema = self.read_convert_schema(sql_table)
+            resource = Resource(name=name, schema=schema)
+            self.resources[resource.name] = resource
+        return resource
 
-    def read_table_names(self):
+    def read_resource_names(self):
         names = []
         for sql_table in self.__metadata.sorted_tables:
-            name = self.read_table_convert_name(sql_table.name)
+            name = self.read_convert_name(sql_table.name)
             if name is not None:
-                names.append(name)
+                names.append(sql_table.name)
         return names
 
-    def read_table_convert_table(self, name, sql_table):
+    def read_data_stream(self, name):
+        sql_table = self.read_sql_table(name)
+        with self.__connection.begin():
+            # Streaming could be not working for some backends:
+            # http://docs.sqlalchemy.org/en/latest/core/connections.html
+            select = sql_table.select().execution_options(stream_results=True)
+            result = select.execute()
+            for cells in result:
+                yield cells
+
+    def read_convert_name(self, sql_name):
+        if sql_name.startswith(self.__prefix):
+            return sql_name.replace(self.__prefix, "", 1)
+        return None
+
+    def read_convert_schema(self, sql_table):
         schema = Schema()
 
         # Fields
@@ -259,16 +313,10 @@ class SqlStorage(Storage):
                     ref = {"resource": resource, "fields": foreign_fields}
                     schema.foreign_keys.append({"fields": own_fields, "reference": ref})
 
-        # Create table
-        table = StorageTable(name, schema=schema)
-        return table
+        # Return schema
+        return schema
 
-    def read_table_convert_name(self, name):
-        if name.startswith(self.__prefix):
-            return name.replace(self.__prefix, "", 1)
-        return None
-
-    def read_table_convert_field_type(self, name):
+    def read_convert_type(self, sql_type):
 
         # All dialects
         mapping = {
@@ -289,81 +337,70 @@ class SqlStorage(Storage):
 
         # Get field type
         for key, value in mapping.items():
-            if isinstance(name, key):
+            if isinstance(sql_type, key):
                 return value
 
         # Not supported type
-        note = f'Column type "{name}" is not supported'
+        note = f'Column type "{sql_type}" is not supported'
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
-    def read_table_data_stream(self, name):
-        sql_table = self.__get_sql_table(name)
-
-        # Open and close transaction
-        with self.__connection.begin():
-            # Streaming could be not working for some backends:
-            # http://docs.sqlalchemy.org/en/latest/core/connections.html
-            select = sql_table.select().execution_options(stream_results=True)
-            result = select.execute()
-            for cells in result:
-                yield cells
+    def read_sql_table(self, name):
+        sql_name = self.__prefix + name
+        if self.__namespace:
+            full_name = ".".join((self.__namespace, sql_name))
+        return self.__metadata.tables.get(full_name)
 
     # Write
 
-    def write_table(self, *tables, force=False):
+    def write_package(self, package, force=False):
 
         # Check existent
-        for table in tables:
-            if table.name in self.read_table_names():
+        for resource in package.resources:
+            sql_name = self.write_convert_name(resource.name)
+            if sql_name in self.__get_sql_names():
                 if not force:
-                    note = f'Table "{table.name}" already exists'
+                    note = f'Table "{resource.name}" already exists'
                     raise exceptions.FrictionlessException(errors.StorageError(note=note))
-                self.remove_table(table.name)
+                self.delete_resource(resource.name)
 
         # Convert tables
         sql_tables = []
-        for table in tables:
-            sql_table = self.write_table_convert_table(table)
+        for resource in package.resources:
+            sql_table = self.write_convert_schema(resource.schema)
             sql_tables.append(sql_table)
 
         # Create tables
         try:
             self.__metadata.create_all(tables=sql_tables)
-            for table in tables:
-                self.__tables[table.name] = table
+            for resource in package.resources:
+                self.__resources[resource.name] = resource
         except sa.exc.ProgrammingError as exception:
             if "there is no unique constraint matching given keys" in str(exception):
                 note = "Foreign keys can only reference primary key or unique fields\n%s"
                 error = errors.StorageError(note=note % exception)
                 raise exceptions.FrictionlessException(error) from exception
 
-    def write_table_remove(self, *names, ignore=False):
+    def write_resource(self, resource, *, force=False):
+        package = Package(resources=[resource])
+        return self.write_package(package, force=force)
 
-        # Iterate
-        sql_tables = []
-        for name in names:
+    def write_row_stream(self, name, row_stream):
+        buffer = []
+        buffer_size = 1000
+        sql_table = self.read_sql_table(name)
+        with self.__connection.begin():
+            for row in row_stream:
+                buffer.append(row)
+                if len(buffer) > buffer_size:
+                    self.__connection.execute(sql_table.insert().values(buffer))
+                    buffer = []
+            if len(buffer):
+                self.__connection.execute(sql_table.insert().values(buffer))
 
-            # Check existent
-            if name not in self.read_table_names():
-                if not ignore:
-                    note = f'Table "{name}" does not exist'
-                    raise exceptions.FrictionlessException(errors.StorageError(note=note))
-                continue
+    def write_convert_name(self, name):
+        return self.__prefix + name
 
-            # Remove from tables
-            if name in self.__tables:
-                del self.__tables[name]
-
-            # Add table for removal
-            sql_table = self.__get_sql_table(name)
-            sql_tables.append(sql_table)
-
-        # Drop tables, update metadata
-        self.__metadata.drop_all(tables=sql_tables)
-        self.__metadata.clear()
-        self.__metadata.reflect()
-
-    def write_table_convert_table(self, table):
+    def write_convert_schema(self, table):
 
         # Prepare
         columns = []
@@ -422,10 +459,7 @@ class SqlStorage(Storage):
         sql_table = sa.Table(name, self.__metadata, *(columns + constraints))
         return sql_table
 
-    def write_table_convert_name(self, name):
-        return self.__prefix + name
-
-    def write_table_convert_field_type(self, name):
+    def write_convert_type(self, type):
 
         # Default dialect
         mapping = {
@@ -458,38 +492,12 @@ class SqlStorage(Storage):
             )
 
         # Return type
-        if name in mapping:
-            return mapping[name]
+        if type in mapping:
+            return mapping[type]
 
         # Not supported type
-        note = f'Field type "{name}" is not supported'
+        note = f'Field type "{type}" is not supported'
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
-
-    def write_table_row_stream(self, name, row_stream):
-        buffer = []
-        buffer_size = 1000
-        sql_table = self.__get_sql_table(name)
-        with self.__connection.begin():
-            for row in row_stream:
-                buffer.append(row)
-                if len(buffer) > buffer_size:
-                    self.__connection.execute(sql_table.insert().values(buffer))
-                    buffer = []
-            if len(buffer):
-                self.__connection.execute(sql_table.insert().values(buffer))
-
-    # Private
-
-    def __get_sql_table(self, name):
-        sql_name = self.read_table_convert_name(name)
-        if self.__namespace:
-            sql_name = ".".join((self.__namespace, sql_name))
-        return self.__metadata.tables[sql_name]
-
-    def __add_regex_support(self):
-        # It will fail silently if this function already exists
-        if self.__dialect == "sqlite":
-            self.__connection.connection.create_function("REGEXP", 2, regexp)
 
 
 # Internal
