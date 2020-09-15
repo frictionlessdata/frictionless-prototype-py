@@ -2,22 +2,28 @@ class Storage:
     def __init__(self, **options):
         pass
 
-    def add_table(self, *tables, force=False, **options):
+    # Delete
+
+    def delete_resource(self, name, *, ignore=False, **options):
         pass
 
-    def remove_table(self, *names, ignore=False, **options):
+    def delete_package(self, names, *, ignore=False, **options):
         pass
 
-    def get_table(self, name):
+    # Read
+
+    def read_resource(self, name, **options):
         pass
 
-    def has_table(self, name):
+    def read_package(self, **options):
         pass
 
-    def list_tables(self):
+    # Write
+
+    def write_resource(self, resource, *, force=False, **options):
         pass
 
-    def list_table_names(self):
+    def write_package(self, package, *, force=False, **options):
         pass
 
 
