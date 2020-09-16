@@ -5,6 +5,7 @@ import zipfile
 from copy import deepcopy
 from .metadata import Metadata
 from .resource import Resource
+from .system import system
 from . import exceptions
 from . import helpers
 from . import errors
@@ -232,6 +233,20 @@ class Package(Metadata):
         Parameters:
             storage (Storage): storage instance
         """
+        return storage.read_package()
+
+    @staticmethod
+    def from_sql(*, engine, prefix="", namespace=None):
+        """Create resource from storage
+
+        Parameters:
+            engine (object): `sqlalchemy` engine
+            prefix (str): prefix for all tables
+            namespace (str): SQL scheme
+        """
+        storage = system.create_storage(
+            "sql", engine=engine, prefix=prefix, namespace=namespace
+        )
         return storage.read_package()
 
     def to_dict(self, expand=False):
