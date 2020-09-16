@@ -560,6 +560,16 @@ class Resource(Metadata):
         """
         return storage.read_resource(name)
 
+    def to_storage(self, storage):
+        """Export resource to storage
+
+        Parameters:
+            storage (Storage): storage instance
+        """
+        self.infer(only_sample=True)
+        storage.write_resource(self)
+        return storage
+
     @staticmethod
     def from_sql(*, name, engine, prefix="", namespace=None):
         """Create resource from storage
@@ -574,6 +584,21 @@ class Resource(Metadata):
             "sql", engine=engine, prefix=prefix, namespace=namespace
         )
         return storage.read_resource(name)
+
+    def to_sql(self, *, engine, prefix="", namespace=None):
+        """Export resource to storage
+
+        Parameters:
+            engine (object): `sqlalchemy` engine
+            prefix (str): prefix for all tables
+            namespace (str): SQL scheme
+        """
+        self.infer(only_sample=True)
+        storage = system.create_storage(
+            "sql", engine=engine, prefix=prefix, namespace=namespace
+        )
+        storage.write_resource(self)
+        return storage
 
     def to_dict(self, expand=False):
         """Convert resource to dict
