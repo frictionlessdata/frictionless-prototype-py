@@ -4,8 +4,11 @@ import collections
 import numpy as np
 import pandas as pd
 import pandas.core.dtypes.api as pdc
+from functools import partial
+from ..resource import Resource
+from ..package import Package
 from ..plugin import Plugin
-from ..storage import Storage, StorageTable
+from ..storage import Storage
 from ..schema import Schema
 from ..field import Field
 from .. import exceptions
@@ -25,7 +28,8 @@ class PandasPlugin(Plugin):
     """
 
     def create_storage(self, name, **options):
-        pass
+        if name == "pandas":
+            return PandasStorage(**options)
 
 
 # Storage
@@ -35,41 +39,70 @@ class PandasPlugin(Plugin):
 class PandasStorage(Storage):
     """Pandas storage implementation"""
 
-    def __init__(self, dataframes=None):
+    def __init__(self, *, dataframes=None):
         self.__dataframes = dataframes or collections.OrderedDict()
-        self.__tables = {}
+        self.__resources = {}
 
     def __repr__(self):
         return "Storage <pandas>"
 
     # Read
 
-    def read_names(self):
+    def read_package(self):
+        resources = []
+        for name in self.read_names():
+            resource = self.read_resource(name)
+            resources.append(resource)
+        return resources
+
+    def read_resource(self, name):
+        resource = self.__resources.get(name)
+        if resource is None:
+            dataframe = self.read_pandas_dataframe(name)
+            if not dataframe:
+                note = f'Resource "{name}" does not exist'
+                raise exceptions.FrictionlessException(errors.StorageError(note=note))
+            schema = self.read_convert_schema(dataframe)
+            data = partial(self.read_data_stream, name)
+            resource = Resource(name=name, schema=schema, data=data)
+            self.__resources[resource.name] = resource
+        return resource
+
+    def read_resource_names(self):
         return list(sorted(self.__dataframes.keys()))
 
-    def read_tables(self):
-        tables = []
-        for name in self.read_names():
-            table = self.read_table(name)
-            tables.append(table)
-        return tables
+    # TODO: fix logic
+    def read_data_stream(self, name):
+        table = self.read_table(name)
+        schema = table.schema
 
-    def read_table(self, name):
-        table = self.__tables.get(name)
-        if table is None:
-            if name not in self.__dataframes:
-                note = f'Table "{name}" does not exist'
-                raise exceptions.FrictionlessException(errors.StorageError(note=note))
-            dataframe = self.__dataframes[name]
-            table = self.read_table_convert(name, dataframe)
-        return table
+        # Yield cells
+        for pk, row in self.__dataframes[name].iterrows():
+            result = []
+            for field in schema.fields:
+                if schema.primary_key and schema.primary_key[0] == field.name:
+                    if field.type == "number" and np.isnan(pk):
+                        pk = None
+                    if pk and field.type == "integer":
+                        pk = int(pk)
+                    result.append(field.cast_value(pk))
+                else:
+                    value = row[field.name]
+                    if field.type == "number" and np.isnan(value):
+                        value = None
+                    if value and field.type == "integer":
+                        value = int(value)
+                    elif field.type == "datetime":
+                        value = value.to_pydatetime()
+                    result.append(field.cast_value(value))
+            yield result
 
-    def read_table_convert_table(self, name, dataframe):
+    def read_convert_schema(self, dataframe):
         schema = Schema()
 
         # Primary key
         if dataframe.index.name:
-            type = self.read_table_convert_field_type(dataframe.index.dtype)
+            type = self.read_convert_type(dataframe.index.dtype)
             field = Field(name=dataframe.index.name, type=type)
             field.required = True
             schema.fields.append(field)
@@ -82,11 +115,10 @@ class PandasStorage(Storage):
             field = Field(name=name, type=type)
             schema.fields.append(field)
 
-        # Return table
-        table = StorageTable(name, schema=schema)
-        return table
+        # Return schema
+        return schema
 
-    def read_table_convert_field_type(self, dtype, sample=None):
+    def read_convert_type(self, dtype, sample=None):
 
         # Pandas types
         if pdc.is_bool_dtype(dtype):
@@ -116,66 +148,53 @@ class PandasStorage(Storage):
         # Default
         return "string"
 
-    def read_table_to_row_stream(self, name):
-        table = self.read_table(name)
-        schema = table.schema
-
-        # Yield rows
-        for pk, row in self.__dataframes[name].iterrows():
-            row = self.__mapper.restore_row(row, schema=schema, pk=pk)
-            result = []
-            for field in schema.fields:
-                if schema.primary_key and schema.primary_key[0] == field.name:
-                    if field.type == "number" and np.isnan(pk):
-                        pk = None
-                    if pk and field.type == "integer":
-                        pk = int(pk)
-                    result.append(field.cast_value(pk))
-                else:
-                    value = row[field.name]
-                    if field.type == "number" and np.isnan(value):
-                        value = None
-                    if value and field.type == "integer":
-                        value = int(value)
-                    elif field.type == "datetime":
-                        value = value.to_pydatetime()
-                    result.append(field.cast_value(value))
-            yield result
+    def read_pandas_dataframe(self, name):
+        return self.__dataframes.get(name)
 
     # Write
 
-    def write_table(self, *tables, force=False):
+    def write_package(self, package, *, force=False):
+        existent_names = self.read_resource_names()
 
         # Check existent
-        for table in tables:
-            if table.names in self.read_names():
+        for resource in package.resources:
+            if resource.name in existent_names:
                 if not force:
-                    note = f'Table "{table.name}" already exists'
+                    note = f'Table "{resource.name}" already exists'
                     raise exceptions.FrictionlessException(errors.StorageError(note=note))
-                self.write_table_remove_table(table.name)
+                self.delete_resource(resource.name)
 
         # Define dataframes
-        for table in tables:
-            self.__tables[table.name] = table
-            self.__dataframes[table.name] = pd.DataFrame()
+        for resource in package.resources:
+            self.__resources[resource.name] = resource
+            self.__dataframes[resource.name] = pd.DataFrame()
 
-    def write_table_remove_table(self, *names, ignore=False):
+        # Write data
+        # TODO: implement
+        for resource in package.resources:
+            pass
 
-        # Iterate over buckets
-        for name in names:
+    def write_resource(self, resource, *, force=False):
+        package = Package(resources=[resource])
+        return self.write_package(package, force=force)
 
-            # Check existent
-            if name not in self.read_names():
-                if not ignore:
-                    note = f'Table "{name}" does not exist'
-                    raise exceptions.FrictionlessException(errors.StorageError(note=note))
-                return
+    # TODO: fix logic
+    def write_row_stream(self, name, row_stream):
 
-            # Remove table
-            self.__tables.pop(name)
-            self.__dataframes.pop(name)
+        # Prepare
+        table = self.read_table(name)
+        new_data_frame = self.write_table_convert_table(table, row_stream)
 
-    def write_table_convert_table(self, table, row_stream):
+        # Just set new DataFrame if current is empty
+        if self.__dataframes[name].size == 0:
+            self.__dataframes[name] = new_data_frame
+
+        # Append new data frame to the old one setting new data frame
+        # containing data from both old and new data frames
+        else:
+            self.__dataframes[name] = pd.concat([self.__dataframes[name], new_data_frame])
+
+    def write_convert_schema(self, table, row_stream):
 
         # Get data/index
         data_rows = []
@@ -210,7 +229,7 @@ class PandasStorage(Storage):
             if len(schema.primary_key) == 1:
                 index_class = pd.Index
                 index_field = schema.get_field(schema.primary_key[0])
-                index_dtype = self.convert_type(index_field.type)
+                index_dtype = self.write_convert_type(index_field.type)
                 if field.type in ["datetime", "date"]:
                     index_class = pd.DatetimeIndex
                 index = index_class(index_rows, name=index_field.name, dtype=index_dtype)
@@ -223,7 +242,7 @@ class PandasStorage(Storage):
         for field in schema.fields:
             if field.name not in schema.primary_key:
                 field_name = field.name
-                dtype = self.convert_type(jtstypes_map.get(field.name, field.type))
+                dtype = self.write_convert_type(jtstypes_map.get(field.name, field.type))
                 dtypes.append((field_name, dtype))
                 columns.append(field.name)
 
@@ -233,7 +252,7 @@ class PandasStorage(Storage):
 
         return dataframe
 
-    def write_table_convert_field_type(self, type):
+    def write_convert_type(self, type):
 
         # Mapping
         mapping = {
@@ -262,17 +281,24 @@ class PandasStorage(Storage):
         note = f'Column type "{type}" is not supported'
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
-    def write_table_from_row_stream(self, name, row_stream):
+    # Delete
 
-        # Prepare
-        table = self.read_table(name)
-        new_data_frame = self.write_table_convert_table(table, row_stream)
+    def delete_package(self, names, *, ignore=False):
+        existent_names = self.read_resource_names()
 
-        # Just set new DataFrame if current is empty
-        if self.__dataframes[name].size == 0:
-            self.__dataframes[name] = new_data_frame
+        # Iterate over buckets
+        for name in names:
 
-        # Append new data frame to the old one setting new data frame
-        # containing data from both old and new data frames
-        else:
-            self.__dataframes[name] = pd.concat([self.__dataframes[name], new_data_frame])
+            # Check existent
+            if name not in existent_names:
+                if not ignore:
+                    note = f'Resource "{name}" does not exist'
+                    raise exceptions.FrictionlessException(errors.StorageError(note=note))
+                return
+
+            # Remove table
+            self.__resources.pop(name)
+            self.__dataframes.pop(name)
+
+    def delete_resource(self, name, *, ignore=False):
+        return self.delete_package([name], ignore=ignore)

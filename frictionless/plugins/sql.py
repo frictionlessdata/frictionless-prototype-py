@@ -210,37 +210,6 @@ class SqlStorage(Storage):
         text = template.format(engine=self.__connection.engine)
         return text
 
-    # Delete
-
-    def delete_package(self, names, *, ignore=False):
-
-        # Iterate
-        sql_tables = []
-        for name in names:
-
-            # Check existent
-            if name not in self.read_resource_names():
-                if not ignore:
-                    note = f'Table "{name}" does not exist'
-                    raise exceptions.FrictionlessException(errors.StorageError(note=note))
-                continue
-
-            # Remove from resources
-            if name in self.__resources:
-                del self.__resources[name]
-
-            # Add table for removal
-            sql_table = self.read_sql_table(name)
-            sql_tables.append(sql_table)
-
-        # Drop tables, update metadata
-        self.__metadata.drop_all(tables=sql_tables)
-        self.__metadata.clear()
-        self.__metadata.reflect()
-
-    def delete_resource(self, name, *, ignore=False):
-        return self.delete_package([name], ignore=ignore)
-
     # Read
 
     def read_package(self):
@@ -254,6 +223,9 @@ class SqlStorage(Storage):
         resource = self.__resources.get(name)
         if resource is None:
             sql_table = self.read_sql_table(name)
+            if not sql_table:
+                note = f'Resource "{name}" does not exist'
+                raise exceptions.FrictionlessException(errors.StorageError(note=note))
             schema = self.read_convert_schema(sql_table)
             data = partial(self.read_data_stream, name)
             resource = Resource(name=name, schema=schema, data=data)
@@ -277,12 +249,6 @@ class SqlStorage(Storage):
             result = select.execute()
             for cells in result:
                 yield tuple(cells)
-
-    def read_sql_table(self, name):
-        sql_name = self.__prefix + name
-        if self.__namespace:
-            sql_name = ".".join((self.__namespace, sql_name))
-        return self.__metadata.tables.get(sql_name)
 
     def read_convert_name(self, sql_name):
         if sql_name.startswith(self.__prefix):
@@ -357,14 +323,21 @@ class SqlStorage(Storage):
         note = f'Column type "{sql_type}" is not supported'
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
+    def read_sql_table(self, name):
+        sql_name = self.__prefix + name
+        if self.__namespace:
+            sql_name = ".".join((self.__namespace, sql_name))
+        return self.__metadata.tables.get(sql_name)
+
     # Write
 
     # TODO: use a transaction
     def write_package(self, package, force=False):
+        existent_names = self.read_resource_names()
 
         # Check existent
         for resource in package.resources:
-            if resource.name in self.read_resource_names():
+            if resource.name in existent_names:
                 if not force:
                     note = f'Table "{resource.name}" already exists'
                     raise exceptions.FrictionlessException(errors.StorageError(note=note))
@@ -509,6 +482,38 @@ class SqlStorage(Storage):
         # Not supported type
         note = f'Field type "{type}" is not supported'
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
+
+    # Delete
+
+    def delete_package(self, names, *, ignore=False):
+        existent_names = self.read_resource_names()
+
+        # Iterate
+        sql_tables = []
+        for name in names:
+
+            # Check existent
+            if name not in existent_names:
+                if not ignore:
+                    note = f'Resource "{name}" does not exist'
+                    raise exceptions.FrictionlessException(errors.StorageError(note=note))
+                continue
+
+            # Remove from resources
+            if name in self.__resources:
+                del self.__resources[name]
+
+            # Add table for removal
+            sql_table = self.read_sql_table(name)
+            sql_tables.append(sql_table)
+
+        # Drop tables, update metadata
+        self.__metadata.drop_all(tables=sql_tables)
+        self.__metadata.clear()
+        self.__metadata.reflect()
+
+    def delete_resource(self, name, *, ignore=False):
+        return self.delete_package([name], ignore=ignore)
 
 
 # Internal

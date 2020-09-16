@@ -2,14 +2,6 @@ class Storage:
     def __init__(self, **options):
         pass
 
-    # Delete
-
-    def delete_package(self, names, *, ignore=False, **options):
-        pass
-
-    def delete_resource(self, name, *, ignore=False, **options):
-        pass
-
     # Read
 
     def read_package(self, **options):
@@ -24,6 +16,14 @@ class Storage:
         pass
 
     def write_resource(self, resource, *, force=False, **options):
+        pass
+
+    # Delete
+
+    def delete_package(self, names, *, ignore=False, **options):
+        pass
+
+    def delete_resource(self, name, *, ignore=False, **options):
         pass
 
 
