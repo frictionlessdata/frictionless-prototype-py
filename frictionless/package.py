@@ -254,10 +254,11 @@ class Package(Metadata):
             prefix (str): prefix for all tables
             namespace (str): SQL scheme
         """
-        storage = system.create_storage(
-            "sql", engine=engine, prefix=prefix, namespace=namespace
+        return Package.from_storage(
+            system.create_storage(
+                "sql", engine=engine, prefix=prefix, namespace=namespace
+            )
         )
-        return storage.read_package()
 
     def to_sql(self, *, engine, prefix="", namespace=None):
         """Export package to SQL
@@ -267,12 +268,11 @@ class Package(Metadata):
             prefix (str): prefix for all tables
             namespace (str): SQL scheme
         """
-        self.infer(only_sample=True)
-        storage = system.create_storage(
-            "sql", engine=engine, prefix=prefix, namespace=namespace
+        return self.to_storage(
+            system.create_storage(
+                "sql", engine=engine, prefix=prefix, namespace=namespace
+            )
         )
-        storage.write_package(self)
-        return storage
 
     def to_dict(self, expand=False):
         """Convert package to a dict
