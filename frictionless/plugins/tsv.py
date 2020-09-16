@@ -26,6 +26,27 @@ class TsvPlugin(Plugin):
             return TsvParser(file)
 
 
+# Dialect
+
+
+class TsvDialect(Dialect):
+    """Tsv dialect representation
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.tsv import TsvDialect`
+
+    Parameters:
+        descriptor? (str|dict): descriptor
+
+    Raises:
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
+    pass
+
+
 # Parser
 
 
@@ -63,24 +84,3 @@ class TsvParser(Parser):
                 cells, notes = schema.write_data(cells, native_types=self.native_types)
                 writer.writerow(cells)
         helpers.move_file(file.name, self.file.source)
-
-
-# Dialect
-
-
-class TsvDialect(Dialect):
-    """Tsv dialect representation
-
-    API      | Usage
-    -------- | --------
-    Public   | `from frictionless.plugins.tsv import TsvDialect`
-
-    Parameters:
-        descriptor? (str|dict): descriptor
-
-    Raises:
-        FrictionlessException: raise any error that occurs during the process
-
-    """
-
-    pass

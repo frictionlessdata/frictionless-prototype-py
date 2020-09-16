@@ -30,6 +30,71 @@ class OdsPlugin(Plugin):
             return OdsParser(file)
 
 
+# Dialect
+
+
+class OdsDialect(Dialect):
+    """Ods dialect representation
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.ods import OdsDialect`
+
+    Parameters:
+        descriptor? (str|dict): descriptor
+        sheet? (str): sheet
+
+    Raises:
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
+    def __init__(
+        self,
+        descriptor=None,
+        *,
+        sheet=None,
+        header=None,
+        header_rows=None,
+        header_join=None,
+    ):
+        self.setinitial("sheet", sheet)
+        super().__init__(
+            descriptor=descriptor,
+            header=header,
+            header_rows=header_rows,
+            header_join=header_join,
+        )
+
+    @Metadata.property
+    def sheet(self):
+        """
+        Returns:
+            int|str: sheet
+        """
+        return self.get("sheet", 1)
+
+    # Expand
+
+    def expand(self):
+        """Expand metadata"""
+        super().expand()
+        self.setdefault("sheet", self.sheet)
+
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "sheet": {"type": ["number", "string"]},
+            "header": {"type": "boolean"},
+            "headerRows": {"type": "array", "items": {"type": "number"}},
+            "headerJoin": {"type": "string"},
+        },
+    }
+
+
 # Parser
 
 
@@ -117,68 +182,3 @@ class OdsParser(Parser):
             for field_index, cell in enumerate(cells):
                 sheet[(row_index + 1, field_index)].set_value(cell)
         book.save()
-
-
-# Dialect
-
-
-class OdsDialect(Dialect):
-    """Ods dialect representation
-
-    API      | Usage
-    -------- | --------
-    Public   | `from frictionless.plugins.ods import OdsDialect`
-
-    Parameters:
-        descriptor? (str|dict): descriptor
-        sheet? (str): sheet
-
-    Raises:
-        FrictionlessException: raise any error that occurs during the process
-
-    """
-
-    def __init__(
-        self,
-        descriptor=None,
-        *,
-        sheet=None,
-        header=None,
-        header_rows=None,
-        header_join=None,
-    ):
-        self.setinitial("sheet", sheet)
-        super().__init__(
-            descriptor=descriptor,
-            header=header,
-            header_rows=header_rows,
-            header_join=header_join,
-        )
-
-    @Metadata.property
-    def sheet(self):
-        """
-        Returns:
-            int|str: sheet
-        """
-        return self.get("sheet", 1)
-
-    # Expand
-
-    def expand(self):
-        """Expand metadata"""
-        super().expand()
-        self.setdefault("sheet", self.sheet)
-
-    # Metadata
-
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {
-            "sheet": {"type": ["number", "string"]},
-            "header": {"type": "boolean"},
-            "headerRows": {"type": "array", "items": {"type": "number"}},
-            "headerJoin": {"type": "string"},
-        },
-    }

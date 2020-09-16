@@ -22,7 +22,7 @@ class SpssPlugin(Plugin):
 
     """
 
-    def create_storage(self, source):
+    def create_storage(self, name, **options):
         pass
 
 

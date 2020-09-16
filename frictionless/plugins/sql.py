@@ -36,69 +36,9 @@ class SqlPlugin(Plugin):
         if file.scheme in SQL_SCHEMES:
             return SqlParser(file)
 
-
-# Parser
-
-
-# NOTE: probably we can reuse Storage for read/write here
-# NOTE: extend native types (make property as it depends on the database engine)
-class SqlParser(Parser):
-    """SQL parser implementation.
-
-    API      | Usage
-    -------- | --------
-    Public   | `from frictionless.plugins.sql import SqlParser`
-
-    """
-
-    loading = False
-    native_types = [
-        "string",
-    ]
-
-    # Read
-
-    def read_data_stream_create(self):
-        sa = helpers.import_from_plugin("sqlalchemy", plugin="sql")
-        dialect = self.file.dialect
-        engine = sa.create_engine(self.file.source)
-        engine.update_execution_options(stream_results=True)
-        table = sa.sql.table(dialect.table)
-        order = sa.sql.text(dialect.order_by) if dialect.order_by else None
-        query = sa.sql.select(["*"]).select_from(table).order_by(order)
-        data = iter(engine.execute(query))
-        item = next(data)
-        yield list(item.keys())
-        yield list(item)
-        for item in iter(data):
-            yield list(item)
-
-    # Write
-
-    # NOTE: rewrite this method
-    # NOTE: create columns using extended native types
-    def write(self, row_stream):
-        sa = helpers.import_from_plugin("sqlalchemy", plugin="sql")
-        engine = sa.create_engine(self.file.source)
-        dialect = self.file.dialect
-        buffer = []
-        buffer_size = 1000
-        with engine.begin() as conn:
-            for row in row_stream:
-                schema = row.schema
-                if row.row_number == 1:
-                    meta = sa.MetaData()
-                    columns = [sa.Column(nm, sa.String()) for nm in schema.field_names]
-                    table = sa.Table(dialect.table, meta, *columns)
-                    meta.create_all(conn)
-                cells = list(row.values())
-                cells, notes = schema.write_data(cells, native_types=self.native_types)
-                buffer.append(cells)
-                if len(buffer) > buffer_size:
-                    conn.execute(table.insert().values(buffer))
-                    buffer = []
-            if len(buffer):
-                conn.execute(table.insert().values(buffer))
+    def create_storage(self, name, **options):
+        if name == "sql":
+            return SqlStorage(**options)
 
 
 # Dialect
@@ -164,6 +104,70 @@ class SqlDialect(Dialect):
     }
 
 
+# Parser
+
+
+# NOTE: probably we can reuse Storage for read/write here
+# NOTE: extend native types (make property as it depends on the database engine)
+class SqlParser(Parser):
+    """SQL parser implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.sql import SqlParser`
+
+    """
+
+    loading = False
+    native_types = [
+        "string",
+    ]
+
+    # Read
+
+    def read_data_stream_create(self):
+        sa = helpers.import_from_plugin("sqlalchemy", plugin="sql")
+        dialect = self.file.dialect
+        engine = sa.create_engine(self.file.source)
+        engine.update_execution_options(stream_results=True)
+        table = sa.sql.table(dialect.table)
+        order = sa.sql.text(dialect.order_by) if dialect.order_by else None
+        query = sa.sql.select(["*"]).select_from(table).order_by(order)
+        data = iter(engine.execute(query))
+        item = next(data)
+        yield list(item.keys())
+        yield list(item)
+        for item in iter(data):
+            yield list(item)
+
+    # Write
+
+    # NOTE: rewrite this method
+    # NOTE: create columns using extended native types
+    def write(self, row_stream):
+        sa = helpers.import_from_plugin("sqlalchemy", plugin="sql")
+        engine = sa.create_engine(self.file.source)
+        dialect = self.file.dialect
+        buffer = []
+        buffer_size = 1000
+        with engine.begin() as conn:
+            for row in row_stream:
+                schema = row.schema
+                if row.row_number == 1:
+                    meta = sa.MetaData()
+                    columns = [sa.Column(nm, sa.String()) for nm in schema.field_names]
+                    table = sa.Table(dialect.table, meta, *columns)
+                    meta.create_all(conn)
+                cells = list(row.values())
+                cells, notes = schema.write_data(cells, native_types=self.native_types)
+                buffer.append(cells)
+                if len(buffer) > buffer_size:
+                    conn.execute(table.insert().values(buffer))
+                    buffer = []
+            if len(buffer):
+                conn.execute(table.insert().values(buffer))
+
+
 # Storage
 
 
@@ -179,6 +183,7 @@ class SqlStorage(Storage):
     Parameters:
         engine (object): `sqlalchemy` engine
         prefix (str): prefix for all tables
+        namespace (str): SQL scheme
 
     """
 

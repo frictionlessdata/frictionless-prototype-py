@@ -556,7 +556,23 @@ class Resource(Metadata):
 
         Parameters:
             storage (Storage): storage instance
+            name (str): resource name
         """
+        return storage.read_resource(name)
+
+    @staticmethod
+    def from_sql(*, name, engine, prefix="", namespace=None):
+        """Create resource from storage
+
+        Parameters:
+            name (str): resource name
+            engine (object): `sqlalchemy` engine
+            prefix (str): prefix for all tables
+            namespace (str): SQL scheme
+        """
+        storage = system.create_storage(
+            "sql", engine=engine, prefix=prefix, namespace=namespace
+        )
         return storage.read_resource(name)
 
     def to_dict(self, expand=False):

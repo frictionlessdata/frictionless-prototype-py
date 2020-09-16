@@ -31,6 +31,7 @@ class System:
         "create_loader",
         "create_parser",
         "create_server",
+        "create_storage",
     ]
 
     def create_check(self, name, *, descriptor=None):
@@ -180,24 +181,45 @@ class System:
         note = f'cannot create parser "{name}". Try installing "frictionless-{name}"'
         raise exceptions.FrictionlessException(errors.FormatError(note=note))
 
-    def create_server(self, name):
+    def create_server(self, name, **options):
         """Create server
 
         Parameters:
             name (str): server name
+            options (str): server options
 
         Returns:
             Server: server
         """
         server = None
         for func in self.methods["create_server"].values():
-            server = func(name)
+            server = func(name, **options)
             if server is not None:
                 break
         if server is None:
             note = f'cannot create server "{name}". Try installing "frictionless-{name}"'
             raise exceptions.FrictionlessException(errors.Error(note=note))
         return server
+
+    def create_storage(self, name, **options):
+        """Create storage
+
+        Parameters:
+            name (str): storage name
+            options (str): storage options
+
+        Returns:
+            Storage: storage
+        """
+        storage = None
+        for func in self.methods["create_storage"].values():
+            storage = func(name, **options)
+            if storage is not None:
+                break
+        if storage is None:
+            note = f'cannot create storage "{name}". Try installing "frictionless-{name}"'
+            raise exceptions.FrictionlessException(errors.Error(note=note))
+        return storage
 
     # Methods
 
