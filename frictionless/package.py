@@ -228,16 +228,26 @@ class Package(Metadata):
 
     @staticmethod
     def from_storage(storage):
-        """Create package from storage
+        """Import package from storage
 
         Parameters:
             storage (Storage): storage instance
         """
         return storage.read_package()
 
+    def to_storage(self, storage):
+        """Export package to storage
+
+        Parameters:
+            storage (Storage): storage instance
+        """
+        self.infer(only_sample=True)
+        storage.write_package(self)
+        return storage
+
     @staticmethod
     def from_sql(*, engine, prefix="", namespace=None):
-        """Create resource from storage
+        """Import package from SQL
 
         Parameters:
             engine (object): `sqlalchemy` engine
@@ -248,6 +258,21 @@ class Package(Metadata):
             "sql", engine=engine, prefix=prefix, namespace=namespace
         )
         return storage.read_package()
+
+    def to_sql(self, *, engine, prefix="", namespace=None):
+        """Export package to SQL
+
+        Parameters:
+            engine (object): `sqlalchemy` engine
+            prefix (str): prefix for all tables
+            namespace (str): SQL scheme
+        """
+        self.infer(only_sample=True)
+        storage = system.create_storage(
+            "sql", engine=engine, prefix=prefix, namespace=namespace
+        )
+        storage.write_package(self)
+        return storage
 
     def to_dict(self, expand=False):
         """Convert package to a dict

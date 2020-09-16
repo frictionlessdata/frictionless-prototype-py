@@ -552,7 +552,7 @@ class Resource(Metadata):
 
     @staticmethod
     def from_storage(storage, *, name):
-        """Create resource from storage
+        """Import resource from storage
 
         Parameters:
             storage (Storage): storage instance
@@ -572,7 +572,7 @@ class Resource(Metadata):
 
     @staticmethod
     def from_sql(*, name, engine, prefix="", namespace=None):
-        """Create resource from storage
+        """Import resource from storage
 
         Parameters:
             name (str): resource name
