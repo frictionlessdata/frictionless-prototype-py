@@ -225,6 +225,15 @@ class Package(Metadata):
 
     # Import/Export
 
+    @staticmethod
+    def from_storage(storage):
+        """Create package from storage
+
+        Parameters:
+            storage (Storage): storage instance
+        """
+        return storage.read_package()
+
     def to_dict(self, expand=False):
         """Convert package to a dict
 
