@@ -550,6 +550,15 @@ class Resource(Metadata):
 
     # Import/Export
 
+    @staticmethod
+    def from_storage(storage, *, name):
+        """Create resource from storage
+
+        Parameters:
+            storage (Storage): storage instance
+        """
+        return storage.read_resource(name)
+
     def to_dict(self, expand=False):
         """Convert resource to dict
 
