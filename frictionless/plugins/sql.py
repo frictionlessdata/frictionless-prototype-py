@@ -1,5 +1,6 @@
 import re
 import sqlalchemy as sa
+from functools import partial
 import sqlalchemy.dialects.postgresql as sapg
 from ..metadata import Metadata
 from ..dialects import Dialect
@@ -219,9 +220,9 @@ class SqlStorage(Storage):
                     raise exceptions.FrictionlessException(errors.StorageError(note=note))
                 continue
 
-            # Remove from tables
-            if name in self.__tables:
-                del self.__tables[name]
+            # Remove from resources
+            if name in self.__resources:
+                del self.__resources[name]
 
             # Add table for removal
             sql_table = self.read_sql_table(name)
@@ -249,8 +250,9 @@ class SqlStorage(Storage):
         if resource is None:
             sql_table = self.read_sql_table(name)
             schema = self.read_convert_schema(sql_table)
-            resource = Resource(name=name, schema=schema)
-            self.resources[resource.name] = resource
+            data = partial(self.read_data_stream, name)
+            resource = Resource(name=name, schema=schema, data=data)
+            self.__resources[resource.name] = resource
         return resource
 
     def read_resource_names(self):
@@ -269,7 +271,13 @@ class SqlStorage(Storage):
             select = sql_table.select().execution_options(stream_results=True)
             result = select.execute()
             for cells in result:
-                yield cells
+                yield tuple(cells)
+
+    def read_sql_table(self, name):
+        sql_name = self.__prefix + name
+        if self.__namespace:
+            sql_name = ".".join((self.__namespace, sql_name))
+        return self.__metadata.tables.get(sql_name)
 
     def read_convert_name(self, sql_name):
         if sql_name.startswith(self.__prefix):
@@ -281,7 +289,7 @@ class SqlStorage(Storage):
 
         # Fields
         for column in sql_table.columns:
-            field_type = self.read_table_convert_field_type(column.type)
+            field_type = self.read_convert_type(column.type)
             field = Field(name=column.name, type=field_type)
             if not column.nullable:
                 field.required = True
@@ -344,20 +352,14 @@ class SqlStorage(Storage):
         note = f'Column type "{sql_type}" is not supported'
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
-    def read_sql_table(self, name):
-        sql_name = self.__prefix + name
-        if self.__namespace:
-            full_name = ".".join((self.__namespace, sql_name))
-        return self.__metadata.tables.get(full_name)
-
     # Write
 
+    # TODO: use a transaction
     def write_package(self, package, force=False):
 
         # Check existent
         for resource in package.resources:
-            sql_name = self.write_convert_name(resource.name)
-            if sql_name in self.__get_sql_names():
+            if resource.name in self.read_resource_names():
                 if not force:
                     note = f'Table "{resource.name}" already exists'
                     raise exceptions.FrictionlessException(errors.StorageError(note=note))
@@ -366,7 +368,7 @@ class SqlStorage(Storage):
         # Convert tables
         sql_tables = []
         for resource in package.resources:
-            sql_table = self.write_convert_schema(resource.schema)
+            sql_table = self.write_convert_schema(resource.name, resource.schema)
             sql_tables.append(sql_table)
 
         # Create tables
@@ -379,6 +381,10 @@ class SqlStorage(Storage):
                 note = "Foreign keys can only reference primary key or unique fields\n%s"
                 error = errors.StorageError(note=note % exception)
                 raise exceptions.FrictionlessException(error) from exception
+
+        # Write data
+        for resource in package.resources:
+            self.write_row_stream(resource.name, resource.read_row_stream())
 
     def write_resource(self, resource, *, force=False):
         package = Package(resources=[resource])
@@ -400,19 +406,19 @@ class SqlStorage(Storage):
     def write_convert_name(self, name):
         return self.__prefix + name
 
-    def write_convert_schema(self, table):
+    def write_convert_schema(self, name, schema):
 
         # Prepare
         columns = []
         constraints = []
         column_mapping = {}
-        name = self.write_table_convert_name(table.name)
+        sql_name = self.write_convert_name(name)
 
         # Fields
-        for field in table.schema.fields:
+        for field in schema.fields:
             checks = []
             nullable = not field.required
-            column_type = self.write_table_convert_field_type(field.type)
+            column_type = self.write_convert_type(field.type)
             unique = field.constraints.get("unique", False)
             for name, value in field.constraints.items():
                 if name == "minLength":
@@ -430,7 +436,7 @@ class SqlStorage(Storage):
                         check = sa.Check("\"%s\" REGEXP '%s'" % (field.name, value))
                         checks.append(check)
                 elif name == "enum":
-                    enum_name = "%s_%s_enum" % (table.name, field.name)
+                    enum_name = "%s_%s_enum" % (sql_name, field.name)
                     column_type = sa.Enum(*value, name=enum_name)
             column_args = [field.name, column_type] + checks
             column = sa.Column(*column_args, nullable=nullable, unique=unique)
@@ -438,13 +444,13 @@ class SqlStorage(Storage):
             column_mapping[field.name] = column
 
         # Primary key
-        if table.schema.primary_key is not None:
-            constraint = sa.PrimaryKeyConstraint(*table.schema.primary_key)
+        if schema.primary_key is not None:
+            constraint = sa.PrimaryKeyConstraint(*schema.primary_key)
             constraints.append(constraint)
 
         # Foreign keys
         if self.__dialect in ["postgresql", "sqlite"]:
-            for fk in table.schema.foreign_keys:
+            for fk in schema.foreign_keys:
                 fields = fk["fields"]
                 resource = fk["reference"]["resource"]
                 foreign_fields = fk["reference"]["fields"]
@@ -455,8 +461,8 @@ class SqlStorage(Storage):
                 constraint = sa.ForeignKeyConstraint(fields, foreign_fields)
                 constraints.append(constraint)
 
-        # Convert
-        sql_table = sa.Table(name, self.__metadata, *(columns + constraints))
+        # Create sql table
+        sql_table = sa.Table(sql_name, self.__metadata, *(columns + constraints))
         return sql_table
 
     def write_convert_type(self, type):
