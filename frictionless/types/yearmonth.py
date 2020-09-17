@@ -42,7 +42,7 @@ class YearmonthType(Type):
     # Write
 
     def write_cell(self, cell):
-        return "-".join(cell)
+        return "-".join(map(str, cell))
 
 
 # Internal

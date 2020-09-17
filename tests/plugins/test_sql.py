@@ -61,7 +61,6 @@ def test_table_write_sqlite(database_url):
 # Storage
 
 
-@pytest.mark.skip
 def test_package_storage_sqlite():
     engine = sa.create_engine(os.environ["SQLITE_URL"])
     prefix = "prefix_"

@@ -363,18 +363,29 @@ class SqlStorage(Storage):
 
         # Write data
         for resource in package.resources:
-            self.write_row_stream(resource.name, resource.read_row_stream())
+            self.write_row_stream(resource)
 
     def write_resource(self, resource, *, force=False):
         package = Package(resources=[resource])
         return self.write_package(package, force=force)
 
-    def write_row_stream(self, name, row_stream):
+    def write_row_stream(self, resource):
+
+        # Fallback fields
+        fallback_fields = []
+        mapping = self.write_convert_types()
+        for field in resource.schema.fields:
+            if mapping[field.type] is None:
+                fallback_fields.append(field)
+
+        # Write data
         buffer = []
         buffer_size = 1000
-        sql_table = self.read_sql_table(name)
+        sql_table = self.read_sql_table(resource.name)
         with self.__connection.begin():
-            for row in row_stream:
+            for row in resource.read_row_stream():
+                for field in fallback_fields:
+                    row[field.name], notes = field.write_cell(row[field.name])
                 buffer.append(row)
                 if len(buffer) > buffer_size:
                     self.__connection.execute(sql_table.insert().values(buffer))

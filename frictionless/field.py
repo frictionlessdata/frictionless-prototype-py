@@ -282,6 +282,7 @@ class Field(Metadata):
             notes["type"] = f'type is "{self.type}/{self.format}"'
         return cell, notes
 
+    # NOTE: rename to convert everywhere like in storage?
     def write_cell_cast(self, cell):
         """Write cell low-level (cast)
 
