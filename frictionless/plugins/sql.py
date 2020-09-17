@@ -296,9 +296,19 @@ class SqlStorage(Storage):
         return schema
 
     def read_convert_type(self, sql_type):
+        mapping = self.read_convert_types()
 
-        # All dialects
-        mapping = {
+        # Supported type
+        for key, value in mapping.items():
+            if isinstance(sql_type, key):
+                return value
+
+        # Not supported type
+        note = f'Column type "{sql_type}" is not supported'
+        raise exceptions.FrictionlessException(errors.StorageError(note=note))
+
+    def read_convert_types(self):
+        return {
             sapg.ARRAY: "array",
             sa.Boolean: "boolean",
             sa.Date: "date",
@@ -313,15 +323,6 @@ class SqlStorage(Storage):
             sa.VARCHAR: "string",
             sapg.UUID: "string",
         }
-
-        # Get field type
-        for key, value in mapping.items():
-            if isinstance(sql_type, key):
-                return value
-
-        # Not supported type
-        note = f'Column type "{sql_type}" is not supported'
-        raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
     def read_sql_table(self, name):
         sql_name = self.__prefix + name
@@ -397,23 +398,25 @@ class SqlStorage(Storage):
             checks = []
             nullable = not field.required
             column_type = self.write_convert_type(field.type)
+            if not column_type:
+                column_type = sa.Text
             unique = field.constraints.get("unique", False)
-            for name, value in field.constraints.items():
-                if name == "minLength":
+            for const, value in field.constraints.items():
+                if const == "minLength":
                     checks.append(sa.Check('LENGTH("%s") >= %s' % (field.name, value)))
-                elif name == "maxLength":
+                elif const == "maxLength":
                     checks.append(sa.Check('LENGTH("%s") <= %s' % (field.name, value)))
-                elif name == "minimum":
+                elif const == "minimum":
                     checks.append(sa.Check('"%s" >= %s' % (field.name, value)))
-                elif name == "maximum":
+                elif const == "maximum":
                     checks.append(sa.Check('"%s" <= %s' % (field.name, value)))
-                elif name == "pattern":
+                elif const == "pattern":
                     if self.__dialect in ["postgresql"]:
                         checks.append(sa.Check("\"%s\" ~ '%s'" % (field.name, value)))
                     else:
                         check = sa.Check("\"%s\" REGEXP '%s'" % (field.name, value))
                         checks.append(check)
-                elif name == "enum":
+                elif const == "enum":
                     enum_name = "%s_%s_enum" % (sql_name, field.name)
                     column_type = sa.Enum(*value, name=enum_name)
             column_args = [field.name, column_type] + checks
@@ -432,8 +435,9 @@ class SqlStorage(Storage):
                 fields = fk["fields"]
                 resource = fk["reference"]["resource"]
                 foreign_fields = fk["reference"]["fields"]
+                table_name = sql_name
                 if resource != "":
-                    table_name = self.write_table_convert_name(resource)
+                    table_name = self.write_convert_name(resource)
                 composer = lambda field: ".".join([table_name, field])
                 foreign_fields = list(map(composer, foreign_fields))
                 constraint = sa.ForeignKeyConstraint(fields, foreign_fields)
@@ -444,6 +448,17 @@ class SqlStorage(Storage):
         return sql_table
 
     def write_convert_type(self, type):
+        mapping = self.write_convert_types()
+
+        # Supported type
+        if type in mapping:
+            return mapping[type]
+
+        # Not supported type
+        note = f'Field type "{type}" is not supported'
+        raise exceptions.FrictionlessException(errors.StorageError(note=note))
+
+    def write_convert_types(self):
 
         # Default dialect
         mapping = {
@@ -475,13 +490,7 @@ class SqlStorage(Storage):
                 }
             )
 
-        # Return type
-        if type in mapping:
-            return mapping[type]
-
-        # Not supported type
-        note = f'Field type "{type}" is not supported'
-        raise exceptions.FrictionlessException(errors.StorageError(note=note))
+        return mapping
 
     # Delete
 

@@ -28,6 +28,7 @@ TESTS_REQUIRE = [
     "pytest-cov",
     "pydoc-markdown",
     "docstring-parser",
+    "python-dotenv",
     "responses",
     "coveralls",
     "nbconvert",

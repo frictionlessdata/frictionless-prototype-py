@@ -2,7 +2,7 @@ import pytest
 from frictionless import Table, exceptions
 
 
-# Read
+# Loader
 
 
 @pytest.mark.slow

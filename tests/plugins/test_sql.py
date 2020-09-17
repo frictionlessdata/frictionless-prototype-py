@@ -1,9 +1,14 @@
+import os
 import pytest
-from frictionless import Table, exceptions
+import sqlalchemy as sa
+from frictionless import Table, Package, exceptions
 from frictionless.plugins.sql import SqlDialect
+from dotenv import load_dotenv
+
+load_dotenv(".env")
 
 
-# Read
+# Parser
 
 
 def test_table_format_sql(database_url):
@@ -43,9 +48,6 @@ def test_table_format_sql_headers_false(database_url):
         assert table.read_data() == [["id", "name"], [1, "english"], [2, "中国人"]]
 
 
-# Write
-
-
 def test_table_write_sqlite(database_url):
     source = "data/table.csv"
     dialect = SqlDialect(table="name", order_by="id")
@@ -54,3 +56,20 @@ def test_table_write_sqlite(database_url):
     with Table(database_url, dialect=dialect) as table:
         assert table.header == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
+
+
+# Storage
+
+
+@pytest.mark.skip
+def test_package_storage_sqlite():
+    engine = sa.create_engine(os.environ["SQLITE_URL"])
+    prefix = "prefix_"
+
+    # Write
+    package = Package("data/package-storage.json")
+    package.to_sql(engine=engine, prefix=prefix)
+
+    # Read
+    package = Package.from_sql(engine=engine, prefix=prefix)
+    print(package)

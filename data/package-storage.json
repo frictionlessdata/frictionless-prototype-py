@@ -30,7 +30,7 @@
           ],
           "primaryKey": "entry_id",
           "foreignKeys": [
-              {"fields": "entry_id", "reference": {"resource": "articles", "fields": "id"}}
+              {"fields": "entry_id", "reference": {"resource": "article", "fields": "id"}}
           ]
       },
       "data": [
