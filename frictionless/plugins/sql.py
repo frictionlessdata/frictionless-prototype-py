@@ -223,7 +223,7 @@ class SqlStorage(Storage):
         resource = self.__resources.get(name)
         if resource is None:
             sql_table = self.read_sql_table(name)
-            if not sql_table:
+            if sql_table is None:
                 note = f'Resource "{name}" does not exist'
                 raise exceptions.FrictionlessException(errors.StorageError(note=note))
             schema = self.read_convert_schema(sql_table)
@@ -237,7 +237,7 @@ class SqlStorage(Storage):
         for sql_table in self.__metadata.sorted_tables:
             name = self.read_convert_name(sql_table.name)
             if name is not None:
-                names.append(sql_table.name)
+                names.append(name)
         return names
 
     def read_data_stream(self, name):
@@ -247,6 +247,7 @@ class SqlStorage(Storage):
             # http://docs.sqlalchemy.org/en/latest/core/connections.html
             select = sql_table.select().execution_options(stream_results=True)
             result = select.execute()
+            yield result.keys()
             for cells in result:
                 yield tuple(cells)
 
@@ -268,7 +269,7 @@ class SqlStorage(Storage):
 
         # Primary key
         for constraint in sql_table.constraints:
-            if not isinstance(constraint, sa.PrimaryKeyConstraint):
+            if isinstance(constraint, sa.PrimaryKeyConstraint):
                 for column in constraint.columns:
                     schema.primary_key.append(column.name)
 
@@ -284,7 +285,7 @@ class SqlStorage(Storage):
                         # TODO: review this comparision
                         if element.column.table.name != sql_table.name:
                             res_name = element.column.table.name
-                            resource = self.read_table_convert_name(res_name)
+                            resource = self.read_convert_name(res_name)
                         foreign_fields.append(element.column.name)
                     if len(own_fields) == len(foreign_fields) == 1:
                         own_fields = own_fields.pop()

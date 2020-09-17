@@ -10,12 +10,13 @@
               {"name": "current", "type": "boolean"},
               {"name": "rating", "type": "number"}
           ],
-          "primaryKey": "id",
+          "primaryKey": ["id"],
           "foreignKeys": [
               {"fields": "parent", "reference": {"resource": "", "fields": "id"}}
           ]
       },
       "data": [
+          ["id", "parent", "name", "current", "rating"],
           ["1", "", "Taxes", "True", "9.5"],
           ["2", "1", "中国人", "False", "7"]
       ]
@@ -28,12 +29,13 @@
               {"name": "comment", "type": "string"},
               {"name": "note", "type": "any"}
           ],
-          "primaryKey": "entry_id",
+          "primaryKey": ["entry_id"],
           "foreignKeys": [
               {"fields": "entry_id", "reference": {"resource": "article", "fields": "id"}}
           ]
       },
       "data": [
+          ["entiry_id", "comment", "note"],
           ["1", "good", "note1"],
           ["2", "bad", "note2"]
       ]
@@ -52,6 +54,7 @@
           ]
       },
       "data": [
+          ["date", "date_year", "datetime", "duration", "time", "year", "yearmonth"],
           ["2015-01-01", "2015", "2015-01-01T03:00:00Z", "P1Y1M", "03:00:00", "2015", "2015-01"],
           ["2015-12-31", "2015", "2015-12-31T15:45:33Z", "P2Y2M", "15:45:33", "2015", "2015-01"]
       ]
@@ -60,26 +63,28 @@
       "name": "location",
       "schema": {
           "fields": [
-              {"name": "location", "type": "geojson"},
+              {"name": "geojson", "type": "geojson"},
               {"name": "geopoint", "type": "geopoint"}
           ]
       },
       "data": [
-          ["{\"type\": \"Point\",\"coordinates\":[33.33,33.33]}", "30,75"],
-          ["{\"type\": \"Point\",\"coordinates\":[50.00,50.00]}", "90,45"]
+          ["geojson", "geopoint"],
+          ["{\"type\": \"Point\", \"coordinates\": [33.33, 33.33]}", "30,75"],
+          ["{\"type\": \"Point\", \"coordinates\": [50.55, 50.55]}", "90,45"]
       ]
     },
     {
       "name": "compound",
       "schema": {
           "fields": [
-              {"name": "stats", "type": "object"},
-              {"name": "persons", "type": "array"}
+              {"name": "object", "type": "object"},
+              {"name": "array", "type": "array"}
           ]
       },
       "data": [
-          ["{\"chars\":560}", "[\"Mike\", \"John\"]"],
-          ["{\"chars\":970}", "[\"Paul\", \"Alex\"]"]
+          ["object", "array"],
+          ["{\"chars\": 560}", "[\"Mike\", \"John\"]"],
+          ["{\"chars\": 970}", "[\"Paul\", \"Alex\"]"]
       ]
     }
   ]

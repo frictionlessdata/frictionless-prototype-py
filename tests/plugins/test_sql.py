@@ -1,4 +1,3 @@
-import os
 import pytest
 import sqlalchemy as sa
 from frictionless import Table, Package, exceptions
@@ -61,14 +60,29 @@ def test_table_write_sqlite(database_url):
 # Storage
 
 
-def test_package_storage_sqlite():
-    engine = sa.create_engine(os.environ["SQLITE_URL"])
+def test_package_storage_sqlite(database_url):
+    engine = sa.create_engine(database_url)
     prefix = "prefix_"
 
-    # Write
-    package = Package("data/package-storage.json")
-    package.to_sql(engine=engine, prefix=prefix)
+    # Export/Import
+    source = Package("data/package-storage.json")
+    source.to_sql(engine=engine, prefix=prefix)
+    target = Package.from_sql(engine=engine, prefix=prefix)
 
-    # Read
-    package = Package.from_sql(engine=engine, prefix=prefix)
-    print(package)
+    # Assert meta (with expected discrepancies)
+    source.get_resource("comment").schema.get_field("note").type = "string"
+    source.get_resource("temporal").schema.get_field("date_year").pop("format")
+    source.get_resource("temporal").schema.get_field("duration").type = "string"
+    source.get_resource("temporal").schema.get_field("year").type = "integer"
+    source.get_resource("temporal").schema.get_field("yearmonth").type = "string"
+    source.get_resource("location").schema.get_field("geojson").type = "string"
+    source.get_resource("location").schema.get_field("geopoint").type = "string"
+    source.get_resource("compound").schema.get_field("object").type = "string"
+    source.get_resource("compound").schema.get_field("array").type = "string"
+    for resource in source.resources:
+        assert resource.schema == target.get_resource(resource.name).schema
+
+    # Assert data (with expected discrepancies)
+    source.get_resource("temporal").schema.get_field("date_year").format = "%Y"
+    for resource in source.resources:
+        assert resource.read_rows() == target.get_resource(resource.name).read_rows()
