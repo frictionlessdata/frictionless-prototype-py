@@ -274,24 +274,23 @@ class SqlStorage(Storage):
                     schema.primary_key.append(column.name)
 
         # Foreign keys
-        if self.__dialect in ["postgresql", "sqlite"]:
-            for constraint in sql_table.constraints:
-                if isinstance(constraint, sa.ForeignKeyConstraint):
-                    resource = ""
-                    own_fields = []
-                    foreign_fields = []
-                    for element in constraint.elements:
-                        own_fields.append(element.parent.name)
-                        # TODO: review this comparision
-                        if element.column.table.name != sql_table.name:
-                            res_name = element.column.table.name
-                            resource = self.read_convert_name(res_name)
-                        foreign_fields.append(element.column.name)
-                    if len(own_fields) == len(foreign_fields) == 1:
-                        own_fields = own_fields.pop()
-                        foreign_fields = foreign_fields.pop()
-                    ref = {"resource": resource, "fields": foreign_fields}
-                    schema.foreign_keys.append({"fields": own_fields, "reference": ref})
+        for constraint in sql_table.constraints:
+            if isinstance(constraint, sa.ForeignKeyConstraint):
+                resource = ""
+                own_fields = []
+                foreign_fields = []
+                for element in constraint.elements:
+                    own_fields.append(element.parent.name)
+                    # TODO: review this comparision
+                    if element.column.table.name != sql_table.name:
+                        res_name = element.column.table.name
+                        resource = self.read_convert_name(res_name)
+                    foreign_fields.append(element.column.name)
+                if len(own_fields) == len(foreign_fields) == 1:
+                    own_fields = own_fields.pop()
+                    foreign_fields = foreign_fields.pop()
+                ref = {"resource": resource, "fields": foreign_fields}
+                schema.foreign_keys.append({"fields": own_fields, "reference": ref})
 
         # Return schema
         return schema
@@ -438,18 +437,17 @@ class SqlStorage(Storage):
             constraints.append(constraint)
 
         # Foreign keys
-        if self.__dialect in ["postgresql", "sqlite"]:
-            for fk in schema.foreign_keys:
-                fields = fk["fields"]
-                resource = fk["reference"]["resource"]
-                foreign_fields = fk["reference"]["fields"]
-                table_name = sql_name
-                if resource != "":
-                    table_name = self.write_convert_name(resource)
-                composer = lambda field: ".".join([table_name, field])
-                foreign_fields = list(map(composer, foreign_fields))
-                constraint = sa.ForeignKeyConstraint(fields, foreign_fields)
-                constraints.append(constraint)
+        for fk in schema.foreign_keys:
+            fields = fk["fields"]
+            resource = fk["reference"]["resource"]
+            foreign_fields = fk["reference"]["fields"]
+            table_name = sql_name
+            if resource != "":
+                table_name = self.write_convert_name(resource)
+            composer = lambda field: ".".join([table_name, field])
+            foreign_fields = list(map(composer, foreign_fields))
+            constraint = sa.ForeignKeyConstraint(fields, foreign_fields)
+            constraints.append(constraint)
 
         # Create sql table
         sql_table = sa.Table(sql_name, self.__metadata, *(columns + constraints))

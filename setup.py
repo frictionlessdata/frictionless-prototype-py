@@ -24,6 +24,7 @@ TESTS_REQUIRE = [
     "black",
     "pylama",
     "pytest",
+    "pymysql",
     "psycopg2",
     "pytest-cov",
     "pydoc-markdown",
