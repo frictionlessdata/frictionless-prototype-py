@@ -201,6 +201,7 @@ class Resource(Metadata):
         """
         return "data" in self
 
+    # NOTE: optimize tabular/infer
     @Metadata.property(write=False)
     def tabular(self):
         """
@@ -584,7 +585,6 @@ class Resource(Metadata):
             storage (Storage): storage instance
             force (bool): overwrite existent
         """
-        self.infer(only_sample=True)
         storage.write_resource(self, force=force)
         return storage
 

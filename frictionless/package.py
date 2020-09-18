@@ -257,7 +257,6 @@ class Package(Metadata):
             storage (Storage): storage instance
             force (bool): overwrite existent
         """
-        self.infer(only_sample=True)
         storage.write_package(self, force=force)
         return storage
 

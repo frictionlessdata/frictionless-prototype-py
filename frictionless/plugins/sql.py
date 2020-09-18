@@ -172,7 +172,6 @@ class SqlParser(Parser):
 
 
 # TODO: move dependencies from the top to here
-# TODO: for now, read/write are oversimplified
 class SqlStorage(Storage):
     """SQL storage representation
 
@@ -193,12 +192,10 @@ class SqlStorage(Storage):
         self.__prefix = prefix
         self.__namespace = namespace
         self.__connection = engine.connect()
-        self.__dialect = engine.dialect.name
-        self.__resources = {}
 
         # Add regex support
         # It will fail silently if this function already exists
-        if self.__dialect == "sqlite":
+        if self.__connection.engine.dialect.name == "sqlite":
             self.__connection.connection.create_function("REGEXP", 2, regexp)
 
         # Create metadata and reflect
@@ -210,6 +207,10 @@ class SqlStorage(Storage):
         text = template.format(engine=self.__connection.engine)
         return text
 
+    @property
+    def connection(self):
+        return self.__connection
+
     # Read
 
     def read_package(self):
@@ -220,16 +221,13 @@ class SqlStorage(Storage):
         return package
 
     def read_resource(self, name):
-        resource = self.__resources.get(name)
-        if resource is None:
-            sql_table = self.__read_sql_table(name)
-            if sql_table is None:
-                note = f'Resource "{name}" does not exist'
-                raise exceptions.FrictionlessException(errors.StorageError(note=note))
-            schema = self.__read_convert_schema(sql_table)
-            data = partial(self.__read_data_stream, name)
-            resource = Resource(name=name, schema=schema, data=data)
-            self.__resources[resource.name] = resource
+        sql_table = self.__read_sql_table(name)
+        if sql_table is None:
+            note = f'Resource "{name}" does not exist'
+            raise exceptions.FrictionlessException(errors.StorageError(note=note))
+        schema = self.__read_convert_schema(sql_table)
+        data = partial(self.__read_data_stream, name)
+        resource = Resource(name=name, schema=schema, data=data)
         return resource
 
     def __read_resource_names(self):
@@ -325,7 +323,7 @@ class SqlStorage(Storage):
         }
 
     def __read_sql_table(self, name):
-        sql_name = self.__prefix + name
+        sql_name = self.__write_convert_name(name)
         if self.__namespace:
             sql_name = ".".join((self.__namespace, sql_name))
         return self.__metadata.tables.get(sql_name)
@@ -336,26 +334,26 @@ class SqlStorage(Storage):
     def write_package(self, package, force=False):
         existent_names = self.__read_resource_names()
 
+        # Copy/infer package
+        package = Package(package)
+        package.infer()
+
         # Check existent
         overwrite_names = []
         for resource in package.resources:
             if resource.name in existent_names:
                 if not force:
-                    note = f'Resource"{resource.name}" already exists'
+                    note = f'Resource "{resource.name}" already exists'
                     raise exceptions.FrictionlessException(errors.StorageError(note=note))
                 overwrite_names.append(resource.name)
         self.delete_package(overwrite_names)
 
-        # Convert tables
+        # Create tables
         sql_tables = []
         for resource in package.resources:
-            sql_table = self.__write_convert_schema(resource.name, resource.schema)
+            sql_table = self.__write_convert_schema(resource)
             sql_tables.append(sql_table)
-
-        # Create tables
         self.__metadata.create_all(tables=sql_tables)
-        for resource in package.resources:
-            self.__resources[resource.name] = resource
 
         # Write data
         for resource in package.resources:
@@ -392,16 +390,16 @@ class SqlStorage(Storage):
     def __write_convert_name(self, name):
         return self.__prefix + name
 
-    def __write_convert_schema(self, name, schema):
+    def __write_convert_schema(self, resource):
 
         # Prepare
         columns = []
         constraints = []
         column_mapping = {}
-        sql_name = self.__write_convert_name(name)
+        sql_name = self.__write_convert_name(resource.name)
 
         # Fields
-        for field in schema.fields:
+        for field in resource.schema.fields:
             checks = []
             nullable = not field.required
             column_type = self.__write_convert_type(field.type)
@@ -418,7 +416,7 @@ class SqlStorage(Storage):
                 elif const == "maximum":
                     checks.append(sa.Check('"%s" <= %s' % (field.name, value)))
                 elif const == "pattern":
-                    if self.__dialect in ["postgresql"]:
+                    if self.__connection.engine.dialect.name in ["postgresql"]:
                         checks.append(sa.Check("\"%s\" ~ '%s'" % (field.name, value)))
                     else:
                         check = sa.Check("\"%s\" REGEXP '%s'" % (field.name, value))
@@ -432,12 +430,12 @@ class SqlStorage(Storage):
             column_mapping[field.name] = column
 
         # Primary key
-        if schema.primary_key is not None:
-            constraint = sa.PrimaryKeyConstraint(*schema.primary_key)
+        if resource.schema.primary_key is not None:
+            constraint = sa.PrimaryKeyConstraint(*resource.schema.primary_key)
             constraints.append(constraint)
 
         # Foreign keys
-        for fk in schema.foreign_keys:
+        for fk in resource.schema.foreign_keys:
             fields = fk["fields"]
             resource = fk["reference"]["resource"]
             foreign_fields = fk["reference"]["fields"]
@@ -486,7 +484,7 @@ class SqlStorage(Storage):
         }
 
         # Postgresql dialect
-        if self.__dialect == "postgresql":
+        if self.__connection.engine.dialect.name == "postgresql":
             mapping.update(
                 {
                     "array": sapg.JSONB,
@@ -513,10 +511,6 @@ class SqlStorage(Storage):
                     note = f'Resource "{name}" does not exist'
                     raise exceptions.FrictionlessException(errors.StorageError(note=note))
                 continue
-
-            # Remove from resources
-            if name in self.__resources:
-                del self.__resources[name]
 
             # Add table for removal
             sql_table = self.__read_sql_table(name)
