@@ -7,8 +7,9 @@ def test_storage():
 
     # Export/Import
     source = Package("data/package-storage.json")
-    dataframes = source.to_pandas()
-    print(dataframes)
+    print(source)
+    #  dataframes = source.to_pandas()
+    #  print(dataframes)
     #  target = Package.from_sql(engine=engine, prefix=prefix)
 
     # Compare meta (with expected discrepancies)
@@ -31,4 +32,3 @@ def test_storage():
 
     # Cleanup storage
     #  storage.delete_package(target.resource_names)
-    pass

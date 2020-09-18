@@ -51,13 +51,6 @@ class PandasStorage(Storage):
 
     # Read
 
-    def read_package(self):
-        resources = []
-        for name in self.read_names():
-            resource = self.read_resource(name)
-            resources.append(resource)
-        return resources
-
     def read_resource(self, name):
         dataframe = self.__read_pandas_dataframe(name)
         if not dataframe:
@@ -68,10 +61,17 @@ class PandasStorage(Storage):
         resource = Resource(name=name, schema=schema, data=data)
         return resource
 
+    def read_package(self):
+        resources = []
+        for name in self.read_names():
+            resource = self.read_resource(name)
+            resources.append(resource)
+        return resources
+
     def __read_resource_names(self):
         return list(sorted(self.__dataframes.keys()))
 
-    # TODO: fix logic
+    # TODO: fix the logic
     def __read_data_stream(self, name):
         table = self.read_table(name)
         schema = table.schema
@@ -153,8 +153,16 @@ class PandasStorage(Storage):
 
     # Write
 
+    def write_resource(self, resource, *, force=False):
+        package = Package(resources=[resource])
+        return self.write_package(package, force=force)
+
     def write_package(self, package, *, force=False):
         existent_names = self.__read_resource_names()
+
+        # Copy/infer package
+        package = Package(package)
+        package.infer()
 
         # Check existent
         for resource in package.resources:
@@ -164,84 +172,61 @@ class PandasStorage(Storage):
                     raise exceptions.FrictionlessException(errors.StorageError(note=note))
                 self.delete_resource(resource.name)
 
-        # Define dataframes
+        # Write resources
         for resource in package.resources:
-            self.__dataframes[resource.name] = pd.DataFrame()
+            self.__dataframes[resource.name] = self.__write_convert_resource(resource)
 
-        # Write data
-        # TODO: implement
-        for resource in package.resources:
-            pass
-
-    def write_resource(self, resource, *, force=False):
-        package = Package(resources=[resource])
-        return self.write_package(package, force=force)
-
-    # TODO: fix logic
-    def __write_row_stream(self, name, row_stream):
-
-        # Prepare
-        table = self.read_table(name)
-        new_data_frame = self.write_table_convert_table(table, row_stream)
-
-        # Just set new DataFrame if current is empty
-        if self.__dataframes[name].size == 0:
-            self.__dataframes[name] = new_data_frame
-
-        # Append new data frame to the old one setting new data frame
-        # containing data from both old and new data frames
-        else:
-            self.__dataframes[name] = pd.concat([self.__dataframes[name], new_data_frame])
-
-    def __write_convert_schema(self, table, row_stream):
+    # TODO: fix the logic
+    def __write_convert_resource(self, resource):
 
         # Get data/index
+        types = {}
         data_rows = []
         index_rows = []
-        jtstypes_map = {}
-        schema = table.schema
-        for row in row_stream:
+        for row in resource.read_rows():
             data_values = []
             index_values = []
-            for field, value in zip(schema.fields, row):
+            for field, value in zip(resource.schema.fields, row):
                 if isinstance(value, float) and np.isnan(value):
                     value = None
                 if value and field.type == "integer":
                     value = int(value)
                 # http://pandas.pydata.org/pandas-docs/stable/gotchas.html#support-for-integer-na
                 if value is None and field.type in ("number", "integer"):
-                    jtstypes_map[field.name] = "number"
+                    types[field.name] = "number"
                     value = np.NaN
-                if field.name in schema.primary_key:
+                if field.name in resource.schema.primary_key:
                     index_values.append(value)
                 else:
                     data_values.append(value)
-            if len(schema.primary_key) == 1:
+            if len(resource.schema.primary_key) == 1:
                 index_rows.append(index_values[0])
-            elif len(schema.primary_key) > 1:
+            elif len(resource.schema.primary_key) > 1:
                 index_rows.append(tuple(index_values))
             data_rows.append(tuple(data_values))
 
         # Create index
         index = None
-        if schema.primary_key:
-            if len(schema.primary_key) == 1:
+        if resource.schema.primary_key:
+            if len(resource.schema.primary_key) == 1:
                 index_class = pd.Index
-                index_field = schema.get_field(schema.primary_key[0])
+                index_field = resource.schema.get_field(resource.schema.primary_key[0])
                 index_dtype = self.write_convert_type(index_field.type)
                 if field.type in ["datetime", "date"]:
                     index_class = pd.DatetimeIndex
                 index = index_class(index_rows, name=index_field.name, dtype=index_dtype)
-            elif len(schema.primary_key) > 1:
-                index = pd.MultiIndex.from_tuples(index_rows, names=schema.primary_key)
+            elif len(resource.schema.primary_key) > 1:
+                index = pd.MultiIndex.from_tuples(
+                    index_rows, names=resource.schema.primary_key
+                )
 
         # Create dtypes/columns
         dtypes = []
         columns = []
-        for field in schema.fields:
-            if field.name not in schema.primary_key:
+        for field in resource.schema.fields:
+            if field.name not in resource.schema.primary_key:
                 field_name = field.name
-                dtype = self.write_convert_type(jtstypes_map.get(field.name, field.type))
+                dtype = self.__write_convert_type(types.get(field.name, field.type))
                 dtypes.append((field_name, dtype))
                 columns.append(field.name)
 
@@ -282,10 +267,13 @@ class PandasStorage(Storage):
 
     # Delete
 
+    def delete_resource(self, name, *, ignore=False):
+        return self.delete_package([name], ignore=ignore)
+
     def delete_package(self, names, *, ignore=False):
         existent_names = self.__read_resource_names()
 
-        # Iterate over buckets
+        # Remove dataframes
         for name in names:
 
             # Check existent
@@ -297,6 +285,3 @@ class PandasStorage(Storage):
 
             # Remove resource
             self.__dataframes.pop(name)
-
-    def delete_resource(self, name, *, ignore=False):
-        return self.delete_package([name], ignore=ignore)

@@ -213,13 +213,6 @@ class SqlStorage(Storage):
 
     # Read
 
-    def read_package(self):
-        package = Package()
-        for name in self.__read_resource_names():
-            resource = self.read_resource(name)
-            package.resources.append(resource)
-        return package
-
     def read_resource(self, name):
         sql_table = self.__read_sql_table(name)
         if sql_table is None:
@@ -229,6 +222,13 @@ class SqlStorage(Storage):
         data = partial(self.__read_data_stream, name)
         resource = Resource(name=name, schema=schema, data=data)
         return resource
+
+    def read_package(self):
+        package = Package()
+        for name in self.__read_resource_names():
+            resource = self.read_resource(name)
+            package.resources.append(resource)
+        return package
 
     def __read_resource_names(self):
         names = []
@@ -330,6 +330,10 @@ class SqlStorage(Storage):
 
     # Write
 
+    def write_resource(self, resource, *, force=False):
+        package = Package(resources=[resource])
+        return self.write_package(package, force=force)
+
     # TODO: use a transaction
     def write_package(self, package, force=False):
         existent_names = self.__read_resource_names()
@@ -358,10 +362,6 @@ class SqlStorage(Storage):
         # Write data
         for resource in package.resources:
             self.__write_row_stream(resource)
-
-    def write_resource(self, resource, *, force=False):
-        package = Package(resources=[resource])
-        return self.write_package(package, force=force)
 
     def __write_row_stream(self, resource):
 
@@ -498,6 +498,9 @@ class SqlStorage(Storage):
 
     # Delete
 
+    def delete_resource(self, name, *, ignore=False):
+        return self.delete_package([name], ignore=ignore)
+
     def delete_package(self, names, *, ignore=False):
         existent_names = self.__read_resource_names()
 
@@ -520,9 +523,6 @@ class SqlStorage(Storage):
         self.__metadata.drop_all(tables=sql_tables)
         self.__metadata.clear()
         self.__metadata.reflect()
-
-    def delete_resource(self, name, *, ignore=False):
-        return self.delete_package([name], ignore=ignore)
 
 
 # Internal
