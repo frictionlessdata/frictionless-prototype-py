@@ -1,8 +1,8 @@
 import os
 import pytest
 import sqlalchemy as sa
-from frictionless import Table, Package, exceptions
-from frictionless.plugins.sql import SqlDialect
+from frictionless import Table, Package, Resource, exceptions
+from frictionless.plugins.sql import SqlDialect, SqlStorage
 from dotenv import load_dotenv
 
 load_dotenv(".env")
@@ -61,7 +61,7 @@ def test_table_write_sqlite(database_url):
 # Storage
 
 
-def test_package_storage_sqlite(database_url):
+def test_storage_sqlite(database_url):
     engine = sa.create_engine(database_url)
     prefix = "prefix_"
 
@@ -93,7 +93,7 @@ def test_package_storage_sqlite(database_url):
 
 
 @pytest.mark.ci
-def test_package_storage_postgresql():
+def test_storage_postgresql():
     engine = sa.create_engine(os.environ["POSTGRESQL_URL"])
     prefix = "prefix_"
 
@@ -124,7 +124,7 @@ def test_package_storage_postgresql():
 
 
 @pytest.mark.ci
-def test_package_storage_mysql():
+def test_storage_mysql():
     engine = sa.create_engine(os.environ["MYSQL_URL"])
     prefix = "prefix_"
 
@@ -155,3 +155,39 @@ def test_package_storage_mysql():
 
     # Cleanup storage
     storage.delete_package(target.resource_names)
+
+
+def test_storage_read_resource_not_existent_error(database_url):
+    engine = sa.create_engine(database_url)
+    storage = SqlStorage(engine=engine)
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        storage.read_resource("bad")
+    error = excinfo.value.error
+    assert error.code == "storage-error"
+    assert error.note.count("does not exist")
+
+
+def test_storage_write_resource_existent_error(database_url):
+    engine = sa.create_engine(database_url)
+    resource = Resource(path="data/table.csv")
+    storage = resource.to_sql(engine=engine)
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        storage.write_resource(resource)
+    error = excinfo.value.error
+    assert error.code == "storage-error"
+    assert error.note.count("already exists")
+
+
+def test_storage_delete_resource_not_existent_error(database_url):
+    engine = sa.create_engine(database_url)
+    storage = SqlStorage(engine=engine)
+    with pytest.raises(exceptions.FrictionlessException) as excinfo:
+        storage.delete_resource("bad")
+    error = excinfo.value.error
+    assert error.code == "storage-error"
+    assert error.note.count("does not exist")
+
+
+# TODO: implement
+def test_storage_field_constraints(database_url):
+    pass

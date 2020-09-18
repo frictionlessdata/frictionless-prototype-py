@@ -341,7 +341,7 @@ class SqlStorage(Storage):
         for resource in package.resources:
             if resource.name in existent_names:
                 if not force:
-                    note = f'Table "{resource.name}" already exists'
+                    note = f'Resource"{resource.name}" already exists'
                     raise exceptions.FrictionlessException(errors.StorageError(note=note))
                 overwrite_names.append(resource.name)
         self.delete_package(overwrite_names)
