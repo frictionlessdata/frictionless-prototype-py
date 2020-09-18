@@ -41,6 +41,34 @@
       ]
     },
     {
+      "name": "location",
+      "schema": {
+          "fields": [
+              {"name": "geojson", "type": "geojson"},
+              {"name": "geopoint", "type": "geopoint"}
+          ]
+      },
+      "data": [
+          ["geojson", "geopoint"],
+          ["{\"type\": \"Point\", \"coordinates\": [33.33, 33.33]}", "30,75"],
+          ["{\"type\": \"Point\", \"coordinates\": [50.55, 50.55]}", "90,45"]
+      ]
+    },
+    {
+      "name": "structure",
+      "schema": {
+          "fields": [
+              {"name": "object", "type": "object"},
+              {"name": "array", "type": "array"}
+          ]
+      },
+      "data": [
+          ["object", "array"],
+          ["{\"chars\": 560}", "[\"Mike\", \"John\"]"],
+          ["{\"chars\": 970}", "[\"Paul\", \"Alex\"]"]
+      ]
+    },
+    {
       "name": "temporal",
       "schema": {
           "fields": [
@@ -57,34 +85,6 @@
           ["date", "date_year", "datetime", "duration", "time", "year", "yearmonth"],
           ["2015-01-01", "2015", "2015-01-01T03:00:00Z", "P1Y1M", "03:00:00", "2015", "2015-01"],
           ["2015-12-31", "2015", "2015-12-31T15:45:33Z", "P2Y2M", "15:45:33", "2015", "2015-01"]
-      ]
-    },
-    {
-      "name": "location",
-      "schema": {
-          "fields": [
-              {"name": "geojson", "type": "geojson"},
-              {"name": "geopoint", "type": "geopoint"}
-          ]
-      },
-      "data": [
-          ["geojson", "geopoint"],
-          ["{\"type\": \"Point\", \"coordinates\": [33.33, 33.33]}", "30,75"],
-          ["{\"type\": \"Point\", \"coordinates\": [50.55, 50.55]}", "90,45"]
-      ]
-    },
-    {
-      "name": "compound",
-      "schema": {
-          "fields": [
-              {"name": "object", "type": "object"},
-              {"name": "array", "type": "array"}
-          ]
-      },
-      "data": [
-          ["object", "array"],
-          ["{\"chars\": 560}", "[\"Mike\", \"John\"]"],
-          ["{\"chars\": 970}", "[\"Paul\", \"Alex\"]"]
       ]
     }
   ]

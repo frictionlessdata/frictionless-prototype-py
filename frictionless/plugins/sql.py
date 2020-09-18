@@ -338,12 +338,14 @@ class SqlStorage(Storage):
         existent_names = self.read_resource_names()
 
         # Check existent
+        overwrite_names = []
         for resource in package.resources:
             if resource.name in existent_names:
                 if not force:
                     note = f'Table "{resource.name}" already exists'
                     raise exceptions.FrictionlessException(errors.StorageError(note=note))
-                self.delete_resource(resource.name)
+                overwrite_names.append(resource.name)
+        self.delete_package(overwrite_names)
 
         # Convert tables
         sql_tables = []
@@ -352,15 +354,9 @@ class SqlStorage(Storage):
             sql_tables.append(sql_table)
 
         # Create tables
-        try:
-            self.__metadata.create_all(tables=sql_tables)
-            for resource in package.resources:
-                self.__resources[resource.name] = resource
-        except sa.exc.ProgrammingError as exception:
-            if "there is no unique constraint matching given keys" in str(exception):
-                note = "Foreign keys can only reference primary key or unique fields\n%s"
-                error = errors.StorageError(note=note % exception)
-                raise exceptions.FrictionlessException(error) from exception
+        self.__metadata.create_all(tables=sql_tables)
+        for resource in package.resources:
+            self.__resources[resource.name] = resource
 
         # Write data
         for resource in package.resources:
@@ -509,7 +505,7 @@ class SqlStorage(Storage):
     def delete_package(self, names, *, ignore=False):
         existent_names = self.read_resource_names()
 
-        # Iterate
+        # Prepare tables
         sql_tables = []
         for name in names:
 
