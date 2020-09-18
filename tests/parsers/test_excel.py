@@ -16,7 +16,7 @@ def test_table_xlsx_table():
         assert table.read_data() == [[1.0, "english"], [2.0, "中国人"]]
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_xlsx_remote():
     source = BASE_URL % "data/table.xlsx"
     with Table(source) as table:
@@ -140,7 +140,7 @@ def test_table_xlsx_preserve_formatting_number_multicode():
         assert table.read_data() == [["4.5"], ["-9.032"], ["15.8"]]
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_xlsx_workbook_cache():
     source = BASE_URL % "data/special/sheets.xlsx"
     for sheet in ["Sheet1", "Sheet2", "Sheet3"]:
@@ -156,7 +156,7 @@ def test_table_local_xls():
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_remote_xls():
     with Table(BASE_URL % "data/table.xls") as table:
         assert table.header == ["id", "name"]
@@ -238,7 +238,7 @@ def test_table_xls_with_ints_floats_dates():
         ]
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_fix_for_2007_xls():
     source = "https://ams3.digitaloceanspaces.com/budgetkey-files/spending-reports/2018-3-משרד התרבות והספורט-לשכת הפרסום הממשלתית-2018-10-22-c457.xls"
     with Table(source) as table:

@@ -79,14 +79,14 @@ def test_table_csv_text():
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_csv_remote():
     with Table(BASE_URL % "data/table.csv") as table:
         assert table.header == ["id", "name"]
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_csv_remote_non_ascii_url():
     source = "http://data.defra.gov.uk/ops/government_procurement_card/over_£500_GPC_apr_2013.csv"
     with Table(source) as table:

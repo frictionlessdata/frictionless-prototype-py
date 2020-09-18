@@ -1,4 +1,4 @@
-.PHONY: all check docs install format lint release test
+.PHONY: all docs install format lint release test test-ci
 
 
 PACKAGE := $(shell grep '^PACKAGE =' setup.py | cut -d '"' -f2)
@@ -8,10 +8,6 @@ LEAD := $(shell head -n 1 LEAD.md)
 
 all:
 	@grep '^\.PHONY' Makefile | cut -d' ' -f2- | tr ' ' '\n'
-
-check:
-	make lint
-	pytest -x -m 'not slow'
 
 docs:
 	python scripts/docs.py
@@ -40,3 +36,7 @@ release:
 test:
 	make lint
 	pytest --cov ${PACKAGE} --cov-report term-missing --cov-fail-under 50
+
+test-ci:
+	make lint
+	pytest --cov ${PACKAGE} --cov-report term-missing --cov-fail-under 50 --ci

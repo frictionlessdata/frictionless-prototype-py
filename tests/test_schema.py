@@ -59,7 +59,7 @@ def test_schema_descriptor_path():
     assert actual == expect
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_schema_descriptor_url():
     url = BASE_URL % "data/schema_valid_simple.json"
     actual = Schema(url)

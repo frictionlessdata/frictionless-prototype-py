@@ -752,7 +752,7 @@ def test_validate_structure_errors_with_limit_errors():
     ]
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_validate_limit_memory():
     source = lambda: ([integer] for integer in range(1, 100000000))
     schema = {"fields": [{"name": "integer", "type": "integer"}], "primaryKey": "integer"}

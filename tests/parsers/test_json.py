@@ -44,14 +44,14 @@ def test_table_json_from_text_keyed():
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_json_from_remote():
     with Table(BASE_URL % "data/table-lists.json") as table:
         assert table.header == ["id", "name"]
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_json_from_remote_keyed():
     with Table(BASE_URL % "data/table-dicts.json") as table:
         assert table.dialect.keyed is True
