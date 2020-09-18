@@ -66,10 +66,10 @@ def test_package_storage_sqlite(database_url):
 
     # Export/Import
     source = Package("data/package-storage.json")
-    source.to_sql(engine=engine, prefix=prefix)
+    storage = source.to_sql(engine=engine, prefix=prefix, force=True)
     target = Package.from_sql(engine=engine, prefix=prefix)
 
-    # Assert meta (with expected discrepancies)
+    # Compare meta (with expected discrepancies)
     source.get_resource("comment").schema.get_field("note").type = "string"
     source.get_resource("temporal").schema.get_field("date_year").pop("format")
     source.get_resource("temporal").schema.get_field("duration").type = "string"
@@ -82,7 +82,10 @@ def test_package_storage_sqlite(database_url):
     for resource in source.resources:
         assert resource.schema == target.get_resource(resource.name).schema
 
-    # Assert data (with expected discrepancies)
+    # Compare data (with expected discrepancies)
     source.get_resource("temporal").schema.get_field("date_year").format = "%Y"
     for resource in source.resources:
         assert resource.read_rows() == target.get_resource(resource.name).read_rows()
+
+    # Cleanup storage
+    storage.delete_package(target.resource_names)
