@@ -302,7 +302,7 @@ class SqlStorage(Storage):
                 return value
 
         # Not supported type
-        note = f'Column type "{sql_type}" is not supported'
+        note = f'Field type "{sql_type}" is not supported'
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
     def __read_convert_types(self):

@@ -235,6 +235,16 @@ class Package(Metadata):
         """
         return storage.read_package()
 
+    def to_storage(self, storage, *, force=False):
+        """Export package to storage
+
+        Parameters:
+            storage (Storage): storage instance
+            force (bool): overwrite existent
+        """
+        storage.write_package(self, force=force)
+        return storage
+
     @staticmethod
     def from_sql(*, engine, prefix="", namespace=None):
         """Import package from SQL
@@ -249,16 +259,6 @@ class Package(Metadata):
                 "sql", engine=engine, prefix=prefix, namespace=namespace
             )
         )
-
-    def to_storage(self, storage, *, force=False):
-        """Export package to storage
-
-        Parameters:
-            storage (Storage): storage instance
-            force (bool): overwrite existent
-        """
-        storage.write_package(self, force=force)
-        return storage
 
     def to_sql(self, *, engine, prefix="", namespace=None, force=False):
         """Export package to SQL
@@ -275,6 +275,23 @@ class Package(Metadata):
             ),
             force=force,
         )
+
+    @staticmethod
+    def from_pandas(*, dataframes):
+        """Import package from Pandas dataframes
+
+        Parameters:
+            dataframes (dict): mapping of Pandas dataframes
+        """
+        return Package.from_storage(
+            system.create_storage("pandas", dataframes=dataframes)
+        )
+
+    def to_pandas(self):
+        """Export package to Pandas dataframes"""
+        storage = self.to_storage(system.create_storage("pandas"))
+        dataframes = storage.dataframes
+        return dataframes
 
     def to_dict(self, expand=False):
         """Convert package to a dict

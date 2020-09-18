@@ -41,10 +41,13 @@ class PandasStorage(Storage):
 
     def __init__(self, *, dataframes=None):
         self.__dataframes = dataframes or collections.OrderedDict()
-        self.__resources = {}
 
     def __repr__(self):
         return "Storage <pandas>"
+
+    @property
+    def dataframes(self):
+        return self.__dataframes
 
     # Read
 
@@ -56,23 +59,20 @@ class PandasStorage(Storage):
         return resources
 
     def read_resource(self, name):
-        resource = self.__resources.get(name)
-        if resource is None:
-            dataframe = self.read_pandas_dataframe(name)
-            if not dataframe:
-                note = f'Resource "{name}" does not exist'
-                raise exceptions.FrictionlessException(errors.StorageError(note=note))
-            schema = self.read_convert_schema(dataframe)
-            data = partial(self.read_data_stream, name)
-            resource = Resource(name=name, schema=schema, data=data)
-            self.__resources[resource.name] = resource
+        dataframe = self.__read_pandas_dataframe(name)
+        if not dataframe:
+            note = f'Resource "{name}" does not exist'
+            raise exceptions.FrictionlessException(errors.StorageError(note=note))
+        schema = self.__read_convert_schema(dataframe)
+        data = partial(self.__read_data_stream, name)
+        resource = Resource(name=name, schema=schema, data=data)
         return resource
 
-    def read_resource_names(self):
+    def __read_resource_names(self):
         return list(sorted(self.__dataframes.keys()))
 
     # TODO: fix logic
-    def read_data_stream(self, name):
+    def __read_data_stream(self, name):
         table = self.read_table(name)
         schema = table.schema
 
@@ -97,12 +97,12 @@ class PandasStorage(Storage):
                     result.append(field.cast_value(value))
             yield result
 
-    def read_convert_schema(self, dataframe):
+    def __read_convert_schema(self, dataframe):
         schema = Schema()
 
         # Primary key
         if dataframe.index.name:
-            type = self.read_convert_type(dataframe.index.dtype)
+            type = self.__read_convert_type(dataframe.index.dtype)
             field = Field(name=dataframe.index.name, type=type)
             field.required = True
             schema.fields.append(field)
@@ -118,7 +118,7 @@ class PandasStorage(Storage):
         # Return schema
         return schema
 
-    def read_convert_type(self, dtype, sample=None):
+    def __read_convert_type(self, dtype, sample=None):
 
         # Pandas types
         if pdc.is_bool_dtype(dtype):
@@ -148,13 +148,13 @@ class PandasStorage(Storage):
         # Default
         return "string"
 
-    def read_pandas_dataframe(self, name):
+    def __read_pandas_dataframe(self, name):
         return self.__dataframes.get(name)
 
     # Write
 
     def write_package(self, package, *, force=False):
-        existent_names = self.read_resource_names()
+        existent_names = self.__read_resource_names()
 
         # Check existent
         for resource in package.resources:
@@ -166,7 +166,6 @@ class PandasStorage(Storage):
 
         # Define dataframes
         for resource in package.resources:
-            self.__resources[resource.name] = resource
             self.__dataframes[resource.name] = pd.DataFrame()
 
         # Write data
@@ -179,7 +178,7 @@ class PandasStorage(Storage):
         return self.write_package(package, force=force)
 
     # TODO: fix logic
-    def write_row_stream(self, name, row_stream):
+    def __write_row_stream(self, name, row_stream):
 
         # Prepare
         table = self.read_table(name)
@@ -194,7 +193,7 @@ class PandasStorage(Storage):
         else:
             self.__dataframes[name] = pd.concat([self.__dataframes[name], new_data_frame])
 
-    def write_convert_schema(self, table, row_stream):
+    def __write_convert_schema(self, table, row_stream):
 
         # Get data/index
         data_rows = []
@@ -252,7 +251,7 @@ class PandasStorage(Storage):
 
         return dataframe
 
-    def write_convert_type(self, type):
+    def __write_convert_type(self, type):
 
         # Mapping
         mapping = {
@@ -278,13 +277,13 @@ class PandasStorage(Storage):
             return mapping[type]
 
         # Not supported type
-        note = f'Column type "{type}" is not supported'
+        note = f'Field type "{type}" is not supported'
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
     # Delete
 
     def delete_package(self, names, *, ignore=False):
-        existent_names = self.read_resource_names()
+        existent_names = self.__read_resource_names()
 
         # Iterate over buckets
         for name in names:
@@ -296,8 +295,7 @@ class PandasStorage(Storage):
                     raise exceptions.FrictionlessException(errors.StorageError(note=note))
                 return
 
-            # Remove table
-            self.__resources.pop(name)
+            # Remove resource
             self.__dataframes.pop(name)
 
     def delete_resource(self, name, *, ignore=False):

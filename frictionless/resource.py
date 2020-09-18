@@ -561,9 +561,19 @@ class Resource(Metadata):
         """
         return storage.read_resource(name)
 
+    def to_storage(self, storage, *, force=False):
+        """Export resource to storage
+
+        Parameters:
+            storage (Storage): storage instance
+            force (bool): overwrite existent
+        """
+        storage.write_resource(self, force=force)
+        return storage
+
     @staticmethod
     def from_sql(*, name, engine, prefix="", namespace=None):
-        """Import resource from SQL
+        """Import resource from SQL table
 
         Parameters:
             name (str): resource name
@@ -578,18 +588,8 @@ class Resource(Metadata):
             name=name,
         )
 
-    def to_storage(self, storage, *, force=False):
-        """Export resource to storage
-
-        Parameters:
-            storage (Storage): storage instance
-            force (bool): overwrite existent
-        """
-        storage.write_resource(self, force=force)
-        return storage
-
     def to_sql(self, *, engine, prefix="", namespace=None, force=False):
-        """Export resource to SQL
+        """Export resource to SQL table
 
         Parameters:
             engine (object): `sqlalchemy` engine
@@ -603,6 +603,29 @@ class Resource(Metadata):
             ),
             force=force,
         )
+
+    @staticmethod
+    def from_pandas(dataframe):
+        """Import resource from Pandas dataframe
+
+        Parameters:
+            dataframe (str): padas dataframe
+        """
+        return Resource.from_storage(
+            system.create_storage("pandas", dataframes={"name": dataframe}),
+            name="name",
+        )
+
+    def to_pandas(self):
+        """Export resource to Pandas dataframe
+
+        Parameters:
+            dataframes (dict): pandas dataframes
+            force (bool): overwrite existent
+        """
+        storage = self.to_storage(system.create_storage("pandas"))
+        dataframe = storage.dataframes[self.name]
+        return dataframe
 
     def to_dict(self, expand=False):
         """Convert resource to dict
