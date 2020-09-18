@@ -27,6 +27,7 @@ class Storage:
         pass
 
 
+# TODO: remove after the migration to new storage API
 class StorageTable:
     def __init__(self, name, *, schema):
         self.__name = name

@@ -214,7 +214,7 @@ class SqlStorage(Storage):
 
     def read_package(self):
         package = Package()
-        for name in self.read_resource_names():
+        for name in self.__read_resource_names():
             resource = self.read_resource(name)
             package.resources.append(resource)
         return package
@@ -222,26 +222,26 @@ class SqlStorage(Storage):
     def read_resource(self, name):
         resource = self.__resources.get(name)
         if resource is None:
-            sql_table = self.read_sql_table(name)
+            sql_table = self.__read_sql_table(name)
             if sql_table is None:
                 note = f'Resource "{name}" does not exist'
                 raise exceptions.FrictionlessException(errors.StorageError(note=note))
-            schema = self.read_convert_schema(sql_table)
-            data = partial(self.read_data_stream, name)
+            schema = self.__read_convert_schema(sql_table)
+            data = partial(self.__read_data_stream, name)
             resource = Resource(name=name, schema=schema, data=data)
             self.__resources[resource.name] = resource
         return resource
 
-    def read_resource_names(self):
+    def __read_resource_names(self):
         names = []
         for sql_table in self.__metadata.sorted_tables:
-            name = self.read_convert_name(sql_table.name)
+            name = self.__read_convert_name(sql_table.name)
             if name is not None:
                 names.append(name)
         return names
 
-    def read_data_stream(self, name):
-        sql_table = self.read_sql_table(name)
+    def __read_data_stream(self, name):
+        sql_table = self.__read_sql_table(name)
         with self.__connection.begin():
             # Streaming could be not working for some backends:
             # http://docs.sqlalchemy.org/en/latest/core/connections.html
@@ -251,17 +251,17 @@ class SqlStorage(Storage):
             for cells in result:
                 yield tuple(cells)
 
-    def read_convert_name(self, sql_name):
+    def __read_convert_name(self, sql_name):
         if sql_name.startswith(self.__prefix):
             return sql_name.replace(self.__prefix, "", 1)
         return None
 
-    def read_convert_schema(self, sql_table):
+    def __read_convert_schema(self, sql_table):
         schema = Schema()
 
         # Fields
         for column in sql_table.columns:
-            field_type = self.read_convert_type(column.type)
+            field_type = self.__read_convert_type(column.type)
             field = Field(name=column.name, type=field_type)
             if not column.nullable:
                 field.required = True
@@ -284,7 +284,7 @@ class SqlStorage(Storage):
                     # TODO: review this comparision
                     if element.column.table.name != sql_table.name:
                         res_name = element.column.table.name
-                        resource = self.read_convert_name(res_name)
+                        resource = self.__read_convert_name(res_name)
                     foreign_fields.append(element.column.name)
                 if len(own_fields) == len(foreign_fields) == 1:
                     own_fields = own_fields.pop()
@@ -295,8 +295,8 @@ class SqlStorage(Storage):
         # Return schema
         return schema
 
-    def read_convert_type(self, sql_type):
-        mapping = self.read_convert_types()
+    def __read_convert_type(self, sql_type):
+        mapping = self.__read_convert_types()
 
         # Supported type
         for key, value in mapping.items():
@@ -307,7 +307,7 @@ class SqlStorage(Storage):
         note = f'Column type "{sql_type}" is not supported'
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
-    def read_convert_types(self):
+    def __read_convert_types(self):
         return {
             sapg.ARRAY: "array",
             sa.Boolean: "boolean",
@@ -324,7 +324,7 @@ class SqlStorage(Storage):
             sapg.UUID: "string",
         }
 
-    def read_sql_table(self, name):
+    def __read_sql_table(self, name):
         sql_name = self.__prefix + name
         if self.__namespace:
             sql_name = ".".join((self.__namespace, sql_name))
@@ -334,7 +334,7 @@ class SqlStorage(Storage):
 
     # TODO: use a transaction
     def write_package(self, package, force=False):
-        existent_names = self.read_resource_names()
+        existent_names = self.__read_resource_names()
 
         # Check existent
         overwrite_names = []
@@ -349,7 +349,7 @@ class SqlStorage(Storage):
         # Convert tables
         sql_tables = []
         for resource in package.resources:
-            sql_table = self.write_convert_schema(resource.name, resource.schema)
+            sql_table = self.__write_convert_schema(resource.name, resource.schema)
             sql_tables.append(sql_table)
 
         # Create tables
@@ -359,17 +359,17 @@ class SqlStorage(Storage):
 
         # Write data
         for resource in package.resources:
-            self.write_row_stream(resource)
+            self.__write_row_stream(resource)
 
     def write_resource(self, resource, *, force=False):
         package = Package(resources=[resource])
         return self.write_package(package, force=force)
 
-    def write_row_stream(self, resource):
+    def __write_row_stream(self, resource):
 
         # Fallback fields
         fallback_fields = []
-        mapping = self.write_convert_types()
+        mapping = self.__write_convert_types()
         for field in resource.schema.fields:
             if mapping[field.type] is None:
                 fallback_fields.append(field)
@@ -377,7 +377,7 @@ class SqlStorage(Storage):
         # Write data
         buffer = []
         buffer_size = 1000
-        sql_table = self.read_sql_table(resource.name)
+        sql_table = self.__read_sql_table(resource.name)
         with self.__connection.begin():
             for row in resource.read_row_stream():
                 for field in fallback_fields:
@@ -389,22 +389,22 @@ class SqlStorage(Storage):
             if len(buffer):
                 self.__connection.execute(sql_table.insert().values(buffer))
 
-    def write_convert_name(self, name):
+    def __write_convert_name(self, name):
         return self.__prefix + name
 
-    def write_convert_schema(self, name, schema):
+    def __write_convert_schema(self, name, schema):
 
         # Prepare
         columns = []
         constraints = []
         column_mapping = {}
-        sql_name = self.write_convert_name(name)
+        sql_name = self.__write_convert_name(name)
 
         # Fields
         for field in schema.fields:
             checks = []
             nullable = not field.required
-            column_type = self.write_convert_type(field.type)
+            column_type = self.__write_convert_type(field.type)
             if not column_type:
                 column_type = sa.Text
             unique = field.constraints.get("unique", False)
@@ -443,7 +443,7 @@ class SqlStorage(Storage):
             foreign_fields = fk["reference"]["fields"]
             table_name = sql_name
             if resource != "":
-                table_name = self.write_convert_name(resource)
+                table_name = self.__write_convert_name(resource)
             composer = lambda field: ".".join([table_name, field])
             foreign_fields = list(map(composer, foreign_fields))
             constraint = sa.ForeignKeyConstraint(fields, foreign_fields)
@@ -453,8 +453,8 @@ class SqlStorage(Storage):
         sql_table = sa.Table(sql_name, self.__metadata, *(columns + constraints))
         return sql_table
 
-    def write_convert_type(self, type):
-        mapping = self.write_convert_types()
+    def __write_convert_type(self, type):
+        mapping = self.__write_convert_types()
 
         # Supported type
         if type in mapping:
@@ -464,7 +464,7 @@ class SqlStorage(Storage):
         note = f'Field type "{type}" is not supported'
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
-    def write_convert_types(self):
+    def __write_convert_types(self):
 
         # Default dialect
         mapping = {
@@ -501,7 +501,7 @@ class SqlStorage(Storage):
     # Delete
 
     def delete_package(self, names, *, ignore=False):
-        existent_names = self.read_resource_names()
+        existent_names = self.__read_resource_names()
 
         # Prepare tables
         sql_tables = []
@@ -519,7 +519,7 @@ class SqlStorage(Storage):
                 del self.__resources[name]
 
             # Add table for removal
-            sql_table = self.read_sql_table(name)
+            sql_table = self.__read_sql_table(name)
             sql_tables.append(sql_table)
 
         # Drop tables, update metadata
