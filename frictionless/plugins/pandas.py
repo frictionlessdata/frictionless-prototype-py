@@ -1,9 +1,6 @@
 import isodate
 import datetime
 import collections
-import numpy as np
-import pandas as pd
-import pandas.core.dtypes.api as pdc
 from functools import partial
 from ..resource import Resource
 from ..package import Package
@@ -12,6 +9,7 @@ from ..storage import Storage
 from ..schema import Schema
 from ..field import Field
 from .. import exceptions
+from .. import helpers
 from .. import errors
 
 
@@ -35,7 +33,6 @@ class PandasPlugin(Plugin):
 # Storage
 
 
-# TODO: move dependencies from the top to here
 class PandasStorage(Storage):
     """Pandas storage implementation"""
 
@@ -79,6 +76,7 @@ class PandasStorage(Storage):
         return list(sorted(self.__dataframes.keys()))
 
     def __read_data_stream(self, name, schema):
+        np = helpers.import_from_plugin("numpy", plugin="pandas")
         dataframe = self.__read_pandas_dataframe(name)
         for pk, item in dataframe.iterrows():
             cells = []
@@ -120,6 +118,7 @@ class PandasStorage(Storage):
         return schema
 
     def __read_convert_type(self, dtype, sample=None):
+        pdc = helpers.import_from_plugin("pandas.core.dtypes.api", plugin="pandas")
 
         # Pandas types
         if pdc.is_bool_dtype(dtype):
@@ -178,6 +177,8 @@ class PandasStorage(Storage):
             self.__dataframes[resource.name] = self.__write_convert_resource(resource)
 
     def __write_convert_resource(self, resource):
+        np = helpers.import_from_plugin("numpy", plugin="pandas")
+        pd = helpers.import_from_plugin("pandas", plugin="pandas")
 
         # Get data/index
         data_rows = []
@@ -235,6 +236,7 @@ class PandasStorage(Storage):
         return dataframe
 
     def __write_convert_type(self, type):
+        np = helpers.import_from_plugin("numpy", plugin="pandas")
 
         # Mapping
         mapping = {

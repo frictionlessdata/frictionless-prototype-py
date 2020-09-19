@@ -1,12 +1,12 @@
 import re
 import os
 import datetime
-import savReaderWriter as sav
 from ..storage import Storage, StorageTable
 from ..plugin import Plugin
 from ..schema import Schema
 from ..field import Field
 from .. import exceptions
+from .. import helpers
 from .. import errors
 
 
@@ -29,7 +29,6 @@ class SpssPlugin(Plugin):
 # Storage
 
 
-# TODO: move dependencies from the top to here
 class SpssStorage(Storage):
     """SPSS storage implementation"""
 
@@ -64,6 +63,7 @@ class SpssStorage(Storage):
         return tables
 
     def read_table(self, name):
+        sav = helpers.import_from_plugin("savReaderWriter", plugin="spss")
         table = self.__tables.get(name)
         if table is None:
             path = self.read_table_convert_name(name)
@@ -129,6 +129,7 @@ class SpssStorage(Storage):
         return "string"
 
     def read_table_stream_data(self, name):
+        sav = helpers.import_from_plugin("savReaderWriter", plugin="spss")
         table = self.read_table(name)
         path = self.read_table_convert_name(name)
         with sav.SavReader(path, ioUtf8=False, rawMode=False) as reader:
@@ -151,6 +152,7 @@ class SpssStorage(Storage):
     # Write
 
     def write_table(self, *tables, force=False):
+        sav = helpers.import_from_plugin("savReaderWriter", plugin="spss")
 
         # Check existence
         for table in tables:
@@ -237,6 +239,7 @@ class SpssStorage(Storage):
         return {"varNames": var_names, "varTypes": var_types, "formats": formats}
 
     def write_table_row_stream(self, name, row_stream):
+        sav = helpers.import_from_plugin("savReaderWriter", plugin="spss")
         path = self.read_table_convert_name(name)
         table = self.read_table(name)
         kwargs = self.write_table_convert_table(table)

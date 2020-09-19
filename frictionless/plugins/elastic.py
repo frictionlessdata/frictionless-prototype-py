@@ -6,10 +6,8 @@ import datetime
 import itertools
 import collections
 from copy import copy
-from elasticsearch import Elasticsearch
-from elasticsearch.helpers import streaming_bulk
-from elasticsearch.exceptions import RequestError
 from ..plugin import Plugin
+from .. import helpers
 
 tracer = logging.getLogger("elasticsearch")
 tracer.setLevel(logging.CRITICAL)
@@ -35,13 +33,14 @@ class ElasticPlugin(Plugin):
 # Storage
 
 
-# TODO: move dependencies from the top to here
 class Storage(object):
     """Elastic storage implementation"""
 
     def __init__(self, es=None):
-        # Use the passed `es` or create a new Elasticsearch instance
-        self.__es = es if es is not None else Elasticsearch()
+        es_core = helpers.import_from_plugin("elasticsearch", plugin="elasticsearch")
+
+        # Attributes
+        self.__es = es if es is not None else es_core.Elasticsearch()
         self.__no_mapping_types = self.__es.info()["version"]["number"] >= "7"
 
     def __repr__(self):
@@ -104,6 +103,10 @@ class Storage(object):
                 settings which will be used in index creation
 
         """
+        es_exceptions = helpers.import_from_plugin(
+            "elasticsearch.exceptions", plugin="elasticsearch"
+        )
+
         existing_index_names = []
         if self.__es.indices.exists_alias(name=bucket):
             existing_index_names = self.__es.indices.get_alias(bucket)
@@ -119,7 +122,7 @@ class Storage(object):
                 self.put_mapping(bucket, doc_types, index_name, mapping_generator_cls)
                 existing_index_names.pop(-1)
 
-            except RequestError:
+            except es_exceptions.RequestError:
                 if reindex:
                     index_name = self.create_index(bucket, index_settings=index_settings)
                     self.put_mapping(bucket, doc_types, index_name, mapping_generator_cls)
@@ -182,6 +185,9 @@ class Storage(object):
     def write_table_row_stream(
         self, bucket, doc_type, rows, primary_key, update=False, as_generator=False
     ):
+        es_helpers = helpers.import_from_plugin(
+            "elasticsearch.helpers", plugin="elasticsearch"
+        )
 
         if primary_key is None or len(primary_key) == 0:
             raise ValueError("primary_key cannot be an empty list")
@@ -209,7 +215,9 @@ class Storage(object):
         iterables = itertools.tee(rows)
         actions_iterable = actions(iterables[0], doc_type, primary_key, update)
 
-        iter = zip(streaming_bulk(self.__es, actions=actions_iterable), iterables[1])
+        iter = zip(
+            es_helpers.streaming_bulk(self.__es, actions=actions_iterable), iterables[1]
+        )
 
         if as_generator:
             for result, row in iter:

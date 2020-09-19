@@ -31,7 +31,6 @@ class CkanPlugin(Plugin):
 # Storage
 
 
-# TODO: move dependencies from the top to here
 class CkanStorage(Storage):
     """Ckan storage implementation"""
 

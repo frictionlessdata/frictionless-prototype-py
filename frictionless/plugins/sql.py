@@ -1,7 +1,5 @@
 import re
-import sqlalchemy as sa
 from functools import partial
-import sqlalchemy.dialects.postgresql as sapg
 from ..metadata import Metadata
 from ..dialects import Dialect
 from ..resource import Resource
@@ -171,7 +169,6 @@ class SqlParser(Parser):
 # Storage
 
 
-# TODO: move dependencies from the top to here
 class SqlStorage(Storage):
     """SQL storage representation
 
@@ -187,6 +184,7 @@ class SqlStorage(Storage):
     """
 
     def __init__(self, *, engine, prefix="", namespace=None):
+        sa = helpers.import_from_plugin("sqlalchemy", plugin="sql")
 
         # Set attributes
         self.__prefix = prefix
@@ -256,6 +254,7 @@ class SqlStorage(Storage):
         return None
 
     def __read_convert_schema(self, sql_table):
+        sa = helpers.import_from_plugin("sqlalchemy", plugin="sql")
         schema = Schema()
 
         # Fields
@@ -306,6 +305,10 @@ class SqlStorage(Storage):
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
     def __read_convert_types(self):
+        sa = helpers.import_from_plugin("sqlalchemy", plugin="sql")
+        sapg = helpers.import_from_plugin("sqlalchemy.dialects.postgresql", plugin="sql")
+
+        # Return mapping
         return {
             sapg.ARRAY: "array",
             sa.Boolean: "boolean",
@@ -392,6 +395,7 @@ class SqlStorage(Storage):
         return self.__prefix + name
 
     def __write_convert_schema(self, resource):
+        sa = helpers.import_from_plugin("sqlalchemy", plugin="sql")
 
         # Prepare
         columns = []
@@ -464,6 +468,8 @@ class SqlStorage(Storage):
         raise exceptions.FrictionlessException(errors.StorageError(note=note))
 
     def __write_convert_types(self):
+        sa = helpers.import_from_plugin("sqlalchemy", plugin="sql")
+        sapg = helpers.import_from_plugin("sqlalchemy.dialects.postgresql", plugin="sql")
 
         # Default dialect
         mapping = {

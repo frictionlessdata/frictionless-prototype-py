@@ -3,13 +3,13 @@ import re
 import json
 import time
 import unicodecsv
-from apiclient.http import MediaIoBaseUpload
 from slugify import slugify
 from ..storage import Storage, StorageTable
 from ..plugin import Plugin
 from ..schema import Schema
 from ..field import Field
 from .. import exceptions
+from .. import helpers
 from .. import errors
 
 
@@ -32,7 +32,6 @@ class BigqueryPlugin(Plugin):
 # Storage
 
 
-# TODO: move dependencies from the top to here
 class BigqueryStorage(Storage):
     """BigQuery storage implementation"""
 
@@ -308,6 +307,9 @@ class BigqueryStorage(Storage):
     # Private
 
     def __write_rows_buffer(self, bucket, rows_buffer):
+        http = helpers.import_from_plugin("apiclient.http", plugin="bigquery")
+
+        # Attributes
 
         # Process data to byte stream csv
         bytes = io.BufferedRandom(io.BytesIO())
@@ -333,7 +335,7 @@ class BigqueryStorage(Storage):
 
         # Prepare job media body
         mimetype = "application/octet-stream"
-        media_body = MediaIoBaseUpload(bytes, mimetype=mimetype)
+        media_body = http.MediaIoBaseUpload(bytes, mimetype=mimetype)
 
         # Make request to Big Query
         response = (
