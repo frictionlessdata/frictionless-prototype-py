@@ -201,6 +201,7 @@ class Resource(Metadata):
         """
         return "data" in self
 
+    # NOTE: optimize tabular/infer
     @Metadata.property(write=False)
     def tabular(self):
         """
@@ -549,6 +550,80 @@ class Resource(Metadata):
         return lookup
 
     # Import/Export
+
+    @staticmethod
+    def from_storage(storage, *, name):
+        """Import resource from storage
+
+        Parameters:
+            storage (Storage): storage instance
+            name (str): resource name
+        """
+        return storage.read_resource(name)
+
+    def to_storage(self, storage, *, force=False):
+        """Export resource to storage
+
+        Parameters:
+            storage (Storage): storage instance
+            force (bool): overwrite existent
+        """
+        storage.write_resource(self, force=force)
+        return storage
+
+    @staticmethod
+    def from_sql(*, name, engine, prefix="", namespace=None):
+        """Import resource from SQL table
+
+        Parameters:
+            name (str): resource name
+            engine (object): `sqlalchemy` engine
+            prefix (str): prefix for all tables
+            namespace (str): SQL scheme
+        """
+        return Resource.from_storage(
+            system.create_storage(
+                "sql", engine=engine, prefix=prefix, namespace=namespace
+            ),
+            name=name,
+        )
+
+    def to_sql(self, *, engine, prefix="", namespace=None, force=False):
+        """Export resource to SQL table
+
+        Parameters:
+            engine (object): `sqlalchemy` engine
+            prefix (str): prefix for all tables
+            namespace (str): SQL scheme
+            force (bool): overwrite existent
+        """
+        return self.to_storage(
+            system.create_storage(
+                "sql", engine=engine, prefix=prefix, namespace=namespace
+            ),
+            force=force,
+        )
+
+    @staticmethod
+    def from_pandas(dataframe):
+        """Import resource from Pandas dataframe
+
+        Parameters:
+            dataframe (str): padas dataframe
+        """
+        return Resource.from_storage(
+            system.create_storage("pandas", dataframes={"name": dataframe}),
+            name="name",
+        )
+
+    def to_pandas(self):
+        """Export resource to Pandas dataframe
+
+        Parameters:
+            dataframes (dict): pandas dataframes
+            force (bool): overwrite existent
+        """
+        return self.to_storage(system.create_storage("pandas"))
 
     def to_dict(self, expand=False):
         """Convert resource to dict

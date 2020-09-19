@@ -66,7 +66,7 @@ class InlineParser(Parser):
 
         # General
         for cells in chain([cells], data):
-            if not isinstance(cells, list):
+            if not isinstance(cells, (list, tuple)):
                 error = errors.SourceError(note="all data items must be lists")
                 raise exceptions.FrictionlessException(error)
             yield cells

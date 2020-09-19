@@ -6,7 +6,7 @@ from frictionless.plugins.ods import OdsDialect
 BASE_URL = "https://raw.githubusercontent.com/okfn/tabulator-py/master/%s"
 
 
-# Read
+# Parser
 
 
 def test_table_ods():
@@ -15,7 +15,7 @@ def test_table_ods():
         assert table.read_data() == [[1, "english"], [2, "中国人"]]
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_ods_remote():
     source = BASE_URL % "data/table.ods"
     with Table(source) as table:
@@ -74,9 +74,6 @@ def test_table_ods_with_ints_floats_dates():
             [1997, 5.6, datetime(2009, 9, 20).date(), datetime(2009, 9, 20, 15, 30, 0)],
             [1969, 11.7, datetime(2012, 8, 23).date(), datetime(2012, 8, 23, 20, 40, 59)],
         ]
-
-
-# Write
 
 
 def test_table_write_ods(tmpdir):

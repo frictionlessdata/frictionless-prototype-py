@@ -27,6 +27,71 @@ class HtmlPlugin(Plugin):
             return HtmlParser(file)
 
 
+# Dialect
+
+
+class HtmlDialect(Dialect):
+    """Html dialect representation
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.html import HtmlDialect`
+
+    Parameters:
+        descriptor? (str|dict): descriptor
+        selector? (str): HTML selector
+
+    Raises:
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
+    def __init__(
+        self,
+        descriptor=None,
+        *,
+        selector=None,
+        header=None,
+        header_rows=None,
+        header_join=None,
+    ):
+        self.setinitial("selector", selector)
+        super().__init__(
+            descriptor=descriptor,
+            header=header,
+            header_rows=header_rows,
+            header_join=header_join,
+        )
+
+    @Metadata.property
+    def selector(self):
+        """
+        Returns:
+            str: selector
+        """
+        return self.get("selector", "table")
+
+    # Expand
+
+    def expand(self):
+        """Expand metadata"""
+        super().expand()
+        self.setdefault("selector", self.selector)
+
+    # Metadata
+
+    metadata_profile = {  # type: ignore
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "selector": {"type": "string"},
+            "header": {"type": "boolean"},
+            "headerRows": {"type": "array", "items": {"type": "number"}},
+            "headerJoin": {"type": "string"},
+        },
+    }
+
+
 # Parser
 
 
@@ -94,68 +159,3 @@ class HtmlParser(Parser):
         with tempfile.NamedTemporaryFile("wt", delete=False) as file:
             file.write(html)
         helpers.move_file(file.name, self.file.source)
-
-
-# Dialect
-
-
-class HtmlDialect(Dialect):
-    """Html dialect representation
-
-    API      | Usage
-    -------- | --------
-    Public   | `from frictionless.plugins.html import HtmlDialect`
-
-    Parameters:
-        descriptor? (str|dict): descriptor
-        selector? (str): HTML selector
-
-    Raises:
-        FrictionlessException: raise any error that occurs during the process
-
-    """
-
-    def __init__(
-        self,
-        descriptor=None,
-        *,
-        selector=None,
-        header=None,
-        header_rows=None,
-        header_join=None,
-    ):
-        self.setinitial("selector", selector)
-        super().__init__(
-            descriptor=descriptor,
-            header=header,
-            header_rows=header_rows,
-            header_join=header_join,
-        )
-
-    @Metadata.property
-    def selector(self):
-        """
-        Returns:
-            str: selector
-        """
-        return self.get("selector", "table")
-
-    # Expand
-
-    def expand(self):
-        """Expand metadata"""
-        super().expand()
-        self.setdefault("selector", self.selector)
-
-    # Metadata
-
-    metadata_profile = {  # type: ignore
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {
-            "selector": {"type": "string"},
-            "header": {"type": "boolean"},
-            "headerRows": {"type": "array", "items": {"type": "number"}},
-            "headerJoin": {"type": "string"},
-        },
-    }

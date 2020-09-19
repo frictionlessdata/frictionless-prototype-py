@@ -51,7 +51,7 @@ class Metadata(helpers.ControlledDict):
                     write = getattr(attr, "metadata_write", None)
                     if write:
                         if callable(write):
-                            return callable(self, value)
+                            return write(self, value)
                         return setitem(self, stringcase.camelcase(name), value)
         if not name.startswith("_"):
             message = f"'{type(self).__name__}' object has no attribute '{name}'"

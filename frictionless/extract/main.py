@@ -6,6 +6,7 @@ from ..package import Package
 from .. import helpers
 
 
+# NOTE: ability to extract stream?
 def extract(source, *, source_type=None, process=None, **options):
     """Extract resource rows into memory
 

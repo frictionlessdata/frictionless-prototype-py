@@ -29,36 +29,6 @@ class AwsPlugin(Plugin):
             return S3Loader(file)
 
 
-# Loader
-
-
-class S3Loader(Loader):
-    """S3 loader implementation.
-
-    API      | Usage
-    -------- | --------
-    Public   | `from frictionless.plugins.aws import S3Loader`
-
-    """
-
-    remote = True
-
-    # Read
-
-    def read_byte_stream_create(self):
-        boto3 = helpers.import_from_plugin("boto3", plugin="aws")
-        control = self.file.control
-        client = boto3.client("s3", endpoint_url=control.endpoint_url)
-        source = requests.utils.requote_uri(self.file.source)
-        parts = urlparse(source, allow_fragments=False)
-        response = client.get_object(Bucket=parts.netloc, Key=parts.path[1:])
-        # https://github.com/frictionlessdata/tabulator-py/issues/271
-        byte_stream = io.BufferedRandom(io.BytesIO())
-        byte_stream.write(response["Body"].read())
-        byte_stream.seek(0)
-        return byte_stream
-
-
 # Control
 
 
@@ -103,6 +73,36 @@ class S3Control(Control):
         "type": "object",
         "properties": {"endpointUrl": {"type": "string"}, "detectEncoding": {}},
     }
+
+
+# Loader
+
+
+class S3Loader(Loader):
+    """S3 loader implementation.
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.aws import S3Loader`
+
+    """
+
+    remote = True
+
+    # Read
+
+    def read_byte_stream_create(self):
+        boto3 = helpers.import_from_plugin("boto3", plugin="aws")
+        control = self.file.control
+        client = boto3.client("s3", endpoint_url=control.endpoint_url)
+        source = requests.utils.requote_uri(self.file.source)
+        parts = urlparse(source, allow_fragments=False)
+        response = client.get_object(Bucket=parts.netloc, Key=parts.path[1:])
+        # https://github.com/frictionlessdata/tabulator-py/issues/271
+        byte_stream = io.BufferedRandom(io.BytesIO())
+        byte_stream.write(response["Body"].read())
+        byte_stream.seek(0)
+        return byte_stream
 
 
 # Internal

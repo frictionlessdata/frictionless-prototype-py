@@ -4,6 +4,10 @@ os:
 dist:
   xenial
 
+services:
+  - postgresql
+  - mysql
+
 language:
   python
 
@@ -12,11 +16,16 @@ python:
   - 3.7
   - 3.8
 
+before_install:
+  - cp .env.example .env
+  - psql -c 'CREATE DATABASE test;' -U postgres
+  - mysql -e 'CREATE DATABASE test CHARACTER SET utf8 COLLATE utf8_general_ci;'
+
 install:
   - make install
 
 script:
-  - make test
+  - make test-ci
 
 after_success:
   - coveralls

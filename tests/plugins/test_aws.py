@@ -6,7 +6,7 @@ from moto import mock_s3
 from frictionless import Table
 
 
-# Read
+# Loader
 
 
 @mock_s3

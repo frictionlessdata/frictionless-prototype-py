@@ -5,6 +5,7 @@ import zipfile
 from copy import deepcopy
 from .metadata import Metadata
 from .resource import Resource
+from .system import system
 from . import exceptions
 from . import helpers
 from . import errors
@@ -224,6 +225,71 @@ class Package(Metadata):
             resource.infer(only_sample=only_sample)
 
     # Import/Export
+
+    @staticmethod
+    def from_storage(storage):
+        """Import package from storage
+
+        Parameters:
+            storage (Storage): storage instance
+        """
+        return storage.read_package()
+
+    def to_storage(self, storage, *, force=False):
+        """Export package to storage
+
+        Parameters:
+            storage (Storage): storage instance
+            force (bool): overwrite existent
+        """
+        storage.write_package(self, force=force)
+        return storage
+
+    @staticmethod
+    def from_sql(*, engine, prefix="", namespace=None):
+        """Import package from SQL
+
+        Parameters:
+            engine (object): `sqlalchemy` engine
+            prefix (str): prefix for all tables
+            namespace (str): SQL scheme
+        """
+        return Package.from_storage(
+            system.create_storage(
+                "sql", engine=engine, prefix=prefix, namespace=namespace
+            )
+        )
+
+    def to_sql(self, *, engine, prefix="", namespace=None, force=False):
+        """Export package to SQL
+
+        Parameters:
+            engine (object): `sqlalchemy` engine
+            prefix (str): prefix for all tables
+            namespace (str): SQL scheme
+            force (bool): overwrite existent
+        """
+        return self.to_storage(
+            system.create_storage(
+                "sql", engine=engine, prefix=prefix, namespace=namespace
+            ),
+            force=force,
+        )
+
+    @staticmethod
+    def from_pandas(*, dataframes):
+        """Import package from Pandas dataframes
+
+        Parameters:
+            dataframes (dict): mapping of Pandas dataframes
+        """
+        return Package.from_storage(
+            system.create_storage("pandas", dataframes=dataframes)
+        )
+
+    def to_pandas(self):
+        """Export package to Pandas dataframes"""
+        return self.to_storage(system.create_storage("pandas"))
 
     def to_dict(self, expand=False):
         """Convert package to a dict

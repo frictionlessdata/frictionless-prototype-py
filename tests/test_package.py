@@ -71,14 +71,14 @@ def test_package_from_path_error_bad_json_not_dict():
     assert error.note.count("table.json")
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_package_from_path_remote():
     package = Package(BASE_URL % "data/package.json")
     assert package.basepath == BASE_URL % "data"
     assert package == {"resources": [{"name": "name", "path": "path"}]}
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_package_from_path_remote_error_not_found():
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         Package(BASE_URL % "data/bad.json")
@@ -87,7 +87,7 @@ def test_package_from_path_remote_error_not_found():
     assert error.note.count("bad.json")
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_package_from_path_remote_error_bad_json():
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
         Package(BASE_URL % "data/invalid.json")
@@ -123,7 +123,7 @@ def test_package_from_zip():
     ]
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_package_from_zip_remote():
     package = Package(BASE_URL % "data/package.zip")
     assert package.name == "testing"
@@ -418,7 +418,7 @@ def test_package_to_zip(tmpdir):
     ]
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_package_to_zip_source_remote(tmpdir):
 
     # Write

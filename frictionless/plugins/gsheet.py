@@ -29,6 +29,27 @@ class GsheetPlugin(Plugin):
             return GsheetParser(file)
 
 
+# Dialect
+
+
+class GsheetDialect(Dialect):
+    """Gsheet dialect representation
+
+    API      | Usage
+    -------- | --------
+    Public   | `from frictionless.plugins.gsheet import GsheetDialect`
+
+    Parameters:
+        descriptor? (str|dict): descriptor
+
+    Raises:
+        FrictionlessException: raise any error that occurs during the process
+
+    """
+
+    pass
+
+
 # Parser
 
 
@@ -65,24 +86,3 @@ class GsheetParser(Parser):
     def write(self, row_stream, *, schema):
         error = errors.Error(note="Writing to Google Sheets is not supported")
         raise exceptions.FrictionlessException(error)
-
-
-# Dialect
-
-
-class GsheetDialect(Dialect):
-    """Gsheet dialect representation
-
-    API      | Usage
-    -------- | --------
-    Public   | `from frictionless.plugins.gsheet import GsheetDialect`
-
-    Parameters:
-        descriptor? (str|dict): descriptor
-
-    Raises:
-        FrictionlessException: raise any error that occurs during the process
-
-    """
-
-    pass

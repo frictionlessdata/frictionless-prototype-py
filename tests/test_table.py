@@ -259,7 +259,7 @@ def test_table_scheme_file():
         assert table.scheme == "file"
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_scheme_https():
     with Table(BASE_URL % "data/table.csv") as table:
         assert table.scheme == "https"
@@ -302,7 +302,7 @@ def test_table_scheme_error_file_not_found():
     assert error.note == "[Errno 2] No such file or directory: 'bad.csv'"
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_scheme_error_file_not_found_remote():
     table = Table("https://example.com/bad.csv")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
@@ -524,7 +524,7 @@ def test_table_compression_filelike_csv_gz():
             assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_compression_remote_csv_zip():
     source = "https://raw.githubusercontent.com/frictionlessdata/tabulator-py/master/data/table.csv.zip"
     with Table(source) as table:
@@ -532,7 +532,7 @@ def test_table_compression_remote_csv_zip():
         assert table.read_data() == [["1", "english"], ["2", "中国人"]]
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_compression_remote_csv_gz():
     source = "https://raw.githubusercontent.com/frictionlessdata/tabulator-py/master/data/table.csv.gz"
     with Table(source) as table:
@@ -581,7 +581,7 @@ def test_table_control():
         assert table.sample == [["1", "english"], ["2", "中国人"]]
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_control_http_preload():
     control = controls.RemoteControl(http_preload=True)
     with Table(BASE_URL % "data/table.csv", control=control) as table:
@@ -1110,7 +1110,7 @@ def test_table_stats_hash_compressed():
         assert table.stats["hash"] == "2a72c90bd48c1fa48aec632db23ce8f7"
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_stats_hash_remote():
     with Table(BASE_URL % "data/special/doublequote.csv") as table:
         table.read_data()
@@ -1130,7 +1130,7 @@ def test_table_stats_bytes_compressed():
         assert table.stats["bytes"] == 1265
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_stats_bytes_remote():
     with Table(BASE_URL % "data/special/doublequote.csv") as table:
         table.read_data()
@@ -1146,7 +1146,7 @@ def test_table_stats_rows():
         assert table.stats["rows"] == 5
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_stats_rows_remote():
     with Table(BASE_URL % "data/special/doublequote.csv") as table:
         table.read_data()
@@ -1345,7 +1345,7 @@ def test_table_not_existent_local_file_with_no_format_issue_287():
     assert error.note == "[Errno 2] No such file or directory: 'bad'"
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_not_existent_remote_file_with_no_format_issue_287():
     table = Table("http://example.com/bad")
     with pytest.raises(exceptions.FrictionlessException) as excinfo:
@@ -1355,7 +1355,7 @@ def test_table_not_existent_remote_file_with_no_format_issue_287():
     assert error.note == "404 Client Error: Not Found for url: http://example.com/bad"
 
 
-@pytest.mark.slow
+@pytest.mark.ci
 def test_table_chardet_raises_remote_issue_305():
     source = "https://gist.githubusercontent.com/roll/56b91d7d998c4df2d4b4aeeefc18cab5/raw/a7a577cd30139b3396151d43ba245ac94d8ddf53/tabulator-issue-305.csv"
     with Table(source) as table:
