@@ -89,10 +89,11 @@ def test_storage_sqlite(database_url):
     assert target.get_resource("comment").schema == {
         "fields": [
             {"name": "entry_id", "type": "integer", "constraints": {"required": True}},
+            {"name": "user_id", "type": "integer", "constraints": {"required": True}},
             {"name": "comment", "type": "string"},
             {"name": "note", "type": "string"},  # type downgrade
         ],
-        "primaryKey": ["entry_id"],
+        "primaryKey": ["entry_id", "user_id"],
         "foreignKeys": [
             {"fields": "entry_id", "reference": {"resource": "article", "fields": "id"}}
         ],
@@ -128,8 +129,8 @@ def test_storage_sqlite(database_url):
         {"id": 2, "parent": 1, "name": "中国人", "current": False, "rating": 7},
     ]
     assert target.get_resource("comment").read_rows() == [
-        {"entry_id": 1, "comment": "good", "note": "note1"},
-        {"entry_id": 2, "comment": "bad", "note": "note2"},
+        {"entry_id": 1, "user_id": 1, "comment": "good", "note": "note1"},
+        {"entry_id": 2, "user_id": 2, "comment": "bad", "note": "note2"},
     ]
     assert target.get_resource("location").read_rows() == [
         {"geojson": '{"type": "Point", "coordinates": [33, 33.33]}', "geopoint": "30,70"},
@@ -192,10 +193,11 @@ def test_storage_postgresql():
     assert target.get_resource("comment").schema == {
         "fields": [
             {"name": "entry_id", "type": "integer", "constraints": {"required": True}},
+            {"name": "user_id", "type": "integer", "constraints": {"required": True}},
             {"name": "comment", "type": "string"},
             {"name": "note", "type": "string"},  # type downgrade
         ],
-        "primaryKey": ["entry_id"],
+        "primaryKey": ["entry_id", "user_id"],
         "foreignKeys": [
             {"fields": "entry_id", "reference": {"resource": "article", "fields": "id"}}
         ],
@@ -231,8 +233,8 @@ def test_storage_postgresql():
         {"id": 2, "parent": 1, "name": "中国人", "current": False, "rating": 7},
     ]
     assert target.get_resource("comment").read_rows() == [
-        {"entry_id": 1, "comment": "good", "note": "note1"},
-        {"entry_id": 2, "comment": "bad", "note": "note2"},
+        {"entry_id": 1, "user_id": 1, "comment": "good", "note": "note1"},
+        {"entry_id": 2, "user_id": 2, "comment": "bad", "note": "note2"},
     ]
     assert target.get_resource("location").read_rows() == [
         {"geojson": {"type": "Point", "coordinates": [33, 33.33]}, "geopoint": "30,70"},
@@ -296,10 +298,11 @@ def test_storage_mysql():
     assert target.get_resource("comment").schema == {
         "fields": [
             {"name": "entry_id", "type": "integer", "constraints": {"required": True}},
+            {"name": "user_id", "type": "integer", "constraints": {"required": True}},
             {"name": "comment", "type": "string"},
             {"name": "note", "type": "string"},  # type downgrade
         ],
-        "primaryKey": ["entry_id"],
+        "primaryKey": ["entry_id", "user_id"],
         "foreignKeys": [
             {"fields": "entry_id", "reference": {"resource": "article", "fields": "id"}}
         ],
@@ -335,8 +338,8 @@ def test_storage_mysql():
         {"id": 2, "parent": 1, "name": "中国人", "current": False, "rating": 7},
     ]
     assert target.get_resource("comment").read_rows() == [
-        {"entry_id": 1, "comment": "good", "note": "note1"},
-        {"entry_id": 2, "comment": "bad", "note": "note2"},
+        {"entry_id": 1, "user_id": 1, "comment": "good", "note": "note1"},
+        {"entry_id": 2, "user_id": 2, "comment": "bad", "note": "note2"},
     ]
     assert target.get_resource("location").read_rows() == [
         {"geojson": '{"type": "Point", "coordinates": [33, 33.33]}', "geopoint": "30,70"},

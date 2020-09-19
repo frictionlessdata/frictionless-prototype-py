@@ -78,7 +78,6 @@ class PandasStorage(Storage):
     def __read_resource_names(self):
         return list(sorted(self.__dataframes.keys()))
 
-    # TODO: fix the logic
     def __read_data_stream(self, name, schema):
         dataframe = self.__read_pandas_dataframe(name)
         for pk, item in dataframe.iterrows():
@@ -178,7 +177,6 @@ class PandasStorage(Storage):
         for resource in package.resources:
             self.__dataframes[resource.name] = self.__write_convert_resource(resource)
 
-    # TODO: fix the logic
     def __write_convert_resource(self, resource):
 
         # Get data/index

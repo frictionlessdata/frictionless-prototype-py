@@ -26,18 +26,19 @@
       "schema": {
           "fields": [
               {"name": "entry_id", "type": "integer", "constraints": {"required": true}},
+              {"name": "user_id", "type": "integer", "constraints": {"required": true}},
               {"name": "comment", "type": "string"},
               {"name": "note", "type": "any"}
           ],
-          "primaryKey": ["entry_id"],
+          "primaryKey": ["entry_id", "user_id"],
           "foreignKeys": [
               {"fields": "entry_id", "reference": {"resource": "article", "fields": "id"}}
           ]
       },
       "data": [
-          ["entiry_id", "comment", "note"],
-          ["1", "good", "note1"],
-          ["2", "bad", "note2"]
+          ["entiry_id", "user_id", "comment", "note"],
+          ["1", "1", "good", "note1"],
+          ["2", "2", "bad", "note2"]
       ]
     },
     {

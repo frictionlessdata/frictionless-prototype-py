@@ -280,7 +280,6 @@ class SqlStorage(Storage):
                 foreign_fields = []
                 for element in constraint.elements:
                     own_fields.append(element.parent.name)
-                    # TODO: review this comparision
                     if element.column.table.name != sql_table.name:
                         res_name = element.column.table.name
                         resource = self.__read_convert_name(res_name)
@@ -335,7 +334,6 @@ class SqlStorage(Storage):
         package = Package(resources=[resource])
         return self.write_package(package, force=force)
 
-    # TODO: use a transaction
     def write_package(self, package, force=False):
         existent_names = self.__read_resource_names()
 
@@ -344,25 +342,28 @@ class SqlStorage(Storage):
         package.infer()
 
         # Check existent
-        overwrite_names = []
+        delete_names = []
         for resource in package.resources:
             if resource.name in existent_names:
                 if not force:
                     note = f'Resource "{resource.name}" already exists'
                     raise exceptions.FrictionlessException(errors.StorageError(note=note))
-                overwrite_names.append(resource.name)
-        self.delete_package(overwrite_names)
+                delete_names.append(resource.name)
 
-        # Create tables
-        sql_tables = []
-        for resource in package.resources:
-            sql_table = self.__write_convert_schema(resource)
-            sql_tables.append(sql_table)
-        self.__metadata.create_all(tables=sql_tables)
+        # Wrap into a transaction
+        with self.__connection.begin():
 
-        # Write data
-        for resource in package.resources:
-            self.__write_row_stream(resource)
+            # Create tables
+            sql_tables = []
+            self.delete_package(delete_names)
+            for resource in package.resources:
+                sql_table = self.__write_convert_schema(resource)
+                sql_tables.append(sql_table)
+            self.__metadata.create_all(tables=sql_tables)
+
+            # Write data
+            for resource in package.resources:
+                self.__write_row_stream(resource)
 
     def __write_row_stream(self, resource):
 
@@ -377,16 +378,15 @@ class SqlStorage(Storage):
         buffer = []
         buffer_size = 1000
         sql_table = self.__read_sql_table(resource.name)
-        with self.__connection.begin():
-            for row in resource.read_row_stream():
-                for field in fallback_fields:
-                    row[field.name], notes = field.write_cell(row[field.name])
-                buffer.append(row)
-                if len(buffer) > buffer_size:
-                    self.__connection.execute(sql_table.insert().values(buffer))
-                    buffer = []
-            if len(buffer):
+        for row in resource.read_row_stream():
+            for field in fallback_fields:
+                row[field.name], notes = field.write_cell(row[field.name])
+            buffer.append(row)
+            if len(buffer) > buffer_size:
                 self.__connection.execute(sql_table.insert().values(buffer))
+                buffer = []
+        if len(buffer):
+            self.__connection.execute(sql_table.insert().values(buffer))
 
     def __write_convert_name(self, name):
         return self.__prefix + name
@@ -520,10 +520,13 @@ class SqlStorage(Storage):
             sql_table = self.__read_sql_table(name)
             sql_tables.append(sql_table)
 
-        # Drop tables, update metadata
-        self.__metadata.drop_all(tables=sql_tables)
-        self.__metadata.clear()
-        self.__metadata.reflect()
+        # Wrap into a transaction
+        with self.__connection.begin():
+
+            # Drop tables, update metadata
+            self.__metadata.drop_all(tables=sql_tables)
+            self.__metadata.clear()
+            self.__metadata.reflect()
 
 
 # Internal

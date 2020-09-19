@@ -151,7 +151,7 @@ class BigqueryStorage(Storage):
             rows.append(row)
 
         # Sort rows
-        # TODO: provide proper sorting solution
+        # NOTE: provide proper sorting solution
         rows = sorted(rows, key=lambda row: row[0] if row[0] is not None else "null")
 
         # Emit rows
