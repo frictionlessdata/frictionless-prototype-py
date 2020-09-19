@@ -50,8 +50,8 @@
       },
       "data": [
           ["geojson", "geopoint"],
-          ["{\"type\": \"Point\", \"coordinates\": [33.33, 33.33]}", "30,75"],
-          ["{\"type\": \"Point\", \"coordinates\": [50.55, 50.55]}", "90,45"]
+          ["{\"type\": \"Point\", \"coordinates\": [33, 33.33]}", "30,70"],
+          ["{\"type\": \"Point\", \"coordinates\": [55, 55.55]}", "90,40"]
       ]
     },
     {

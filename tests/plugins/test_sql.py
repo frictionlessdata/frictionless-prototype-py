@@ -1,5 +1,6 @@
 import os
 import pytest
+import datetime
 import sqlalchemy as sa
 from frictionless import Table, Package, Resource, exceptions
 from frictionless.plugins.sql import SqlDialect, SqlStorage
@@ -70,23 +71,94 @@ def test_storage_sqlite(database_url):
     storage = source.to_sql(engine=engine, prefix=prefix, force=True)
     target = Package.from_sql(engine=engine, prefix=prefix)
 
-    # Compare meta (with expected discrepancies)
-    source.get_resource("comment").schema.get_field("note").type = "string"
-    source.get_resource("location").schema.get_field("geojson").type = "string"
-    source.get_resource("location").schema.get_field("geopoint").type = "string"
-    source.get_resource("structure").schema.get_field("object").type = "string"
-    source.get_resource("structure").schema.get_field("array").type = "string"
-    source.get_resource("temporal").schema.get_field("date_year").pop("format")
-    source.get_resource("temporal").schema.get_field("duration").type = "string"
-    source.get_resource("temporal").schema.get_field("year").type = "integer"
-    source.get_resource("temporal").schema.get_field("yearmonth").type = "string"
-    for resource in source.resources:
-        assert resource.schema == target.get_resource(resource.name).schema
+    # Assert metadata
 
-    # Compare data (with expected discrepancies)
-    source.get_resource("temporal").schema.get_field("date_year").format = "%Y"
-    for resource in source.resources:
-        assert resource.read_rows() == target.get_resource(resource.name).read_rows()
+    assert target.get_resource("article").schema == {
+        "fields": [
+            {"name": "id", "type": "integer", "constraints": {"required": True}},
+            {"name": "parent", "type": "integer"},
+            {"name": "name", "type": "string"},
+            {"name": "current", "type": "boolean"},
+            {"name": "rating", "type": "number"},
+        ],
+        "primaryKey": ["id"],
+        "foreignKeys": [
+            {"fields": "parent", "reference": {"resource": "", "fields": "id"}}
+        ],
+    }
+    assert target.get_resource("comment").schema == {
+        "fields": [
+            {"name": "entry_id", "type": "integer", "constraints": {"required": True}},
+            {"name": "comment", "type": "string"},
+            {"name": "note", "type": "string"},  # type downgrade
+        ],
+        "primaryKey": ["entry_id"],
+        "foreignKeys": [
+            {"fields": "entry_id", "reference": {"resource": "article", "fields": "id"}}
+        ],
+    }
+    assert target.get_resource("location").schema == {
+        "fields": [
+            {"name": "geojson", "type": "string"},  # type fallback
+            {"name": "geopoint", "type": "string"},  # type fallback
+        ]
+    }
+    assert target.get_resource("structure").schema == {
+        "fields": [
+            {"name": "object", "type": "string"},  # type fallback
+            {"name": "array", "type": "string"},  # type fallback
+        ]
+    }
+    assert target.get_resource("temporal").schema == {
+        "fields": [
+            {"name": "date", "type": "date"},
+            {"name": "date_year", "type": "date"},  # format removal
+            {"name": "datetime", "type": "datetime"},
+            {"name": "duration", "type": "string"},  # type fallback
+            {"name": "time", "type": "time"},
+            {"name": "year", "type": "integer"},  # type downgrade
+            {"name": "yearmonth", "type": "string"},  # type fallback
+        ]
+    }
+
+    # Assert data
+
+    assert target.get_resource("article").read_rows() == [
+        {"id": 1, "parent": None, "name": "Taxes", "current": True, "rating": 9.5},
+        {"id": 2, "parent": 1, "name": "中国人", "current": False, "rating": 7},
+    ]
+    assert target.get_resource("comment").read_rows() == [
+        {"entry_id": 1, "comment": "good", "note": "note1"},
+        {"entry_id": 2, "comment": "bad", "note": "note2"},
+    ]
+    assert target.get_resource("location").read_rows() == [
+        {"geojson": '{"type": "Point", "coordinates": [33, 33.33]}', "geopoint": "30,70"},
+        {"geojson": '{"type": "Point", "coordinates": [55, 55.55]}', "geopoint": "90,40"},
+    ]
+    assert target.get_resource("structure").read_rows() == [
+        {"object": '{"chars": 560}', "array": '["Mike", "John"]'},
+        {"object": '{"chars": 970}', "array": '["Paul", "Alex"]'},
+    ]
+    assert target.get_resource("temporal").read_rows() == [
+        {
+            "date": datetime.date(2015, 1, 1),
+            "date_year": datetime.date(2015, 1, 1),
+            "datetime": datetime.datetime(2015, 1, 1, 3, 0),
+            "duration": "P1Y1M",
+            "time": datetime.time(3, 0),
+            "year": 2015,
+            "yearmonth": "2015-01",
+        },
+        {
+            "date": datetime.date(2015, 12, 31),
+            "date_year": datetime.date(2015, 1, 1),
+            "datetime": datetime.datetime(2015, 12, 31, 15, 45, 33),
+            "duration": "P2Y2M",
+            "time": datetime.time(15, 45, 33),
+            "year": 2015,
+            "yearmonth": "2015-01",
+        },
+    ]
 
     # Cleanup storage
     storage.delete_package(target.resource_names)
@@ -102,22 +174,95 @@ def test_storage_postgresql():
     storage = source.to_sql(engine=engine, prefix=prefix, force=True)
     target = Package.from_sql(engine=engine, prefix=prefix)
 
-    # Compare meta (with expected discrepancies)
-    source.get_resource("comment").schema.get_field("note").type = "string"
-    source.get_resource("location").schema.get_field("geojson").type = "object"
-    source.get_resource("location").schema.get_field("geopoint").type = "string"
-    source.get_resource("structure").schema.get_field("array").type = "object"
-    source.get_resource("temporal").schema.get_field("date_year").pop("format")
-    source.get_resource("temporal").schema.get_field("duration").type = "string"
-    source.get_resource("temporal").schema.get_field("year").type = "integer"
-    source.get_resource("temporal").schema.get_field("yearmonth").type = "string"
-    for resource in source.resources:
-        assert resource.schema == target.get_resource(resource.name).schema
+    # Assert metadata
 
-    # Compare data (with expected discrepancies)
-    source.get_resource("temporal").schema.get_field("date_year").format = "%Y"
-    for resource in source.resources:
-        assert resource.read_rows() == target.get_resource(resource.name).read_rows()
+    assert target.get_resource("article").schema == {
+        "fields": [
+            {"name": "id", "type": "integer", "constraints": {"required": True}},
+            {"name": "parent", "type": "integer"},
+            {"name": "name", "type": "string"},
+            {"name": "current", "type": "boolean"},
+            {"name": "rating", "type": "number"},
+        ],
+        "primaryKey": ["id"],
+        "foreignKeys": [
+            {"fields": "parent", "reference": {"resource": "", "fields": "id"}}
+        ],
+    }
+    assert target.get_resource("comment").schema == {
+        "fields": [
+            {"name": "entry_id", "type": "integer", "constraints": {"required": True}},
+            {"name": "comment", "type": "string"},
+            {"name": "note", "type": "string"},  # type downgrade
+        ],
+        "primaryKey": ["entry_id"],
+        "foreignKeys": [
+            {"fields": "entry_id", "reference": {"resource": "article", "fields": "id"}}
+        ],
+    }
+    assert target.get_resource("location").schema == {
+        "fields": [
+            {"name": "geojson", "type": "object"},  # type downgrade
+            {"name": "geopoint", "type": "string"},  # type fallback
+        ]
+    }
+    assert target.get_resource("structure").schema == {
+        "fields": [
+            {"name": "object", "type": "object"},
+            {"name": "array", "type": "object"},  # type downgrade
+        ]
+    }
+    assert target.get_resource("temporal").schema == {
+        "fields": [
+            {"name": "date", "type": "date"},
+            {"name": "date_year", "type": "date"},  # format removal
+            {"name": "datetime", "type": "datetime"},
+            {"name": "duration", "type": "string"},  # type fallback
+            {"name": "time", "type": "time"},
+            {"name": "year", "type": "integer"},  # type downgrade
+            {"name": "yearmonth", "type": "string"},  # type fallback
+        ]
+    }
+
+    # Assert data
+
+    assert target.get_resource("article").read_rows() == [
+        {"id": 1, "parent": None, "name": "Taxes", "current": True, "rating": 9.5},
+        {"id": 2, "parent": 1, "name": "中国人", "current": False, "rating": 7},
+    ]
+    assert target.get_resource("comment").read_rows() == [
+        {"entry_id": 1, "comment": "good", "note": "note1"},
+        {"entry_id": 2, "comment": "bad", "note": "note2"},
+    ]
+    assert target.get_resource("location").read_rows() == [
+        {"geojson": {"type": "Point", "coordinates": [33, 33.33]}, "geopoint": "30,70"},
+        {"geojson": {"type": "Point", "coordinates": [55, 55.55]}, "geopoint": "90,40"},
+    ]
+    # TOOD: fix array
+    assert target.get_resource("structure").read_rows() == [
+        {"object": {"chars": 560}, "array": None},
+        {"object": {"chars": 970}, "array": None},
+    ]
+    assert target.get_resource("temporal").read_rows() == [
+        {
+            "date": datetime.date(2015, 1, 1),
+            "date_year": datetime.date(2015, 1, 1),
+            "datetime": datetime.datetime(2015, 1, 1, 3, 0),
+            "duration": "P1Y1M",
+            "time": datetime.time(3, 0),
+            "year": 2015,
+            "yearmonth": "2015-01",
+        },
+        {
+            "date": datetime.date(2015, 12, 31),
+            "date_year": datetime.date(2015, 1, 1),
+            "datetime": datetime.datetime(2015, 12, 31, 15, 45, 33),
+            "duration": "P2Y2M",
+            "time": datetime.time(15, 45, 33),
+            "year": 2015,
+            "yearmonth": "2015-01",
+        },
+    ]
 
     # Cleanup storage
     storage.delete_package(target.resource_names)
@@ -133,25 +278,94 @@ def test_storage_mysql():
     storage = source.to_sql(engine=engine, prefix=prefix, force=True)
     target = Package.from_sql(engine=engine, prefix=prefix)
 
-    # Compare meta (with expected discrepancies)
-    source.get_resource("article").schema.get_field("current").type = "integer"
-    source.get_resource("comment").schema.get_field("note").type = "string"
-    source.get_resource("location").schema.get_field("geojson").type = "string"
-    source.get_resource("location").schema.get_field("geopoint").type = "string"
-    source.get_resource("structure").schema.get_field("object").type = "string"
-    source.get_resource("structure").schema.get_field("array").type = "string"
-    source.get_resource("temporal").schema.get_field("date_year").pop("format")
-    source.get_resource("temporal").schema.get_field("duration").type = "string"
-    source.get_resource("temporal").schema.get_field("year").type = "integer"
-    source.get_resource("temporal").schema.get_field("yearmonth").type = "string"
-    for resource in source.resources:
-        assert resource.schema == target.get_resource(resource.name).schema
+    # Assert metadata
 
-    # Compare data (with expected discrepancies)
-    source.get_resource("article").schema.get_field("current").type = "boolean"
-    source.get_resource("temporal").schema.get_field("date_year").format = "%Y"
-    for resource in source.resources:
-        assert resource.read_rows() == target.get_resource(resource.name).read_rows()
+    assert target.get_resource("article").schema == {
+        "fields": [
+            {"name": "id", "type": "integer", "constraints": {"required": True}},
+            {"name": "parent", "type": "integer"},
+            {"name": "name", "type": "string"},
+            {"name": "current", "type": "integer"},  # type downgrade
+            {"name": "rating", "type": "number"},
+        ],
+        "primaryKey": ["id"],
+        "foreignKeys": [
+            {"fields": "parent", "reference": {"resource": "", "fields": "id"}}
+        ],
+    }
+    assert target.get_resource("comment").schema == {
+        "fields": [
+            {"name": "entry_id", "type": "integer", "constraints": {"required": True}},
+            {"name": "comment", "type": "string"},
+            {"name": "note", "type": "string"},  # type downgrade
+        ],
+        "primaryKey": ["entry_id"],
+        "foreignKeys": [
+            {"fields": "entry_id", "reference": {"resource": "article", "fields": "id"}}
+        ],
+    }
+    assert target.get_resource("location").schema == {
+        "fields": [
+            {"name": "geojson", "type": "string"},  # type fallback
+            {"name": "geopoint", "type": "string"},  # type fallback
+        ]
+    }
+    assert target.get_resource("structure").schema == {
+        "fields": [
+            {"name": "object", "type": "string"},  # type fallback
+            {"name": "array", "type": "string"},  # type fallback
+        ]
+    }
+    assert target.get_resource("temporal").schema == {
+        "fields": [
+            {"name": "date", "type": "date"},
+            {"name": "date_year", "type": "date"},  # format removal
+            {"name": "datetime", "type": "datetime"},
+            {"name": "duration", "type": "string"},  # type fallback
+            {"name": "time", "type": "time"},
+            {"name": "year", "type": "integer"},  # type downgrade
+            {"name": "yearmonth", "type": "string"},  # type fallback
+        ]
+    }
+
+    # Assert data
+
+    assert target.get_resource("article").read_rows() == [
+        {"id": 1, "parent": None, "name": "Taxes", "current": True, "rating": 9.5},
+        {"id": 2, "parent": 1, "name": "中国人", "current": False, "rating": 7},
+    ]
+    assert target.get_resource("comment").read_rows() == [
+        {"entry_id": 1, "comment": "good", "note": "note1"},
+        {"entry_id": 2, "comment": "bad", "note": "note2"},
+    ]
+    assert target.get_resource("location").read_rows() == [
+        {"geojson": '{"type": "Point", "coordinates": [33, 33.33]}', "geopoint": "30,70"},
+        {"geojson": '{"type": "Point", "coordinates": [55, 55.55]}', "geopoint": "90,40"},
+    ]
+    assert target.get_resource("structure").read_rows() == [
+        {"object": '{"chars": 560}', "array": '["Mike", "John"]'},
+        {"object": '{"chars": 970}', "array": '["Paul", "Alex"]'},
+    ]
+    assert target.get_resource("temporal").read_rows() == [
+        {
+            "date": datetime.date(2015, 1, 1),
+            "date_year": datetime.date(2015, 1, 1),
+            "datetime": datetime.datetime(2015, 1, 1, 3, 0),
+            "duration": "P1Y1M",
+            "time": datetime.time(3, 0),
+            "year": 2015,
+            "yearmonth": "2015-01",
+        },
+        {
+            "date": datetime.date(2015, 12, 31),
+            "date_year": datetime.date(2015, 1, 1),
+            "datetime": datetime.datetime(2015, 12, 31, 15, 45, 33),
+            "duration": "P2Y2M",
+            "time": datetime.time(15, 45, 33),
+            "year": 2015,
+            "yearmonth": "2015-01",
+        },
+    ]
 
     # Cleanup storage
     storage.delete_package(target.resource_names)

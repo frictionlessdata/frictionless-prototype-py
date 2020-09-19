@@ -1,4 +1,6 @@
 import pytest
+import isodate
+import datetime
 from frictionless import Package, Resource, exceptions
 from frictionless.plugins.pandas import PandasStorage
 
@@ -12,27 +14,90 @@ def test_storage():
     storage = source.to_pandas()
     target = Package.from_pandas(dataframes=storage.dataframes)
 
-    # Compare meta (with expected discrepancies)
-    source.get_resource("article").schema.get_field("parent").type = "number"
-    source.get_resource("article").schema.pop("foreignKeys")
-    source.get_resource("comment").schema.get_field("note").type = "string"
-    source.get_resource("comment").schema.pop("foreignKeys")
-    source.get_resource("location").schema.get_field("geojson").type = "object"
-    source.get_resource("location").schema.get_field("geopoint").type = "array"
-    source.get_resource("temporal").schema.get_field("date_year").pop("format")
-    source.get_resource("temporal").schema.get_field("year").type = "integer"
-    source.get_resource("temporal").schema.get_field("yearmonth").type = "array"
-    for resource in source.resources:
-        assert resource.schema == target.get_resource(resource.name).schema
+    # Assert metadata
 
-    # Compare data (with expected discrepancies)
-    source.get_resource("temporal").schema.get_field("date_year").format = "%Y"
-    source.get_resource("location").schema.get_field("geopoint").type = "geopoint"
-    for resource in source.resources:
-        # NOTE: recover this check
-        if resource.name in ["location", "temporal"]:
-            continue
-        assert resource.read_rows() == target.get_resource(resource.name).read_rows()
+    assert target.get_resource("article").schema == {
+        "fields": [
+            {"name": "id", "type": "integer", "constraints": {"required": True}},
+            {"name": "parent", "type": "number"},  # type downgrade
+            {"name": "name", "type": "string"},
+            {"name": "current", "type": "boolean"},
+            {"name": "rating", "type": "number"},
+        ],
+        "primaryKey": ["id"],
+        # foreign keys removal
+    }
+    assert target.get_resource("comment").schema == {
+        "fields": [
+            {"name": "entry_id", "type": "integer", "constraints": {"required": True}},
+            {"name": "comment", "type": "string"},
+            {"name": "note", "type": "string"},  # type downgrade
+        ],
+        "primaryKey": ["entry_id"],
+        # foreign keys removal
+    }
+    assert target.get_resource("location").schema == {
+        "fields": [
+            {"name": "geojson", "type": "object"},
+            {"name": "geopoint", "type": "array"},
+        ]
+    }
+    assert target.get_resource("structure").schema == {
+        "fields": [
+            {"name": "object", "type": "object"},
+            {"name": "array", "type": "array"},
+        ]
+    }
+    assert target.get_resource("temporal").schema == {
+        "fields": [
+            {"name": "date", "type": "date"},
+            {"name": "date_year", "type": "date"},  # format removal
+            {"name": "datetime", "type": "datetime"},
+            {"name": "duration", "type": "duration"},
+            {"name": "time", "type": "time"},
+            {"name": "year", "type": "integer"},  # type downgrade
+            {"name": "yearmonth", "type": "array"},  # type downgrade
+        ]
+    }
+
+    # Assert data
+
+    assert target.get_resource("article").read_rows() == [
+        {"id": 1, "parent": None, "name": "Taxes", "current": True, "rating": 9.5},
+        {"id": 2, "parent": 1, "name": "中国人", "current": False, "rating": 7},
+    ]
+    assert target.get_resource("comment").read_rows() == [
+        {"entry_id": 1, "comment": "good", "note": "note1"},
+        {"entry_id": 2, "comment": "bad", "note": "note2"},
+    ]
+    assert target.get_resource("location").read_rows() == [
+        {"geojson": {"type": "Point", "coordinates": [33, 33.33]}, "geopoint": [30, 70]},
+        {"geojson": {"type": "Point", "coordinates": [55, 55.55]}, "geopoint": [90, 40]},
+    ]
+    assert target.get_resource("structure").read_rows() == [
+        {"object": {"chars": 560}, "array": ["Mike", "John"]},
+        {"object": {"chars": 970}, "array": ["Paul", "Alex"]},
+    ]
+    assert target.get_resource("temporal").read_rows() == [
+        {
+            "date": datetime.date(2015, 1, 1),
+            "date_year": datetime.date(2015, 1, 1),
+            "datetime": datetime.datetime(2015, 1, 1, 3, 0),
+            "duration": isodate.parse_duration("P1Y1M"),
+            "time": datetime.time(3, 0),
+            "year": 2015,
+            "yearmonth": [2015, 1],
+        },
+        {
+            "date": datetime.date(2015, 12, 31),
+            "date_year": datetime.date(2015, 1, 1),
+            "datetime": datetime.datetime(2015, 12, 31, 15, 45, 33),
+            "duration": isodate.parse_duration("P2Y2M"),
+            "time": datetime.time(15, 45, 33),
+            "year": 2015,
+            "yearmonth": [2015, 1],
+        },
+    ]
 
     # Cleanup storage
     storage.delete_package(target.resource_names)
