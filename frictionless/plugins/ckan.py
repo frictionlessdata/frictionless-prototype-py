@@ -5,7 +5,8 @@ import requests
 from ..field import Field
 from ..schema import Schema
 from ..plugin import Plugin
-from ..storage import Storage, StorageTable
+from ..storage import Storage
+from ..resource import Resource
 from .. import exceptions
 from .. import errors
 
@@ -103,7 +104,7 @@ class CkanStorage(Storage):
             schema.fields.append(field)
 
         # Table
-        table = StorageTable(name, schema=schema)
+        table = Resource(name=name, schema=schema)
         return table
 
     def read_table_convert_field_type(self, dstore_type):

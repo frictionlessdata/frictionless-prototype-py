@@ -1,7 +1,8 @@
 import re
 import os
 import datetime
-from ..storage import Storage, StorageTable
+from ..resource import Resource
+from ..storage import Storage
 from ..plugin import Plugin
 from ..schema import Schema
 from ..field import Field
@@ -99,7 +100,7 @@ class SpssStorage(Storage):
             schema.fields.append(field)
 
         # Table
-        table = StorageTable(name, schema=schema)
+        table = Resource(name=name, schema=schema)
         return table
 
     def read_table_convert_field_type(self, type):

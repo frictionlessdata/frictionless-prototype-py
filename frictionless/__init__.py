@@ -15,7 +15,7 @@ from .resource import Resource
 from .row import Row
 from .schema import Schema
 from .server import Server
-from .storage import Storage, StorageTable
+from .storage import Storage
 from .system import system
 from .table import Table
 from .transform import *

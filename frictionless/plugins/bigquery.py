@@ -4,7 +4,8 @@ import json
 import time
 import unicodecsv
 from slugify import slugify
-from ..storage import Storage, StorageTable
+from ..resource import Resource
+from ..storage import Storage
 from ..plugin import Plugin
 from ..schema import Schema
 from ..field import Field
@@ -108,7 +109,7 @@ class BigqueryStorage(Storage):
             schema.fields.append(field)
 
         # Table
-        table = StorageTable("table", schema=schema)
+        table = Resource(name="table", schema=schema)
         return table
 
     def read_table_convert_field_type(self, type):
