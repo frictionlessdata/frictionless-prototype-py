@@ -78,16 +78,13 @@ class PandasStorage(Storage):
     def __read_data_stream(self, name, schema):
         np = helpers.import_from_plugin("numpy", plugin="pandas")
         dataframe = self.__read_pandas_dataframe(name)
+        yield schema.field_names
         for pk, item in dataframe.iterrows():
             cells = []
+            if schema.primary_key:
+                cells = list(pk) if len(schema.primary_key) > 1 else [pk]
             for field in schema.fields:
-                if schema.primary_key and schema.primary_key[0] == field.name:
-                    if field.type == "number" and np.isnan(pk):
-                        pk = None
-                    if pk and field.type == "integer":
-                        pk = int(pk)
-                    cells.append(pk)
-                else:
+                if field.name not in schema.primary_key:
                     value = item[field.name]
                     if field.type == "number" and np.isnan(value):
                         value = None
@@ -100,12 +97,14 @@ class PandasStorage(Storage):
         schema = Schema()
 
         # Primary key
-        if dataframe.index.name:
-            type = self.__read_convert_type(dataframe.index.dtype)
-            field = Field(name=dataframe.index.name, type=type)
-            field.required = True
-            schema.fields.append(field)
-            schema.primary_key.append(dataframe.index.name)
+        for index, name in enumerate(dataframe.index.names):
+            if name is not None:
+                dtype = dataframe.index.get_level_values(index).dtype
+                type = self.__read_convert_type(dtype)
+                field = Field(name=name, type=type)
+                field.required = True
+                schema.fields.append(field)
+                schema.primary_key.append(name)
 
         # Fields
         for name, dtype in dataframe.dtypes.iteritems():
