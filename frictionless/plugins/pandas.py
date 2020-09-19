@@ -49,53 +49,55 @@ class PandasStorage(Storage):
     def dataframes(self):
         return self.__dataframes
 
+    @property
+    def dataframe(self):
+        if len(self.__dataframes) != 1:
+            note = 'The "storage.dataframe" is available for single dataframe storages'
+            raise exceptions.FrictionlessException(errors.StorageError(note=note))
+        return self.__dataframes
+
     # Read
 
     def read_resource(self, name):
         dataframe = self.__read_pandas_dataframe(name)
-        if not dataframe:
+        if dataframe is None:
             note = f'Resource "{name}" does not exist'
             raise exceptions.FrictionlessException(errors.StorageError(note=note))
         schema = self.__read_convert_schema(dataframe)
-        data = partial(self.__read_data_stream, name)
+        data = partial(self.__read_data_stream, name, schema)
         resource = Resource(name=name, schema=schema, data=data)
         return resource
 
     def read_package(self):
-        resources = []
-        for name in self.read_names():
+        package = Package()
+        for name in self.__read_resource_names():
             resource = self.read_resource(name)
-            resources.append(resource)
-        return resources
+            package.resources.append(resource)
+        return package
 
     def __read_resource_names(self):
         return list(sorted(self.__dataframes.keys()))
 
     # TODO: fix the logic
-    def __read_data_stream(self, name):
-        table = self.read_table(name)
-        schema = table.schema
-
-        # Yield cells
-        for pk, row in self.__dataframes[name].iterrows():
-            result = []
+    def __read_data_stream(self, name, schema):
+        dataframe = self.__read_pandas_dataframe(name)
+        for pk, item in dataframe.iterrows():
+            cells = []
             for field in schema.fields:
                 if schema.primary_key and schema.primary_key[0] == field.name:
                     if field.type == "number" and np.isnan(pk):
                         pk = None
                     if pk and field.type == "integer":
                         pk = int(pk)
-                    result.append(field.cast_value(pk))
+                    cells.append(pk)
                 else:
-                    value = row[field.name]
+                    value = item[field.name]
                     if field.type == "number" and np.isnan(value):
                         value = None
-                    if value and field.type == "integer":
-                        value = int(value)
                     elif field.type == "datetime":
                         value = value.to_pydatetime()
-                    result.append(field.cast_value(value))
-            yield result
+                    cells.append(value)
+            yield cells
 
     def __read_convert_schema(self, dataframe):
         schema = Schema()
@@ -111,7 +113,7 @@ class PandasStorage(Storage):
         # Fields
         for name, dtype in dataframe.dtypes.iteritems():
             sample = dataframe[name].iloc[0] if len(dataframe) else None
-            type = self.read_table_convert_field_type(dtype, sample=sample)
+            type = self.__read_convert_type(dtype, sample=sample)
             field = Field(name=name, type=type)
             schema.fields.append(field)
 
@@ -180,20 +182,19 @@ class PandasStorage(Storage):
     def __write_convert_resource(self, resource):
 
         # Get data/index
-        types = {}
         data_rows = []
         index_rows = []
+        fixed_types = {}
         for row in resource.read_rows():
             data_values = []
             index_values = []
-            for field, value in zip(resource.schema.fields, row):
+            for field in resource.schema.fields:
+                value = row[field.name]
                 if isinstance(value, float) and np.isnan(value):
                     value = None
-                if value and field.type == "integer":
-                    value = int(value)
                 # http://pandas.pydata.org/pandas-docs/stable/gotchas.html#support-for-integer-na
                 if value is None and field.type in ("number", "integer"):
-                    types[field.name] = "number"
+                    fixed_types[field.name] = "number"
                     value = np.NaN
                 if field.name in resource.schema.primary_key:
                     index_values.append(value)
@@ -211,7 +212,7 @@ class PandasStorage(Storage):
             if len(resource.schema.primary_key) == 1:
                 index_class = pd.Index
                 index_field = resource.schema.get_field(resource.schema.primary_key[0])
-                index_dtype = self.write_convert_type(index_field.type)
+                index_dtype = self.__write_convert_type(index_field.type)
                 if field.type in ["datetime", "date"]:
                     index_class = pd.DatetimeIndex
                 index = index_class(index_rows, name=index_field.name, dtype=index_dtype)
@@ -225,9 +226,8 @@ class PandasStorage(Storage):
         columns = []
         for field in resource.schema.fields:
             if field.name not in resource.schema.primary_key:
-                field_name = field.name
-                dtype = self.__write_convert_type(types.get(field.name, field.type))
-                dtypes.append((field_name, dtype))
+                dtype = self.__write_convert_type(fixed_types.get(field.name, field.type))
+                dtypes.append((field.name, dtype))
                 columns.append(field.name)
 
         # Create dataframe

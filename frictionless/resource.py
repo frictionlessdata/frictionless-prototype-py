@@ -623,9 +623,7 @@ class Resource(Metadata):
             dataframes (dict): pandas dataframes
             force (bool): overwrite existent
         """
-        storage = self.to_storage(system.create_storage("pandas"))
-        dataframe = storage.dataframes[self.name]
-        return dataframe
+        return self.to_storage(system.create_storage("pandas"))
 
     def to_dict(self, expand=False):
         """Convert resource to dict

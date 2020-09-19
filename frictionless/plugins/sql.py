@@ -246,8 +246,9 @@ class SqlStorage(Storage):
             select = sql_table.select().execution_options(stream_results=True)
             result = select.execute()
             yield result.keys()
-            for cells in result:
-                yield tuple(cells)
+            for item in result:
+                cells = tuple(item)
+                yield cells
 
     def __read_convert_name(self, sql_name):
         if sql_name.startswith(self.__prefix):

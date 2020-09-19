@@ -289,9 +289,7 @@ class Package(Metadata):
 
     def to_pandas(self):
         """Export package to Pandas dataframes"""
-        storage = self.to_storage(system.create_storage("pandas"))
-        dataframes = storage.dataframes
-        return dataframes
+        return self.to_storage(system.create_storage("pandas"))
 
     def to_dict(self, expand=False):
         """Convert package to a dict
