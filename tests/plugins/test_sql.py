@@ -405,6 +405,21 @@ def test_storage_delete_resource_not_existent_error(database_url):
     assert error.note.count("does not exist")
 
 
-# TODO: implement
-def test_storage_field_constraints(database_url):
-    pass
+@pytest.mark.parametrize(
+    "field, constraint",
+    [
+        ("id", {"minimum": 2}),
+        ("id", {"maximum": 1}),
+        ("name", {"minLength": 10}),
+        ("name", {"maxLength": 1}),
+        ("name", {"pattern": "bad"}),
+        ("name", {"enum": ["bad"]}),
+    ],
+)
+def test_storage_field_constraint_not_valid_error(database_url, field, constraint):
+    engine = sa.create_engine(database_url)
+    resource = Resource(path="data/table.csv")
+    resource.infer()
+    resource.schema.get_field(field).constraints = constraint
+    with pytest.raises(sa.exc.IntegrityError):
+        resource.to_sql(engine=engine)
